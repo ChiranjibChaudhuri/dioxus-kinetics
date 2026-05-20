@@ -39,11 +39,11 @@ fn non_finite_rect_values_produce_finite_delta() {
 }
 
 #[test]
-fn tiny_last_dimensions_use_identity_scale() {
+fn tiny_non_zero_last_dimensions_use_computed_scale() {
     let first = Rect::new(0.0, 0.0, 100.0, 50.0);
     let last = Rect::new(0.0, 0.0, 0.0005, -0.0005);
     let delta = compute_flip(first, last);
 
-    assert_eq!(delta.scale_x, 1.0);
-    assert_eq!(delta.scale_y, 1.0);
+    assert_eq!(delta.scale_x, first.width / last.width);
+    assert_eq!(delta.scale_y, first.height / last.height);
 }

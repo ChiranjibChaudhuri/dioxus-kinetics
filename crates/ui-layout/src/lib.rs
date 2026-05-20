@@ -27,8 +27,6 @@ pub struct FlipDelta {
     pub scale_y: f32,
 }
 
-const MIN_DIMENSION: f32 = 0.001;
-
 /// Computes the FLIP delta from `last` back to `first`, assuming a top-left transform origin.
 pub fn compute_flip(first: Rect, last: Rect) -> FlipDelta {
     let first = sanitize_rect(first);
@@ -68,7 +66,7 @@ fn finite_translation(value: f32) -> f32 {
 }
 
 fn compute_scale(first_dimension: f32, last_dimension: f32) -> f32 {
-    if last_dimension.abs() < MIN_DIMENSION {
+    if last_dimension == 0.0 {
         return 1.0;
     }
 

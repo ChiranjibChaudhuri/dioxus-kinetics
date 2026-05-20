@@ -37,10 +37,16 @@ pub fn glass_style(recipe: &GlassRecipe, supports_backdrop_filter: bool) -> Stri
         )
         .set("border", format!("1px solid {}", recipe.border.css_rgba()))
         .set("color", recipe.foreground.css_rgba())
-        .set("border-radius", format!("{}px", trim_float(recipe.radius_px)))
+        .set(
+            "border-radius",
+            format!("{}px", trim_float(recipe.radius_px)),
+        )
         .set(
             "box-shadow",
-            format!("0 18px 42px rgba(20, 23, 28, {:.3})", recipe.shadow_alpha),
+            format!(
+                "0 18px 42px rgba(20, 23, 28, {:.3})",
+                finite_or_zero(recipe.shadow_alpha)
+            ),
         );
 
     if supports_backdrop_filter && !recipe.force_solid && recipe.backdrop_blur_px > 0.0 {
@@ -58,9 +64,19 @@ pub fn glass_style(recipe: &GlassRecipe, supports_backdrop_filter: bool) -> Stri
 }
 
 fn trim_float(value: f32) -> String {
+    let value = finite_or_zero(value);
+
     if value.fract() == 0.0 {
         format!("{}", value as i32)
     } else {
         format!("{value:.2}")
+    }
+}
+
+fn finite_or_zero(value: f32) -> f32 {
+    if value.is_finite() {
+        value
+    } else {
+        0.0
     }
 }

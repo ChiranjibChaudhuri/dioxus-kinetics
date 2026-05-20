@@ -42,14 +42,23 @@ fn registry_contains_ready_and_coming_soon_components() {
 }
 
 #[test]
-fn coming_soon_entries_do_not_have_live_renderers() {
+fn registry_status_matches_live_renderer_availability() {
     for doc in component_docs() {
-        if doc.status == ComponentStatus::ComingSoon {
-            assert!(
-                doc.render.is_none(),
-                "{} should not render unavailable components",
-                doc.name
-            );
+        match doc.status {
+            ComponentStatus::Ready => {
+                assert!(
+                    doc.render.is_some(),
+                    "{} should render a live example",
+                    doc.name
+                );
+            }
+            ComponentStatus::ComingSoon => {
+                assert!(
+                    doc.render.is_none(),
+                    "{} should not render unavailable components",
+                    doc.name
+                );
+            }
         }
     }
 }

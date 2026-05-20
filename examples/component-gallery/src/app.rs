@@ -30,7 +30,7 @@ pub fn App() -> Element {
                         "Semantic components grouped by product function, with live rendered examples for available primitives and disabled coming-soon entries for the next phase."
                     }
                 }
-                div { class: "gallery-mobile-tabs", aria_label: "Component categories",
+                nav { class: "gallery-mobile-tabs", aria_label: "Component categories",
                     for category in categories() {
                         a { href: "#{category.slug()}", "{category.label()}" }
                     }

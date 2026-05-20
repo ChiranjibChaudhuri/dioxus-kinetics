@@ -72,7 +72,9 @@ fn gallery_renders_ready_examples_and_coming_soon_entries() {
     });
 
     assert!(html.contains("Unified UI Component Gallery"));
-    assert!(html.contains("Actions"));
+    for category in component_gallery::categories() {
+        assert!(html.contains(category.label()));
+    }
     assert!(html.contains("Button"));
     assert!(html.contains("Save changes"));
     assert!(html.contains("GlassSurface"));

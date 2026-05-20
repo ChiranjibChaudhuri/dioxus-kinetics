@@ -70,6 +70,13 @@ impl TargetSize {
             min_height_px: 44.0,
         }
     }
+
+    pub const fn minimum_pointer() -> Self {
+        Self {
+            min_width_px: 24.0,
+            min_height_px: 24.0,
+        }
+    }
 }
 
 #[derive(Clone, Debug, PartialEq)]
@@ -81,11 +88,13 @@ pub struct ComponentContract {
 
 impl ComponentContract {
     pub fn button(id: impl Into<String>) -> Self {
+        let id = id.into();
+
         Self {
-            id: ComponentId::new(id),
+            id: ComponentId::new(id.clone()),
             a11y: A11yContract {
                 role: ComponentRole::Button,
-                label: Some("Button".to_string()),
+                label: Some(id),
                 focus_policy: FocusPolicy::Focusable,
                 modal: false,
             },
@@ -94,11 +103,25 @@ impl ComponentContract {
     }
 
     pub fn validate(&self) -> Result<(), &'static str> {
-        if self.a11y.role.is_interactive() && self.a11y.label.as_deref().unwrap_or("").is_empty() {
+        if self.a11y.role.is_interactive()
+            && self
+                .a11y
+                .label
+                .as_deref()
+                .map(str::trim)
+                .unwrap_or("")
+                .is_empty()
+        {
             return Err("interactive component needs an accessible label");
         }
 
-        if self.target_size.min_width_px < 24.0 || self.target_size.min_height_px < 24.0 {
+        let minimum_pointer = TargetSize::minimum_pointer();
+
+        if !self.target_size.min_width_px.is_finite()
+            || !self.target_size.min_height_px.is_finite()
+            || self.target_size.min_width_px < minimum_pointer.min_width_px
+            || self.target_size.min_height_px < minimum_pointer.min_height_px
+        {
             return Err("target size is too small for pointer interaction");
         }
 

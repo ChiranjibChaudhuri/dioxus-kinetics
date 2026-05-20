@@ -17,10 +17,34 @@ impl Spring {
     }
 
     pub fn step(self, value: f32, target: f32, velocity: f32, delta_seconds: f32) -> SpringStep {
+        let stiffness = if self.stiffness.is_finite() {
+            self.stiffness.max(0.0)
+        } else {
+            0.0
+        };
+        let damping = if self.damping.is_finite() {
+            self.damping.max(0.0)
+        } else {
+            0.0
+        };
+        let mass = if self.mass.is_finite() && self.mass > 0.0 {
+            self.mass
+        } else {
+            1.0
+        };
+        let value = if value.is_finite() { value } else { 0.0 };
+        let target = if target.is_finite() { target } else { 0.0 };
+        let velocity = if velocity.is_finite() { velocity } else { 0.0 };
+        let delta_seconds = if delta_seconds.is_finite() && delta_seconds >= 0.0 {
+            delta_seconds
+        } else {
+            0.0
+        };
+
         let displacement = value - target;
-        let spring_force = -self.stiffness * displacement;
-        let damping_force = -self.damping * velocity;
-        let acceleration = (spring_force + damping_force) / self.mass;
+        let spring_force = -stiffness * displacement;
+        let damping_force = -damping * velocity;
+        let acceleration = (spring_force + damping_force) / mass;
         let next_velocity = velocity + acceleration * delta_seconds;
         let next_value = value + next_velocity * delta_seconds;
 
@@ -78,6 +102,13 @@ impl Transition {
         match self {
             Self::Tween { duration_ms, .. } => duration_ms,
             Self::Spring(_) => 0,
+        }
+    }
+
+    pub const fn fixed_duration_ms(self) -> Option<u32> {
+        match self {
+            Self::Tween { duration_ms, .. } => Some(duration_ms),
+            Self::Spring(_) => None,
         }
     }
 }

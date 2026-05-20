@@ -1,6 +1,4 @@
-use ui_tokens::{
-    Color, Density, MotionPreference, Theme, ThemeMode, TransparencyPreference,
-};
+use ui_tokens::{Color, Density, MotionPreference, Theme, ThemeMode, TransparencyPreference};
 
 #[test]
 fn default_theme_has_apple_like_surface_bias() {
@@ -38,14 +36,8 @@ fn default_theme_has_apple_like_surface_bias() {
         theme.semantic.warning.css_rgba(),
         "rgba(176, 105, 0, 1.000)"
     );
-    assert_eq!(
-        theme.semantic.danger.css_rgba(),
-        "rgba(196, 43, 43, 1.000)"
-    );
-    assert_eq!(
-        theme.semantic.info.css_rgba(),
-        "rgba(20, 118, 191, 1.000)"
-    );
+    assert_eq!(theme.semantic.danger.css_rgba(), "rgba(196, 43, 43, 1.000)");
+    assert_eq!(theme.semantic.info.css_rgba(), "rgba(20, 118, 191, 1.000)");
     assert_eq!(theme.motion_preference, MotionPreference::Allow);
 }
 

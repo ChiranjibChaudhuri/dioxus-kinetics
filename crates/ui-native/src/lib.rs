@@ -43,7 +43,7 @@ pub fn plan_native_glass(
     NativeGlassPlan {
         uses_backdrop_blur: can_blur,
         uses_simulated_glass: !can_blur,
-        effective_blur_px: if can_blur {
+        effective_blur_px: if can_blur && recipe.backdrop_blur_px.is_finite() {
             recipe.backdrop_blur_px
         } else {
             0.0

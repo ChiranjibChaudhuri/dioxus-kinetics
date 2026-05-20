@@ -24,7 +24,7 @@ hyperframes-export = ["dep:ui-hyperframes"]
 ui-core.workspace = true
 ui-tokens.workspace = true
 ui-glass.workspace = true
-ui-motion.workspace = true
+motion-core = { package = "ui-motion", path = "../ui-motion" }
 ui-layout.workspace = true
 ui-dioxus.workspace = true
 ui-dom = { workspace = true, optional = true }

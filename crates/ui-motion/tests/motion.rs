@@ -1,4 +1,5 @@
-use ui_motion::{Ease, PresenceState, Spring, Transition};
+use motion_core::{Ease, PresenceState, Spring, Transition};
+use ui_motion as motion_core;
 
 #[test]
 fn reduced_motion_collapses_transition_duration() {

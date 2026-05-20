@@ -1,6 +1,7 @@
 #![forbid(unsafe_code)]
 
 pub mod prelude {
+    pub use motion_core::{Ease, PresenceState, Spring, SpringStep, Transition};
     pub use ui_core::{
         A11yContract, ComponentContract, ComponentId, ComponentRole, FocusPolicy, TargetSize,
     };
@@ -9,7 +10,6 @@ pub mod prelude {
         resolve_glass, GlassDensity, GlassLevel, GlassPolicy, GlassRecipe, GlassRequest, GlassTone,
     };
     pub use ui_layout::{compute_flip, FlipDelta, Rect};
-    pub use ui_motion::{Ease, PresenceState, Spring, SpringStep, Transition};
     pub use ui_tokens::{
         Color, Density, MotionPreference, MotionScale, RadiusScale, SemanticColors, SpacingScale,
         Theme, ThemeMode, TransparencyPreference,

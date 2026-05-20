@@ -2,22 +2,18 @@
 
 use ui_tokens::{Color, Theme, TransparencyPreference};
 
-#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
 pub enum GlassLevel {
+    #[default]
     Subtle,
     Floating,
     Overlay,
     Chrome,
 }
 
-impl Default for GlassLevel {
-    fn default() -> Self {
-        Self::Subtle
-    }
-}
-
-#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
 pub enum GlassTone {
+    #[default]
     Neutral,
     Primary,
     Success,
@@ -26,37 +22,21 @@ pub enum GlassTone {
     Info,
 }
 
-impl Default for GlassTone {
-    fn default() -> Self {
-        Self::Neutral
-    }
-}
-
-#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
 pub enum GlassDensity {
     Compact,
+    #[default]
     Comfortable,
     Spacious,
 }
 
-impl Default for GlassDensity {
-    fn default() -> Self {
-        Self::Comfortable
-    }
-}
-
-#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
 pub enum GlassPolicy {
+    #[default]
     Auto,
     SolidFallback,
     HighContrast,
     ReducedTransparency,
-}
-
-impl Default for GlassPolicy {
-    fn default() -> Self {
-        Self::Auto
-    }
 }
 
 #[derive(Clone, Copy, Debug, PartialEq)]

@@ -93,3 +93,15 @@ fn gallery_renders_snippets_as_rust_code_blocks() {
     assert!(html.contains("ButtonVariant::Primary"));
     assert!(html.contains("GlassLevel::Floating"));
 }
+
+#[test]
+fn gallery_embeds_styles_for_gallery_and_component_classes() {
+    let html = dioxus_ssr::render_element(rsx! {
+        component_gallery::App {}
+    });
+
+    assert!(html.contains(".gallery-shell"));
+    assert!(html.contains(".ui-button--primary"));
+    assert!(html.contains(".ui-glass-surface"));
+    assert!(html.contains("backdrop-filter"));
+}

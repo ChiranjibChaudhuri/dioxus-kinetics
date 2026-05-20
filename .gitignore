@@ -1,0 +1,7 @@
+/target/
+/.dioxus/
+/dist/
+/node_modules/
+Cargo.lock
+*.pdb
+*.log

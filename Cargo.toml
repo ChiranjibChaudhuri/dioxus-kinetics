@@ -1,0 +1,35 @@
+[workspace]
+resolver = "2"
+members = [
+    "crates/ui-core",
+    "crates/ui-tokens",
+    "crates/ui-glass",
+    "crates/ui-motion",
+    "crates/ui-layout",
+    "crates/ui-dom",
+    "crates/ui-native",
+    "crates/ui-dioxus",
+    "crates/ui-gsap",
+    "crates/ui-hyperframes",
+    "crates/unified_ui",
+]
+
+[workspace.package]
+edition = "2021"
+license = "MIT OR Apache-2.0"
+version = "0.1.0"
+publish = false
+
+[workspace.dependencies]
+dioxus = "0.7"
+dioxus-ssr = "0.7"
+ui-core = { path = "crates/ui-core" }
+ui-tokens = { path = "crates/ui-tokens" }
+ui-glass = { path = "crates/ui-glass" }
+ui-motion = { path = "crates/ui-motion" }
+ui-layout = { path = "crates/ui-layout" }
+ui-dom = { path = "crates/ui-dom" }
+ui-native = { path = "crates/ui-native" }
+ui-dioxus = { path = "crates/ui-dioxus" }
+ui-gsap = { path = "crates/ui-gsap" }
+ui-hyperframes = { path = "crates/ui-hyperframes" }

@@ -1,0 +1,36 @@
+[package]
+name = "unified_ui"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[features]
+default = ["web", "desktop", "mobile", "tokens", "glass", "motion", "layout-motion", "a11y"]
+web = ["dep:ui-dom"]
+desktop = ["dep:ui-dom"]
+mobile = ["dep:ui-dom"]
+native = ["dep:ui-native"]
+tokens = []
+glass = []
+motion = []
+layout-motion = []
+a11y = []
+a11y-tests = []
+gsap = ["dep:ui-gsap"]
+hyperframes-export = ["dep:ui-hyperframes"]
+
+[dependencies]
+ui-core.workspace = true
+ui-tokens.workspace = true
+ui-glass.workspace = true
+ui-motion.workspace = true
+ui-layout.workspace = true
+ui-dioxus.workspace = true
+ui-dom = { workspace = true, optional = true }
+ui-native = { workspace = true, optional = true }
+ui-gsap = { workspace = true, optional = true }
+ui-hyperframes = { workspace = true, optional = true }
+
+[lib]
+path = "src/lib.rs"

@@ -1,0 +1,18 @@
+[package]
+name = "ui-dioxus"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[dependencies]
+dioxus.workspace = true
+ui-core.workspace = true
+ui-glass.workspace = true
+ui-tokens.workspace = true
+
+[dev-dependencies]
+dioxus-ssr.workspace = true
+
+[lib]
+path = "src/lib.rs"

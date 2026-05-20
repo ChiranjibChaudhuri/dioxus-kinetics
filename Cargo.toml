@@ -12,6 +12,7 @@ members = [
     "crates/ui-gsap",
     "crates/ui-hyperframes",
     "crates/unified_ui",
+    "examples/component-gallery",
 ]
 
 [workspace.package]
@@ -33,3 +34,4 @@ ui-native = { path = "crates/ui-native" }
 ui-dioxus = { path = "crates/ui-dioxus" }
 ui-gsap = { path = "crates/ui-gsap" }
 ui-hyperframes = { path = "crates/ui-hyperframes" }
+unified_ui = { path = "crates/unified_ui" }

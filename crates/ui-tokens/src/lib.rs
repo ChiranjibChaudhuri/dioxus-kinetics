@@ -10,15 +10,41 @@ pub struct Color {
 
 impl Color {
     pub const fn rgba(r: u8, g: u8, b: u8, a: f32) -> Self {
-        Self { r, g, b, a }
+        Self {
+            r,
+            g,
+            b,
+            a: sanitize_alpha(a),
+        }
     }
 
     pub fn css_rgba(self) -> String {
-        format!("rgba({}, {}, {}, {:.3})", self.r, self.g, self.b, self.a)
+        format!(
+            "rgba({}, {}, {}, {:.3})",
+            self.r,
+            self.g,
+            self.b,
+            sanitize_alpha(self.a)
+        )
     }
 
     pub fn with_alpha(self, a: f32) -> Self {
-        Self { a, ..self }
+        Self {
+            a: sanitize_alpha(a),
+            ..self
+        }
+    }
+}
+
+const fn sanitize_alpha(a: f32) -> f32 {
+    if !a.is_finite() {
+        1.0
+    } else if a < 0.0 {
+        0.0
+    } else if a > 1.0 {
+        1.0
+    } else {
+        a
     }
 }
 

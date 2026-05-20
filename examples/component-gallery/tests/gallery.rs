@@ -62,3 +62,32 @@ fn registry_status_matches_live_renderer_availability() {
         }
     }
 }
+
+use dioxus::prelude::*;
+
+#[test]
+fn gallery_renders_ready_examples_and_coming_soon_entries() {
+    let html = dioxus_ssr::render_element(rsx! {
+        component_gallery::App {}
+    });
+
+    assert!(html.contains("Unified UI Component Gallery"));
+    assert!(html.contains("Actions"));
+    assert!(html.contains("Button"));
+    assert!(html.contains("Save changes"));
+    assert!(html.contains("GlassSurface"));
+    assert!(html.contains("Coming soon"));
+    assert!(html.contains("TextField"));
+    assert!(html.contains("SharedElement"));
+}
+
+#[test]
+fn gallery_renders_snippets_as_rust_code_blocks() {
+    let html = dioxus_ssr::render_element(rsx! {
+        component_gallery::App {}
+    });
+
+    assert!(html.contains("language-rust"));
+    assert!(html.contains("ButtonVariant::Primary"));
+    assert!(html.contains("GlassLevel::Floating"));
+}

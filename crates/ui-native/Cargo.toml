@@ -8,5 +8,8 @@ publish.workspace = true
 [dependencies]
 ui-glass.workspace = true
 
+[dev-dependencies]
+ui-tokens.workspace = true
+
 [lib]
 path = "src/lib.rs"

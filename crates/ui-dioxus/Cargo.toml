@@ -9,6 +9,7 @@ publish.workspace = true
 dioxus.workspace = true
 ui-core.workspace = true
 ui-glass.workspace = true
+ui-timeline.workspace = true
 ui-tokens.workspace = true
 
 [dev-dependencies]

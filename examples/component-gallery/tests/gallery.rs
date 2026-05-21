@@ -7,12 +7,17 @@ fn registry_groups_components_by_product_category() {
     assert_eq!(
         categories,
         &[
+            ComponentCategory::Foundations,
             ComponentCategory::Actions,
             ComponentCategory::Inputs,
+            ComponentCategory::Navigation,
             ComponentCategory::Layout,
             ComponentCategory::Surfaces,
             ComponentCategory::Feedback,
+            ComponentCategory::DataWorkflows,
             ComponentCategory::Motion,
+            ComponentCategory::Composition,
+            ComponentCategory::Capture,
         ]
     );
 }
@@ -157,6 +162,24 @@ fn gallery_renders_advanced_workbench_controls_and_notes() {
         html.contains("[data-ui-theme=&quot;dark&quot;]")
             || html.contains("[data-ui-theme=\"dark\"]")
     );
+}
+
+#[test]
+fn gallery_renders_native_kinetics_examples_without_bridge_copy() {
+    let html = dioxus_ssr::render_element(rsx! {
+        component_gallery::App {}
+    });
+
+    for expected in ["TimelineScope", "FrameStage", "CaptureStage", "GlassLayer"] {
+        assert!(html.contains(expected), "missing gallery entry {expected}");
+    }
+
+    for rejected in ["GSAP", "Remotion", "HyperFrames"] {
+        assert!(
+            !html.contains(rejected),
+            "gallery must not show bridge copy {rejected}"
+        );
+    }
 }
 
 #[test]

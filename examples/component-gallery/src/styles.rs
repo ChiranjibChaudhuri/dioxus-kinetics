@@ -243,6 +243,14 @@ body {
     line-height: 1.55;
 }
 
+.gallery-preview .ui-frame-stage,
+.gallery-preview .ui-capture-stage {
+    min-height: 180px;
+    display: grid;
+    place-items: center;
+    padding: var(--ui-space-4);
+}
+
 @media (max-width: 820px) {
     .gallery-shell {
         display: block;

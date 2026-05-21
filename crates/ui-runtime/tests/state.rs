@@ -1,5 +1,5 @@
-use ui_runtime::state::{advance_presence, PresenceInputs, PresenceState};
 use ui_runtime::reduced_motion::ReducedMotion;
+use ui_runtime::state::{advance_presence, PresenceInputs, PresenceState};
 
 #[test]
 fn initial_present_true_starts_entering() {

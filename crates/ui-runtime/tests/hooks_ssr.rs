@@ -65,17 +65,11 @@ fn PresenceProbe(present: bool) -> Element {
 #[test]
 fn presence_state_initial_present_true_is_visible_in_ssr() {
     let html = dioxus_ssr::render_element(rsx! { PresenceProbe { present: true } });
-    assert!(
-        html.contains("data-state=\"visible\""),
-        "got {html}",
-    );
+    assert!(html.contains("data-state=\"visible\""), "got {html}",);
 }
 
 #[test]
 fn presence_state_initial_present_false_is_unmounted_in_ssr() {
     let html = dioxus_ssr::render_element(rsx! { PresenceProbe { present: false } });
-    assert!(
-        html.contains("data-state=\"unmounted\""),
-        "got {html}",
-    );
+    assert!(html.contains("data-state=\"unmounted\""), "got {html}",);
 }

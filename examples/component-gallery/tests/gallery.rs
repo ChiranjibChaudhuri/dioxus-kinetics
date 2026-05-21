@@ -389,7 +389,10 @@ fn gallery_includes_presence_entry_with_lifecycle_attrs() {
     });
 
     assert!(html.contains("data-presence-cue=\"rise\""), "got {html}");
-    assert!(html.contains("data-presence-state=\"visible\""), "got {html}");
+    assert!(
+        html.contains("data-presence-state=\"visible\""),
+        "got {html}"
+    );
     assert!(html.contains("Present"));
     assert!(html.contains("Hidden"));
 }

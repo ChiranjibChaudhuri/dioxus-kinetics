@@ -18,8 +18,14 @@ fn each_icon_renders_an_svg_with_viewbox_and_aria_hidden() {
         render(rsx! { Search { size: 24 } }),
     ] {
         assert!(html.contains("<svg"), "expected svg element in {html}");
-        assert!(html.contains("viewBox=\"0 0 24 24\""), "viewBox missing in {html}");
-        assert!(html.contains("aria-hidden=\"true\""), "aria-hidden missing in {html}");
+        assert!(
+            html.contains("viewBox=\"0 0 24 24\""),
+            "viewBox missing in {html}"
+        );
+        assert!(
+            html.contains("aria-hidden=\"true\""),
+            "aria-hidden missing in {html}"
+        );
     }
 }
 

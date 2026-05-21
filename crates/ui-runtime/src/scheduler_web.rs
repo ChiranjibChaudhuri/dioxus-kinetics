@@ -37,8 +37,7 @@ where
     let callback = Rc::new(RefCell::new(callback));
     let last_timestamp = Rc::new(RefCell::new(None::<f64>));
 
-    let raf_closure: Rc<RefCell<Option<Closure<dyn FnMut(f64)>>>> =
-        Rc::new(RefCell::new(None));
+    let raf_closure: Rc<RefCell<Option<Closure<dyn FnMut(f64)>>>> = Rc::new(RefCell::new(None));
     let raf_closure_outer = raf_closure.clone();
 
     let window_clone = window.clone();
@@ -60,14 +59,12 @@ where
         }
         drop(cb);
         if let Some(closure) = raf_closure.borrow().as_ref() {
-            let _ = window_clone
-                .request_animation_frame(closure.as_ref().unchecked_ref());
+            let _ = window_clone.request_animation_frame(closure.as_ref().unchecked_ref());
         }
     };
 
     let closure = Closure::wrap(Box::new(request_next) as Box<dyn FnMut(f64)>);
-    let _ = window
-        .request_animation_frame(closure.as_ref().unchecked_ref());
+    let _ = window.request_animation_frame(closure.as_ref().unchecked_ref());
     *raf_closure_outer.borrow_mut() = Some(closure);
 
     handle

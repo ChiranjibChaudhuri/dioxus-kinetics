@@ -41,7 +41,9 @@ pub mod prelude {
     pub use ui_capture::CaptureStageDescriptor;
 
     #[cfg(feature = "runtime")]
-    pub use ui_runtime::{use_animation_value, use_presence_state, use_reduced_motion, ReducedMotion};
+    pub use ui_runtime::{
+        use_animation_value, use_presence_state, use_reduced_motion, ReducedMotion,
+    };
 
     #[cfg(feature = "icons")]
     pub use ui_icons::*;

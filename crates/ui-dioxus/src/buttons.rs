@@ -47,9 +47,7 @@ pub fn IconButton(
 ) -> Element {
     let tone_class = tone.class_suffix();
     let size_class = size.class_suffix();
-    let class = format!(
-        "ui-icon-button ui-icon-button--{tone_class} ui-icon-button--{size_class}"
-    );
+    let class = format!("ui-icon-button ui-icon-button--{tone_class} ui-icon-button--{size_class}");
 
     rsx! {
         button {

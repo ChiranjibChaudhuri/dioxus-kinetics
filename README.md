@@ -4,7 +4,7 @@
 
 # dioxus-kinetics
 
-`dioxus-kinetics` is a Dioxus-first UI library workspace for downstream SaaS products. It is currently an MVP focused on semantic component names, Apple-like glass materials, renderer-neutral tokens, and a single public facade crate.
+`dioxus-kinetics` is a Dioxus-first UI library workspace for downstream SaaS products. It combines semantic component names, Apple-like glass materials, renderer-neutral tokens, reusable library CSS, and a single public facade crate.
 
 The logo in this repository is an original `dioxus-kinetics` mark. It references Dioxus-adjacent ideas like cross-platform motion, Rust UI energy, and layered glass, but it is not the Dioxus logo or a traced copy of Dioxus branding.
 
@@ -18,33 +18,39 @@ use unified_ui::prelude::*;
 
 This repository is a Rust Cargo workspace. The public API is exposed through `crates/unified_ui`; the other crates keep design tokens, material recipes, motion math, layout math, renderer adapters, and optional backend boundaries focused.
 
-The first shipped rendered components are:
+Ready rendered components:
 
 - `Button`
-- `Surface`
-- `GlassSurface`
-- `Stack`
-
-The public API also reserves semantic names for the next component phases:
-
-- `IconButton`
 - `TextField`
 - `Checkbox`
+- `Switch`
+- `CommandMenu`
+- `Toolbar`
+- `Stack`
 - `Tabs`
+- `Sidebar`
+- `Surface`
+- `GlassSurface`
+- `MetricCard`
 - `Dialog`
 - `Toast`
+- `Tooltip`
+- `EmptyState`
+
+Reserved coming-soon names stay visible in the gallery without fake implementations:
+
+- `IconButton`
 - `Presence`
 - `Sequence`
 - `SharedLayout`
 - `SharedElement`
-
-Planned names are documented as coming-soon entries in the component gallery. They are not implemented as fake components.
 
 ## Design Principles
 
 - Semantic component names based on role and behavior.
 - One downstream-facing crate: `unified_ui`.
 - Apple-like glass styling with solid fallback behavior.
+- Reusable `.ui-*` styling exposed through `ui-styles` for downstream apps.
 - Web, Desktop, Mobile, and Native adapter boundaries.
 - Accessibility and reduced-preference policies at the token and contract level.
 - WCAG 2.2 AA as the target for default themes.
@@ -63,6 +69,7 @@ crates/
   ui-dom/           CSS/style serialization for WebView and web targets
   ui-native/        native capability planning for glass rendering
   ui-dioxus/        semantic Dioxus components
+  ui-styles/        shared library CSS variables and component classes
   ui-gsap/          optional GSAP backend boundary
   ui-hyperframes/   optional deterministic composition/export boundary
   unified_ui/       public facade and prelude
@@ -110,6 +117,9 @@ It shows the component library category by category:
 - a short writeup for each component
 - a Rust usage snippet
 - a rendered example for ready components
+- accessibility notes for every entry
+- shared library CSS plus gallery-only layout CSS
+- static theme and density preview controls
 - disabled coming-soon entries for planned components
 
 Check the gallery:
@@ -124,7 +134,7 @@ Run the gallery with the Dioxus CLI when available:
 dx serve --package component-gallery
 ```
 
-The gallery is registry-driven. To add a future component to the docs, update the registry in `examples/component-gallery/src/docs.rs` with its category, status, summary, snippet, and renderer.
+The gallery is registry-driven. To add a future component to the docs, update the registry in `examples/component-gallery/src/docs.rs` with its category, status, summary, snippet, accessibility note, and renderer.
 
 ## Quick Start
 
@@ -152,6 +162,9 @@ cargo test -p component-gallery
 ```rust
 use unified_ui::prelude::*;
 
+let css = library_css();
+assert!(css.contains(".ui-command-menu"));
+
 let theme = Theme::default();
 let recipe = resolve_glass(
     &theme,
@@ -175,17 +188,53 @@ use unified_ui::prelude::*;
 #[component]
 fn Example() -> Element {
     rsx! {
-        GlassSurface {
-            level: GlassLevel::Floating,
-            tone: GlassTone::Neutral,
-            density: GlassDensity::Comfortable,
+        Stack {
+            gap: "md".to_string(),
+            TextField {
+                id: "workspace-name",
+                label: "Workspace name",
+                value: "Acme Ops",
+                help_text: "Visible to teammates",
+            }
+            Switch {
+                id: "auto-renew",
+                label: "Auto renew",
+                checked: true,
+                description: "Keep billing active",
+            }
+            MetricCard {
+                label: "Net revenue",
+                value: "$128.4k",
+                delta: "+12.5%",
+                tone: MetricTone::Success,
+            }
+            Toast {
+                tone: ToastTone::Success,
+                title: "Report exported",
+                description: "The PDF is ready.",
+            }
+        }
+    }
+}
+```
+
+Shared CSS can be rendered once near the application root:
+
+```rust
+use dioxus::prelude::*;
+use unified_ui::prelude::*;
+
+#[component]
+fn App() -> Element {
+    let css = library_css();
+
+    rsx! {
+        style { "{css}" }
+        div {
+            "data-ui-theme": "light",
+            "data-ui-density": "comfortable",
             Stack {
-                gap: "sm".to_string(),
                 Button { "Save changes" }
-                Button {
-                    variant: ButtonVariant::Secondary,
-                    "Review"
-                }
             }
         }
     }
@@ -230,11 +279,13 @@ This is an MVP library foundation. The current implementation includes:
 - DOM/WebView style adapter
 - native capability adapter
 - Dioxus semantic component MVP
+- advanced SaaS controls and surfaces
+- reusable shared CSS crate
 - optional GSAP and HyperFrames boundaries
 - unified facade crate
 - component gallery example app
 
-Future phases should add the full component suite, richer motion orchestration, visual regression checks, native fidelity work, and deeper backend integrations.
+Future phases should add overlay managers, focus trapping, runtime theme/density switching, keyboard engines, data-heavy workflow components, visual regression checks, native fidelity work, and deeper backend integrations.
 
 ## Documentation
 
@@ -243,5 +294,7 @@ Future phases should add the full component suite, richer motion orchestration, 
 - `docs/platform-support.md`
 - `docs/superpowers/specs/2026-05-20-unified-ui-library-design.md`
 - `docs/superpowers/specs/2026-05-20-component-gallery-design.md`
+- `docs/superpowers/specs/2026-05-20-advanced-ui-wave-design.md`
 - `docs/superpowers/plans/2026-05-20-unified-ui-library.md`
 - `docs/superpowers/plans/2026-05-20-component-gallery.md`
+- `docs/superpowers/plans/2026-05-21-advanced-ui-wave.md`

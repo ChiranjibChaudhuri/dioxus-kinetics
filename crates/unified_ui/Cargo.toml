@@ -6,7 +6,19 @@ license.workspace = true
 publish.workspace = true
 
 [features]
-default = ["web", "desktop", "mobile", "tokens", "glass", "motion", "layout-motion", "a11y"]
+default = [
+    "web",
+    "desktop",
+    "mobile",
+    "tokens",
+    "glass",
+    "motion",
+    "layout-motion",
+    "a11y",
+    "timeline",
+    "composition",
+    "capture",
+]
 web = ["dep:ui-dom"]
 desktop = ["dep:ui-dom"]
 mobile = ["dep:ui-dom"]
@@ -17,8 +29,9 @@ motion = []
 layout-motion = []
 a11y = []
 a11y-tests = []
-gsap = ["dep:ui-gsap"]
-hyperframes-export = ["dep:ui-hyperframes"]
+timeline = ["dep:ui-timeline"]
+composition = ["dep:ui-composition"]
+capture = ["dep:ui-capture"]
 
 [dependencies]
 ui-core.workspace = true
@@ -30,8 +43,9 @@ ui-dioxus.workspace = true
 ui-styles.workspace = true
 ui-dom = { workspace = true, optional = true }
 ui-native = { workspace = true, optional = true }
-ui-gsap = { workspace = true, optional = true }
-ui-hyperframes = { workspace = true, optional = true }
+ui-timeline = { workspace = true, optional = true }
+ui-composition = { workspace = true, optional = true }
+ui-capture = { workspace = true, optional = true }
 
 [lib]
 path = "src/lib.rs"

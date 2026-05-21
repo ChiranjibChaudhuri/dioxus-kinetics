@@ -74,3 +74,22 @@ fn public_api_names_include_advanced_wave_names() {
         );
     }
 }
+
+#[test]
+fn public_api_names_use_native_system_boundaries() {
+    let names = unified_ui::public_api_names();
+
+    for expected in ["Timeline", "Composition", "CaptureStage"] {
+        assert!(
+            names.contains(&expected),
+            "missing native system name {expected}"
+        );
+    }
+
+    for rejected in ["Gsap", "GSAP", "HyperFrames", "Remotion"] {
+        assert!(
+            !names.iter().any(|name| name.contains(rejected)),
+            "public names must not expose bridge term {rejected}"
+        );
+    }
+}

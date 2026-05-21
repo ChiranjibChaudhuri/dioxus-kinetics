@@ -26,6 +26,15 @@ pub mod prelude {
 
     #[cfg(feature = "native")]
     pub use ui_native::{plan_native_glass, NativeCapabilities, NativeGlassPlan};
+
+    #[cfg(feature = "timeline")]
+    pub use ui_timeline::{TimelineCapability, TimelineRuntime};
+
+    #[cfg(feature = "composition")]
+    pub use ui_composition::Composition;
+
+    #[cfg(feature = "capture")]
+    pub use ui_capture::CaptureStageDescriptor;
 }
 
 pub fn public_api_names() -> &'static [&'static str] {
@@ -51,15 +60,25 @@ pub fn public_api_names() -> &'static [&'static str] {
         "Sequence",
         "SharedLayout",
         "SharedElement",
+        "Timeline",
+        "TimelineScope",
+        "Composition",
+        "FrameStage",
+        "CaptureStage",
     ]
 }
 
-#[cfg(feature = "gsap")]
-pub mod gsap {
-    pub use ui_gsap::{GsapBackend, GsapCapability};
+#[cfg(feature = "timeline")]
+pub mod timeline {
+    pub use ui_timeline::{TimelineCapability, TimelineRuntime};
 }
 
-#[cfg(feature = "hyperframes-export")]
-pub mod hyperframes {
-    pub use ui_hyperframes::{Composition, RenderTrack};
+#[cfg(feature = "composition")]
+pub mod composition {
+    pub use ui_composition::Composition;
+}
+
+#[cfg(feature = "capture")]
+pub mod capture {
+    pub use ui_capture::CaptureStageDescriptor;
 }

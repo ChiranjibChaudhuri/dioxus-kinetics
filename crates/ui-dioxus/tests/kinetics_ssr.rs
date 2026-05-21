@@ -28,3 +28,17 @@ fn presence_gate_does_not_render_removed_children() {
 
     assert!(!html.contains("Saved"));
 }
+
+#[test]
+fn presence_gate_renders_kinetic_text_when_present() {
+    let html = dioxus_ssr::render_element(rsx! {
+        PresenceGate { present: true,
+            KineticText { id: "toast-copy", text: "Saved", cue: "toast-in" }
+        }
+    });
+
+    assert!(html.contains("ui-kinetic-text"));
+    assert!(html.contains("data-kinetic-id=\"toast-copy\""));
+    assert!(html.contains("data-motion-cue=\"toast-in\""));
+    assert!(html.contains("Saved"));
+}

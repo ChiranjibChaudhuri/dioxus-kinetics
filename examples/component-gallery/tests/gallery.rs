@@ -220,3 +220,24 @@ fn gallery_brand_uses_kinetics_logo_and_name() {
     assert!(html.contains("<svg"));
     assert!(html.contains("dioxus-kinetics logo"));
 }
+
+#[test]
+fn gallery_css_includes_logo_and_variant_grid_styles() {
+    let html = dioxus_ssr::render_element(rsx! {
+        component_gallery::App {}
+    });
+
+    for selector in [
+        ".gallery-logo",
+        ".visually-hidden",
+        ".gallery-variant-grid",
+        ".gallery-variant-grid--3x3",
+        ".gallery-variant-grid--3col",
+        ".gallery-variant-grid--2col",
+        ".gallery-variant-grid--stack",
+        ".gallery-variant-tile",
+        ".gallery-variant-label",
+    ] {
+        assert!(html.contains(selector), "missing CSS selector {selector}");
+    }
+}

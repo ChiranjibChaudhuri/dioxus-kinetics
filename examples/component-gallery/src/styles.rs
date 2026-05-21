@@ -251,6 +251,71 @@ body {
     padding: var(--ui-space-4);
 }
 
+.gallery-logo {
+    display: block;
+    width: 100%;
+    max-width: 260px;
+    margin-bottom: var(--ui-space-4);
+}
+
+.gallery-logo svg {
+    width: 100%;
+    height: auto;
+    border-radius: var(--ui-radius-lg);
+    display: block;
+}
+
+.visually-hidden {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    padding: 0;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    border: 0;
+}
+
+.gallery-variant-grid {
+    display: grid;
+    gap: var(--ui-space-2);
+    width: 100%;
+}
+
+.gallery-variant-grid--3x3 {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.gallery-variant-grid--3col {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.gallery-variant-grid--2col {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.gallery-variant-grid--stack {
+    grid-template-columns: 1fr;
+}
+
+.gallery-variant-tile {
+    display: grid;
+    gap: var(--ui-space-1);
+    padding: var(--ui-space-3);
+    border: 1px solid var(--ui-border);
+    border-radius: var(--ui-radius-md);
+    background: var(--ui-surface);
+    min-height: 96px;
+}
+
+.gallery-variant-label {
+    font-size: 11px;
+    color: var(--ui-muted-fg);
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+
 @media (max-width: 820px) {
     .gallery-shell {
         display: block;
@@ -276,6 +341,12 @@ body {
     }
 
     .gallery-entry {
+        grid-template-columns: 1fr;
+    }
+
+    .gallery-variant-grid--3x3,
+    .gallery-variant-grid--3col,
+    .gallery-variant-grid--2col {
         grid-template-columns: 1fr;
     }
 }

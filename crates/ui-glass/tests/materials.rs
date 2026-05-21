@@ -1,4 +1,8 @@
-use ui_glass::{resolve_glass, GlassDensity, GlassLevel, GlassPolicy, GlassRequest, GlassTone};
+use ui_glass::{
+    resolve_glass, resolve_material, GlassDensity, GlassDepth, GlassLevel, GlassPolicy,
+    GlassRequest, GlassTone, MaterialDensity, MaterialEdge, MaterialPolicy, MaterialRequest,
+    MaterialTone, MaterialVibrancy,
+};
 use ui_tokens::{Theme, TransparencyPreference};
 
 #[test]
@@ -107,4 +111,35 @@ fn fallback_background_uses_solid_surface() {
     );
 
     assert_eq!(recipe.fallback_background, theme.semantic.surface_solid);
+}
+
+#[test]
+fn material_request_resolves_depth_edge_and_vibrancy() {
+    let theme = Theme::default();
+    let recipe = resolve_material(
+        &theme,
+        MaterialRequest::new(GlassDepth::Floating, MaterialTone::Neutral)
+            .with_density(MaterialDensity::Comfortable)
+            .with_edge(MaterialEdge::Hairline)
+            .with_vibrancy(MaterialVibrancy::Vivid),
+    );
+
+    assert_eq!(recipe.backdrop_blur_px, 18.0);
+    assert_eq!(recipe.saturate_percent, 180);
+    assert_eq!(recipe.radius_px, theme.radius.medium_px);
+    assert!(!recipe.force_solid);
+}
+
+#[test]
+fn high_contrast_material_policy_forces_solid_surface() {
+    let theme = Theme::default();
+    let recipe = resolve_material(
+        &theme,
+        MaterialRequest::new(GlassDepth::Overlay, MaterialTone::Primary)
+            .with_policy(MaterialPolicy::HighContrast),
+    );
+
+    assert!(recipe.force_solid);
+    assert_eq!(recipe.backdrop_blur_px, 0.0);
+    assert_eq!(recipe.saturate_percent, 100);
 }

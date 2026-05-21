@@ -1,5 +1,8 @@
 use ui_dom::{glass_style, CssStyleWriter};
-use ui_glass::{resolve_glass, GlassDensity, GlassLevel, GlassPolicy, GlassRequest, GlassTone};
+use ui_glass::{
+    resolve_glass, resolve_material, GlassDensity, GlassDepth, GlassLevel, GlassPolicy,
+    GlassRequest, GlassTone, MaterialRequest, MaterialTone,
+};
 use ui_tokens::Theme;
 
 #[test]
@@ -87,4 +90,20 @@ fn glass_style_sanitizes_non_finite_recipe_numbers() {
     assert!(style.contains("border-radius:0px;"));
     assert!(style.contains("backdrop-filter:blur(0px) saturate(160%);"));
     assert!(style.contains("box-shadow:0 18px 42px rgba(20, 23, 28, 0.000);"));
+}
+
+#[test]
+fn material_style_writes_css_variables_for_native_material_recipe() {
+    let theme = ui_tokens::Theme::default();
+    let recipe = resolve_material(
+        &theme,
+        MaterialRequest::new(GlassDepth::Floating, MaterialTone::Neutral),
+    );
+
+    let css = ui_dom::material_style(&recipe);
+
+    assert!(css.contains("--ui-material-blur"));
+    assert!(css.contains("--ui-material-saturate"));
+    assert!(css.contains("--ui-material-bg"));
+    assert!(css.contains("-webkit-backdrop-filter"));
 }

@@ -63,6 +63,35 @@ pub fn glass_style(recipe: &GlassRecipe, supports_backdrop_filter: bool) -> Stri
     writer.to_inline_style()
 }
 
+pub fn material_style(recipe: &ui_glass::GlassRecipe) -> String {
+    CssStyleWriter::new()
+        .set("--ui-material-bg", recipe.background.css_rgba())
+        .set(
+            "--ui-material-solid-bg",
+            recipe.fallback_background.css_rgba(),
+        )
+        .set("--ui-material-border", recipe.border.css_rgba())
+        .set(
+            "--ui-material-blur",
+            format!("{}px", recipe.backdrop_blur_px),
+        )
+        .set(
+            "--ui-material-saturate",
+            format!("{}%", recipe.saturate_percent),
+        )
+        .set("background", "var(--ui-material-bg)")
+        .set("border-color", "var(--ui-material-border)")
+        .set(
+            "backdrop-filter",
+            "blur(var(--ui-material-blur)) saturate(var(--ui-material-saturate))",
+        )
+        .set(
+            "-webkit-backdrop-filter",
+            "blur(var(--ui-material-blur)) saturate(var(--ui-material-saturate))",
+        )
+        .to_inline_style()
+}
+
 fn trim_float(value: f32) -> String {
     let value = finite_or_zero(value);
 

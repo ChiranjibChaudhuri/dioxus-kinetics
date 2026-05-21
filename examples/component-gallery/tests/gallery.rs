@@ -373,3 +373,29 @@ fn root_readme_uses_kinetics_crate_name() {
     assert!(!readme.contains("unified_ui"));
     assert!(!readme.contains("Unified UI"));
 }
+
+#[test]
+fn gallery_icon_button_is_ready_with_tone_size_matrix() {
+    let docs = component_gallery::component_docs();
+    let ib = docs
+        .iter()
+        .find(|d| d.name == "IconButton")
+        .expect("IconButton doc exists");
+    assert_eq!(ib.status, component_gallery::ComponentStatus::Ready);
+    assert!(ib.render.is_some());
+
+    let html = dioxus_ssr::render_element(rsx! {
+        component_gallery::App {}
+    });
+
+    for tone in ["Neutral", "Primary", "Danger"] {
+        for size in ["Compact", "Default", "Spacious"] {
+            assert!(
+                html.contains(&format!("{tone} · {size}")),
+                "missing IconButton tile {tone} · {size}",
+            );
+        }
+    }
+    assert!(html.contains("ui-icon-button--danger"));
+    assert!(html.contains("ui-icon-button--compact"));
+}

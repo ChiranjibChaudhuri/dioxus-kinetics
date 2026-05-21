@@ -129,11 +129,11 @@ const COMPONENT_DOCS: [ComponentDoc; 27] = [
     ComponentDoc {
         name: "IconButton",
         category: ComponentCategory::Actions,
-        status: ComponentStatus::ComingSoon,
-        summary: "A compact icon-only command control with an accessible label.",
+        status: ComponentStatus::Ready,
+        summary: "A compact icon-only command control with an accessible label, three tones, and three sizes.",
         snippet: ICON_BUTTON_SNIPPET,
-        accessibility: "Reserved for a later icon system while keeping the gallery contract stable.",
-        render: None,
+        accessibility: "Accessible name comes from the `label` prop, exposed on `aria-label`. The icon child uses `aria-hidden`.",
+        render: Some(icon_button_preview),
     },
     ComponentDoc {
         name: "CommandMenu",
@@ -368,8 +368,9 @@ const BUTTON_SNIPPET: &str = r#"Button {
 }"#;
 
 const ICON_BUTTON_SNIPPET: &str = r#"IconButton {
-    label: "Archive",
-    icon: ArchiveIcon,
+    label: "Archive".to_string(),
+    tone: IconButtonTone::Neutral,
+    Close { size: 16 }
 }"#;
 
 const COMMAND_MENU_SNIPPET: &str = r#"CommandMenu {
@@ -721,6 +722,37 @@ fn empty_state_preview() -> Element {
             title: "No reports yet",
             description: "Create a report to share performance with your team.",
             action_label: "Create report",
+        }
+    }
+}
+
+fn icon_button_preview() -> Element {
+    let tones = [
+        (IconButtonTone::Neutral, "Neutral"),
+        (IconButtonTone::Primary, "Primary"),
+        (IconButtonTone::Danger, "Danger"),
+    ];
+    let sizes = [
+        (IconButtonSize::Compact, "Compact"),
+        (IconButtonSize::Default, "Default"),
+        (IconButtonSize::Spacious, "Spacious"),
+    ];
+
+    rsx! {
+        div { class: "gallery-variant-grid gallery-variant-grid--3x3",
+            for (tone, tone_label) in tones {
+                for (size, size_label) in sizes {
+                    div { class: "gallery-variant-tile",
+                        span { class: "gallery-variant-label", "{tone_label} · {size_label}" }
+                        IconButton {
+                            label: format!("{tone_label} {size_label}"),
+                            tone: tone,
+                            size: size,
+                            Plus { size: 16 }
+                        }
+                    }
+                }
+            }
         }
     }
 }

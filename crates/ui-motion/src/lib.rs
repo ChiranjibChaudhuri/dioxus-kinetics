@@ -67,6 +67,59 @@ pub enum Ease {
     Standard,
 }
 
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum Clamp {
+    Yes,
+    No,
+}
+
+#[derive(Clone, Copy, Debug, PartialEq)]
+pub struct TweenSample {
+    pub progress: f32,
+    pub value: f32,
+}
+
+pub fn interpolate(from: f32, to: f32, progress: f32, clamp: Clamp) -> f32 {
+    let from = finite_or_zero(from);
+    let to = finite_or_zero(to);
+    let progress = finite_or_zero(progress);
+    let progress = match clamp {
+        Clamp::Yes => progress.clamp(0.0, 1.0),
+        Clamp::No => progress,
+    };
+
+    from + (to - from) * progress
+}
+
+pub fn sample_tween(
+    from: f32,
+    to: f32,
+    elapsed_ms: f32,
+    duration_ms: f32,
+    ease: Ease,
+) -> TweenSample {
+    let duration_ms = if duration_ms.is_finite() && duration_ms > 0.0 {
+        duration_ms
+    } else {
+        1.0
+    };
+    let raw = finite_or_zero(elapsed_ms) / duration_ms;
+    let progress = apply_ease(raw.clamp(0.0, 1.0), ease);
+
+    TweenSample {
+        progress,
+        value: interpolate(from, to, progress, Clamp::Yes),
+    }
+}
+
+pub fn apply_ease(progress: f32, ease: Ease) -> f32 {
+    let progress = finite_or_zero(progress).clamp(0.0, 1.0);
+    match ease {
+        Ease::Linear => progress,
+        Ease::Standard => progress * progress * (3.0 - 2.0 * progress),
+    }
+}
+
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub enum Transition {
     Tween { duration_ms: u32, ease: Ease },
@@ -133,5 +186,13 @@ impl PresenceState {
             Self::Exiting => Self::Removed,
             Self::Present | Self::Removed => self,
         }
+    }
+}
+
+fn finite_or_zero(value: f32) -> f32 {
+    if value.is_finite() {
+        value
+    } else {
+        0.0
     }
 }

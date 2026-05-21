@@ -1,4 +1,6 @@
-use motion_core::{Ease, PresenceState, Spring, Transition};
+use motion_core::{
+    interpolate, sample_tween, Clamp, Ease, PresenceState, Spring, Transition, TweenSample,
+};
 use ui_motion as motion_core;
 
 #[test]
@@ -6,6 +8,26 @@ fn reduced_motion_collapses_transition_duration() {
     let transition = Transition::tween(180).reduced();
 
     assert_eq!(transition.duration_ms(), 0);
+}
+
+#[test]
+fn interpolate_clamps_progress_when_requested() {
+    assert_eq!(interpolate(10.0, 20.0, -1.0, Clamp::Yes), 10.0);
+    assert_eq!(interpolate(10.0, 20.0, 2.0, Clamp::Yes), 20.0);
+    assert_eq!(interpolate(10.0, 20.0, 0.5, Clamp::Yes), 15.0);
+}
+
+#[test]
+fn sample_tween_returns_deterministic_progress_and_value() {
+    let sample = sample_tween(0.0, 100.0, 250.0, 1000.0, Ease::Linear);
+
+    assert_eq!(
+        sample,
+        TweenSample {
+            progress: 0.25,
+            value: 25.0,
+        }
+    );
 }
 
 #[test]

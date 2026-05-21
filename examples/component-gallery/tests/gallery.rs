@@ -258,3 +258,21 @@ fn gallery_css_includes_logo_and_variant_grid_styles() {
         assert!(html.contains(selector), "missing CSS selector {selector}");
     }
 }
+
+#[test]
+fn gallery_timeline_scope_preview_renders_three_variants() {
+    let html = dioxus_ssr::render_element(rsx! {
+        component_gallery::App {}
+    });
+
+    assert!(html.contains("gallery-variant-grid--stack"));
+    assert!(html.contains("\"data-stagger-index\": \"0\"")
+        || html.contains("data-stagger-index=\"0\""));
+    for cue in ["rise-in", "enter", "settle", "pulse"] {
+        assert!(
+            html.contains(&format!("data-motion-cue=\"{cue}\"")),
+            "missing TimelineScope cue {cue}",
+        );
+    }
+    assert!(html.contains("data-ui-transparency=\"reduced\""));
+}

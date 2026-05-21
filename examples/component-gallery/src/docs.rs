@@ -698,13 +698,39 @@ fn empty_state_preview() -> Element {
 
 fn timeline_scope_preview() -> Element {
     rsx! {
-        TimelineScope { id: "dashboard-enter", autoplay: true,
-            KineticBox { id: "metric-card", cue: "rise-in",
-                MetricReadout {
-                    label: "Pipeline",
-                    value: "$418k",
-                    delta: "+8.2%",
-                    tone: MetricTone::Info,
+        div { class: "gallery-variant-grid gallery-variant-grid--stack",
+            div { class: "gallery-variant-tile",
+                span { class: "gallery-variant-label", "Stagger" }
+                TimelineScope { id: "stagger-demo", autoplay: true,
+                    for index in 0u32..4 {
+                        div { "data-stagger-index": "{index}",
+                            KineticBox { id: "stagger-{index}", cue: "rise-in",
+                                "Tile {index}"
+                            }
+                        }
+                    }
+                }
+            }
+            div { class: "gallery-variant-tile",
+                span { class: "gallery-variant-label", "Sequence" }
+                TimelineScope { id: "sequence-demo", autoplay: true,
+                    KineticBox { id: "sequence-enter", cue: "enter", "Enter" }
+                    KineticBox { id: "sequence-settle", cue: "settle", "Settle" }
+                    KineticBox { id: "sequence-pulse", cue: "pulse", "Pulse" }
+                }
+            }
+            div { class: "gallery-variant-tile",
+                span { class: "gallery-variant-label", "Reduced motion" }
+                div { "data-ui-transparency": "reduced",
+                    TimelineScope { id: "reduced-demo", autoplay: true,
+                        for index in 0u32..4 {
+                            div { "data-stagger-index": "{index}",
+                                KineticBox { id: "reduced-{index}", cue: "rise-in",
+                                    "Tile {index}"
+                                }
+                            }
+                        }
+                    }
                 }
             }
         }

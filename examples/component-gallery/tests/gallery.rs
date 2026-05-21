@@ -135,6 +135,7 @@ fn gallery_embeds_styles_for_gallery_and_component_classes() {
     assert!(html.contains(".gallery-shell"));
     assert!(html.contains(".ui-button--primary"));
     assert!(html.contains(".ui-glass-surface"));
+    assert!(html.contains(".gallery-preview .ui-dialog"));
     assert!(html.contains("backdrop-filter"));
 }
 

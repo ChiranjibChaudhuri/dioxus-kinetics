@@ -196,6 +196,27 @@ body {
     color: var(--ui-muted-fg);
 }
 
+.gallery-preview .ui-dialog {
+    position: relative;
+    inset: auto;
+    min-height: 240px;
+    display: grid;
+    place-items: center;
+    padding: var(--ui-space-4);
+}
+
+.gallery-preview .ui-dialog-backdrop {
+    position: absolute;
+    inset: 0;
+    border-radius: var(--ui-radius-lg);
+    background: rgba(10, 15, 24, 0.24);
+}
+
+.gallery-preview .ui-dialog-panel {
+    width: min(420px, 100%);
+    padding: var(--ui-space-4);
+}
+
 .gallery-inline {
     display: flex;
     flex-wrap: wrap;

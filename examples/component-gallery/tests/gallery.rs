@@ -276,3 +276,17 @@ fn gallery_timeline_scope_preview_renders_three_variants() {
     }
     assert!(html.contains("data-ui-transparency=\"reduced\""));
 }
+
+#[test]
+fn gallery_frame_stage_preview_renders_three_frame_snapshots() {
+    let html = dioxus_ssr::render_element(rsx! {
+        component_gallery::App {}
+    });
+
+    for caption in ["Frame 0 / 180", "Frame 90 / 180", "Frame 179 / 180"] {
+        assert!(
+            html.contains(caption),
+            "missing FrameStage caption {caption}",
+        );
+    }
+}

@@ -4,7 +4,7 @@
 
 **Goal:** Replace bridge-oriented animation/export boundaries with native Rust and Dioxus timeline, composition, capture, glass, and semantic naming foundations.
 
-**Architecture:** Keep one downstream facade in `unified_ui`, with focused internal crates for native timeline, frame composition, capture metadata, motion math, material recipes, and Dioxus rendering. The first implementation lands MVP contracts and SSR-safe examples, not pixel/video export.
+**Architecture:** Keep one downstream facade in `kinetics`, with focused internal crates for native timeline, frame composition, capture metadata, motion math, material recipes, and Dioxus rendering. The first implementation lands MVP contracts and SSR-safe examples, not pixel/video export.
 
 **Tech Stack:** Rust 2021, Cargo workspace, Dioxus 0.7, Dioxus SSR tests, pure Rust unit tests, static CSS strings, PowerShell commands on Windows.
 
@@ -21,7 +21,7 @@ It includes:
 - `ui-composition` frame composition MVP
 - `ui-capture` capture manifest and frame seek MVP
 - expanded material API in `ui-glass`
-- semantic component names in `ui-dioxus` and `unified_ui`
+- semantic component names in `ui-dioxus` and `kinetics`
 - gallery categories and examples for native systems
 - documentation updates
 
@@ -46,8 +46,8 @@ Those outputs must build on the native contracts created here.
 - `crates/ui-dom/src/lib.rs`: serialize expanded material CSS variables.
 - `crates/ui-dioxus/src/`: add semantic name wrappers and native system preview components.
 - `crates/ui-styles/src/lib.rs`: add native material, timeline, composition, and capture selectors.
-- `crates/unified_ui/Cargo.toml`: replace `gsap` and `hyperframes-export` features with `timeline`, `composition`, and `capture`.
-- `crates/unified_ui/src/lib.rs`: export native systems through the public prelude.
+- `crates/kinetics/Cargo.toml`: replace `gsap` and `hyperframes-export` features with `timeline`, `composition`, and `capture`.
+- `crates/kinetics/src/lib.rs`: export native systems through the public prelude.
 - `examples/component-gallery/src/docs.rs`: update registry categories, names, snippets, and native examples.
 - `examples/component-gallery/src/app.rs`: keep registry rendering, with category list updated by `docs.rs`.
 - `examples/component-gallery/src/styles.rs`: add preview styles for timeline, composition, and capture examples.
@@ -57,23 +57,23 @@ Those outputs must build on the native contracts created here.
 
 **Files:**
 - Modify: `Cargo.toml`
-- Modify: `crates/unified_ui/Cargo.toml`
-- Modify: `crates/unified_ui/src/lib.rs`
+- Modify: `crates/kinetics/Cargo.toml`
+- Modify: `crates/kinetics/src/lib.rs`
 - Move: `crates/ui-gsap` to `crates/ui-timeline`
 - Move: `crates/ui-hyperframes` to `crates/ui-capture`
 - Create: `crates/ui-composition/Cargo.toml`
 - Create: `crates/ui-composition/src/lib.rs`
 - Create: `crates/ui-composition/tests/composition.rs`
-- Modify: `crates/unified_ui/tests/prelude.rs`
+- Modify: `crates/kinetics/tests/prelude.rs`
 
 - [ ] **Step 1: Write failing facade test for native boundary names**
 
-Add this test to `crates/unified_ui/tests/prelude.rs`:
+Add this test to `crates/kinetics/tests/prelude.rs`:
 
 ```rust
 #[test]
 fn public_api_names_use_native_system_boundaries() {
-    let names = unified_ui::public_api_names();
+    let names = kinetics::public_api_names();
 
     for expected in ["Timeline", "Composition", "CaptureStage"] {
         assert!(names.contains(&expected), "missing native system name {expected}");
@@ -93,7 +93,7 @@ fn public_api_names_use_native_system_boundaries() {
 Run:
 
 ```powershell
-cargo test -p unified_ui public_api_names_use_native_system_boundaries -- --exact
+cargo test -p kinetics public_api_names_use_native_system_boundaries -- --exact
 ```
 
 Expected: FAIL because `Timeline`, `Composition`, and `CaptureStage` are not in `public_api_names()`.
@@ -128,7 +128,7 @@ members = [
     "crates/ui-composition",
     "crates/ui-capture",
     "crates/ui-styles",
-    "crates/unified_ui",
+    "crates/kinetics",
     "examples/component-gallery",
 ]
 
@@ -153,7 +153,7 @@ ui-timeline = { path = "crates/ui-timeline" }
 ui-composition = { path = "crates/ui-composition" }
 ui-capture = { path = "crates/ui-capture" }
 ui-styles = { path = "crates/ui-styles" }
-unified_ui = { path = "crates/unified_ui" }
+kinetics = { path = "crates/kinetics" }
 ```
 
 - [ ] **Step 5: Update renamed crate manifests**
@@ -302,11 +302,11 @@ impl Composition {
 
 - [ ] **Step 7: Update unified facade features and dependencies**
 
-Replace `crates/unified_ui/Cargo.toml` with:
+Replace `crates/kinetics/Cargo.toml` with:
 
 ```toml
 [package]
-name = "unified_ui"
+name = "kinetics"
 version.workspace = true
 edition.workspace = true
 license.workspace = true
@@ -348,7 +348,7 @@ path = "src/lib.rs"
 
 - [ ] **Step 8: Update the unified facade exports**
 
-In `crates/unified_ui/src/lib.rs`, remove the `gsap` and `hyperframes` modules and add:
+In `crates/kinetics/src/lib.rs`, remove the `gsap` and `hyperframes` modules and add:
 
 ```rust
 #[cfg(feature = "timeline")]
@@ -395,7 +395,7 @@ Update `public_api_names()` so the returned slice contains these native names an
 Run:
 
 ```powershell
-cargo test -p unified_ui public_api_names_use_native_system_boundaries -- --exact
+cargo test -p kinetics public_api_names_use_native_system_boundaries -- --exact
 ```
 
 Expected: PASS.
@@ -415,7 +415,7 @@ Expected: PASS.
 Run:
 
 ```powershell
-git add Cargo.toml crates/ui-timeline crates/ui-capture crates/ui-composition crates/unified_ui
+git add Cargo.toml crates/ui-timeline crates/ui-capture crates/ui-composition crates/kinetics
 git commit -m "chore: rename native kinetics boundaries"
 ```
 
@@ -2103,18 +2103,18 @@ git commit -m "feat: add dioxus composition capture components"
 
 **Files:**
 - Modify: `crates/ui-dioxus/src/lib.rs`
-- Modify: `crates/unified_ui/src/lib.rs`
-- Modify: `crates/unified_ui/tests/prelude.rs`
+- Modify: `crates/kinetics/src/lib.rs`
+- Modify: `crates/kinetics/tests/prelude.rs`
 - Modify: `docs/component-naming.md`
 
 - [ ] **Step 1: Write failing prelude test**
 
-Append to `crates/unified_ui/tests/prelude.rs`:
+Append to `crates/kinetics/tests/prelude.rs`:
 
 ```rust
 #[test]
 fn prelude_exposes_functional_component_names() {
-    let names = unified_ui::public_api_names();
+    let names = kinetics::public_api_names();
 
     for expected in [
         "ActionControl",
@@ -2143,7 +2143,7 @@ fn prelude_exposes_functional_component_names() {
 Run:
 
 ```powershell
-cargo test -p unified_ui prelude_exposes_functional_component_names -- --exact
+cargo test -p kinetics prelude_exposes_functional_component_names -- --exact
 ```
 
 Expected: FAIL because `public_api_names()` does not contain the functional names.
@@ -2170,7 +2170,7 @@ pub use Surface as ContentPlane;
 
 - [ ] **Step 4: Add functional exports in facade prelude**
 
-In `crates/unified_ui/src/lib.rs`, add the functional names to the `ui_dioxus` prelude export list:
+In `crates/kinetics/src/lib.rs`, add the functional names to the `ui_dioxus` prelude export list:
 
 ```rust
 ActionBar, ActionControl, BlankState, ChoiceMark, CommandFinder, ContentPlane, ContextHint,
@@ -2187,7 +2187,7 @@ Replace `docs/component-naming.md` with:
 ```markdown
 # Component Naming
 
-Unified UI uses functional component names.
+Kinetics uses functional component names.
 
 Names describe the user-facing role or behavior:
 
@@ -2220,7 +2220,7 @@ documentation and examples should prefer the functional names.
 Run:
 
 ```powershell
-cargo test -p unified_ui
+cargo test -p kinetics
 ```
 
 Expected: PASS.
@@ -2230,7 +2230,7 @@ Expected: PASS.
 Run:
 
 ```powershell
-git add crates/ui-dioxus crates/unified_ui docs/component-naming.md
+git add crates/ui-dioxus crates/kinetics docs/component-naming.md
 git commit -m "feat: expose functional component names"
 ```
 
@@ -2745,7 +2745,7 @@ cargo test -p ui-composition
 cargo test -p ui-capture
 cargo test -p ui-dioxus
 cargo test -p ui-styles
-cargo test -p unified_ui
+cargo test -p kinetics
 cargo test -p component-gallery
 ```
 
@@ -2816,6 +2816,6 @@ Expected: `main` is pushed. `Reading_material/` remains untracked unless the use
 - [ ] `ui-composition` can validate compositions, sample frame cues, and sort layers.
 - [ ] `ui-capture` can validate viewports, resolve marks, and validate manifests.
 - [ ] `ui-dioxus` exports SSR-safe timeline, frame, and capture components.
-- [ ] `unified_ui::prelude::*` exports native names.
+- [ ] `kinetics::prelude::*` exports native names.
 - [ ] Gallery has category-wise native systems documentation.
 - [ ] `cargo test --workspace` passes.

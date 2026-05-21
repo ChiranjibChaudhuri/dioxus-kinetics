@@ -10,7 +10,7 @@ This phase implements:
 
 - reusable library styling in a new `ui-styles` crate
 - 12 advanced Dioxus components in `ui-dioxus`
-- public prelude exports in `unified_ui`
+- public prelude exports in `kinetics`
 - gallery registry updates so the new components become `Ready`
 - richer gallery examples for variants, states, density, theme, and SaaS use cases
 
@@ -53,9 +53,9 @@ Expand this crate from basic primitives to advanced semantic components. Each co
 - accept controlled props for state
 - avoid internal app state except for purely presentational derived values
 
-### `unified_ui`
+### `kinetics`
 
-Export the advanced components and style helpers through `unified_ui::prelude::*`. Public names must remain semantic and must not borrow external library names.
+Export the advanced components and style helpers through `kinetics::prelude::*`. Public names must remain semantic and must not borrow external library names.
 
 ### `component-gallery`
 
@@ -170,7 +170,7 @@ cargo fmt --all -- --check
 cargo check -p component-gallery
 cargo test -p ui-styles
 cargo test -p ui-dioxus
-cargo test -p unified_ui
+cargo test -p kinetics
 cargo test -p component-gallery
 cargo test --workspace
 ```
@@ -179,7 +179,7 @@ Expected test coverage:
 
 - `ui-styles` tests confirm exported CSS contains theme, density, glass, and advanced component selectors.
 - `ui-dioxus` SSR tests confirm semantic structure and classes for every new component.
-- `unified_ui` tests confirm the prelude exports new components and style helper.
+- `kinetics` tests confirm the prelude exports new components and style helper.
 - `component-gallery` tests confirm all 12 advanced components are ready, render examples, and expose snippets/accessibility notes.
 
 ## Out Of Scope

@@ -19,7 +19,7 @@ pub fn App() -> Element {
                 div { class: "gallery-brand",
                     span { class: "gallery-mark", "UI" }
                     div {
-                        h1 { "Unified UI" }
+                        h1 { "Kinetics" }
                         p { "Component reference" }
                     }
                 }
@@ -32,7 +32,7 @@ pub fn App() -> Element {
             main { class: "gallery-main",
                 header { class: "gallery-header",
                     p { class: "gallery-eyebrow", "Dioxus SaaS library" }
-                    h2 { "Unified UI Component Gallery" }
+                    h2 { "Kinetics Component Gallery" }
                     p {
                         "Semantic components grouped by product function, with live rendered examples for available primitives and disabled coming-soon entries for the next phase."
                     }

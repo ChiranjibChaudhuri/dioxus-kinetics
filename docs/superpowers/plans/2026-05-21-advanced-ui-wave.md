@@ -4,7 +4,7 @@
 
 **Goal:** Build the first advanced `dioxus-kinetics` wave: reusable library CSS, 12 controlled SaaS components, public facade exports, and a richer registry-driven component gallery.
 
-**Architecture:** Add a new `ui-styles` crate for reusable CSS while keeping gallery-only layout CSS in the example app. Split `ui-dioxus` into focused modules for forms, navigation, overlays, and display components, then re-export through `unified_ui::prelude::*`. Upgrade the component gallery registry so the advanced components are marked `Ready` and render real SaaS examples.
+**Architecture:** Add a new `ui-styles` crate for reusable CSS while keeping gallery-only layout CSS in the example app. Split `ui-dioxus` into focused modules for forms, navigation, overlays, and display components, then re-export through `kinetics::prelude::*`. Upgrade the component gallery registry so the advanced components are marked `Ready` and render real SaaS examples.
 
 **Tech Stack:** Rust 2021, Cargo workspace, Dioxus 0.7, Dioxus SSR tests, static CSS strings, controlled component props, workspace-level verification.
 
@@ -12,7 +12,7 @@
 
 ## Scope Check
 
-The approved spec is broad, but it is one coherent implementation phase because every task contributes to the same deliverable: a reusable advanced UI library wave exposed by `unified_ui` and demonstrated in `examples/component-gallery`.
+The approved spec is broad, but it is one coherent implementation phase because every task contributes to the same deliverable: a reusable advanced UI library wave exposed by `kinetics` and demonstrated in `examples/component-gallery`.
 
 This plan intentionally does not implement global overlay stacks, focus trapping, runtime theme switching, runtime density switching, full keyboard engines, `DataTable`, visual regression screenshots, GSAP timelines, or HyperFrames demos. Those remain separate follow-up plans.
 
@@ -35,7 +35,7 @@ crates/
     src/overlays.rs
     src/display.rs
     tests/advanced_ssr.rs
-  unified_ui/
+  kinetics/
     Cargo.toml
     src/lib.rs
     tests/prelude.rs
@@ -57,7 +57,7 @@ Responsibilities:
 - `ui-dioxus/src/overlays.rs`: `Dialog`, `Toast`, `CommandMenu`, `Tooltip`.
 - `ui-dioxus/src/display.rs`: `MetricCard`, `EmptyState`.
 - `ui-dioxus/src/lib.rs`: module wiring and existing primitive exports.
-- `unified_ui`: single downstream facade and prelude.
+- `kinetics`: single downstream facade and prelude.
 - `component-gallery`: registry/workbench examples and gallery-only layout CSS.
 
 ## Shared Component API Shape
@@ -172,7 +172,7 @@ members = [
     "crates/ui-gsap",
     "crates/ui-hyperframes",
     "crates/ui-styles",
-    "crates/unified_ui",
+    "crates/kinetics",
     "examples/component-gallery",
 ]
 
@@ -196,7 +196,7 @@ ui-dioxus = { path = "crates/ui-dioxus" }
 ui-gsap = { path = "crates/ui-gsap" }
 ui-hyperframes = { path = "crates/ui-hyperframes" }
 ui-styles = { path = "crates/ui-styles" }
-unified_ui = { path = "crates/unified_ui" }
+kinetics = { path = "crates/kinetics" }
 ```
 
 - [ ] **Step 4: Create the style crate manifest**
@@ -1601,16 +1601,16 @@ git commit -m "feat: add overlay and feedback components"
 ## Task 5: Unified Facade Exports
 
 **Files:**
-- Modify: `crates/unified_ui/Cargo.toml`
-- Modify: `crates/unified_ui/src/lib.rs`
-- Modify: `crates/unified_ui/tests/prelude.rs`
+- Modify: `crates/kinetics/Cargo.toml`
+- Modify: `crates/kinetics/src/lib.rs`
+- Modify: `crates/kinetics/tests/prelude.rs`
 
 - [ ] **Step 1: Add failing prelude tests**
 
-Append to `crates/unified_ui/tests/prelude.rs`:
+Append to `crates/kinetics/tests/prelude.rs`:
 
 ```rust
-use unified_ui::prelude::*;
+use kinetics::prelude::*;
 
 #[test]
 fn prelude_exposes_advanced_components_and_styles() {
@@ -1634,7 +1634,7 @@ fn prelude_exposes_advanced_components_and_styles() {
 
 #[test]
 fn public_api_names_include_advanced_wave_names() {
-    let names = unified_ui::public_api_names();
+    let names = kinetics::public_api_names();
 
     for expected in [
         "TextField",
@@ -1660,14 +1660,14 @@ fn public_api_names_include_advanced_wave_names() {
 Run:
 
 ```powershell
-cargo test -p unified_ui prelude_exposes_advanced_components_and_styles
+cargo test -p kinetics prelude_exposes_advanced_components_and_styles
 ```
 
-Expected: FAIL because `library_css` and new components are not exported from `unified_ui`.
+Expected: FAIL because `library_css` and new components are not exported from `kinetics`.
 
 - [ ] **Step 3: Add `ui-styles` dependency**
 
-Modify `crates/unified_ui/Cargo.toml`:
+Modify `crates/kinetics/Cargo.toml`:
 
 ```toml
 [dependencies]
@@ -1686,7 +1686,7 @@ ui-hyperframes = { workspace = true, optional = true }
 
 - [ ] **Step 4: Export advanced components and styles**
 
-Modify `crates/unified_ui/src/lib.rs` prelude exports:
+Modify `crates/kinetics/src/lib.rs` prelude exports:
 
 ```rust
 pub mod prelude {
@@ -1753,7 +1753,7 @@ pub fn public_api_names() -> &'static [&'static str] {
 Run:
 
 ```powershell
-cargo test -p unified_ui
+cargo test -p kinetics
 ```
 
 Expected: PASS.
@@ -1763,7 +1763,7 @@ Expected: PASS.
 Run:
 
 ```powershell
-git add crates/unified_ui/Cargo.toml crates/unified_ui/src/lib.rs crates/unified_ui/tests/prelude.rs
+git add crates/kinetics/Cargo.toml crates/kinetics/src/lib.rs crates/kinetics/tests/prelude.rs
 git commit -m "feat: expose advanced ui wave"
 ```
 
@@ -1823,7 +1823,7 @@ Modify `examples/component-gallery/Cargo.toml`:
 ```toml
 [dependencies]
 dioxus.workspace = true
-unified_ui.workspace = true
+kinetics.workspace = true
 ui-styles.workspace = true
 ```
 
@@ -2650,7 +2650,7 @@ Run:
 cargo check -p component-gallery
 cargo test -p ui-styles
 cargo test -p ui-dioxus
-cargo test -p unified_ui
+cargo test -p kinetics
 cargo test -p component-gallery
 ```
 
@@ -2693,7 +2693,7 @@ If no files changed after verification except README, commit only README with th
 - [ ] `ui-styles` tests verify theme, density, reduced preference hooks, glass, and advanced selectors.
 - [ ] `ui-dioxus` exports `TextField`, `Checkbox`, `Switch`, `Tabs`, `Dialog`, `Toast`, `CommandMenu`, `Tooltip`, `Toolbar`, `Sidebar`, `MetricCard`, and `EmptyState`.
 - [ ] New components render semantic HTML/ARIA in SSR tests.
-- [ ] `unified_ui::prelude::*` exports all new components and style helpers.
+- [ ] `kinetics::prelude::*` exports all new components and style helpers.
 - [ ] `component-gallery` imports `ui-styles` and no longer duplicates component styling in gallery CSS.
 - [ ] Gallery registry marks all 12 advanced components `Ready`.
 - [ ] Gallery entries include summary, snippet, accessibility note, and live renderer.
@@ -2702,7 +2702,7 @@ If no files changed after verification except README, commit only README with th
 - [ ] `cargo check -p component-gallery` passes.
 - [ ] `cargo test -p ui-styles` passes.
 - [ ] `cargo test -p ui-dioxus` passes.
-- [ ] `cargo test -p unified_ui` passes.
+- [ ] `cargo test -p kinetics` passes.
 - [ ] `cargo test -p component-gallery` passes.
 - [ ] `cargo test --workspace` passes.
 

@@ -1,4 +1,4 @@
-# Unified UI Library Design
+# Kinetics Library Design
 
 Date: 2026-05-20
 Status: Ready for user review
@@ -44,10 +44,10 @@ Native support must not force web-only dependencies into the core. Native can re
 Downstream SaaS products should consume one library:
 
 ```rust
-use unified_ui::prelude::*;
+use kinetics::prelude::*;
 ```
 
-The implementation may use internal workspace crates, but downstream apps should normally depend only on `unified_ui`.
+The implementation may use internal workspace crates, but downstream apps should normally depend only on `kinetics`.
 
 Recommended feature flags:
 
@@ -82,7 +82,7 @@ Internal crates:
 | `ui-native` | Dioxus Native/Blitz adapter for tokens, surfaces, layout, basic motion, and accessibility mapping |
 | `ui-gsap` | Optional web-only advanced animation backend |
 | `ui-hyperframes` | Optional export-only backend for deterministic demo/video rendering |
-| `unified_ui` | Curated public crate and prelude for downstream SaaS apps |
+| `kinetics` | Curated public crate and prelude for downstream SaaS apps |
 
 Core rule: semantic state belongs in Dioxus. Per-frame visual updates belong in renderer controllers so animation does not force full subtree rerenders.
 
@@ -482,7 +482,7 @@ DOM, webview, and native may differ. Adapters must expose capabilities explicitl
 
 The design is implementation-ready when the written implementation plan can produce:
 
-- one `unified_ui` public crate with a stable prelude
+- one `kinetics` public crate with a stable prelude
 - semantic component APIs with no borrowed naming
 - Apple-like glass material tokens and fallbacks
 - Web/Desktop/Mobile renderer support through DOM/webview

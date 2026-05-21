@@ -108,7 +108,7 @@ fn gallery_renders_ready_examples_and_coming_soon_entries() {
         component_gallery::App {}
     });
 
-    assert!(html.contains("Unified UI Component Gallery"));
+    assert!(html.contains("Kinetics Component Gallery"));
     for category in component_gallery::categories() {
         assert!(html.contains(category.label()));
     }

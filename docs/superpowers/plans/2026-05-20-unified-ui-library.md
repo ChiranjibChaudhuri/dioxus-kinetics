@@ -1,10 +1,10 @@
-# Unified UI Library Implementation Plan
+# Kinetics Library Implementation Plan
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Goal:** Build the first working MVP of a single Dioxus UI library for downstream SaaS apps, with semantic components, Apple-like glass tokens, motion primitives, layout math, Web/Desktop/Mobile DOM support, and a Native adapter contract.
 
-**Architecture:** Create a Rust workspace with focused crates behind one public `unified_ui` facade. Keep semantic state and component contracts portable; renderer-specific crates convert the same tokens and contracts into DOM/WebView or Native behavior. Keep GSAP and HyperFrames as optional crates with explicit backend boundaries so they do not affect default runtime usage.
+**Architecture:** Create a Rust workspace with focused crates behind one public `kinetics` facade. Keep semantic state and component contracts portable; renderer-specific crates convert the same tokens and contracts into DOM/WebView or Native behavior. Keep GSAP and HyperFrames as optional crates with explicit backend boundaries so they do not affect default runtime usage.
 
 **Tech Stack:** Rust 2021, Cargo workspace, Dioxus 0.7, Dioxus SSR tests, pure Rust unit tests, feature-gated public facade, Git commits per task.
 
@@ -14,7 +14,7 @@
 
 The approved design is broad. This plan implements the first coherent MVP, not every mature backend feature. It creates the full workspace shape, stable public naming, token/glass/motion/layout cores, DOM/WebView support, Native capability planning, public prelude, docs, and optional backend boundaries. Rich GSAP timelines, HyperFrames video export rendering, Playwright visual tests, and native visual parity each need follow-up plans after this MVP compiles and has unit/SSR coverage.
 
-This is still one testable implementation stream because each task contributes to one library facade: `unified_ui`.
+This is still one testable implementation stream because each task contributes to one library facade: `kinetics`.
 
 ## File Structure
 
@@ -65,7 +65,7 @@ crates/
     Cargo.toml
     src/lib.rs
     tests/export.rs
-  unified_ui/
+  kinetics/
     Cargo.toml
     src/lib.rs
     tests/prelude.rs
@@ -83,7 +83,7 @@ Responsibility boundaries:
 - `ui-dioxus`: semantic Dioxus components that use the core crates.
 - `ui-gsap`: optional backend boundary for advanced web animation.
 - `ui-hyperframes`: optional export boundary for deterministic scene output.
-- `unified_ui`: the single downstream SaaS dependency and prelude.
+- `kinetics`: the single downstream SaaS dependency and prelude.
 
 ## Task 1: Workspace Scaffold
 
@@ -138,7 +138,7 @@ members = [
     "crates/ui-dioxus",
     "crates/ui-gsap",
     "crates/ui-hyperframes",
-    "crates/unified_ui",
+    "crates/kinetics",
 ]
 
 [workspace.package]
@@ -181,11 +181,11 @@ Cargo.lock
 Write `README.md`:
 
 ```markdown
-# Unified UI
+# Kinetics
 
-Unified UI is a Dioxus-first UI library for downstream SaaS products.
+Kinetics is a Dioxus-first UI library for downstream SaaS products.
 
-The library exposes one public crate, `unified_ui`, while keeping tokens,
+The library exposes one public crate, `kinetics`, while keeping tokens,
 glass materials, motion, layout, and renderer adapters in focused internal
 crates.
 
@@ -371,11 +371,11 @@ ui-motion.workspace = true
 path = "src/lib.rs"
 ```
 
-`crates/unified_ui/Cargo.toml`:
+`crates/kinetics/Cargo.toml`:
 
 ```toml
 [package]
-name = "unified_ui"
+name = "kinetics"
 version.workspace = true
 edition.workspace = true
 license.workspace = true
@@ -426,7 +426,7 @@ Run:
 cargo metadata --format-version 1 --no-deps
 ```
 
-Expected: command exits `0` and output includes `"unified_ui"`.
+Expected: command exits `0` and output includes `"kinetics"`.
 
 - [ ] **Step 7: Commit scaffold**
 
@@ -2016,15 +2016,15 @@ git commit -m "feat: add optional backend boundaries"
 ## Task 11: Public Facade And Prelude
 
 **Files:**
-- Modify: `crates/unified_ui/src/lib.rs`
-- Create: `crates/unified_ui/tests/prelude.rs`
+- Modify: `crates/kinetics/src/lib.rs`
+- Create: `crates/kinetics/tests/prelude.rs`
 
 - [ ] **Step 1: Write failing prelude tests**
 
-Write `crates/unified_ui/tests/prelude.rs`:
+Write `crates/kinetics/tests/prelude.rs`:
 
 ```rust
-use unified_ui::prelude::*;
+use kinetics::prelude::*;
 
 #[test]
 fn prelude_exposes_semantic_components_and_tokens() {
@@ -2040,7 +2040,7 @@ fn prelude_exposes_semantic_components_and_tokens() {
 
 #[test]
 fn default_features_do_not_expose_gsap_or_hyperframes_names() {
-    let public_names = unified_ui::public_api_names();
+    let public_names = kinetics::public_api_names();
 
     assert!(!public_names.iter().any(|name| name.contains("Gsap")));
     assert!(!public_names.iter().any(|name| name.contains("HyperFrames")));
@@ -2052,14 +2052,14 @@ fn default_features_do_not_expose_gsap_or_hyperframes_names() {
 Run:
 
 ```powershell
-cargo test -p unified_ui
+cargo test -p kinetics
 ```
 
 Expected: FAIL with unresolved imports or missing prelude exports.
 
 - [ ] **Step 3: Implement public facade**
 
-Replace `crates/unified_ui/src/lib.rs`:
+Replace `crates/kinetics/src/lib.rs`:
 
 ```rust
 #![forbid(unsafe_code)]
@@ -2121,7 +2121,7 @@ pub mod hyperframes {
 Run:
 
 ```powershell
-cargo test -p unified_ui
+cargo test -p kinetics
 ```
 
 Expected: PASS, `2 passed`.
@@ -2131,7 +2131,7 @@ Expected: PASS, `2 passed`.
 Run:
 
 ```powershell
-cargo test -p unified_ui --no-default-features --features "native gsap hyperframes-export"
+cargo test -p kinetics --no-default-features --features "native gsap hyperframes-export"
 ```
 
 Expected: PASS.
@@ -2141,7 +2141,7 @@ Expected: PASS.
 Run:
 
 ```powershell
-git add crates/unified_ui
+git add crates/kinetics
 git commit -m "feat: add unified public facade"
 ```
 
@@ -2160,7 +2160,7 @@ Write `docs/component-naming.md`:
 ```markdown
 # Component Naming
 
-Unified UI uses semantic component names.
+Kinetics uses semantic component names.
 
 Names describe the user-facing role or behavior:
 
@@ -2230,14 +2230,14 @@ features.
 Replace `README.md`:
 
 ```markdown
-# Unified UI
+# Kinetics
 
-Unified UI is a Dioxus-first UI library for downstream SaaS products.
+Kinetics is a Dioxus-first UI library for downstream SaaS products.
 
 The library exposes one public crate:
 
 ```rust
-use unified_ui::prelude::*;
+use kinetics::prelude::*;
 ```
 
 Design principles:
@@ -2290,7 +2290,7 @@ Run:
 ```powershell
 cargo fmt --all -- --check
 cargo test --workspace
-cargo test -p unified_ui --no-default-features --features "native gsap hyperframes-export"
+cargo test -p kinetics --no-default-features --features "native gsap hyperframes-export"
 ```
 
 Expected: all commands exit `0`.
@@ -2324,7 +2324,7 @@ Expected: no matches.
 Run:
 
 ```powershell
-cargo tree -p unified_ui --edges features
+cargo tree -p kinetics --edges features
 ```
 
 Expected: default feature output does not enable `ui-gsap` or `ui-hyperframes`.
@@ -2334,7 +2334,7 @@ Expected: default feature output does not enable `ui-gsap` or `ui-hyperframes`.
 Run:
 
 ```powershell
-cargo test -p unified_ui --no-default-features --features native
+cargo test -p kinetics --no-default-features --features native
 ```
 
 Expected: PASS.
@@ -2344,7 +2344,7 @@ Expected: PASS.
 Run:
 
 ```powershell
-cargo test -p unified_ui
+cargo test -p kinetics
 ```
 
 Expected: PASS.

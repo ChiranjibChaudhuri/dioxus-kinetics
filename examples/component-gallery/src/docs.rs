@@ -762,9 +762,25 @@ fn frame_stage_preview() -> Element {
 }
 
 fn capture_stage_preview() -> Element {
+    let profiles: [(&str, &str, u32); 3] = [
+        ("mobile", "Mobile · 360 × 640", 24),
+        ("tablet", "Tablet · 768 × 1024", 48),
+        ("desktop", "Desktop · 1440 × 900", 72),
+    ];
+
     rsx! {
-        CaptureStage { id: "component-showcase", viewport: "desktop", frame: 72,
-            p { "Desktop viewport at frame 72" }
+        div { class: "gallery-variant-grid gallery-variant-grid--3col",
+            for (viewport, caption, frame) in profiles {
+                div { class: "gallery-variant-tile",
+                    span { class: "gallery-variant-label", "{caption}" }
+                    CaptureStage {
+                        id: "capture-{viewport}",
+                        viewport: viewport.to_string(),
+                        frame: frame,
+                        p { "Frame {frame}" }
+                    }
+                }
+            }
         }
     }
 }

@@ -290,3 +290,30 @@ fn gallery_frame_stage_preview_renders_three_frame_snapshots() {
         );
     }
 }
+
+#[test]
+fn gallery_capture_stage_preview_renders_three_viewport_profiles() {
+    let html = dioxus_ssr::render_element(rsx! {
+        component_gallery::App {}
+    });
+
+    for caption in [
+        "Mobile · 360 × 640",
+        "Tablet · 768 × 1024",
+        "Desktop · 1440 × 900",
+    ] {
+        assert!(
+            html.contains(caption),
+            "missing CaptureStage caption {caption}",
+        );
+    }
+
+    for viewport in ["mobile", "tablet", "desktop"] {
+        assert!(
+            html.contains(&format!("data-viewport=\"{viewport}\""))
+                || html.contains(&format!("viewport=\"{viewport}\""))
+                || html.contains(&format!(">{viewport}<")),
+            "missing CaptureStage viewport prop {viewport}",
+        );
+    }
+}

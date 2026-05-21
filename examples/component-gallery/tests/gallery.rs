@@ -266,8 +266,9 @@ fn gallery_timeline_scope_preview_renders_three_variants() {
     });
 
     assert!(html.contains("gallery-variant-grid--stack"));
-    assert!(html.contains("\"data-stagger-index\": \"0\"")
-        || html.contains("data-stagger-index=\"0\""));
+    assert!(
+        html.contains("\"data-stagger-index\": \"0\"") || html.contains("data-stagger-index=\"0\"")
+    );
     for cue in ["rise-in", "enter", "settle", "pulse"] {
         assert!(
             html.contains(&format!("data-motion-cue=\"{cue}\"")),
@@ -360,4 +361,15 @@ fn gallery_capture_stage_preview_renders_three_viewport_profiles() {
             "missing CaptureStage viewport prop {viewport}",
         );
     }
+}
+
+#[test]
+fn root_readme_uses_kinetics_crate_name() {
+    let readme_path = std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join("../../README.md");
+    let readme = std::fs::read_to_string(readme_path).expect("README.md should be readable");
+
+    assert!(readme.contains("use kinetics::prelude::*"));
+    assert!(readme.contains("crates/kinetics"));
+    assert!(!readme.contains("unified_ui"));
+    assert!(!readme.contains("Unified UI"));
 }

@@ -54,7 +54,7 @@ Reserved coming-soon names stay visible in the gallery without fake implementati
 - Web, Desktop, Mobile, and Native adapter boundaries.
 - Accessibility and reduced-preference policies at the token and contract level.
 - WCAG 2.2 AA as the target for default themes.
-- Optional GSAP and HyperFrames integrations kept outside default runtime features.
+- First-party timeline, composition, and capture boundaries kept inside the Rust/Dioxus system model.
 - Renderer-neutral core logic wherever possible.
 
 ## Workspace Layout
@@ -70,8 +70,9 @@ crates/
   ui-native/        native capability planning for glass rendering
   ui-dioxus/        semantic Dioxus components
   ui-styles/        shared library CSS variables and component classes
-  ui-gsap/          optional GSAP backend boundary
-  ui-hyperframes/   optional deterministic composition/export boundary
+  ui-timeline/      first-party animation timeline boundary
+  ui-composition/   first-party composition metadata boundary
+  ui-capture/       first-party capture stage boundary
   unified_ui/       public facade and prelude
 examples/
   component-gallery/ runnable Dioxus documentation gallery
@@ -93,19 +94,20 @@ Default `unified_ui` features:
 - `motion`
 - `layout-motion`
 - `a11y`
+- `timeline`
+- `composition`
+- `capture`
 
 Optional features:
 
 - `native`
-- `gsap`
-- `hyperframes-export`
 - `a11y-tests`
 
 Example:
 
 ```powershell
 cargo test -p unified_ui --no-default-features --features native
-cargo test -p unified_ui --no-default-features --features "native gsap hyperframes-export"
+cargo test -p unified_ui --no-default-features --features "native timeline composition capture"
 ```
 
 ## Component Gallery
@@ -263,7 +265,7 @@ See `docs/glass-materials.md` for the material model.
 | Mobile | MVP | WebView DOM style adapter |
 | Native | MVP contract | Native capability adapter |
 
-GSAP and HyperFrames are optional integration boundaries and are not included in default runtime features.
+Timeline, composition, and capture are first-party Rust/Dioxus boundaries usable through web, desktop, mobile WebView, and platform-native adapters.
 
 See `docs/platform-support.md` for more detail.
 
@@ -281,7 +283,7 @@ This is an MVP library foundation. The current implementation includes:
 - Dioxus semantic component MVP
 - advanced SaaS controls and surfaces
 - reusable shared CSS crate
-- optional GSAP and HyperFrames boundaries
+- first-party timeline, composition, and capture boundaries
 - unified facade crate
 - component gallery example app
 

@@ -119,6 +119,16 @@ impl ExportManifest {
     }
 
     pub fn validate(&self) -> Result<(), CaptureError> {
+        if self.compositions.is_empty() {
+            return Err(CaptureError::MissingComposition);
+        }
+        if self.stages.is_empty() {
+            return Err(CaptureError::MissingStage);
+        }
+        if self.viewports.is_empty() {
+            return Err(CaptureError::MissingViewport);
+        }
+
         for viewport in &self.viewports {
             viewport.validate()?;
         }
@@ -145,4 +155,6 @@ pub enum CaptureError {
     InvalidViewport,
     InvalidComposition,
     MissingComposition,
+    MissingStage,
+    MissingViewport,
 }

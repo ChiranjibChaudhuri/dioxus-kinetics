@@ -29,3 +29,23 @@ fn manifest_validates_stage_composition_and_viewport() {
 
     assert_eq!(manifest.validate(), Ok(()));
 }
+
+#[test]
+fn manifest_rejects_empty_capture_handoff() {
+    let manifest = ExportManifest::new("0.1.0");
+
+    assert_eq!(manifest.validate(), Err(CaptureError::MissingComposition));
+}
+
+#[test]
+fn manifest_rejects_missing_stage_and_viewport() {
+    let no_stage = ExportManifest::new("0.1.0")
+        .with_composition(Composition::new("demo", 1920, 1080, 30, 120))
+        .with_viewport(ViewportProfile::desktop());
+    let no_viewport = ExportManifest::new("0.1.0")
+        .with_composition(Composition::new("demo", 1920, 1080, 30, 120))
+        .with_stage(CaptureStageDescriptor::new("stage", "demo"));
+
+    assert_eq!(no_stage.validate(), Err(CaptureError::MissingStage));
+    assert_eq!(no_viewport.validate(), Err(CaptureError::MissingViewport));
+}

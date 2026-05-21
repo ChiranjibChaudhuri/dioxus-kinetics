@@ -15,8 +15,8 @@ pub struct TimelineRuntime {
 }
 
 impl TimelineRuntime {
-    pub const fn target(&self) -> &'static str {
-        "native"
+    pub const fn runtime(&self) -> &'static str {
+        "cross-platform"
     }
 
     pub const fn capabilities(&self) -> &'static [TimelineCapability] {

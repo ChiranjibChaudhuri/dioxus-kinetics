@@ -1,7 +1,7 @@
 use ui_timeline::{TimelineCapability, TimelineRuntime};
 
 #[test]
-fn timeline_runtime_declares_native_capabilities() {
+fn timeline_runtime_declares_cross_platform_capabilities() {
     let runtime = TimelineRuntime::default();
 
     assert_eq!(
@@ -14,5 +14,5 @@ fn timeline_runtime_declares_native_capabilities() {
             TimelineCapability::ScrollProgress,
         ]
     );
-    assert_eq!(runtime.target(), "native");
+    assert_eq!(runtime.runtime(), "cross-platform");
 }

@@ -18,6 +18,8 @@ default = [
     "timeline",
     "composition",
     "capture",
+    "runtime",
+    "icons",
 ]
 web = ["dep:ui-dom"]
 desktop = ["dep:ui-dom"]
@@ -32,6 +34,8 @@ a11y-tests = []
 timeline = ["dep:ui-timeline"]
 composition = ["dep:ui-composition"]
 capture = ["dep:ui-capture"]
+runtime = ["dep:ui-runtime"]
+icons = ["dep:ui-icons"]
 
 [dependencies]
 ui-core.workspace = true
@@ -46,6 +50,8 @@ ui-native = { workspace = true, optional = true }
 ui-timeline = { workspace = true, optional = true }
 ui-composition = { workspace = true, optional = true }
 ui-capture = { workspace = true, optional = true }
+ui-runtime = { workspace = true, optional = true }
+ui-icons = { workspace = true, optional = true }
 
 [lib]
 path = "src/lib.rs"

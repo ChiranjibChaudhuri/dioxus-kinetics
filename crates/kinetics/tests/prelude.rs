@@ -169,3 +169,28 @@ fn prelude_and_public_names_cover_kinetic_system_components() {
         );
     }
 }
+
+#[test]
+fn public_api_includes_runtime_and_icons() {
+    let names = kinetics::public_api_names();
+    for expected in [
+        "IconButton",
+        "IconButtonTone",
+        "IconButtonSize",
+        "Presence",
+        "PresenceCue",
+        "Close",
+        "Check",
+        "ChevronDown",
+        "ChevronRight",
+        "Plus",
+        "Minus",
+        "Trash",
+        "Search",
+    ] {
+        assert!(
+            names.contains(&expected),
+            "missing public API name {expected}",
+        );
+    }
+}

@@ -246,6 +246,22 @@ pub fn resolve_material(theme: &Theme, request: MaterialRequest) -> GlassRecipe 
         theme,
         GlassRequest::new(level, tone, density).with_policy(policy),
     );
+
+    if !recipe.force_solid {
+        let (blur, alpha, shadow_alpha) = match request.depth {
+            GlassDepth::Inline => (8.0, 0.58, 0.06),
+            GlassDepth::Raised => (12.0, 0.64, 0.10),
+            GlassDepth::Floating => (18.0, 0.72, 0.16),
+            GlassDepth::Chrome => (28.0, 0.68, 0.18),
+            GlassDepth::Overlay => (24.0, 0.80, 0.22),
+            GlassDepth::Modal => (32.0, 0.84, 0.28),
+        };
+
+        recipe.background = tone_color(theme, tone).with_alpha(alpha);
+        recipe.backdrop_blur_px = blur;
+        recipe.shadow_alpha = shadow_alpha;
+    }
+
     recipe.saturate_percent = match (recipe.force_solid, request.vibrancy) {
         (true, _) => 100,
         (false, MaterialVibrancy::Muted) => 130,

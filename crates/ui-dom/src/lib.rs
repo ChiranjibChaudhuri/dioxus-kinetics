@@ -73,7 +73,7 @@ pub fn material_style(recipe: &ui_glass::GlassRecipe) -> String {
         .set("--ui-material-border", recipe.border.css_rgba())
         .set(
             "--ui-material-blur",
-            format!("{}px", recipe.backdrop_blur_px),
+            format!("{}px", trim_float(recipe.backdrop_blur_px)),
         )
         .set(
             "--ui-material-saturate",

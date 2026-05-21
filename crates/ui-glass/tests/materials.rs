@@ -143,3 +143,30 @@ fn high_contrast_material_policy_forces_solid_surface() {
     assert_eq!(recipe.backdrop_blur_px, 0.0);
     assert_eq!(recipe.saturate_percent, 100);
 }
+
+#[test]
+fn material_depth_variants_resolve_distinct_surface_strengths() {
+    let theme = Theme::default();
+
+    let inline = resolve_material(
+        &theme,
+        MaterialRequest::new(GlassDepth::Inline, MaterialTone::Neutral),
+    );
+    let raised = resolve_material(
+        &theme,
+        MaterialRequest::new(GlassDepth::Raised, MaterialTone::Neutral),
+    );
+    let overlay = resolve_material(
+        &theme,
+        MaterialRequest::new(GlassDepth::Overlay, MaterialTone::Neutral),
+    );
+    let modal = resolve_material(
+        &theme,
+        MaterialRequest::new(GlassDepth::Modal, MaterialTone::Neutral),
+    );
+
+    assert_ne!(inline.backdrop_blur_px, raised.backdrop_blur_px);
+    assert_ne!(inline.shadow_alpha, raised.shadow_alpha);
+    assert_ne!(overlay.backdrop_blur_px, modal.backdrop_blur_px);
+    assert_ne!(overlay.shadow_alpha, modal.shadow_alpha);
+}

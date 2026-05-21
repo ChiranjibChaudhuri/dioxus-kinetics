@@ -107,3 +107,20 @@ fn material_style_writes_css_variables_for_native_material_recipe() {
     assert!(css.contains("--ui-material-bg"));
     assert!(css.contains("-webkit-backdrop-filter"));
 }
+
+#[test]
+fn material_style_sanitizes_non_finite_recipe_numbers() {
+    let theme = Theme::default();
+    let mut recipe = resolve_material(
+        &theme,
+        MaterialRequest::new(GlassDepth::Floating, MaterialTone::Neutral),
+    );
+    recipe.backdrop_blur_px = f32::NAN;
+
+    let style = ui_dom::material_style(&recipe);
+    let lower_style = style.to_ascii_lowercase();
+
+    assert!(!lower_style.contains("nan"));
+    assert!(!lower_style.contains("inf"));
+    assert!(style.contains("--ui-material-blur:0px;"));
+}

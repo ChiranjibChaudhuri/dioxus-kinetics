@@ -54,7 +54,7 @@ Reserved coming-soon names stay visible in the gallery without fake implementati
 - Web, Desktop, Mobile, and Native adapter boundaries.
 - Accessibility and reduced-preference policies at the token and contract level.
 - WCAG 2.2 AA as the target for default themes.
-- First-party timeline, composition, and capture boundaries kept inside the Rust/Dioxus system model.
+- Native timeline, composition, and capture boundaries kept inside the Rust/Dioxus system model.
 - Renderer-neutral core logic wherever possible.
 
 ## Workspace Layout
@@ -70,9 +70,9 @@ crates/
   ui-native/        native capability planning for glass rendering
   ui-dioxus/        semantic Dioxus components
   ui-styles/        shared library CSS variables and component classes
-  ui-timeline/      first-party animation timeline boundary
-  ui-composition/   first-party composition metadata boundary
-  ui-capture/       first-party capture stage boundary
+  ui-timeline/      native timeline, stagger, presence, scroll, and shared movement contracts
+  ui-composition/   native frame composition and deterministic frame sampling
+  ui-capture/       native capture stages, viewport profiles, marks, and export manifests
   unified_ui/       public facade and prelude
 examples/
   component-gallery/ runnable Dioxus documentation gallery
@@ -265,7 +265,7 @@ See `docs/glass-materials.md` for the material model.
 | Mobile | MVP | WebView DOM style adapter |
 | Native | MVP contract | Native capability adapter |
 
-Timeline, composition, and capture are first-party Rust/Dioxus boundaries usable through web, desktop, mobile WebView, and platform-native adapters.
+Timeline, composition, and capture are native Rust/Dioxus systems usable through web, desktop, mobile WebView, and platform-native adapters. They do not depend on third-party animation, video, or capture runtimes.
 
 See `docs/platform-support.md` for more detail.
 
@@ -283,7 +283,9 @@ This is an MVP library foundation. The current implementation includes:
 - Dioxus semantic component MVP
 - advanced SaaS controls and surfaces
 - reusable shared CSS crate
-- first-party timeline, composition, and capture boundaries
+- native timeline boundary
+- native frame composition boundary
+- native capture manifest boundary
 - unified facade crate
 - component gallery example app
 

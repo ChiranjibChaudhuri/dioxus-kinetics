@@ -8,8 +8,7 @@
 | Native | MVP contract | Native capability adapter |
 
 Native support begins with semantic parity, token rendering, glass fallback,
-focus behavior, and basic motion planning. Native visual fidelity depends on
-available Dioxus Native and Blitz renderer capabilities.
+focus behavior, motion snapshots, composition metadata, and capture manifests.
 
-Timeline, composition, and capture are first-party Rust/Dioxus systems usable
-through web, desktop, mobile WebView, and platform-native adapters.
+Timeline, composition, and capture are native Rust/Dioxus systems. They do not
+depend on third-party animation, video, or capture runtimes.

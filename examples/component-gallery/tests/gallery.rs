@@ -191,3 +191,20 @@ fn root_readme_mentions_component_gallery() {
     assert!(readme.contains("cargo check -p component-gallery"));
     assert!(readme.contains("dx serve --package component-gallery"));
 }
+
+#[test]
+fn root_readme_describes_native_systems_without_bridge_language() {
+    let readme_path = std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join("../../README.md");
+    let readme = std::fs::read_to_string(readme_path).expect("README.md should be readable");
+
+    for expected in ["ui-timeline", "ui-composition", "ui-capture"] {
+        assert!(readme.contains(expected), "README missing {expected}");
+    }
+
+    for rejected in ["GSAP", "Remotion", "HyperFrames"] {
+        assert!(
+            !readme.contains(rejected),
+            "README still contains bridge term {rejected}"
+        );
+    }
+}

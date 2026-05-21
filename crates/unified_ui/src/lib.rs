@@ -6,10 +6,13 @@ pub mod prelude {
         A11yContract, ComponentContract, ComponentId, ComponentRole, FocusPolicy, TargetSize,
     };
     pub use ui_dioxus::{
-        Button, ButtonVariant, Checkbox, CommandGroup, CommandItem, CommandMenu, Dialog,
-        EmptyState, GlassSurface, MetricCard, MetricTone, Sidebar, SidebarItem, SidebarSection,
-        Stack, Surface, Switch, TabItem, TabPanel, Tabs, TextField, Toast, ToastTone, Toolbar,
-        Tooltip,
+        ActionBar, ActionControl, BlankState, Button, ButtonVariant, CaptureStage, Checkbox,
+        ChoiceMark, CommandFinder, CommandGroup, CommandItem, CommandMenu, ContentPlane,
+        ContextHint, Dialog, EmptyState, FrameClip, FrameLayer, FrameStage, GlassLayer,
+        GlassSurface, KineticBox, KineticText, MetricCard, MetricReadout, MetricTone, ModalLayer,
+        NavigationRail, NoticeStack, PresenceGate, Sidebar, SidebarItem, SidebarSection, Stack,
+        StateSwitch, Surface, Switch, TabItem, TabPanel, Tabs, TextEntry, TextField, TimelineScope,
+        Toast, ToastTone, Toolbar, Tooltip, ViewSwitcher,
     };
     pub use ui_glass::{
         resolve_glass, GlassDensity, GlassLevel, GlassPolicy, GlassRecipe, GlassRequest, GlassTone,
@@ -26,40 +29,79 @@ pub mod prelude {
 
     #[cfg(feature = "native")]
     pub use ui_native::{plan_native_glass, NativeCapabilities, NativeGlassPlan};
+
+    #[cfg(feature = "timeline")]
+    pub use ui_timeline::{TimelineCapability, TimelineRuntime};
+
+    #[cfg(feature = "composition")]
+    pub use ui_composition::Composition;
+
+    #[cfg(feature = "capture")]
+    pub use ui_capture::CaptureStageDescriptor;
 }
 
 pub fn public_api_names() -> &'static [&'static str] {
     &[
         "Button",
+        "ActionControl",
         "IconButton",
         "TextField",
+        "TextEntry",
         "Checkbox",
+        "ChoiceMark",
         "Switch",
+        "StateSwitch",
         "Tabs",
+        "ViewSwitcher",
         "Dialog",
+        "ModalLayer",
         "Toast",
+        "NoticeStack",
         "CommandMenu",
+        "CommandFinder",
         "Tooltip",
+        "ContextHint",
         "Toolbar",
+        "ActionBar",
         "Sidebar",
+        "NavigationRail",
         "MetricCard",
+        "MetricReadout",
         "EmptyState",
+        "BlankState",
         "Surface",
+        "ContentPlane",
         "GlassSurface",
+        "GlassLayer",
         "Presence",
         "Transition",
         "Sequence",
         "SharedLayout",
         "SharedElement",
+        "Timeline",
+        "TimelineScope",
+        "KineticBox",
+        "KineticText",
+        "PresenceGate",
+        "Composition",
+        "FrameStage",
+        "FrameClip",
+        "FrameLayer",
+        "CaptureStage",
     ]
 }
 
-#[cfg(feature = "gsap")]
-pub mod gsap {
-    pub use ui_gsap::{GsapBackend, GsapCapability};
+#[cfg(feature = "timeline")]
+pub mod timeline {
+    pub use ui_timeline::{TimelineCapability, TimelineRuntime};
 }
 
-#[cfg(feature = "hyperframes-export")]
-pub mod hyperframes {
-    pub use ui_hyperframes::{Composition, RenderTrack};
+#[cfg(feature = "composition")]
+pub mod composition {
+    pub use ui_composition::Composition;
+}
+
+#[cfg(feature = "capture")]
+pub mod capture {
+    pub use ui_capture::CaptureStageDescriptor;
 }

@@ -514,6 +514,40 @@ pub const COMPONENT_CSS: &str = r#"
     border-radius: var(--ui-radius-lg);
     background: linear-gradient(135deg, var(--ui-primary), var(--ui-info));
 }
+
+.ui-glass-layer {
+    background: var(--ui-material-bg, var(--ui-glass));
+    border: 1px solid var(--ui-material-border, var(--ui-border));
+    border-radius: var(--ui-radius-lg);
+    box-shadow: var(--ui-material-shadow, var(--ui-shadow-soft));
+    backdrop-filter: blur(var(--ui-material-blur, 18px)) saturate(var(--ui-material-saturate, 160%));
+    -webkit-backdrop-filter: blur(var(--ui-material-blur, 18px)) saturate(var(--ui-material-saturate, 160%));
+}
+
+.ui-timeline-scope,
+.ui-presence-gate {
+    display: grid;
+    gap: var(--ui-space-3);
+}
+
+.ui-kinetic-box,
+.ui-kinetic-text,
+.ui-frame-layer {
+    transition: opacity var(--ui-motion-normal), transform var(--ui-motion-normal);
+}
+
+.ui-frame-stage,
+.ui-capture-stage {
+    position: relative;
+    overflow: hidden;
+    border: 1px solid var(--ui-border);
+    border-radius: var(--ui-radius-lg);
+    background: var(--ui-surface);
+}
+
+.ui-frame-clip {
+    display: contents;
+}
 "#;
 
 pub fn library_css() -> String {

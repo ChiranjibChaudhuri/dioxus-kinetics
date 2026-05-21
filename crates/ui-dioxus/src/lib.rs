@@ -1,17 +1,34 @@
 #![forbid(unsafe_code)]
 
+mod capture;
+mod composition;
 mod display;
 mod forms;
+mod kinetics;
 mod navigation;
 mod overlays;
 
 use dioxus::prelude::*;
 use ui_glass::{GlassDensity, GlassLevel, GlassTone};
 
+pub use capture::CaptureStage;
+pub use composition::{FrameClip, FrameLayer, FrameStage};
+pub use display::{EmptyState as BlankState, MetricCard as MetricReadout};
 pub use display::{EmptyState, MetricCard, MetricTone};
 pub use forms::{Checkbox, Switch, TextField};
+pub use forms::{Checkbox as ChoiceMark, Switch as StateSwitch, TextField as TextEntry};
+pub use kinetics::{KineticBox, KineticText, PresenceGate, TimelineScope};
 pub use navigation::{Sidebar, SidebarItem, SidebarSection, TabItem, TabPanel, Tabs, Toolbar};
+pub use navigation::{Sidebar as NavigationRail, Tabs as ViewSwitcher, Toolbar as ActionBar};
 pub use overlays::{CommandGroup, CommandItem, CommandMenu, Dialog, Toast, ToastTone, Tooltip};
+pub use overlays::{
+    CommandMenu as CommandFinder, Dialog as ModalLayer, Toast as NoticeStack,
+    Tooltip as ContextHint,
+};
+
+pub use Button as ActionControl;
+pub use GlassSurface as GlassLayer;
+pub use Surface as ContentPlane;
 
 #[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
 pub enum ButtonVariant {

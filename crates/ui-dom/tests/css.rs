@@ -1,5 +1,8 @@
 use ui_dom::{glass_style, CssStyleWriter};
-use ui_glass::{resolve_glass, GlassDensity, GlassLevel, GlassPolicy, GlassRequest, GlassTone};
+use ui_glass::{
+    resolve_glass, resolve_material, GlassDensity, GlassDepth, GlassLevel, GlassPolicy,
+    GlassRequest, GlassTone, MaterialRequest, MaterialTone,
+};
 use ui_tokens::Theme;
 
 #[test]
@@ -87,4 +90,37 @@ fn glass_style_sanitizes_non_finite_recipe_numbers() {
     assert!(style.contains("border-radius:0px;"));
     assert!(style.contains("backdrop-filter:blur(0px) saturate(160%);"));
     assert!(style.contains("box-shadow:0 18px 42px rgba(20, 23, 28, 0.000);"));
+}
+
+#[test]
+fn material_style_writes_css_variables_for_native_material_recipe() {
+    let theme = ui_tokens::Theme::default();
+    let recipe = resolve_material(
+        &theme,
+        MaterialRequest::new(GlassDepth::Floating, MaterialTone::Neutral),
+    );
+
+    let css = ui_dom::material_style(&recipe);
+
+    assert!(css.contains("--ui-material-blur"));
+    assert!(css.contains("--ui-material-saturate"));
+    assert!(css.contains("--ui-material-bg"));
+    assert!(css.contains("-webkit-backdrop-filter"));
+}
+
+#[test]
+fn material_style_sanitizes_non_finite_recipe_numbers() {
+    let theme = Theme::default();
+    let mut recipe = resolve_material(
+        &theme,
+        MaterialRequest::new(GlassDepth::Floating, MaterialTone::Neutral),
+    );
+    recipe.backdrop_blur_px = f32::NAN;
+
+    let style = ui_dom::material_style(&recipe);
+    let lower_style = style.to_ascii_lowercase();
+
+    assert!(!lower_style.contains("nan"));
+    assert!(!lower_style.contains("inf"));
+    assert!(style.contains("--ui-material-blur:0px;"));
 }

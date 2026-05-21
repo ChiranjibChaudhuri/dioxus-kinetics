@@ -45,3 +45,22 @@ fn library_css_concatenates_base_and_component_css() {
     assert!(css.contains(".ui-button"));
     assert!(css.contains(".ui-dialog"));
 }
+
+#[test]
+fn component_css_covers_native_kinetics_systems() {
+    let css = COMPONENT_CSS;
+
+    for selector in [
+        ".ui-glass-layer",
+        ".ui-timeline-scope",
+        ".ui-kinetic-box",
+        ".ui-kinetic-text",
+        ".ui-presence-gate",
+        ".ui-frame-stage",
+        ".ui-frame-clip",
+        ".ui-frame-layer",
+        ".ui-capture-stage",
+    ] {
+        assert!(css.contains(selector), "missing selector {selector}");
+    }
+}

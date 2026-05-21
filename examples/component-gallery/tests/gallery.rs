@@ -7,12 +7,17 @@ fn registry_groups_components_by_product_category() {
     assert_eq!(
         categories,
         &[
+            ComponentCategory::Foundations,
             ComponentCategory::Actions,
             ComponentCategory::Inputs,
+            ComponentCategory::Navigation,
             ComponentCategory::Layout,
             ComponentCategory::Surfaces,
             ComponentCategory::Feedback,
+            ComponentCategory::DataWorkflows,
             ComponentCategory::Motion,
+            ComponentCategory::Composition,
+            ComponentCategory::Capture,
         ]
     );
 }
@@ -160,6 +165,24 @@ fn gallery_renders_advanced_workbench_controls_and_notes() {
 }
 
 #[test]
+fn gallery_renders_native_kinetics_examples_without_bridge_copy() {
+    let html = dioxus_ssr::render_element(rsx! {
+        component_gallery::App {}
+    });
+
+    for expected in ["TimelineScope", "FrameStage", "CaptureStage", "GlassLayer"] {
+        assert!(html.contains(expected), "missing gallery entry {expected}");
+    }
+
+    for rejected in ["GSAP", "Remotion", "HyperFrames"] {
+        assert!(
+            !html.contains(rejected),
+            "gallery must not show bridge copy {rejected}"
+        );
+    }
+}
+
+#[test]
 fn root_readme_mentions_component_gallery() {
     let readme_path = std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join("../../README.md");
     let readme = std::fs::read_to_string(readme_path).expect("README.md should be readable");
@@ -167,4 +190,21 @@ fn root_readme_mentions_component_gallery() {
     assert!(readme.contains("Component Gallery"));
     assert!(readme.contains("cargo check -p component-gallery"));
     assert!(readme.contains("dx serve --package component-gallery"));
+}
+
+#[test]
+fn root_readme_describes_native_systems_without_bridge_language() {
+    let readme_path = std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join("../../README.md");
+    let readme = std::fs::read_to_string(readme_path).expect("README.md should be readable");
+
+    for expected in ["ui-timeline", "ui-composition", "ui-capture"] {
+        assert!(readme.contains(expected), "README missing {expected}");
+    }
+
+    for rejected in ["GSAP", "Remotion", "HyperFrames"] {
+        assert!(
+            !readme.contains(rejected),
+            "README still contains bridge term {rejected}"
+        );
+    }
 }

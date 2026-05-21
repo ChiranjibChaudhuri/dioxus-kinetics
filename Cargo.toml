@@ -9,8 +9,9 @@ members = [
     "crates/ui-dom",
     "crates/ui-native",
     "crates/ui-dioxus",
-    "crates/ui-gsap",
-    "crates/ui-hyperframes",
+    "crates/ui-timeline",
+    "crates/ui-composition",
+    "crates/ui-capture",
     "crates/ui-styles",
     "crates/unified_ui",
     "examples/component-gallery",
@@ -33,7 +34,8 @@ ui-layout = { path = "crates/ui-layout" }
 ui-dom = { path = "crates/ui-dom" }
 ui-native = { path = "crates/ui-native" }
 ui-dioxus = { path = "crates/ui-dioxus" }
-ui-gsap = { path = "crates/ui-gsap" }
-ui-hyperframes = { path = "crates/ui-hyperframes" }
+ui-timeline = { path = "crates/ui-timeline" }
+ui-composition = { path = "crates/ui-composition" }
+ui-capture = { path = "crates/ui-capture" }
 ui-styles = { path = "crates/ui-styles" }
 unified_ui = { path = "crates/unified_ui" }

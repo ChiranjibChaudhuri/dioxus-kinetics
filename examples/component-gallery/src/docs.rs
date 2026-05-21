@@ -3,45 +3,67 @@ use unified_ui::prelude::*;
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum ComponentCategory {
+    Foundations,
     Actions,
     Inputs,
+    Navigation,
     Layout,
     Surfaces,
     Feedback,
+    DataWorkflows,
     Motion,
+    Composition,
+    Capture,
 }
 
 impl ComponentCategory {
     pub const fn label(self) -> &'static str {
         match self {
+            Self::Foundations => "Foundations",
             Self::Actions => "Actions",
             Self::Inputs => "Inputs",
+            Self::Navigation => "Navigation",
             Self::Layout => "Layout",
             Self::Surfaces => "Surfaces",
             Self::Feedback => "Feedback",
+            Self::DataWorkflows => "Data workflows",
             Self::Motion => "Motion",
+            Self::Composition => "Composition",
+            Self::Capture => "Capture",
         }
     }
 
     pub const fn description(self) -> &'static str {
         match self {
+            Self::Foundations => "Material and surface primitives that anchor the visual system.",
             Self::Actions => "Command controls that trigger a product action.",
             Self::Inputs => "Controls that collect user-entered data.",
+            Self::Navigation => "Wayfinding controls that move between product regions.",
             Self::Layout => "Structure primitives for arranging interface regions.",
             Self::Surfaces => "Containers that define visual layers and material treatment.",
             Self::Feedback => "Overlays and messages that respond to user or system state.",
+            Self::DataWorkflows => "Readouts and surfaces that summarize product data.",
             Self::Motion => "Lifecycle and layout motion primitives for continuity.",
+            Self::Composition => {
+                "Frame-addressable scenes for previews and export-safe compositions."
+            }
+            Self::Capture => "Viewport and frame targets for documentation and capture runners.",
         }
     }
 
     pub const fn slug(self) -> &'static str {
         match self {
+            Self::Foundations => "foundations",
             Self::Actions => "actions",
             Self::Inputs => "inputs",
+            Self::Navigation => "navigation",
             Self::Layout => "layout",
             Self::Surfaces => "surfaces",
             Self::Feedback => "feedback",
+            Self::DataWorkflows => "data-workflows",
             Self::Motion => "motion",
+            Self::Composition => "composition",
+            Self::Capture => "capture",
         }
     }
 }
@@ -74,12 +96,17 @@ pub struct ComponentDoc {
 
 pub fn categories() -> &'static [ComponentCategory] {
     &[
+        ComponentCategory::Foundations,
         ComponentCategory::Actions,
         ComponentCategory::Inputs,
+        ComponentCategory::Navigation,
         ComponentCategory::Layout,
         ComponentCategory::Surfaces,
         ComponentCategory::Feedback,
+        ComponentCategory::DataWorkflows,
         ComponentCategory::Motion,
+        ComponentCategory::Composition,
+        ComponentCategory::Capture,
     ]
 }
 
@@ -89,7 +116,7 @@ pub fn component_docs() -> &'static [ComponentDoc] {
 
 const BASIC_ACCESSIBILITY: &str = "Renders native semantic elements and stable focusable controls.";
 
-const COMPONENT_DOCS: [ComponentDoc; 21] = [
+const COMPONENT_DOCS: [ComponentDoc; 25] = [
     ComponentDoc {
         name: "Button",
         category: ComponentCategory::Actions,
@@ -279,6 +306,42 @@ const COMPONENT_DOCS: [ComponentDoc; 21] = [
         accessibility: "Coming soon; shared elements will avoid replacing meaningful content.",
         render: None,
     },
+    ComponentDoc {
+        name: "TimelineScope",
+        category: ComponentCategory::Motion,
+        status: ComponentStatus::Ready,
+        summary: "Coordinates native Rust timeline cues for Dioxus UI motion.",
+        snippet: TIMELINE_SCOPE_SNIPPET,
+        accessibility: "Reduced motion policies collapse timeline cues to stable states.",
+        render: Some(timeline_scope_preview),
+    },
+    ComponentDoc {
+        name: "FrameStage",
+        category: ComponentCategory::Composition,
+        status: ComponentStatus::Ready,
+        summary: "Renders a deterministic frame-addressable scene for previews and export-safe compositions.",
+        snippet: FRAME_STAGE_SNIPPET,
+        accessibility: "Frame content remains readable at the selected frame and does not depend on wall-clock animation.",
+        render: Some(frame_stage_preview),
+    },
+    ComponentDoc {
+        name: "CaptureStage",
+        category: ComponentCategory::Capture,
+        status: ComponentStatus::Ready,
+        summary: "Declares a viewport and frame target for documentation, tests, and future capture runners.",
+        snippet: CAPTURE_STAGE_SNIPPET,
+        accessibility: "Capture previews preserve semantic text and expose stable frame metadata.",
+        render: Some(capture_stage_preview),
+    },
+    ComponentDoc {
+        name: "GlassLayer",
+        category: ComponentCategory::Foundations,
+        status: ComponentStatus::Ready,
+        summary: "Functional material name for translucent glass surfaces with solid fallback behavior.",
+        snippet: GLASS_LAYER_SNIPPET,
+        accessibility: "Text contrast is validated against solid fallback surfaces.",
+        render: Some(glass_layer_preview),
+    },
 ];
 
 const BUTTON_SNIPPET: &str = r#"Button {
@@ -405,6 +468,44 @@ const SHARED_LAYOUT_SNIPPET: &str = r#"SharedLayout {
 const SHARED_ELEMENT_SNIPPET: &str = r#"SharedElement {
     element_id: "customer-row-42",
     children
+}"#;
+
+const TIMELINE_SCOPE_SNIPPET: &str = r#"TimelineScope {
+    id: "dashboard-enter",
+    autoplay: true,
+    KineticBox {
+        id: "metric-card",
+        cue: "rise-in",
+        "Revenue"
+    }
+}"#;
+
+const FRAME_STAGE_SNIPPET: &str = r#"FrameStage {
+    composition: Composition::new("launch-demo", 1920, 1080, 30, 180),
+    frame: 42,
+    FrameClip {
+        start: 0,
+        duration: 60,
+        FrameLayer {
+            id: "title",
+            depth: 10,
+            "Dioxus Kinetics"
+        }
+    }
+}"#;
+
+const CAPTURE_STAGE_SNIPPET: &str = r#"CaptureStage {
+    id: "component-showcase",
+    viewport: "desktop",
+    frame: 72,
+    "Preview"
+}"#;
+
+const GLASS_LAYER_SNIPPET: &str = r#"GlassLayer {
+    level: GlassLevel::Floating,
+    tone: GlassTone::Neutral,
+    density: GlassDensity::Comfortable,
+    "Revenue operations"
 }"#;
 
 fn button_preview() -> Element {
@@ -591,6 +692,56 @@ fn empty_state_preview() -> Element {
             title: "No reports yet",
             description: "Create a report to share performance with your team.",
             action_label: "Create report",
+        }
+    }
+}
+
+fn timeline_scope_preview() -> Element {
+    rsx! {
+        TimelineScope { id: "dashboard-enter", autoplay: true,
+            KineticBox { id: "metric-card", cue: "rise-in",
+                MetricReadout {
+                    label: "Pipeline",
+                    value: "$418k",
+                    delta: "+8.2%",
+                    tone: MetricTone::Info,
+                }
+            }
+        }
+    }
+}
+
+fn frame_stage_preview() -> Element {
+    rsx! {
+        FrameStage {
+            composition: Composition::new("launch-demo", 1920, 1080, 30, 180),
+            frame: 42,
+            FrameClip { start: 0, duration: 60,
+                FrameLayer { id: "title", depth: 10,
+                    h4 { "Dioxus Kinetics" }
+                    p { "Frame 42 / 180" }
+                }
+            }
+        }
+    }
+}
+
+fn capture_stage_preview() -> Element {
+    rsx! {
+        CaptureStage { id: "component-showcase", viewport: "desktop", frame: 72,
+            p { "Desktop viewport at frame 72" }
+        }
+    }
+}
+
+fn glass_layer_preview() -> Element {
+    rsx! {
+        GlassLayer {
+            level: GlassLevel::Floating,
+            tone: GlassTone::Neutral,
+            density: GlassDensity::Comfortable,
+            h4 { "Revenue operations" }
+            p { "Native material contract" }
         }
     }
 }

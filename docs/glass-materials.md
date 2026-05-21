@@ -16,3 +16,17 @@ renderer capabilities.
 
 Text and icons are validated against fallback surfaces, not only ideal
 blurred surfaces.
+
+## Native Material Names
+
+The public material API uses functional names:
+
+- `GlassLayer`
+- `MaterialRequest`
+- `MaterialTone`
+- `MaterialDensity`
+- `MaterialPolicy`
+- `GlassDepth`
+
+Existing glass recipe types remain available during the `0.1.x` transition,
+but docs and examples prefer the functional material vocabulary.

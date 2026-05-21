@@ -1,18 +1,28 @@
 # Component Naming
 
-Unified UI uses semantic component names.
+Unified UI uses functional component names.
 
 Names describe the user-facing role or behavior:
 
-- `Button`
-- `TextField`
-- `Tabs`
-- `Dialog`
-- `Toast`
-- `Surface`
-- `GlassSurface`
-- `Presence`
-- `SharedLayout`
+- `ActionControl`
+- `TextEntry`
+- `ChoiceMark`
+- `StateSwitch`
+- `ViewSwitcher`
+- `ActionBar`
+- `NavigationRail`
+- `MetricReadout`
+- `BlankState`
+- `ModalLayer`
+- `NoticeStack`
+- `CommandFinder`
+- `ContextHint`
+- `ContentPlane`
+- `GlassLayer`
+- `TimelineScope`
+- `FrameStage`
+- `CaptureStage`
 
-Public names do not borrow library, framework, or platform brand names.
-Backend names appear only behind optional backend modules.
+Public names do not borrow library, framework, platform, animation, or video product names.
+The previous MVP names can remain available during the `0.1.x` transition, but the default
+documentation and examples should prefer the functional names.

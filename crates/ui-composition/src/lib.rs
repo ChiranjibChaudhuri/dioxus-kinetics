@@ -94,11 +94,11 @@ impl FrameClip {
     }
 
     pub fn active_at(&self, frame: u32) -> bool {
-        let end = self.start.saturating_add(self.duration);
+        let within_range = frame >= self.start && frame.saturating_sub(self.start) < self.duration;
         match self.fill {
-            ClipFill::None => frame >= self.start && frame < end,
-            ClipFill::HoldStart => frame <= end,
-            ClipFill::HoldEnd => frame >= self.start,
+            ClipFill::None => within_range,
+            ClipFill::HoldStart => self.duration > 0 && (frame < self.start || within_range),
+            ClipFill::HoldEnd => self.duration > 0 && frame >= self.start,
             ClipFill::HoldBoth => true,
         }
     }

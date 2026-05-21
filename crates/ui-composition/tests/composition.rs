@@ -43,6 +43,24 @@ fn frame_clip_activation_respects_fill_mode() {
 }
 
 #[test]
+fn frame_clip_handles_saturating_terminal_frame() {
+    let clip = FrameClip::new(u32::MAX, 1, ClipFill::None);
+
+    assert!(clip.active_at(u32::MAX));
+}
+
+#[test]
+fn frame_clip_hold_start_uses_exclusive_end_and_ignores_zero_duration() {
+    let clip = FrameClip::new(10, 20, ClipFill::HoldStart);
+    let zero = FrameClip::new(10, 0, ClipFill::HoldStart);
+
+    assert!(clip.active_at(0));
+    assert!(clip.active_at(29));
+    assert!(!clip.active_at(30));
+    assert!(!zero.active_at(10));
+}
+
+#[test]
 fn frame_cue_samples_opacity_deterministically() {
     let cue = FrameCue::opacity(0, 30, 0.0, 1.0, FrameEase::Linear);
 

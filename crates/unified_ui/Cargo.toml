@@ -27,6 +27,7 @@ ui-glass.workspace = true
 motion-core = { package = "ui-motion", path = "../ui-motion" }
 ui-layout.workspace = true
 ui-dioxus.workspace = true
+ui-styles.workspace = true
 ui-dom = { workspace = true, optional = true }
 ui-native = { workspace = true, optional = true }
 ui-gsap = { workspace = true, optional = true }

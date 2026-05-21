@@ -3,6 +3,7 @@
 mod display;
 mod forms;
 mod navigation;
+mod overlays;
 
 use dioxus::prelude::*;
 use ui_glass::{GlassDensity, GlassLevel, GlassTone};
@@ -10,6 +11,7 @@ use ui_glass::{GlassDensity, GlassLevel, GlassTone};
 pub use display::{EmptyState, MetricCard, MetricTone};
 pub use forms::{Checkbox, Switch, TextField};
 pub use navigation::{Sidebar, SidebarItem, SidebarSection, TabItem, TabPanel, Tabs, Toolbar};
+pub use overlays::{CommandGroup, CommandItem, CommandMenu, Dialog, Toast, ToastTone, Tooltip};
 
 #[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
 pub enum ButtonVariant {

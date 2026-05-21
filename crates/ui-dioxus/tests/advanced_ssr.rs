@@ -1,7 +1,8 @@
 use dioxus::prelude::*;
 use ui_dioxus::{
-    Checkbox, EmptyState, MetricCard, MetricTone, Sidebar, SidebarItem, SidebarSection, Switch,
-    TabItem, TabPanel, Tabs, TextField, Toolbar,
+    Checkbox, CommandGroup, CommandItem, CommandMenu, Dialog, EmptyState, MetricCard, MetricTone,
+    Sidebar, SidebarItem, SidebarSection, Switch, TabItem, TabPanel, Tabs, TextField, Toast,
+    ToastTone, Toolbar, Tooltip,
 };
 
 #[test]
@@ -135,4 +136,83 @@ fn toolbar_sidebar_and_display_components_render_semantic_structure() {
     assert!(metric.contains("ui-metric-card-sparkline"));
     assert!(empty.contains("ui-empty-state"));
     assert!(empty.contains("Create report"));
+}
+
+#[test]
+fn dialog_toast_and_tooltip_render_overlay_semantics() {
+    let dialog = dioxus_ssr::render_element(rsx! {
+        Dialog {
+            open: true,
+            title: "Delete workspace",
+            description: "This action cannot be undone.",
+            body: "All reports and settings will be archived.",
+            actions: vec!["Cancel".to_string(), "Delete".to_string()],
+        }
+    });
+    let closed_dialog = dioxus_ssr::render_element(rsx! {
+        Dialog {
+            open: false,
+            title: "Hidden",
+        }
+    });
+    let toast = dioxus_ssr::render_element(rsx! {
+        Toast {
+            tone: ToastTone::Success,
+            title: "Report exported",
+            description: "The PDF is ready.",
+            action_label: "Open",
+            dismiss_label: "Dismiss",
+        }
+    });
+    let tooltip = dioxus_ssr::render_element(rsx! {
+        Tooltip {
+            id: "revenue-tip",
+            visible: true,
+            trigger_label: "Net revenue",
+            content: "Revenue after refunds and credits.",
+        }
+    });
+
+    assert!(dialog.contains("role=\"dialog\""));
+    assert!(dialog.contains("aria-modal=\"true\""));
+    assert!(dialog.contains("ui-dialog-backdrop"));
+    assert!(!closed_dialog.contains("ui-dialog-panel"));
+    assert!(toast.contains("ui-toast--success"));
+    assert!(toast.contains("role=\"status\""));
+    assert!(tooltip.contains("role=\"tooltip\""));
+    assert!(tooltip.contains("aria-describedby=\"revenue-tip\""));
+}
+
+#[test]
+fn command_menu_renders_grouped_items_and_empty_state() {
+    let menu = dioxus_ssr::render_element(rsx! {
+        CommandMenu {
+            open: true,
+            query: "rep",
+            selected_id: "reports",
+            empty_text: "No commands",
+            groups: vec![CommandGroup::new(
+                "Navigation",
+                vec![
+                    CommandItem::new("dashboard", "Open dashboard", "Go to overview"),
+                    CommandItem::new("reports", "Open reports", "Review exports"),
+                ],
+            )],
+        }
+    });
+    let empty = dioxus_ssr::render_element(rsx! {
+        CommandMenu {
+            open: true,
+            query: "zzz",
+            empty_text: "No commands",
+            groups: vec![],
+        }
+    });
+
+    assert!(menu.contains("ui-command-menu"));
+    assert!(menu.contains("role=\"dialog\""));
+    assert!(menu.contains("role=\"listbox\""));
+    assert!(menu.contains("aria-selected=\"true\""));
+    assert!(menu.contains("Open reports"));
+    assert!(empty.contains("No commands"));
 }

@@ -193,6 +193,23 @@ fn root_readme_mentions_component_gallery() {
 }
 
 #[test]
+fn gallery_glass_layer_preview_renders_tone_level_matrix() {
+    let html = dioxus_ssr::render_element(rsx! {
+        component_gallery::App {}
+    });
+
+    assert!(html.contains("gallery-variant-grid--3x3"));
+    for level in ["Subtle", "Floating", "Overlay"] {
+        for tone in ["Neutral", "Info", "Warning"] {
+            assert!(
+                html.contains(&format!("{level} · {tone}")),
+                "missing GlassLayer tile {level} · {tone}",
+            );
+        }
+    }
+}
+
+#[test]
 fn root_readme_describes_native_systems_without_bridge_language() {
     let readme_path = std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join("../../README.md");
     let readme = std::fs::read_to_string(readme_path).expect("README.md should be readable");

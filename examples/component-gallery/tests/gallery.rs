@@ -63,6 +63,38 @@ fn registry_status_matches_live_renderer_availability() {
     }
 }
 
+#[test]
+fn advanced_wave_components_are_ready_with_accessibility_notes() {
+    let docs = component_docs();
+
+    for name in [
+        "TextField",
+        "Checkbox",
+        "Switch",
+        "Tabs",
+        "Dialog",
+        "Toast",
+        "CommandMenu",
+        "Tooltip",
+        "Toolbar",
+        "Sidebar",
+        "MetricCard",
+        "EmptyState",
+    ] {
+        let doc = docs
+            .iter()
+            .find(|doc| doc.name == name)
+            .expect("component doc exists");
+        assert_eq!(doc.status, ComponentStatus::Ready, "{name} should be ready");
+        assert!(doc.render.is_some(), "{name} should render a live example");
+        assert!(
+            !doc.accessibility.is_empty(),
+            "{name} needs accessibility notes"
+        );
+        assert!(!doc.snippet.is_empty(), "{name} needs a snippet");
+    }
+}
+
 use dioxus::prelude::*;
 
 #[test]

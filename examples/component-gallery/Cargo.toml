@@ -8,6 +8,7 @@ publish.workspace = true
 [dependencies]
 dioxus.workspace = true
 unified_ui.workspace = true
+ui-styles.workspace = true
 
 [dev-dependencies]
 dioxus-ssr.workspace = true

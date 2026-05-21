@@ -1,6 +1,6 @@
 use dioxus::prelude::*;
 use ui_motion::{Ease, Transition};
-use ui_runtime::{use_animation_value, ReducedMotion};
+use ui_runtime::{use_animation_value, use_presence_state, ReducedMotion};
 
 #[component]
 fn AnimationProbe(target: f32, transition: Transition) -> Element {
@@ -42,4 +42,40 @@ fn animation_value_with_reduced_motion_returns_target() {
         }
     });
     assert!(html.contains("data-value=\"1\""), "got {html}");
+}
+
+#[component]
+fn PresenceProbe(present: bool) -> Element {
+    let state = use_presence_state(
+        present,
+        Transition::Tween {
+            duration_ms: 220,
+            ease: Ease::Standard,
+        },
+        Transition::Tween {
+            duration_ms: 180,
+            ease: Ease::Standard,
+        },
+    );
+    rsx! {
+        div { "data-state": "{state().as_str()}" }
+    }
+}
+
+#[test]
+fn presence_state_initial_present_true_is_visible_in_ssr() {
+    let html = dioxus_ssr::render_element(rsx! { PresenceProbe { present: true } });
+    assert!(
+        html.contains("data-state=\"visible\""),
+        "got {html}",
+    );
+}
+
+#[test]
+fn presence_state_initial_present_false_is_unmounted_in_ssr() {
+    let html = dioxus_ssr::render_element(rsx! { PresenceProbe { present: false } });
+    assert!(
+        html.contains("data-state=\"unmounted\""),
+        "got {html}",
+    );
 }

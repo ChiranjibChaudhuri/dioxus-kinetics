@@ -121,3 +121,51 @@ fn prelude_exposes_functional_component_names() {
         );
     }
 }
+
+#[test]
+fn prelude_reexports_functional_component_aliases() {
+    let _ = ActionControl;
+    let _ = TextEntry;
+    let _ = ChoiceMark;
+    let _ = StateSwitch;
+    let _ = ViewSwitcher;
+    let _ = ActionBar;
+    let _ = NavigationRail;
+    let _ = MetricReadout;
+    let _ = BlankState;
+    let _ = ModalLayer;
+    let _ = NoticeStack;
+    let _ = CommandFinder;
+    let _ = ContextHint;
+    let _ = ContentPlane;
+    let _ = GlassLayer;
+}
+
+#[test]
+fn prelude_and_public_names_cover_kinetic_system_components() {
+    let _ = TimelineScope;
+    let _ = KineticBox;
+    let _ = KineticText;
+    let _ = PresenceGate;
+    let _ = FrameStage;
+    let _ = FrameClip;
+    let _ = FrameLayer;
+    let _ = CaptureStage;
+
+    let names = unified_ui::public_api_names();
+    for expected in [
+        "TimelineScope",
+        "KineticBox",
+        "KineticText",
+        "PresenceGate",
+        "FrameStage",
+        "FrameClip",
+        "FrameLayer",
+        "CaptureStage",
+    ] {
+        assert!(
+            names.contains(&expected),
+            "missing kinetic system name {expected}"
+        );
+    }
+}

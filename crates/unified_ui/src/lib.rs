@@ -6,12 +6,13 @@ pub mod prelude {
         A11yContract, ComponentContract, ComponentId, ComponentRole, FocusPolicy, TargetSize,
     };
     pub use ui_dioxus::{
-        ActionBar, ActionControl, BlankState, Button, ButtonVariant, Checkbox, ChoiceMark,
-        CommandFinder, CommandGroup, CommandItem, CommandMenu, ContentPlane, ContextHint, Dialog,
-        EmptyState, GlassLayer, GlassSurface, MetricCard, MetricReadout, MetricTone, ModalLayer,
-        NavigationRail, NoticeStack, Sidebar, SidebarItem, SidebarSection, Stack, StateSwitch,
-        Surface, Switch, TabItem, TabPanel, Tabs, TextEntry, TextField, Toast, ToastTone, Toolbar,
-        Tooltip, ViewSwitcher,
+        ActionBar, ActionControl, BlankState, Button, ButtonVariant, CaptureStage, Checkbox,
+        ChoiceMark, CommandFinder, CommandGroup, CommandItem, CommandMenu, ContentPlane,
+        ContextHint, Dialog, EmptyState, FrameClip, FrameLayer, FrameStage, GlassLayer,
+        GlassSurface, KineticBox, KineticText, MetricCard, MetricReadout, MetricTone, ModalLayer,
+        NavigationRail, NoticeStack, PresenceGate, Sidebar, SidebarItem, SidebarSection, Stack,
+        StateSwitch, Surface, Switch, TabItem, TabPanel, Tabs, TextEntry, TextField, TimelineScope,
+        Toast, ToastTone, Toolbar, Tooltip, ViewSwitcher,
     };
     pub use ui_glass::{
         resolve_glass, GlassDensity, GlassLevel, GlassPolicy, GlassRecipe, GlassRequest, GlassTone,
@@ -79,8 +80,13 @@ pub fn public_api_names() -> &'static [&'static str] {
         "SharedElement",
         "Timeline",
         "TimelineScope",
+        "KineticBox",
+        "KineticText",
+        "PresenceGate",
         "Composition",
         "FrameStage",
+        "FrameClip",
+        "FrameLayer",
         "CaptureStage",
     ]
 }

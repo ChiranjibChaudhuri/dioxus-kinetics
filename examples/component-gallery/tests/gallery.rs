@@ -292,6 +292,50 @@ fn gallery_frame_stage_preview_renders_three_frame_snapshots() {
 }
 
 #[test]
+fn gallery_includes_kinetic_box_and_presence_gate_entries() {
+    let docs = component_gallery::component_docs();
+
+    let kb = docs
+        .iter()
+        .find(|doc| doc.name == "KineticBox")
+        .expect("KineticBox doc exists");
+    assert_eq!(kb.status, component_gallery::ComponentStatus::Ready);
+    assert!(kb.render.is_some());
+
+    let pg = docs
+        .iter()
+        .find(|doc| doc.name == "PresenceGate")
+        .expect("PresenceGate doc exists");
+    assert_eq!(pg.status, component_gallery::ComponentStatus::Ready);
+    assert!(pg.render.is_some());
+}
+
+#[test]
+fn gallery_kinetic_box_preview_renders_three_cues() {
+    let html = dioxus_ssr::render_element(rsx! {
+        component_gallery::App {}
+    });
+
+    for cue in ["rise-in", "fade-in", "slide-up"] {
+        assert!(
+            html.contains(&format!("data-motion-cue=\"{cue}\"")),
+            "missing KineticBox cue {cue}",
+        );
+    }
+}
+
+#[test]
+fn gallery_presence_gate_preview_renders_present_and_hidden_tiles() {
+    let html = dioxus_ssr::render_element(rsx! {
+        component_gallery::App {}
+    });
+
+    assert!(html.contains("Visible state"));
+    assert!(html.contains("Hidden state"));
+    assert!(html.contains("gallery-variant-grid--2col"));
+}
+
+#[test]
 fn gallery_capture_stage_preview_renders_three_viewport_profiles() {
     let html = dioxus_ssr::render_element(rsx! {
         component_gallery::App {}

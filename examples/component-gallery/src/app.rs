@@ -1,13 +1,20 @@
 use dioxus::prelude::*;
+use ui_styles::library_css;
 
 use crate::docs::{categories, component_docs, ComponentCategory, ComponentDoc, ComponentStatus};
 use crate::styles::GALLERY_CSS;
 
 #[component]
 pub fn App() -> Element {
+    let shared_css = library_css();
+
     rsx! {
+        style { "{shared_css}" }
         style { "{GALLERY_CSS}" }
-        div { class: "gallery-shell",
+        div {
+            class: "gallery-shell",
+            "data-ui-theme": "light",
+            "data-ui-density": "comfortable",
             aside { class: "gallery-rail",
                 div { class: "gallery-brand",
                     span { class: "gallery-mark", "UI" }
@@ -28,6 +35,19 @@ pub fn App() -> Element {
                     h2 { "Unified UI Component Gallery" }
                     p {
                         "Semantic components grouped by product function, with live rendered examples for available primitives and disabled coming-soon entries for the next phase."
+                    }
+                }
+                section { class: "gallery-controls", "aria-label": "Preview settings",
+                    div { class: "gallery-control-group",
+                        span { class: "gallery-control-label", "Theme" }
+                        button { class: "ui-button ui-button--primary", r#type: "button", "Light" }
+                        button { class: "ui-button ui-button--secondary", r#type: "button", "Dark" }
+                    }
+                    div { class: "gallery-control-group",
+                        span { class: "gallery-control-label", "Density" }
+                        button { class: "ui-button ui-button--secondary", r#type: "button", "Compact" }
+                        button { class: "ui-button ui-button--primary", r#type: "button", "Comfortable" }
+                        button { class: "ui-button ui-button--secondary", r#type: "button", "Spacious" }
                     }
                 }
                 nav { class: "gallery-mobile-tabs", aria_label: "Component categories",
@@ -79,6 +99,10 @@ fn component_entry(doc: &'static ComponentDoc) -> Element {
                     span { class: "{status_class}", "{doc.status.label()}" }
                 }
                 p { "{doc.summary}" }
+                div { class: "gallery-accessibility",
+                    strong { "Accessibility" }
+                    p { "{doc.accessibility}" }
+                }
             }
             div { class: "gallery-example",
                 {rendered_example(doc)}

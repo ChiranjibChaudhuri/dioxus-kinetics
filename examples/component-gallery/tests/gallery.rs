@@ -35,7 +35,7 @@ fn registry_contains_ready_and_coming_soon_components() {
         .any(|doc| doc.name == "Stack" && doc.status == ComponentStatus::Ready));
     assert!(docs
         .iter()
-        .any(|doc| doc.name == "TextField" && doc.status == ComponentStatus::ComingSoon));
+        .any(|doc| doc.name == "TextField" && doc.status == ComponentStatus::Ready));
     assert!(docs
         .iter()
         .any(|doc| doc.name == "SharedElement" && doc.status == ComponentStatus::ComingSoon));
@@ -136,6 +136,26 @@ fn gallery_embeds_styles_for_gallery_and_component_classes() {
     assert!(html.contains(".ui-button--primary"));
     assert!(html.contains(".ui-glass-surface"));
     assert!(html.contains("backdrop-filter"));
+}
+
+#[test]
+fn gallery_renders_advanced_workbench_controls_and_notes() {
+    let html = dioxus_ssr::render_element(rsx! {
+        component_gallery::App {}
+    });
+
+    assert!(html.contains("Theme"));
+    assert!(html.contains("Density"));
+    assert!(html.contains("Light"));
+    assert!(html.contains("Dark"));
+    assert!(html.contains("Compact"));
+    assert!(html.contains("Spacious"));
+    assert!(html.contains("Accessibility"));
+    assert!(html.contains(".ui-command-menu"));
+    assert!(
+        html.contains("[data-ui-theme=&quot;dark&quot;]")
+            || html.contains("[data-ui-theme=\"dark\"]")
+    );
 }
 
 #[test]

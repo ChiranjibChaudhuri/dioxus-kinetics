@@ -1,5 +1,7 @@
 #![forbid(unsafe_code)]
 
+mod capture;
+mod composition;
 mod display;
 mod forms;
 mod kinetics;
@@ -9,6 +11,8 @@ mod overlays;
 use dioxus::prelude::*;
 use ui_glass::{GlassDensity, GlassLevel, GlassTone};
 
+pub use capture::CaptureStage;
+pub use composition::{FrameClip, FrameLayer, FrameStage};
 pub use display::{EmptyState, MetricCard, MetricTone};
 pub use forms::{Checkbox, Switch, TextField};
 pub use kinetics::{KineticBox, KineticText, PresenceGate, TimelineScope};

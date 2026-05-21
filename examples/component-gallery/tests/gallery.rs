@@ -105,3 +105,13 @@ fn gallery_embeds_styles_for_gallery_and_component_classes() {
     assert!(html.contains(".ui-glass-surface"));
     assert!(html.contains("backdrop-filter"));
 }
+
+#[test]
+fn root_readme_mentions_component_gallery() {
+    let readme_path = std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join("../../README.md");
+    let readme = std::fs::read_to_string(readme_path).expect("README.md should be readable");
+
+    assert!(readme.contains("Component Gallery"));
+    assert!(readme.contains("cargo check -p component-gallery"));
+    assert!(readme.contains("dx serve --package component-gallery"));
+}

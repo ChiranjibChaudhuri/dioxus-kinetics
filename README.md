@@ -44,8 +44,27 @@ Optional features:
 - `GlassSurface`
 - `Stack`
 
+## Component Gallery
+
+The runnable documentation app lives in `examples/component-gallery`.
+
+Check it with:
+
+```powershell
+cargo check -p component-gallery
+```
+
+Run it with the Dioxus CLI when available:
+
+```powershell
+dx serve --package component-gallery
+```
+
+The gallery is registry-driven. Ready components render live examples, and planned components appear as disabled coming-soon entries until their implementation lands.
+
 ## Documentation
 
 - `docs/component-naming.md`
 - `docs/glass-materials.md`
 - `docs/platform-support.md`
+- `docs/superpowers/specs/2026-05-20-component-gallery-design.md`

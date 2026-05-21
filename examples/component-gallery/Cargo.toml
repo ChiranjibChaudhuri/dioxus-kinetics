@@ -13,6 +13,9 @@ ui-styles.workspace = true
 [dev-dependencies]
 dioxus-ssr.workspace = true
 
+[features]
+web = ["dioxus/web"]
+
 [lib]
 path = "src/lib.rs"
 

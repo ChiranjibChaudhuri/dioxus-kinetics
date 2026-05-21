@@ -2,6 +2,7 @@
 /.dioxus/
 /dist/
 /node_modules/
+/.worktrees/
 Cargo.lock
 *.pdb
 *.log

@@ -34,4 +34,6 @@ fn capture_stage_renders_viewport_and_frame_metadata() {
     assert!(html.contains("data-capture-id=\"component-showcase\""));
     assert!(html.contains("data-viewport=\"desktop\""));
     assert!(html.contains("data-frame=\"72\""));
+    assert!(html.contains("Preview"));
+    assert!(!html.contains("data-composition-id"));
 }

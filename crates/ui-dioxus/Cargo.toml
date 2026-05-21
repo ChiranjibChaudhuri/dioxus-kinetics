@@ -7,7 +7,6 @@ publish.workspace = true
 
 [dependencies]
 dioxus.workspace = true
-ui-capture.workspace = true
 ui-composition.workspace = true
 ui-core.workspace = true
 ui-glass.workspace = true

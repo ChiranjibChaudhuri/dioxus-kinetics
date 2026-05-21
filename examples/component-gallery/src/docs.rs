@@ -273,11 +273,11 @@ const COMPONENT_DOCS: [ComponentDoc; 27] = [
     ComponentDoc {
         name: "Presence",
         category: ComponentCategory::Motion,
-        status: ComponentStatus::ComingSoon,
-        summary: "Coordinates mounted, exiting, and removed states for animated lifecycles.",
+        status: ComponentStatus::Ready,
+        summary: "Renders children with an enter/exit animation lifecycle; settles into the rendered state on SSR and reduced-motion paths.",
         snippet: PRESENCE_SNIPPET,
-        accessibility: "Coming soon; motion helpers will respect reduced-motion preferences.",
-        render: None,
+        accessibility: "Hidden state renders no children; the entering and visible states keep the DOM stable for assistive tech.",
+        render: Some(presence_preview),
     },
     ComponentDoc {
         name: "Sequence",
@@ -471,8 +471,9 @@ const EMPTY_STATE_SNIPPET: &str = r#"EmptyState {
 }"#;
 
 const PRESENCE_SNIPPET: &str = r#"Presence {
-    visible: is_open,
-    Dialog { title: "Invite member" }
+    present: is_visible,
+    cue: PresenceCue::Rise,
+    p { "Hello" }
 }"#;
 
 const SEQUENCE_SNIPPET: &str = r#"Sequence {
@@ -751,6 +752,25 @@ fn icon_button_preview() -> Element {
                             Plus { size: 16 }
                         }
                     }
+                }
+            }
+        }
+    }
+}
+
+fn presence_preview() -> Element {
+    rsx! {
+        div { class: "gallery-variant-grid gallery-variant-grid--2col",
+            div { class: "gallery-variant-tile",
+                span { class: "gallery-variant-label", "Present" }
+                Presence { present: true, cue: PresenceCue::Rise,
+                    p { "Visible state" }
+                }
+            }
+            div { class: "gallery-variant-tile",
+                span { class: "gallery-variant-label", "Hidden" }
+                Presence { present: false, cue: PresenceCue::Rise,
+                    p { "Hidden state" }
                 }
             }
         }

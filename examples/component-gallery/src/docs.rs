@@ -1,5 +1,5 @@
 use dioxus::prelude::*;
-use unified_ui::prelude::*;
+use kinetics::prelude::*;
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum ComponentCategory {

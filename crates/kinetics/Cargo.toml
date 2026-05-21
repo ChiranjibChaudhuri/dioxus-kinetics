@@ -1,5 +1,5 @@
 [package]
-name = "unified_ui"
+name = "kinetics"
 version.workspace = true
 edition.workspace = true
 license.workspace = true

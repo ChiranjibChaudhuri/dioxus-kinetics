@@ -1,4 +1,4 @@
-use unified_ui::prelude::*;
+use kinetics::prelude::*;
 
 #[test]
 fn prelude_exposes_semantic_components_and_tokens() {
@@ -21,7 +21,7 @@ fn prelude_exposes_semantic_components_and_tokens() {
 
 #[test]
 fn default_features_do_not_expose_gsap_or_hyperframes_names() {
-    let public_names = unified_ui::public_api_names();
+    let public_names = kinetics::public_api_names();
 
     assert!(!public_names.iter().any(|name| name.contains("Gsap")));
     assert!(!public_names.iter().any(|name| name.contains("HyperFrames")));
@@ -52,7 +52,7 @@ fn prelude_exposes_advanced_components_and_styles() {
 
 #[test]
 fn public_api_names_include_advanced_wave_names() {
-    let names = unified_ui::public_api_names();
+    let names = kinetics::public_api_names();
 
     for expected in [
         "TextField",
@@ -77,7 +77,7 @@ fn public_api_names_include_advanced_wave_names() {
 
 #[test]
 fn public_api_names_use_native_system_boundaries() {
-    let names = unified_ui::public_api_names();
+    let names = kinetics::public_api_names();
 
     for expected in ["Timeline", "Composition", "CaptureStage"] {
         assert!(
@@ -96,7 +96,7 @@ fn public_api_names_use_native_system_boundaries() {
 
 #[test]
 fn prelude_exposes_functional_component_names() {
-    let names = unified_ui::public_api_names();
+    let names = kinetics::public_api_names();
 
     for expected in [
         "ActionControl",
@@ -152,7 +152,7 @@ fn prelude_and_public_names_cover_kinetic_system_components() {
     let _ = FrameLayer;
     let _ = CaptureStage;
 
-    let names = unified_ui::public_api_names();
+    let names = kinetics::public_api_names();
     for expected in [
         "TimelineScope",
         "KineticBox",

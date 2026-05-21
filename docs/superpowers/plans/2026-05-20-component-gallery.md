@@ -6,7 +6,7 @@
 
 **Architecture:** Add `examples/component-gallery` as a workspace crate with a small library plus binary. The library owns the documentation registry, Dioxus app components, live previews, and local CSS; the binary only launches the app. Tests compile and SSR-render the app so registry drift and invalid component usage are caught early.
 
-**Tech Stack:** Rust 2021, Cargo workspace, Dioxus 0.7, Dioxus SSR tests, `unified_ui::prelude::*`, local CSS embedded in the example app, frequent commits.
+**Tech Stack:** Rust 2021, Cargo workspace, Dioxus 0.7, Dioxus SSR tests, `kinetics::prelude::*`, local CSS embedded in the example app, frequent commits.
 
 ---
 
@@ -36,7 +36,7 @@ examples/
 
 Responsibilities:
 
-- `Cargo.toml`: add the example crate as a workspace member and expose `unified_ui` as a workspace dependency.
+- `Cargo.toml`: add the example crate as a workspace member and expose `kinetics` as a workspace dependency.
 - `README.md`: link to the gallery and show how to run it.
 - `examples/component-gallery/Cargo.toml`: declare the runnable example crate.
 - `examples/component-gallery/src/docs.rs`: registry data, categories, statuses, snippets, and live preview function pointers.
@@ -75,7 +75,7 @@ members = [
     "crates/ui-dioxus",
     "crates/ui-gsap",
     "crates/ui-hyperframes",
-    "crates/unified_ui",
+    "crates/kinetics",
     "examples/component-gallery",
 ]
 
@@ -98,7 +98,7 @@ ui-native = { path = "crates/ui-native" }
 ui-dioxus = { path = "crates/ui-dioxus" }
 ui-gsap = { path = "crates/ui-gsap" }
 ui-hyperframes = { path = "crates/ui-hyperframes" }
-unified_ui = { path = "crates/unified_ui" }
+kinetics = { path = "crates/kinetics" }
 ```
 
 - [ ] **Step 2: Create the example manifest**
@@ -115,7 +115,7 @@ publish.workspace = true
 
 [dependencies]
 dioxus.workspace = true
-unified_ui.workspace = true
+kinetics.workspace = true
 
 [dev-dependencies]
 dioxus-ssr.workspace = true
@@ -292,7 +292,7 @@ Replace `examples/component-gallery/src/docs.rs`:
 
 ```rust
 use dioxus::prelude::*;
-use unified_ui::prelude::*;
+use kinetics::prelude::*;
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum ComponentCategory {
@@ -649,7 +649,7 @@ fn gallery_renders_ready_examples_and_coming_soon_entries() {
         component_gallery::App {}
     });
 
-    assert!(html.contains("Unified UI Component Gallery"));
+    assert!(html.contains("Kinetics Component Gallery"));
     assert!(html.contains("Actions"));
     assert!(html.contains("Button"));
     assert!(html.contains("Save changes"));
@@ -700,7 +700,7 @@ pub fn App() -> Element {
                 div { class: "gallery-brand",
                     span { class: "gallery-mark", "UI" }
                     div {
-                        h1 { "Unified UI" }
+                        h1 { "Kinetics" }
                         p { "Component reference" }
                     }
                 }
@@ -713,7 +713,7 @@ pub fn App() -> Element {
             main { class: "gallery-main",
                 header { class: "gallery-header",
                     p { class: "gallery-eyebrow", "Dioxus SaaS library" }
-                    h2 { "Unified UI Component Gallery" }
+                    h2 { "Kinetics Component Gallery" }
                     p {
                         "Semantic components grouped by product function, with live rendered examples for available primitives and disabled coming-soon entries for the next phase."
                     }
@@ -1270,14 +1270,14 @@ Expected: FAIL because the README does not mention the gallery yet.
 Replace `README.md`:
 
 ```markdown
-# Unified UI
+# Kinetics
 
-Unified UI is a Dioxus-first UI library for downstream SaaS products.
+Kinetics is a Dioxus-first UI library for downstream SaaS products.
 
 The library exposes one public crate:
 
 ```rust
-use unified_ui::prelude::*;
+use kinetics::prelude::*;
 ```
 
 Design principles:
@@ -1449,7 +1449,7 @@ Expected: only the existing untracked `Reading_material/` path may appear.
 
 - [ ] `examples/component-gallery` is a workspace crate.
 - [ ] The binary launches `component_gallery::App`.
-- [ ] The app uses `unified_ui::prelude::*` for live examples.
+- [ ] The app uses `kinetics::prelude::*` for live examples.
 - [ ] Ready entries render `Button`, `Surface`, `GlassSurface`, and `Stack`.
 - [ ] Coming-soon entries exist for `IconButton`, `TextField`, `Checkbox`, `Tabs`, `Dialog`, `Toast`, `Presence`, `Sequence`, `SharedLayout`, and `SharedElement`.
 - [ ] Coming-soon entries do not call unavailable components.

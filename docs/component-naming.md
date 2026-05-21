@@ -1,6 +1,6 @@
 # Component Naming
 
-Unified UI uses functional component names.
+Kinetics uses functional component names.
 
 Names describe the user-facing role or behavior:
 

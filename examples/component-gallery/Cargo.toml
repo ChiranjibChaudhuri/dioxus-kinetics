@@ -7,7 +7,7 @@ publish.workspace = true
 
 [dependencies]
 dioxus.workspace = true
-unified_ui.workspace = true
+kinetics.workspace = true
 ui-styles.workspace = true
 
 [dev-dependencies]

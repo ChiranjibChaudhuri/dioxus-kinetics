@@ -2,9 +2,9 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** Rename the public facade crate from `unified_ui` to `kinetics`, swap the component gallery's text-based brand for the inline `docs/assets/dioxus-kinetics-logo.svg` mark, and expand the showcase previews for the Ready primitives in Motion, Composition, Capture, and Foundations.
+**Goal:** Rename the public facade crate from `kinetics` to `kinetics`, swap the component gallery's text-based brand for the inline `docs/assets/dioxus-kinetics-logo.svg` mark, and expand the showcase previews for the Ready primitives in Motion, Composition, Capture, and Foundations.
 
-**Architecture:** Mechanical rename plus presentation polish. No new components, no motion math, no JS runtime work. The user picked full rename (option A): the old `unified_ui` name disappears from active code AND from historical specs/plans. Previews change from single-instance demos to comparative `gallery-variant-grid` tiles. Coming-soon entries stay untouched for sub-projects 2-4.
+**Architecture:** Mechanical rename plus presentation polish. No new components, no motion math, no JS runtime work. The user picked full rename (option A): the old `kinetics` name disappears from active code AND from historical specs/plans. Previews change from single-instance demos to comparative `gallery-variant-grid` tiles. Coming-soon entries stay untouched for sub-projects 2-4.
 
 **Tech Stack:** Rust 2021, Cargo workspace, Dioxus 0.7, Dioxus SSR tests, pure Rust unit tests, static CSS strings, PowerShell commands on Windows.
 
@@ -16,8 +16,8 @@ This plan implements the rebrand and showcase polish described in `docs/superpow
 
 It includes:
 
-- moving `crates/unified_ui/` to `crates/kinetics/` and updating every consumer
-- replacing all "Unified UI" brand strings with "Kinetics"
+- moving `crates/kinetics/` to `crates/kinetics/` and updating every consumer
+- replacing all "Kinetics" brand strings with "Kinetics"
 - updating historical specs and plans under `docs/superpowers/`
 - inlining the `dioxus-kinetics-logo.svg` into the gallery rail
 - replacing the existing single-instance previews in Motion, Composition, Capture, and Foundations with comparative variant grids
@@ -43,31 +43,31 @@ Run every command in this plan from inside the worktree directory.
 
 ## File Map
 
-- `Cargo.toml`: workspace members list (`unified_ui` → `kinetics`).
-- `crates/kinetics/`: replaces `crates/unified_ui/`. Same source tree, renamed package.
+- `Cargo.toml`: workspace members list (`kinetics` → `kinetics`).
+- `crates/kinetics/`: replaces `crates/kinetics/`. Same source tree, renamed package.
 - `crates/kinetics/Cargo.toml`: package name becomes `kinetics`.
-- `crates/kinetics/tests/prelude.rs`: every `unified_ui::` becomes `kinetics::`.
-- Every `Cargo.toml` that lists `unified_ui` as a dependency: rename it.
-- Every `.rs` file with `use unified_ui` or `unified_ui::`: rename it.
+- `crates/kinetics/tests/prelude.rs`: every `kinetics::` becomes `kinetics::`.
+- Every `Cargo.toml` that lists `kinetics` as a dependency: rename it.
+- Every `.rs` file with `use kinetics` or `kinetics::`: rename it.
 - `examples/component-gallery/src/brand.rs`: new file. Holds the inlined logo SVG as a `&'static str`.
 - `examples/component-gallery/src/lib.rs`: register the new `brand` module.
 - `examples/component-gallery/src/app.rs`: swap the brand block, update header copy.
 - `examples/component-gallery/src/docs.rs`: replace four preview functions, add two new ones, register two new doc entries.
 - `examples/component-gallery/src/styles.rs`: append gallery-logo, gallery-variant-grid, gallery-variant-tile, gallery-variant-label, visually-hidden, and viewport-fit CSS.
 - `examples/component-gallery/tests/gallery.rs`: replace brand assertions, add SVG and variant-grid assertions.
-- `README.md`: every `unified_ui` and "Unified UI" reference.
+- `README.md`: every `kinetics` and "Kinetics" reference.
 - `docs/component-naming.md`, `docs/platform-support.md`, `docs/glass-materials.md`: naming refs.
 - `docs/superpowers/specs/2026-05-20-unified-ui-library-design.md`, `docs/superpowers/specs/2026-05-20-advanced-ui-wave-design.md`, `docs/superpowers/specs/2026-05-20-component-gallery-design.md`, `docs/superpowers/specs/2026-05-21-native-kinetics-systems-design.md`, `docs/superpowers/plans/2026-05-20-unified-ui-library.md`, `docs/superpowers/plans/2026-05-20-component-gallery.md`, `docs/superpowers/plans/2026-05-21-advanced-ui-wave.md`, `docs/superpowers/plans/2026-05-21-native-kinetics-systems.md`: content updates (filenames unchanged).
 
 ## Task 1: Move The Crate Directory And Update Every Consumer
 
 **Files:**
-- Move: `crates/unified_ui/` to `crates/kinetics/`
+- Move: `crates/kinetics/` to `crates/kinetics/`
 - Modify: `Cargo.toml`
 - Modify: `crates/kinetics/Cargo.toml`
 - Modify: `crates/kinetics/tests/prelude.rs`
 - Modify: `examples/component-gallery/Cargo.toml`
-- Modify: every `.rs` file under `crates/` and `examples/` that contains `unified_ui`
+- Modify: every `.rs` file under `crates/` and `examples/` that contains `kinetics`
 
 - [ ] **Step 1: Confirm baseline tests pass**
 
@@ -84,24 +84,24 @@ Expected: PASS (this is the green starting state).
 Run:
 
 ```powershell
-git mv crates/unified_ui crates/kinetics
+git mv crates/kinetics crates/kinetics
 ```
 
 - [ ] **Step 3: Update the workspace `Cargo.toml`**
 
-In root `Cargo.toml`, change the workspace members entry that reads `crates/unified_ui` to `crates/kinetics`. Leave every other entry untouched.
+In root `Cargo.toml`, change the workspace members entry that reads `crates/kinetics` to `crates/kinetics`. Leave every other entry untouched.
 
 - [ ] **Step 4: Update the kinetics package manifest**
 
-In `crates/kinetics/Cargo.toml`, change the `[package]` `name` field from `unified_ui` to `kinetics`. Leave version, edition, license, publish, and dependencies untouched.
+In `crates/kinetics/Cargo.toml`, change the `[package]` `name` field from `kinetics` to `kinetics`. Leave version, edition, license, publish, and dependencies untouched.
 
 - [ ] **Step 5: Update the gallery dependency**
 
-In `examples/component-gallery/Cargo.toml`, change the dependency line that reads `unified_ui = { ... }` so the dependency name on the left is `kinetics`. Keep the rest of the line identical. If the dependency uses a `package = "..."` rename, remove that field (the package name is now `kinetics`).
+In `examples/component-gallery/Cargo.toml`, change the dependency line that reads `kinetics = { ... }` so the dependency name on the left is `kinetics`. Keep the rest of the line identical. If the dependency uses a `package = "..."` rename, remove that field (the package name is now `kinetics`).
 
-- [ ] **Step 6: Update every `use unified_ui` import**
+- [ ] **Step 6: Update every `use kinetics` import**
 
-In every `.rs` file under `crates/` and `examples/`, replace the string `unified_ui` with `kinetics`. This includes `use unified_ui::prelude::*;`, `use unified_ui::...`, doc comments that reference `unified_ui`, and the test file `crates/kinetics/tests/prelude.rs` which still says `unified_ui::public_api_names()` etc.
+In every `.rs` file under `crates/` and `examples/`, replace the string `kinetics` with `kinetics`. This includes `use kinetics::prelude::*;`, `use kinetics::...`, doc comments that reference `kinetics`, and the test file `crates/kinetics/tests/prelude.rs` which still says `kinetics::public_api_names()` etc.
 
 Use this PowerShell loop to do it consistently:
 
@@ -109,7 +109,7 @@ Use this PowerShell loop to do it consistently:
 $files = git ls-files crates examples | Where-Object { $_ -like '*.rs' }
 foreach ($file in $files) {
     $content = Get-Content $file -Raw
-    $updated = $content -replace 'unified_ui', 'kinetics'
+    $updated = $content -replace 'kinetics', 'kinetics'
     if ($content -ne $updated) {
         Set-Content -Path $file -Value $updated -NoNewline
     }
@@ -124,7 +124,7 @@ Run:
 cargo test --workspace
 ```
 
-Expected: PASS. If any test fails, the most likely cause is a `Cargo.toml` `dependencies` entry that still names `unified_ui` somewhere — fix it and re-run.
+Expected: PASS. If any test fails, the most likely cause is a `Cargo.toml` `dependencies` entry that still names `kinetics` somewhere — fix it and re-run.
 
 - [ ] **Step 8: Confirm format check**
 
@@ -142,7 +142,7 @@ Run:
 
 ```powershell
 git add Cargo.toml crates examples
-git commit -m "refactor: rename unified_ui crate to kinetics"
+git commit -m "refactor: rename kinetics crate to kinetics"
 ```
 
 ## Task 2: Update Active Brand Strings In Docs
@@ -159,18 +159,18 @@ The gallery's `app.rs` is NOT touched in this task. Changing the header text her
 
 In `README.md`, replace every occurrence of:
 
-- `Unified UI` → `Kinetics`
-- `unified_ui` → `kinetics`
+- `Kinetics` → `Kinetics`
+- `kinetics` → `kinetics`
 
 Keep the repository name `dioxus-kinetics` unchanged. Keep the workspace layout block correct: the directory listing line now reads `  kinetics/         public facade and prelude`.
 
-Update the README code examples so `use unified_ui::prelude::*;` becomes `use kinetics::prelude::*;` and any `cargo test -p unified_ui` becomes `cargo test -p kinetics`.
+Update the README code examples so `use kinetics::prelude::*;` becomes `use kinetics::prelude::*;` and any `cargo test -p kinetics` becomes `cargo test -p kinetics`.
 
 - [ ] **Step 2: Update naming docs**
 
-In `docs/component-naming.md`, replace `Unified UI` with `Kinetics` in any prose. Component names stay unchanged.
+In `docs/component-naming.md`, replace `Kinetics` with `Kinetics` in any prose. Component names stay unchanged.
 
-In `docs/platform-support.md` and `docs/glass-materials.md`, replace `Unified UI` with `Kinetics` and `unified_ui` with `kinetics` wherever they appear.
+In `docs/platform-support.md` and `docs/glass-materials.md`, replace `Kinetics` with `Kinetics` and `kinetics` with `kinetics` wherever they appear.
 
 - [ ] **Step 3: Run tests**
 
@@ -211,7 +211,7 @@ Run:
 $files = git ls-files docs/superpowers | Where-Object { $_ -like '*.md' }
 foreach ($file in $files) {
     $content = Get-Content $file -Raw
-    $updated = $content -replace 'unified_ui', 'kinetics' -replace 'Unified UI', 'Kinetics'
+    $updated = $content -replace 'kinetics', 'kinetics' -replace 'Kinetics', 'Kinetics'
     if ($content -ne $updated) {
         Set-Content -Path $file -Value $updated -NoNewline
     }
@@ -225,7 +225,7 @@ This intentionally rewrites historical specs and plans. The user picked the full
 Run:
 
 ```powershell
-rg -n "unified_ui|Unified UI" README.md docs crates examples Cargo.toml
+rg -n "kinetics|Kinetics" README.md docs crates examples Cargo.toml
 ```
 
 Expected: zero matches.
@@ -312,7 +312,7 @@ fn gallery_brand_uses_kinetics_logo_and_name() {
     });
 
     assert!(html.contains("Kinetics"));
-    assert!(!html.contains("Unified UI"));
+    assert!(!html.contains("Kinetics"));
     assert!(html.contains("<svg"));
     assert!(html.contains("dioxus-kinetics logo"));
 }
@@ -326,7 +326,7 @@ Run:
 cargo test -p component-gallery gallery_brand_uses_kinetics_logo_and_name -- --exact
 ```
 
-Expected: FAIL because the gallery still renders the "Unified UI" wordmark and does not inline the SVG.
+Expected: FAIL because the gallery still renders the "Kinetics" wordmark and does not inline the SVG.
 
 - [ ] **Step 3: Replace the brand block AND header copy atomically**
 
@@ -339,7 +339,7 @@ aside { class: "gallery-rail",
     div { class: "gallery-brand",
         span { class: "gallery-mark", "UI" }
         div {
-            h1 { "Unified UI" }
+            h1 { "Kinetics" }
             p { "Component reference" }
         }
     }
@@ -361,7 +361,7 @@ aside { class: "gallery-rail",
 
 Keep the rest of the `aside` element unchanged (the `nav.gallery-nav` block remains untouched).
 
-**3b. Main header h2.** Locate `h2 { "Unified UI Component Gallery" }` and replace the literal text with `"Kinetics Component Gallery"`.
+**3b. Main header h2.** Locate `h2 { "Kinetics Component Gallery" }` and replace the literal text with `"Kinetics Component Gallery"`.
 
 **3c. Eyebrow text.** Locate `p { class: "gallery-eyebrow", "Dioxus SaaS library" }` and replace the literal text with `"Dioxus Kinetics library"`.
 
@@ -380,7 +380,7 @@ Expected: PASS.
 In `examples/component-gallery/tests/gallery.rs`, find this line inside `gallery_renders_ready_examples_and_coming_soon_entries`:
 
 ```rust
-assert!(html.contains("Unified UI Component Gallery"));
+assert!(html.contains("Kinetics Component Gallery"));
 ```
 
 Replace it with:
@@ -1208,8 +1208,8 @@ fn root_readme_uses_kinetics_crate_name() {
 
     assert!(readme.contains("use kinetics::prelude::*"));
     assert!(readme.contains("crates/kinetics"));
-    assert!(!readme.contains("unified_ui"));
-    assert!(!readme.contains("Unified UI"));
+    assert!(!readme.contains("kinetics"));
+    assert!(!readme.contains("Kinetics"));
 }
 ```
 
@@ -1274,12 +1274,12 @@ Expected: PASS.
 Run:
 
 ```powershell
-rg -n "unified_ui|Unified UI" README.md docs crates examples Cargo.toml
+rg -n "kinetics|Kinetics" README.md docs crates examples Cargo.toml
 ```
 
 Expected: zero matches.
 
-If matches appear in source files, public docs, or test source (other than negative-assertion test strings — which are not present in this codebase for `unified_ui`), remove them and re-run.
+If matches appear in source files, public docs, or test source (other than negative-assertion test strings — which are not present in this codebase for `kinetics`), remove them and re-run.
 
 - [ ] **Step 5: Acceptance checklist verification**
 
@@ -1289,10 +1289,10 @@ If every item is satisfied, this plan is complete. Hand off to `superpowers:fini
 
 ## Acceptance Checklist
 
-- [ ] `crates/unified_ui` directory no longer exists; `crates/kinetics` directory contains the same source tree.
+- [ ] `crates/kinetics` directory no longer exists; `crates/kinetics` directory contains the same source tree.
 - [ ] Workspace `Cargo.toml` lists `crates/kinetics`.
 - [ ] `crates/kinetics/Cargo.toml` package name is `kinetics`.
-- [ ] Every `use unified_ui::*` is replaced with `use kinetics::*`.
+- [ ] Every `use kinetics::*` is replaced with `use kinetics::*`.
 - [ ] Component gallery rail renders the inlined SVG logo and a visually-hidden "Kinetics" label.
 - [ ] Component gallery main header reads "Kinetics Component Gallery".
 - [ ] `COMPONENT_DOCS` length is 27 and includes `KineticBox` and `PresenceGate` as `Ready` entries with previews.
@@ -1301,5 +1301,5 @@ If every item is satisfied, this plan is complete. Hand off to `superpowers:fini
 - [ ] `cargo fmt --all -- --check` passes.
 - [ ] `cargo test --workspace` passes.
 - [ ] `cargo check -p component-gallery` passes.
-- [ ] `rg "unified_ui|Unified UI" crates examples docs README.md Cargo.toml` returns zero matches.
+- [ ] `rg "kinetics|Kinetics" crates examples docs README.md Cargo.toml` returns zero matches.
 - [ ] Coming-soon entries (Presence, Sequence, SharedLayout, SharedElement, IconButton) remain `ComponentStatus::ComingSoon` and untouched.

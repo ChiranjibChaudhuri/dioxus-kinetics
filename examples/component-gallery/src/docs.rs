@@ -1,5 +1,5 @@
 use dioxus::prelude::*;
-use unified_ui::prelude::*;
+use kinetics::prelude::*;
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum ComponentCategory {
@@ -116,7 +116,7 @@ pub fn component_docs() -> &'static [ComponentDoc] {
 
 const BASIC_ACCESSIBILITY: &str = "Renders native semantic elements and stable focusable controls.";
 
-const COMPONENT_DOCS: [ComponentDoc; 25] = [
+const COMPONENT_DOCS: [ComponentDoc; 27] = [
     ComponentDoc {
         name: "Button",
         category: ComponentCategory::Actions,
@@ -316,6 +316,24 @@ const COMPONENT_DOCS: [ComponentDoc; 25] = [
         render: Some(timeline_scope_preview),
     },
     ComponentDoc {
+        name: "KineticBox",
+        category: ComponentCategory::Motion,
+        status: ComponentStatus::Ready,
+        summary: "Tags a region with a motion cue and stable kinetic id so timeline cues can target it.",
+        snippet: KINETIC_BOX_SNIPPET,
+        accessibility: "Motion cue is exposed via data attributes; reduced-motion policies replace cues with stable presentation.",
+        render: Some(kinetic_box_preview),
+    },
+    ComponentDoc {
+        name: "PresenceGate",
+        category: ComponentCategory::Motion,
+        status: ComponentStatus::Ready,
+        summary: "Renders children only when the presence flag is set; gallery preview compares present and hidden states.",
+        snippet: PRESENCE_GATE_SNIPPET,
+        accessibility: "Hidden state renders no children; assistive tech does not encounter stale content.",
+        render: Some(presence_gate_preview),
+    },
+    ComponentDoc {
         name: "FrameStage",
         category: ComponentCategory::Composition,
         status: ComponentStatus::Ready,
@@ -478,6 +496,17 @@ const TIMELINE_SCOPE_SNIPPET: &str = r#"TimelineScope {
         cue: "rise-in",
         "Revenue"
     }
+}"#;
+
+const KINETIC_BOX_SNIPPET: &str = r#"KineticBox {
+    id: "metric-card",
+    cue: "rise-in",
+    "Tile body"
+}"#;
+
+const PRESENCE_GATE_SNIPPET: &str = r#"PresenceGate {
+    present: is_visible,
+    p { "Visible state" }
 }"#;
 
 const FRAME_STAGE_SNIPPET: &str = r#"FrameStage {
@@ -698,28 +727,98 @@ fn empty_state_preview() -> Element {
 
 fn timeline_scope_preview() -> Element {
     rsx! {
-        TimelineScope { id: "dashboard-enter", autoplay: true,
-            KineticBox { id: "metric-card", cue: "rise-in",
-                MetricReadout {
-                    label: "Pipeline",
-                    value: "$418k",
-                    delta: "+8.2%",
-                    tone: MetricTone::Info,
+        div { class: "gallery-variant-grid gallery-variant-grid--stack",
+            div { class: "gallery-variant-tile",
+                span { class: "gallery-variant-label", "Stagger" }
+                TimelineScope { id: "stagger-demo", autoplay: true,
+                    for index in 0u32..4 {
+                        div { "data-stagger-index": "{index}",
+                            KineticBox { id: "stagger-{index}", cue: "rise-in",
+                                "Tile {index}"
+                            }
+                        }
+                    }
+                }
+            }
+            div { class: "gallery-variant-tile",
+                span { class: "gallery-variant-label", "Sequence" }
+                TimelineScope { id: "sequence-demo", autoplay: true,
+                    KineticBox { id: "sequence-enter", cue: "enter", "Enter" }
+                    KineticBox { id: "sequence-settle", cue: "settle", "Settle" }
+                    KineticBox { id: "sequence-pulse", cue: "pulse", "Pulse" }
+                }
+            }
+            div { class: "gallery-variant-tile",
+                span { class: "gallery-variant-label", "Reduced motion" }
+                div { "data-ui-transparency": "reduced",
+                    TimelineScope { id: "reduced-demo", autoplay: true,
+                        for index in 0u32..4 {
+                            div { "data-stagger-index": "{index}",
+                                KineticBox { id: "reduced-{index}", cue: "rise-in",
+                                    "Tile {index}"
+                                }
+                            }
+                        }
+                    }
                 }
             }
         }
     }
 }
 
-fn frame_stage_preview() -> Element {
+fn kinetic_box_preview() -> Element {
+    let cues = ["rise-in", "fade-in", "slide-up"];
+
     rsx! {
-        FrameStage {
-            composition: Composition::new("launch-demo", 1920, 1080, 30, 180),
-            frame: 42,
-            FrameClip { start: 0, duration: 60,
-                FrameLayer { id: "title", depth: 10,
-                    h4 { "Dioxus Kinetics" }
-                    p { "Frame 42 / 180" }
+        div { class: "gallery-variant-grid gallery-variant-grid--3col",
+            for cue in cues {
+                div { class: "gallery-variant-tile",
+                    span { class: "gallery-variant-label", "{cue}" }
+                    KineticBox { id: "cue-{cue}", cue: cue.to_string(),
+                        p { "Cue preview" }
+                    }
+                }
+            }
+        }
+    }
+}
+
+fn presence_gate_preview() -> Element {
+    rsx! {
+        div { class: "gallery-variant-grid gallery-variant-grid--2col",
+            div { class: "gallery-variant-tile",
+                span { class: "gallery-variant-label", "Present" }
+                PresenceGate { present: true,
+                    p { "Visible state" }
+                }
+            }
+            div { class: "gallery-variant-tile",
+                span { class: "gallery-variant-label", "Hidden" }
+                PresenceGate { present: false }
+                p { "Hidden state" }
+            }
+        }
+    }
+}
+
+fn frame_stage_preview() -> Element {
+    let frames: [u32; 3] = [0, 90, 179];
+
+    rsx! {
+        div { class: "gallery-variant-grid gallery-variant-grid--3col",
+            for frame in frames {
+                div { class: "gallery-variant-tile",
+                    span { class: "gallery-variant-label", "Frame {frame} / 180" }
+                    FrameStage {
+                        composition: Composition::new("launch-demo", 1920, 1080, 30, 180),
+                        frame: frame,
+                        FrameClip { start: 0, duration: 60,
+                            FrameLayer { id: "title", depth: 10,
+                                h4 { "Dioxus Kinetics" }
+                                p { "Frame {frame} / 180" }
+                            }
+                        }
+                    }
                 }
             }
         }
@@ -727,21 +826,56 @@ fn frame_stage_preview() -> Element {
 }
 
 fn capture_stage_preview() -> Element {
+    let profiles: [(&str, &str, u32); 3] = [
+        ("mobile", "Mobile · 360 × 640", 24),
+        ("tablet", "Tablet · 768 × 1024", 48),
+        ("desktop", "Desktop · 1440 × 900", 72),
+    ];
+
     rsx! {
-        CaptureStage { id: "component-showcase", viewport: "desktop", frame: 72,
-            p { "Desktop viewport at frame 72" }
+        div { class: "gallery-variant-grid gallery-variant-grid--3col",
+            for (viewport, caption, frame) in profiles {
+                div { class: "gallery-variant-tile",
+                    span { class: "gallery-variant-label", "{caption}" }
+                    CaptureStage {
+                        id: "capture-{viewport}",
+                        viewport: viewport.to_string(),
+                        frame: frame,
+                        p { "Frame {frame}" }
+                    }
+                }
+            }
         }
     }
 }
 
 fn glass_layer_preview() -> Element {
+    let levels = [
+        (GlassLevel::Subtle, "Subtle"),
+        (GlassLevel::Floating, "Floating"),
+        (GlassLevel::Overlay, "Overlay"),
+    ];
+    let tones = [
+        (GlassTone::Neutral, "Neutral"),
+        (GlassTone::Info, "Info"),
+        (GlassTone::Warning, "Warning"),
+    ];
+
     rsx! {
-        GlassLayer {
-            level: GlassLevel::Floating,
-            tone: GlassTone::Neutral,
-            density: GlassDensity::Comfortable,
-            h4 { "Revenue operations" }
-            p { "Native material contract" }
+        div { class: "gallery-variant-grid gallery-variant-grid--3x3",
+            for (level, level_label) in levels.iter() {
+                for (tone, tone_label) in tones.iter() {
+                    div { class: "gallery-variant-tile",
+                        span { class: "gallery-variant-label", "{level_label} · {tone_label}" }
+                        GlassLayer {
+                            level: *level,
+                            tone: *tone,
+                            density: GlassDensity::Comfortable,
+                            "Material preview"
+                        }
+                    }
+                }
+            }
         }
     }
 }

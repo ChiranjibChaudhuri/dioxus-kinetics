@@ -108,7 +108,7 @@ fn gallery_renders_ready_examples_and_coming_soon_entries() {
         component_gallery::App {}
     });
 
-    assert!(html.contains("Unified UI Component Gallery"));
+    assert!(html.contains("Kinetics Component Gallery"));
     for category in component_gallery::categories() {
         assert!(html.contains(category.label()));
     }
@@ -193,6 +193,23 @@ fn root_readme_mentions_component_gallery() {
 }
 
 #[test]
+fn gallery_glass_layer_preview_renders_tone_level_matrix() {
+    let html = dioxus_ssr::render_element(rsx! {
+        component_gallery::App {}
+    });
+
+    assert!(html.contains("gallery-variant-grid--3x3"));
+    for level in ["Subtle", "Floating", "Overlay"] {
+        for tone in ["Neutral", "Info", "Warning"] {
+            assert!(
+                html.contains(&format!("{level} · {tone}")),
+                "missing GlassLayer tile {level} · {tone}",
+            );
+        }
+    }
+}
+
+#[test]
 fn root_readme_describes_native_systems_without_bridge_language() {
     let readme_path = std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join("../../README.md");
     let readme = std::fs::read_to_string(readme_path).expect("README.md should be readable");
@@ -207,4 +224,152 @@ fn root_readme_describes_native_systems_without_bridge_language() {
             "README still contains bridge term {rejected}"
         );
     }
+}
+
+#[test]
+fn gallery_brand_uses_kinetics_logo_and_name() {
+    let html = dioxus_ssr::render_element(rsx! {
+        component_gallery::App {}
+    });
+
+    assert!(html.contains("Kinetics"));
+    assert!(!html.contains("Unified UI"));
+    assert!(html.contains("<svg"));
+    assert!(html.contains("dioxus-kinetics logo"));
+}
+
+#[test]
+fn gallery_css_includes_logo_and_variant_grid_styles() {
+    let html = dioxus_ssr::render_element(rsx! {
+        component_gallery::App {}
+    });
+
+    for selector in [
+        ".gallery-logo",
+        ".visually-hidden",
+        ".gallery-variant-grid",
+        ".gallery-variant-grid--3x3",
+        ".gallery-variant-grid--3col",
+        ".gallery-variant-grid--2col",
+        ".gallery-variant-grid--stack",
+        ".gallery-variant-tile",
+        ".gallery-variant-label",
+    ] {
+        assert!(html.contains(selector), "missing CSS selector {selector}");
+    }
+}
+
+#[test]
+fn gallery_timeline_scope_preview_renders_three_variants() {
+    let html = dioxus_ssr::render_element(rsx! {
+        component_gallery::App {}
+    });
+
+    assert!(html.contains("gallery-variant-grid--stack"));
+    assert!(
+        html.contains("\"data-stagger-index\": \"0\"") || html.contains("data-stagger-index=\"0\"")
+    );
+    for cue in ["rise-in", "enter", "settle", "pulse"] {
+        assert!(
+            html.contains(&format!("data-motion-cue=\"{cue}\"")),
+            "missing TimelineScope cue {cue}",
+        );
+    }
+    assert!(html.contains("data-ui-transparency=\"reduced\""));
+}
+
+#[test]
+fn gallery_frame_stage_preview_renders_three_frame_snapshots() {
+    let html = dioxus_ssr::render_element(rsx! {
+        component_gallery::App {}
+    });
+
+    for caption in ["Frame 0 / 180", "Frame 90 / 180", "Frame 179 / 180"] {
+        assert!(
+            html.contains(caption),
+            "missing FrameStage caption {caption}",
+        );
+    }
+}
+
+#[test]
+fn gallery_includes_kinetic_box_and_presence_gate_entries() {
+    let docs = component_gallery::component_docs();
+
+    let kb = docs
+        .iter()
+        .find(|doc| doc.name == "KineticBox")
+        .expect("KineticBox doc exists");
+    assert_eq!(kb.status, component_gallery::ComponentStatus::Ready);
+    assert!(kb.render.is_some());
+
+    let pg = docs
+        .iter()
+        .find(|doc| doc.name == "PresenceGate")
+        .expect("PresenceGate doc exists");
+    assert_eq!(pg.status, component_gallery::ComponentStatus::Ready);
+    assert!(pg.render.is_some());
+}
+
+#[test]
+fn gallery_kinetic_box_preview_renders_three_cues() {
+    let html = dioxus_ssr::render_element(rsx! {
+        component_gallery::App {}
+    });
+
+    for cue in ["rise-in", "fade-in", "slide-up"] {
+        assert!(
+            html.contains(&format!("data-motion-cue=\"{cue}\"")),
+            "missing KineticBox cue {cue}",
+        );
+    }
+}
+
+#[test]
+fn gallery_presence_gate_preview_renders_present_and_hidden_tiles() {
+    let html = dioxus_ssr::render_element(rsx! {
+        component_gallery::App {}
+    });
+
+    assert!(html.contains("Visible state"));
+    assert!(html.contains("Hidden state"));
+    assert!(html.contains("gallery-variant-grid--2col"));
+}
+
+#[test]
+fn gallery_capture_stage_preview_renders_three_viewport_profiles() {
+    let html = dioxus_ssr::render_element(rsx! {
+        component_gallery::App {}
+    });
+
+    for caption in [
+        "Mobile · 360 × 640",
+        "Tablet · 768 × 1024",
+        "Desktop · 1440 × 900",
+    ] {
+        assert!(
+            html.contains(caption),
+            "missing CaptureStage caption {caption}",
+        );
+    }
+
+    for viewport in ["mobile", "tablet", "desktop"] {
+        assert!(
+            html.contains(&format!("data-viewport=\"{viewport}\""))
+                || html.contains(&format!("viewport=\"{viewport}\""))
+                || html.contains(&format!(">{viewport}<")),
+            "missing CaptureStage viewport prop {viewport}",
+        );
+    }
+}
+
+#[test]
+fn root_readme_uses_kinetics_crate_name() {
+    let readme_path = std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join("../../README.md");
+    let readme = std::fs::read_to_string(readme_path).expect("README.md should be readable");
+
+    assert!(readme.contains("use kinetics::prelude::*"));
+    assert!(readme.contains("crates/kinetics"));
+    assert!(!readme.contains("unified_ui"));
+    assert!(!readme.contains("Unified UI"));
 }

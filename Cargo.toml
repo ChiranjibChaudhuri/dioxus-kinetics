@@ -13,7 +13,7 @@ members = [
     "crates/ui-composition",
     "crates/ui-capture",
     "crates/ui-styles",
-    "crates/unified_ui",
+    "crates/kinetics",
     "examples/component-gallery",
 ]
 
@@ -38,4 +38,4 @@ ui-timeline = { path = "crates/ui-timeline" }
 ui-composition = { path = "crates/ui-composition" }
 ui-capture = { path = "crates/ui-capture" }
 ui-styles = { path = "crates/ui-styles" }
-unified_ui = { path = "crates/unified_ui" }
+kinetics = { path = "crates/kinetics" }

@@ -45,7 +45,7 @@ The workspace already contains useful foundations:
 - `ui-native`: native capability planning
 - `ui-dioxus`: Dioxus components
 - `ui-styles`: shared CSS variables and component classes
-- `unified_ui`: public facade and prelude
+- `kinetics`: public facade and prelude
 - `examples/component-gallery`: documentation workbench
 
 The current bridge-like crates are placeholders. They should be renamed and reworked before they become a public downstream contract.
@@ -81,20 +81,20 @@ Because the repository is still version `0.1.0`, the implementation may make a b
 Downstream SaaS apps should still use one import:
 
 ```rust
-use unified_ui::prelude::*;
+use kinetics::prelude::*;
 ```
 
 The public facade should expose stable modules:
 
 ```rust
-unified_ui::prelude
-unified_ui::components
-unified_ui::materials
-unified_ui::motion
-unified_ui::timeline
-unified_ui::composition
-unified_ui::capture
-unified_ui::platform
+kinetics::prelude
+kinetics::components
+kinetics::materials
+kinetics::motion
+kinetics::timeline
+kinetics::composition
+kinetics::capture
+kinetics::platform
 ```
 
 The public facade should not expose internal crate topology unless consumers deliberately opt into lower-level crates.
@@ -1015,7 +1015,7 @@ Coming-soon entries remain valid, but they should be dynamic records in the regi
 
 ### Facade Tests
 
-`unified_ui`:
+`kinetics`:
 
 - prelude exports semantic names
 - prelude exports timeline/composition/capture types under native names
@@ -1046,7 +1046,7 @@ cargo test -p ui-timeline
 cargo test -p ui-composition
 cargo test -p ui-capture
 cargo test -p ui-dioxus
-cargo test -p unified_ui
+cargo test -p kinetics
 cargo test -p component-gallery
 cargo test --workspace
 ```
@@ -1068,7 +1068,7 @@ If crates are introduced incrementally, the plan should run the subset that exis
 ### Phase 2: Semantic Public Renames
 
 - introduce functional component names in `ui-dioxus`
-- export functional names from `unified_ui::prelude`
+- export functional names from `kinetics::prelude`
 - update gallery snippets and examples
 - decide whether old names are removed or gated behind `legacy-names`
 - update component naming docs

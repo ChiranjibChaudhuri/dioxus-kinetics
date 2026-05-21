@@ -2,8 +2,8 @@
 
 ## Goal
 
-Rename the public facade crate from `unified_ui` to `kinetics`, swap the
-component gallery's "UI" mark and "Unified UI" wordmark for the existing
+Rename the public facade crate from `kinetics` to `kinetics`, swap the
+component gallery's "UI" mark and "Kinetics" wordmark for the existing
 `docs/assets/dioxus-kinetics-logo.svg`, and expand the showcase previews for
 the already-Ready primitives in the Motion, Composition, Capture, and
 Foundations categories.
@@ -38,10 +38,10 @@ share the same files:
 
 ### Concern 1: Workspace rename
 
-The `crates/unified_ui` directory becomes `crates/kinetics`. The package
+The `crates/kinetics` directory becomes `crates/kinetics`. The package
 name in its `Cargo.toml` becomes `kinetics`. Every consumer that named
-`unified_ui` in a dependency, `use` statement, or doc comment is updated to
-`kinetics`. Brand strings "Unified UI" become "Kinetics". The user chose the
+`kinetics` in a dependency, `use` statement, or doc comment is updated to
+`kinetics`. Brand strings "Kinetics" become "Kinetics". The user chose the
 full rename option, so historical specs and plans under
 `docs/superpowers/specs/` and `docs/superpowers/plans/` are updated too,
 even though they describe past phases.
@@ -53,7 +53,7 @@ The current rail brand block uses two stacked elements:
 ```rust
 span { class: "gallery-mark", "UI" }
 div {
-    h1 { "Unified UI" }
+    h1 { "Kinetics" }
     p { "Component reference" }
 }
 ```
@@ -166,13 +166,13 @@ Two tiles (`.gallery-variant-grid--2col`):
 
 ## File Map
 
-- Move: `crates/unified_ui/` to `crates/kinetics/`.
+- Move: `crates/kinetics/` to `crates/kinetics/`.
 - Modify: `Cargo.toml` workspace members.
 - Modify: `crates/kinetics/Cargo.toml` package name and dependency aliases.
-- Modify: every `Cargo.toml` that lists `unified_ui` as a dependency, so the
+- Modify: every `Cargo.toml` that lists `kinetics` as a dependency, so the
   dependency now names `kinetics`. Today that includes
   `examples/component-gallery/Cargo.toml`.
-- Modify: `crates/kinetics/tests/prelude.rs` — replace `unified_ui::` with
+- Modify: `crates/kinetics/tests/prelude.rs` — replace `kinetics::` with
   `kinetics::`. No assertion changes.
 - Modify: `examples/component-gallery/src/lib.rs` — register the new
   `brand` module if needed.
@@ -182,7 +182,7 @@ Two tiles (`.gallery-variant-grid--2col`):
 - Modify: `examples/component-gallery/src/app.rs` — replace brand block,
   remove the gallery-mark span, remove the gallery-brand h1 and p
   elements. Insert the new gallery-logo div. Replace the main header h2
-  text from "Unified UI Component Gallery" to "Kinetics Component
+  text from "Kinetics Component Gallery" to "Kinetics Component
   Gallery". Replace the eyebrow text "Dioxus SaaS library" with
   "Dioxus Kinetics library".
 - Modify: `examples/component-gallery/src/docs.rs`:
@@ -202,25 +202,25 @@ Two tiles (`.gallery-variant-grid--2col`):
   responsive `@media` block to collapse the variant grids on narrow
   viewports.
 - Modify: `examples/component-gallery/tests/gallery.rs`:
-  - Replace brand text assertions ("Unified UI" → "Kinetics").
+  - Replace brand text assertions ("Kinetics" → "Kinetics").
   - Add brand SVG assertion (`<svg` present and the SVG title text
     "dioxus-kinetics logo" present).
   - Add variant-grid markers assertions for GlassLayer, TimelineScope,
     FrameStage, CaptureStage, KineticBox, PresenceGate.
   - Add an assertion that the rendered HTML does NOT contain the literal
-    string "Unified UI" anywhere.
+    string "Kinetics" anywhere.
   - Update README naming test to expect `crates/kinetics` and
     `use kinetics::prelude::*`.
 - Modify: `README.md`:
-  - Title and prose: every "Unified UI" becomes "Kinetics" (keep the repo
+  - Title and prose: every "Kinetics" becomes "Kinetics" (keep the repo
     name `dioxus-kinetics` as-is).
-  - Every `unified_ui` becomes `kinetics`.
-  - Workspace layout block: `unified_ui/` becomes `kinetics/`.
-  - Code examples: `use unified_ui::prelude::*` becomes
+  - Every `kinetics` becomes `kinetics`.
+  - Workspace layout block: `kinetics/` becomes `kinetics/`.
+  - Code examples: `use kinetics::prelude::*` becomes
     `use kinetics::prelude::*`.
-  - Cargo commands: `-p unified_ui` becomes `-p kinetics`.
+  - Cargo commands: `-p kinetics` becomes `-p kinetics`.
 - Modify: `docs/component-naming.md`, `docs/platform-support.md`,
-  `docs/glass-materials.md` — any "Unified UI" or `unified_ui` reference.
+  `docs/glass-materials.md` — any "Kinetics" or `kinetics` reference.
 - Modify: `docs/superpowers/specs/2026-05-20-unified-ui-library-design.md`,
   `docs/superpowers/specs/2026-05-20-advanced-ui-wave-design.md`,
   `docs/superpowers/specs/2026-05-20-component-gallery-design.md`,
@@ -229,7 +229,7 @@ Two tiles (`.gallery-variant-grid--2col`):
   `docs/superpowers/plans/2026-05-20-component-gallery.md`,
   `docs/superpowers/plans/2026-05-21-advanced-ui-wave.md`,
   `docs/superpowers/plans/2026-05-21-native-kinetics-systems.md` — search
-  and replace `unified_ui` → `kinetics` and "Unified UI" → "Kinetics".
+  and replace `kinetics` → `kinetics` and "Kinetics" → "Kinetics".
   Historical context wording stays; only the names update.
 - The doc filenames `docs/superpowers/specs/2026-05-20-unified-ui-library-design.md`
   and `docs/superpowers/plans/2026-05-20-unified-ui-library.md` are kept
@@ -327,13 +327,13 @@ required for this spec.
 
 `crates/kinetics/tests/prelude.rs`:
 
-- All eight existing tests continue to exist, with `unified_ui::` replaced
+- All eight existing tests continue to exist, with `kinetics::` replaced
   by `kinetics::`. The test function names do not change.
 
 `examples/component-gallery/tests/gallery.rs`:
 
 - `gallery_renders_ready_examples_and_coming_soon_entries`: replace
-  `"Unified UI Component Gallery"` assertion with `"Kinetics Component
+  `"Kinetics Component Gallery"` assertion with `"Kinetics Component
   Gallery"`.
 - `root_readme_mentions_component_gallery`: assertions stay valid.
 - `root_readme_describes_native_systems_without_bridge_language`:
@@ -349,7 +349,7 @@ fn gallery_brand_uses_kinetics_logo_and_name() {
     });
 
     assert!(html.contains("Kinetics"));
-    assert!(!html.contains("Unified UI"));
+    assert!(!html.contains("Kinetics"));
     assert!(html.contains("<svg"));
     assert!(html.contains("dioxus-kinetics logo"));
 }
@@ -398,8 +398,8 @@ fn root_readme_uses_kinetics_crate_name() {
 
     assert!(readme.contains("use kinetics::prelude::*"));
     assert!(readme.contains("crates/kinetics"));
-    assert!(!readme.contains("unified_ui"));
-    assert!(!readme.contains("Unified UI"));
+    assert!(!readme.contains("kinetics"));
+    assert!(!readme.contains("Kinetics"));
 }
 ```
 
@@ -409,7 +409,7 @@ fn root_readme_uses_kinetics_crate_name() {
 - `cargo test --workspace`
 - `cargo check -p component-gallery`
 - Workspace-wide search:
-  - `rg -n "unified_ui|Unified UI" crates examples docs README.md Cargo.toml` returns no matches.
+  - `rg -n "kinetics|Kinetics" crates examples docs README.md Cargo.toml` returns no matches.
 
 The negative-guard tests in `crates/kinetics/tests/prelude.rs` and
 `examples/component-gallery/tests/gallery.rs` that check for `GSAP`,
@@ -417,14 +417,14 @@ The negative-guard tests in `crates/kinetics/tests/prelude.rs` and
 
 ## Acceptance Checklist
 
-- [ ] `crates/unified_ui` directory no longer exists; `crates/kinetics`
+- [ ] `crates/kinetics` directory no longer exists; `crates/kinetics`
       directory contains the same source tree.
 - [ ] Workspace `Cargo.toml` lists `crates/kinetics` instead of
-      `crates/unified_ui`.
+      `crates/kinetics`.
 - [ ] `crates/kinetics/Cargo.toml` package name is `kinetics`.
-- [ ] Every `use unified_ui::*` is replaced with `use kinetics::*`.
+- [ ] Every `use kinetics::*` is replaced with `use kinetics::*`.
 - [ ] Component gallery rail renders the SVG logo and no longer shows
-      the literal string "Unified UI".
+      the literal string "Kinetics".
 - [ ] Component gallery main header reads "Kinetics Component Gallery".
 - [ ] Component gallery `KineticBox` and `PresenceGate` entries exist with
       `ComponentStatus::Ready` and variant-grid previews.
@@ -436,7 +436,7 @@ The negative-guard tests in `crates/kinetics/tests/prelude.rs` and
 - [ ] `cargo fmt --all -- --check` passes.
 - [ ] `cargo test --workspace` passes.
 - [ ] `cargo check -p component-gallery` passes.
-- [ ] `rg "unified_ui|Unified UI" crates examples docs README.md Cargo.toml`
+- [ ] `rg "kinetics|Kinetics" crates examples docs README.md Cargo.toml`
       returns no matches.
 - [ ] Coming-soon entries (Presence, Sequence, SharedLayout, SharedElement,
       IconButton) remain `ComponentStatus::ComingSoon` and untouched.

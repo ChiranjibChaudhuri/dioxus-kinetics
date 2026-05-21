@@ -30,10 +30,10 @@ No new library components will be implemented in this phase.
 
 ## Architecture
 
-The example app will depend on `dioxus` and `unified_ui`. It will use the public prelude so examples match downstream usage:
+The example app will depend on `dioxus` and `kinetics`. It will use the public prelude so examples match downstream usage:
 
 ```rust
-use unified_ui::prelude::*;
+use kinetics::prelude::*;
 ```
 
 The app will be registry-driven. A single Rust module will hold the documentation records:

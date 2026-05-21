@@ -14,6 +14,8 @@ members = [
     "crates/ui-capture",
     "crates/ui-styles",
     "crates/kinetics",
+    "crates/ui-runtime",
+    "crates/ui-icons",
     "examples/component-gallery",
 ]
 
@@ -39,3 +41,5 @@ ui-composition = { path = "crates/ui-composition" }
 ui-capture = { path = "crates/ui-capture" }
 ui-styles = { path = "crates/ui-styles" }
 kinetics = { path = "crates/kinetics" }
+ui-runtime = { path = "crates/ui-runtime" }
+ui-icons = { path = "crates/ui-icons" }

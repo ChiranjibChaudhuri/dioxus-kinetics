@@ -85,3 +85,86 @@ fn repeat_yoyo_maps_clock_into_reverse_progress() {
     assert!(sample.states[0].opacity < 1.0);
     assert!(sample.states[0].opacity > 0.0);
 }
+
+#[test]
+fn fill_none_drops_state_after_timeline_end() {
+    let timeline = Timeline::new("fade", 100.0)
+        .with_fill(FillMode::None)
+        .with_track(TimelineTrack::new(
+            MotionTarget::self_node(),
+            vec![MotionSegment::new(
+                0.0,
+                100.0,
+                MotionCue::opacity(
+                    0.0,
+                    1.0,
+                    Transition::Tween {
+                        duration_ms: 100,
+                        ease: Ease::Linear,
+                    },
+                ),
+            )],
+        ));
+
+    let sample = timeline.sample(TimelineClock::Playback { elapsed_ms: 101.0 });
+
+    assert!(sample.states.is_empty());
+}
+
+#[test]
+fn backwards_fill_does_not_fill_after_timeline_end() {
+    let timeline = Timeline::new("fade", 100.0)
+        .with_fill(FillMode::Backwards)
+        .with_track(TimelineTrack::new(
+            MotionTarget::self_node(),
+            vec![MotionSegment::new(
+                20.0,
+                80.0,
+                MotionCue::opacity(
+                    0.0,
+                    1.0,
+                    Transition::Tween {
+                        duration_ms: 80,
+                        ease: Ease::Linear,
+                    },
+                ),
+            )],
+        ));
+
+    let before = timeline.sample(TimelineClock::Playback { elapsed_ms: 0.0 });
+    let after = timeline.sample(TimelineClock::Playback { elapsed_ms: 101.0 });
+
+    assert_eq!(before.states[0].opacity, 0.0);
+    assert!(after.states.is_empty());
+}
+
+#[test]
+fn repeat_count_without_forwards_fill_drops_after_exhaustion() {
+    let timeline = Timeline::new("pulse", 100.0)
+        .with_repeat(RepeatMode::Count {
+            count: 2,
+            yoyo: false,
+        })
+        .with_fill(FillMode::None)
+        .with_track(TimelineTrack::new(
+            MotionTarget::self_node(),
+            vec![MotionSegment::new(
+                0.0,
+                100.0,
+                MotionCue::opacity(
+                    0.0,
+                    1.0,
+                    Transition::Tween {
+                        duration_ms: 100,
+                        ease: Ease::Linear,
+                    },
+                ),
+            )],
+        ));
+
+    let boundary = timeline.sample(TimelineClock::Playback { elapsed_ms: 100.0 });
+    let exhausted = timeline.sample(TimelineClock::Playback { elapsed_ms: 201.0 });
+
+    assert_eq!(boundary.states[0].opacity, 0.0);
+    assert!(exhausted.states.is_empty());
+}

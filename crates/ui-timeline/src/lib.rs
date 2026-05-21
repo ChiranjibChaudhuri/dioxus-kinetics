@@ -135,12 +135,15 @@ impl Timeline {
 
     pub fn sample(&self, clock: TimelineClock) -> TimelineSample {
         let elapsed_ms = self.resolve_elapsed_ms(clock);
-        let timeline_ms = self.map_repeat_elapsed(elapsed_ms);
-        let states = self
-            .tracks
-            .iter()
-            .filter_map(|track| track.sample(timeline_ms, self.fill))
-            .collect();
+        let position = self.map_repeat_elapsed(elapsed_ms);
+        let states = if position.phase.can_emit(self.fill) {
+            self.tracks
+                .iter()
+                .filter_map(|track| track.sample(position.local_ms, self.fill))
+                .collect()
+        } else {
+            Vec::new()
+        };
 
         TimelineSample { elapsed_ms, states }
     }
@@ -164,10 +167,13 @@ impl Timeline {
         }
     }
 
-    fn map_repeat_elapsed(&self, elapsed_ms: f32) -> f32 {
+    fn map_repeat_elapsed(&self, elapsed_ms: f32) -> TimelinePosition {
         let duration_ms = finite_non_negative(self.duration_ms);
         if duration_ms == 0.0 {
-            return 0.0;
+            return TimelinePosition {
+                local_ms: 0.0,
+                phase: TimelinePhase::Active,
+            };
         }
 
         let (repeat_count, yoyo) = match self.repeat {
@@ -175,24 +181,53 @@ impl Timeline {
             RepeatMode::Count { count, yoyo } => (count.max(1), yoyo),
         };
         let total_ms = duration_ms * repeat_count as f32;
-        let bounded = match self.fill {
-            FillMode::None | FillMode::Backwards => elapsed_ms.min(total_ms),
-            FillMode::Forwards | FillMode::Both => elapsed_ms.min(total_ms),
-        };
-        let bounded = bounded.max(0.0);
-        let mut iteration = (bounded / duration_ms).floor() as u32;
-        if iteration >= repeat_count {
-            iteration = repeat_count - 1;
+        if elapsed_ms > total_ms {
+            let local_ms = if yoyo && repeat_count % 2 == 0 {
+                0.0
+            } else {
+                duration_ms
+            };
+            return TimelinePosition {
+                local_ms,
+                phase: TimelinePhase::After,
+            };
         }
 
-        let mut local_ms = bounded - duration_ms * iteration as f32;
-        if bounded == total_ms {
+        let mut iteration = (elapsed_ms / duration_ms).floor() as u32;
+        let mut local_ms = elapsed_ms - duration_ms * iteration as f32;
+        if iteration >= repeat_count {
+            iteration = repeat_count - 1;
             local_ms = duration_ms;
         }
+
         if yoyo && iteration % 2 == 1 {
-            duration_ms - local_ms
-        } else {
-            local_ms
+            local_ms = duration_ms - local_ms;
+        }
+
+        TimelinePosition {
+            local_ms,
+            phase: TimelinePhase::Active,
+        }
+    }
+}
+
+#[derive(Clone, Copy, Debug, PartialEq)]
+struct TimelinePosition {
+    local_ms: f32,
+    phase: TimelinePhase,
+}
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+enum TimelinePhase {
+    Active,
+    After,
+}
+
+impl TimelinePhase {
+    const fn can_emit(self, fill: FillMode) -> bool {
+        match self {
+            Self::Active => true,
+            Self::After => matches!(fill, FillMode::Forwards | FillMode::Both),
         }
     }
 }

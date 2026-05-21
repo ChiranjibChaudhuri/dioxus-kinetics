@@ -11,6 +11,7 @@ members = [
     "crates/ui-dioxus",
     "crates/ui-gsap",
     "crates/ui-hyperframes",
+    "crates/ui-styles",
     "crates/unified_ui",
     "examples/component-gallery",
 ]
@@ -34,4 +35,5 @@ ui-native = { path = "crates/ui-native" }
 ui-dioxus = { path = "crates/ui-dioxus" }
 ui-gsap = { path = "crates/ui-gsap" }
 ui-hyperframes = { path = "crates/ui-hyperframes" }
+ui-styles = { path = "crates/ui-styles" }
 unified_ui = { path = "crates/unified_ui" }

@@ -17,11 +17,12 @@ pub fn App() -> Element {
             "data-ui-density": "comfortable",
             aside { class: "gallery-rail",
                 div { class: "gallery-brand",
-                    span { class: "gallery-mark", "UI" }
                     div {
-                        h1 { "Kinetics" }
-                        p { "Component reference" }
+                        class: "gallery-logo",
+                        aria_label: "Kinetics",
+                        dangerous_inner_html: crate::brand::KINETICS_LOGO_SVG,
                     }
+                    span { class: "visually-hidden", "Kinetics component gallery" }
                 }
                 nav { class: "gallery-nav", aria_label: "Component categories",
                     for category in categories() {
@@ -31,7 +32,7 @@ pub fn App() -> Element {
             }
             main { class: "gallery-main",
                 header { class: "gallery-header",
-                    p { class: "gallery-eyebrow", "Dioxus SaaS library" }
+                    p { class: "gallery-eyebrow", "Dioxus Kinetics library" }
                     h2 { "Kinetics Component Gallery" }
                     p {
                         "Semantic components grouped by product function, with live rendered examples for available primitives and disabled coming-soon entries for the next phase."

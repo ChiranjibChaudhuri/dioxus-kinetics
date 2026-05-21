@@ -208,3 +208,15 @@ fn root_readme_describes_native_systems_without_bridge_language() {
         );
     }
 }
+
+#[test]
+fn gallery_brand_uses_kinetics_logo_and_name() {
+    let html = dioxus_ssr::render_element(rsx! {
+        component_gallery::App {}
+    });
+
+    assert!(html.contains("Kinetics"));
+    assert!(!html.contains("Unified UI"));
+    assert!(html.contains("<svg"));
+    assert!(html.contains("dioxus-kinetics logo"));
+}

@@ -93,3 +93,31 @@ fn public_api_names_use_native_system_boundaries() {
         );
     }
 }
+
+#[test]
+fn prelude_exposes_functional_component_names() {
+    let names = unified_ui::public_api_names();
+
+    for expected in [
+        "ActionControl",
+        "TextEntry",
+        "ChoiceMark",
+        "StateSwitch",
+        "ViewSwitcher",
+        "ActionBar",
+        "NavigationRail",
+        "MetricReadout",
+        "BlankState",
+        "ModalLayer",
+        "NoticeStack",
+        "CommandFinder",
+        "ContextHint",
+        "ContentPlane",
+        "GlassLayer",
+    ] {
+        assert!(
+            names.contains(&expected),
+            "missing functional name {expected}"
+        );
+    }
+}

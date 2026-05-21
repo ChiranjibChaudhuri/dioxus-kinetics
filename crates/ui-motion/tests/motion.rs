@@ -31,6 +31,19 @@ fn sample_tween_returns_deterministic_progress_and_value() {
 }
 
 #[test]
+fn sample_tween_resolves_zero_duration_to_final_value() {
+    let sample = sample_tween(10.0, 30.0, 0.0, 0.0, Ease::Linear);
+
+    assert_eq!(
+        sample,
+        TweenSample {
+            progress: 1.0,
+            value: 30.0,
+        }
+    );
+}
+
+#[test]
 fn spring_step_moves_toward_target() {
     let spring = Spring::snappy();
     let value = spring.step(0.0, 10.0, 0.0, 1.0 / 60.0).value;

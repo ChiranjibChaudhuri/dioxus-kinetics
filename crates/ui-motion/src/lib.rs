@@ -98,13 +98,17 @@ pub fn sample_tween(
     duration_ms: f32,
     ease: Ease,
 ) -> TweenSample {
-    let duration_ms = if duration_ms.is_finite() && duration_ms > 0.0 {
-        duration_ms
+    let progress = if duration_ms.is_finite() {
+        if duration_ms <= 0.0 {
+            1.0
+        } else {
+            let raw = finite_or_zero(elapsed_ms) / duration_ms;
+            apply_ease(raw.clamp(0.0, 1.0), ease)
+        }
     } else {
-        1.0
+        let raw = finite_or_zero(elapsed_ms);
+        apply_ease(raw.clamp(0.0, 1.0), ease)
     };
-    let raw = finite_or_zero(elapsed_ms) / duration_ms;
-    let progress = apply_ease(raw.clamp(0.0, 1.0), ease);
 
     TweenSample {
         progress,

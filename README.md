@@ -11,12 +11,12 @@ The logo in this repository is an original `dioxus-kinetics` mark. It references
 The intended downstream import is:
 
 ```rust
-use unified_ui::prelude::*;
+use kinetics::prelude::*;
 ```
 
 ## What This Repository Contains
 
-This repository is a Rust Cargo workspace. The public API is exposed through `crates/unified_ui`; the other crates keep design tokens, material recipes, motion math, layout math, renderer adapters, and optional backend boundaries focused.
+This repository is a Rust Cargo workspace. The public API is exposed through `crates/kinetics`; the other crates keep design tokens, material recipes, motion math, layout math, renderer adapters, and optional backend boundaries focused.
 
 Ready rendered components:
 
@@ -48,7 +48,7 @@ Reserved coming-soon names stay visible in the gallery without fake implementati
 ## Design Principles
 
 - Semantic component names based on role and behavior.
-- One downstream-facing crate: `unified_ui`.
+- One downstream-facing crate: `kinetics`.
 - Apple-like glass styling with solid fallback behavior.
 - Reusable `.ui-*` styling exposed through `ui-styles` for downstream apps.
 - Web, Desktop, Mobile, and Native adapter boundaries.
@@ -73,7 +73,7 @@ crates/
   ui-timeline/      native timeline, stagger, presence, scroll, and shared movement contracts
   ui-composition/   native frame composition and deterministic frame sampling
   ui-capture/       native capture stages, viewport profiles, marks, and export manifests
-  unified_ui/       public facade and prelude
+  kinetics/         public facade and prelude
 examples/
   component-gallery/ runnable Dioxus documentation gallery
 docs/
@@ -84,7 +84,7 @@ docs/
 
 ## Features
 
-Default `unified_ui` features:
+Default `kinetics` features:
 
 - `web`
 - `desktop`
@@ -106,8 +106,8 @@ Optional features:
 Example:
 
 ```powershell
-cargo test -p unified_ui --no-default-features --features native
-cargo test -p unified_ui --no-default-features --features "native timeline composition capture"
+cargo test -p kinetics --no-default-features --features native
+cargo test -p kinetics --no-default-features --features "native timeline composition capture"
 ```
 
 ## Component Gallery
@@ -162,7 +162,7 @@ cargo test -p component-gallery
 ## Public Usage Example
 
 ```rust
-use unified_ui::prelude::*;
+use kinetics::prelude::*;
 
 let css = library_css();
 assert!(css.contains(".ui-command-menu"));
@@ -185,7 +185,7 @@ Example Dioxus usage:
 
 ```rust
 use dioxus::prelude::*;
-use unified_ui::prelude::*;
+use kinetics::prelude::*;
 
 #[component]
 fn Example() -> Element {
@@ -224,7 +224,7 @@ Shared CSS can be rendered once near the application root:
 
 ```rust
 use dioxus::prelude::*;
-use unified_ui::prelude::*;
+use kinetics::prelude::*;
 
 #[component]
 fn App() -> Element {

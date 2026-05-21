@@ -1,4 +1,5 @@
 use ui_runtime::state::{advance_presence, PresenceInputs, PresenceState};
+use ui_runtime::reduced_motion::ReducedMotion;
 
 #[test]
 fn initial_present_true_starts_entering() {
@@ -62,4 +63,12 @@ fn exiting_interrupted_by_present_true_starts_entering() {
     });
     assert_eq!(s.state, PresenceState::Entering);
     assert_eq!(s.target, 1.0);
+}
+
+#[test]
+fn reduced_motion_struct_carries_flag() {
+    let on = ReducedMotion(true);
+    let off = ReducedMotion(false);
+    assert!(on.0);
+    assert!(!off.0);
 }

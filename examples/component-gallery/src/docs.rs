@@ -44,7 +44,9 @@ impl ComponentCategory {
             Self::Feedback => "Overlays and messages that respond to user or system state.",
             Self::DataWorkflows => "Readouts and surfaces that summarize product data.",
             Self::Motion => "Lifecycle and layout motion primitives for continuity.",
-            Self::Composition => "Frame-addressable scenes for previews and export-safe compositions.",
+            Self::Composition => {
+                "Frame-addressable scenes for previews and export-safe compositions."
+            }
             Self::Capture => "Viewport and frame targets for documentation and capture runners.",
         }
     }

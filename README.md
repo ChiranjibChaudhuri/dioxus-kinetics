@@ -37,11 +37,6 @@ Ready rendered components:
 - `Tooltip`
 - `EmptyState`
 - `Sequence`
-
-Reserved coming-soon names stay visible in the gallery without fake implementations:
-
-- `IconButton`
-- `Presence`
 - `SharedLayout`
 - `SharedElement`
 

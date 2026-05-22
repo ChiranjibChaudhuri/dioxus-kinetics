@@ -291,20 +291,20 @@ const COMPONENT_DOCS: [ComponentDoc; 27] = [
     ComponentDoc {
         name: "SharedLayout",
         category: ComponentCategory::Motion,
-        status: ComponentStatus::ComingSoon,
-        summary: "Coordinates layout continuity across related regions.",
+        status: ComponentStatus::Ready,
+        summary: "Provides a scoped shared-element registry for descendant SharedElement components.",
         snippet: SHARED_LAYOUT_SNIPPET,
-        accessibility: "Coming soon; layout motion will keep DOM semantics stable.",
-        render: None,
+        accessibility: "Pure wrapper; renders children unchanged.",
+        render: Some(shared_layout_preview),
     },
     ComponentDoc {
         name: "SharedElement",
         category: ComponentCategory::Motion,
-        status: ComponentStatus::ComingSoon,
-        summary: "Marks an element that can visually continue between layout states.",
+        status: ComponentStatus::Ready,
+        summary: "Marks an element with a shared identity for cross-tree FLIP transitions; SSR-safe.",
         snippet: SHARED_ELEMENT_SNIPPET,
-        accessibility: "Coming soon; shared elements will avoid replacing meaningful content.",
-        render: None,
+        accessibility: "data-shared-id attribute carries the identity; reduced-motion renders at the settled state.",
+        render: Some(shared_element_preview),
     },
     ComponentDoc {
         name: "TimelineScope",
@@ -488,13 +488,14 @@ const SEQUENCE_SNIPPET: &str = r#"Sequence {
 }"#;
 
 const SHARED_LAYOUT_SNIPPET: &str = r#"SharedLayout {
-    layout_id: "billing-plan",
-    children
+    SharedElement { id: "hero",
+        p { "Cross-tree" }
+    }
 }"#;
 
 const SHARED_ELEMENT_SNIPPET: &str = r#"SharedElement {
-    element_id: "customer-row-42",
-    children
+    id: "hero",
+    p { "Identity persists across renders" }
 }"#;
 
 const TIMELINE_SCOPE_SNIPPET: &str = r#"TimelineScope {
@@ -993,6 +994,48 @@ fn glass_layer_preview() -> Element {
                             density: GlassDensity::Comfortable,
                             "Material preview"
                         }
+                    }
+                }
+            }
+        }
+    }
+}
+
+fn shared_layout_preview() -> Element {
+    rsx! {
+        SharedLayout {
+            div { class: "gallery-variant-grid gallery-variant-grid--2col",
+                div { class: "gallery-variant-tile",
+                    span { class: "gallery-variant-label", "Left" }
+                    SharedElement { id: "card-left".to_string(),
+                        p { "Same identity across renders." }
+                    }
+                }
+                div { class: "gallery-variant-tile",
+                    span { class: "gallery-variant-label", "Right" }
+                    SharedElement { id: "card-right".to_string(),
+                        p { "Independent identity." }
+                    }
+                }
+            }
+        }
+    }
+}
+
+fn shared_element_preview() -> Element {
+    rsx! {
+        div { class: "gallery-variant-grid gallery-variant-grid--2col",
+            div { class: "gallery-variant-tile",
+                span { class: "gallery-variant-label", "Identity" }
+                SharedElement { id: "demo-hero".to_string(),
+                    p { "data-shared-id attribute carries the identity." }
+                }
+            }
+            div { class: "gallery-variant-tile",
+                span { class: "gallery-variant-label", "Within layout" }
+                SharedLayout {
+                    SharedElement { id: "scoped".to_string(),
+                        p { "Scoped to its SharedLayout ancestor." }
                     }
                 }
             }

@@ -43,7 +43,7 @@ fn registry_contains_ready_and_coming_soon_components() {
         .any(|doc| doc.name == "TextField" && doc.status == ComponentStatus::Ready));
     assert!(docs
         .iter()
-        .any(|doc| doc.name == "SharedElement" && doc.status == ComponentStatus::ComingSoon));
+        .any(|doc| doc.name == "SharedElement" && doc.status == ComponentStatus::Ready));
 }
 
 #[test]
@@ -115,7 +115,6 @@ fn gallery_renders_ready_examples_and_coming_soon_entries() {
     assert!(html.contains("Button"));
     assert!(html.contains("Save changes"));
     assert!(html.contains("GlassSurface"));
-    assert!(html.contains("Coming soon"));
     assert!(html.contains("TextField"));
     assert!(html.contains("SharedElement"));
 }
@@ -443,4 +442,27 @@ fn gallery_sequence_preview_renders_three_cues_with_inline_styles() {
         inline_style_count >= 3,
         "expected at least 3 inline-style KineticBox descendants; got {inline_style_count}",
     );
+}
+
+#[test]
+fn gallery_shared_layout_and_shared_element_are_ready() {
+    let docs = component_gallery::component_docs();
+    let sl = docs
+        .iter()
+        .find(|d| d.name == "SharedLayout")
+        .expect("SharedLayout doc exists");
+    let se = docs
+        .iter()
+        .find(|d| d.name == "SharedElement")
+        .expect("SharedElement doc exists");
+    assert_eq!(sl.status, component_gallery::ComponentStatus::Ready);
+    assert_eq!(se.status, component_gallery::ComponentStatus::Ready);
+    assert!(sl.render.is_some());
+    assert!(se.render.is_some());
+
+    let html = dioxus_ssr::render_element(rsx! {
+        component_gallery::App {}
+    });
+    assert!(html.contains("data-shared-id=\""));
+    assert!(html.contains("class=\"ui-shared-layout\""));
 }

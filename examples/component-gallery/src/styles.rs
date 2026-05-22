@@ -106,18 +106,6 @@ body {
     line-height: 1.6;
 }
 
-.gallery-controls {
-    flex-wrap: wrap;
-    align-items: center;
-    justify-content: space-between;
-    margin: 20px 0;
-    padding: var(--ui-space-4);
-    border: 1px solid var(--ui-border);
-    border-radius: var(--ui-radius-lg);
-    background: var(--ui-glass);
-    backdrop-filter: blur(18px) saturate(160%);
-}
-
 .gallery-control-group {
     align-items: center;
     flex-wrap: wrap;

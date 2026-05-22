@@ -40,6 +40,7 @@ pub fn ScrubFrame(
     let mut playing = use_signal(|| false);
     use_context_provider(|| ScrubElapsedMs(elapsed));
     use_context_provider(|| ScrubFps(fps.unwrap_or(30)));
+    let prefs = try_consume_context::<crate::controls::GalleryPrefs>();
 
     #[cfg(target_arch = "wasm32")]
     use_effect(move || {
@@ -93,6 +94,13 @@ pub fn ScrubFrame(
                         r#type: "button",
                         "aria-label": if *playing.read() { "Pause" } else { "Play" },
                         onclick: move |_| {
+                            if let Some(prefs) = prefs {
+                                if *prefs.motion.read() == crate::controls::MotionPref::Reduced {
+                                    elapsed.set(duration_ms);
+                                    playing.set(false);
+                                    return;
+                                }
+                            }
                             let now = *playing.read();
                             playing.set(!now);
                         },

@@ -325,7 +325,7 @@ fn gallery_presence_gate_preview_renders_present_and_hidden_tiles() {
     });
 
     assert!(html.contains("Visible state"));
-    assert!(html.contains("Hidden state"));
+    assert!(html.contains("(gate suppresses children)"));
     assert!(html.contains("gallery-variant-grid--2col"));
 }
 

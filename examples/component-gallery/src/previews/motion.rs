@@ -189,8 +189,10 @@ pub fn presence_gate_preview() -> Element {
                 ReplayFrame {
                     label: "Hidden",
                     children: rsx! {
-                        PresenceGate { present: false }
-                        p { "Hidden state" }
+                        PresenceGate { present: false,
+                            p { "Visible state" }
+                        }
+                        span { class: "gallery-variant-label", "(gate suppresses children)" }
                     },
                 }
             }

@@ -1,8 +1,12 @@
 #![forbid(unsafe_code)]
 
-pub const BASE_CSS: &str = r#"
+use ui_tokens::elevation::{DARK_ELEVATION, LIGHT_ELEVATION};
+
+pub fn base_css() -> String {
+    format!(
+        r#"
 :root,
-[data-ui-theme="light"] {
+[data-ui-theme="light"] {{
     color-scheme: light;
     --ui-font-sans: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
     --ui-bg: #f6f8fb;
@@ -22,6 +26,10 @@ pub const BASE_CSS: &str = r#"
     --ui-info: #1476bf;
     --ui-shadow-soft: 0 18px 46px rgba(27, 39, 61, 0.10);
     --ui-shadow-lifted: 0 24px 80px rgba(13, 20, 32, 0.24);
+    --ui-elevation-0: {l0};
+    --ui-elevation-1: {l1};
+    --ui-elevation-2: {l2};
+    --ui-elevation-3: {l3};
     --ui-radius-sm: 6px;
     --ui-radius-md: 8px;
     --ui-radius-lg: 12px;
@@ -33,9 +41,9 @@ pub const BASE_CSS: &str = r#"
     --ui-control-height: 36px;
     --ui-motion-fast: 120ms;
     --ui-motion-normal: 180ms;
-}
+}}
 
-[data-ui-theme="dark"] {
+[data-ui-theme="dark"] {{
     color-scheme: dark;
     --ui-bg: #0d1117;
     --ui-surface: #151b23;
@@ -49,57 +57,71 @@ pub const BASE_CSS: &str = r#"
     --ui-focus: #64b5ff;
     --ui-shadow-soft: 0 18px 46px rgba(0, 0, 0, 0.24);
     --ui-shadow-lifted: 0 26px 90px rgba(0, 0, 0, 0.42);
-}
+    --ui-elevation-0: {d0};
+    --ui-elevation-1: {d1};
+    --ui-elevation-2: {d2};
+    --ui-elevation-3: {d3};
+}}
 
-[data-ui-density="compact"] {
+[data-ui-density="compact"] {{
     --ui-control-height: 32px;
     --ui-space-3: 10px;
     --ui-space-4: 12px;
-}
+}}
 
-[data-ui-density="comfortable"] {
+[data-ui-density="comfortable"] {{
     --ui-control-height: 36px;
-}
+}}
 
-[data-ui-density="spacious"] {
+[data-ui-density="spacious"] {{
     --ui-control-height: 42px;
     --ui-space-3: 14px;
     --ui-space-4: 20px;
-}
+}}
 
-[data-ui-transparency="reduced"] {
+[data-ui-transparency="reduced"] {{
     --ui-glass: var(--ui-glass-solid);
-}
+}}
 
-* {
+* {{
     box-sizing: border-box;
-}
+}}
 
-body {
+body {{
     margin: 0;
     font-family: var(--ui-font-sans);
     background: var(--ui-bg);
     color: var(--ui-fg);
-}
+}}
 
 button,
 input,
 textarea,
-select {
+select {{
     font: inherit;
-}
+}}
 
-@media (prefers-reduced-motion: reduce) {
+@media (prefers-reduced-motion: reduce) {{
     *,
     *::before,
-    *::after {
+    *::after {{
         transition-duration: 0.01ms !important;
         animation-duration: 0.01ms !important;
         animation-iteration-count: 1 !important;
         scroll-behavior: auto !important;
-    }
+    }}
+}}
+"#,
+        l0 = LIGHT_ELEVATION.e0,
+        l1 = LIGHT_ELEVATION.e1,
+        l2 = LIGHT_ELEVATION.e2,
+        l3 = LIGHT_ELEVATION.e3,
+        d0 = DARK_ELEVATION.e0,
+        d1 = DARK_ELEVATION.e1,
+        d2 = DARK_ELEVATION.e2,
+        d3 = DARK_ELEVATION.e3,
+    )
 }
-"#;
 
 pub const COMPONENT_CSS: &str = r#"
 .ui-button,
@@ -640,8 +662,9 @@ pub const COMPONENT_CSS: &str = r#"
 "#;
 
 pub fn library_css() -> String {
-    let mut css = String::with_capacity(BASE_CSS.len() + COMPONENT_CSS.len() + 1);
-    css.push_str(BASE_CSS);
+    let base = base_css();
+    let mut css = String::with_capacity(base.len() + COMPONENT_CSS.len() + 1);
+    css.push_str(&base);
     css.push('\n');
     css.push_str(COMPONENT_CSS);
     css

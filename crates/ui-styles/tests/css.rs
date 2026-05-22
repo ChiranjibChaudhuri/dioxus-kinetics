@@ -1,4 +1,4 @@
-use ui_styles::{library_css, BASE_CSS, COMPONENT_CSS};
+use ui_styles::{base_css, library_css, COMPONENT_CSS};
 
 #[test]
 fn component_css_covers_sequence_wrapper() {
@@ -7,7 +7,7 @@ fn component_css_covers_sequence_wrapper() {
 
 #[test]
 fn base_css_exposes_theme_density_and_preference_hooks() {
-    let css = BASE_CSS;
+    let css = base_css();
 
     assert!(css.contains(":root"));
     assert!(css.contains("[data-ui-theme=\"dark\"]"));
@@ -96,4 +96,24 @@ fn component_css_covers_native_kinetics_systems() {
 fn component_css_covers_shared_layout_and_shared_element() {
     assert!(COMPONENT_CSS.contains(".ui-shared-layout"));
     assert!(COMPONENT_CSS.contains(".ui-shared-element"));
+}
+
+#[test]
+fn light_root_declares_four_elevation_variables() {
+    let css = library_css();
+    assert!(css.contains("--ui-elevation-0:"));
+    assert!(css.contains("--ui-elevation-1:"));
+    assert!(css.contains("--ui-elevation-2:"));
+    assert!(css.contains("--ui-elevation-3:"));
+}
+
+#[test]
+fn dark_theme_re_declares_elevation_variables() {
+    let css = library_css();
+    let dark_idx = css
+        .find("[data-ui-theme=\"dark\"]")
+        .expect("dark theme block exists");
+    let dark_block = &css[dark_idx..];
+    assert!(dark_block.contains("--ui-elevation-0:"));
+    assert!(dark_block.contains("--ui-elevation-3:"));
 }

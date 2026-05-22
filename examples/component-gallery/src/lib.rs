@@ -5,6 +5,7 @@ pub mod controls;
 mod brand;
 mod docs;
 mod persistence;
+mod previews;
 mod styles;
 
 pub use app::App;

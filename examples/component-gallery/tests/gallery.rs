@@ -422,3 +422,25 @@ fn gallery_icon_button_is_ready_with_tone_size_matrix() {
     assert!(html.contains("ui-icon-button--danger"));
     assert!(html.contains("ui-icon-button--compact"));
 }
+
+#[test]
+fn gallery_sequence_preview_renders_three_cues_with_inline_styles() {
+    let docs = component_gallery::component_docs();
+    let s = docs
+        .iter()
+        .find(|d| d.name == "Sequence")
+        .expect("Sequence doc exists");
+    assert_eq!(s.status, component_gallery::ComponentStatus::Ready);
+    assert!(s.render.is_some());
+
+    let html = dioxus_ssr::render_element(rsx! {
+        component_gallery::App {}
+    });
+
+    let inline_style_count =
+        html.matches("style=\"opacity").count() + html.matches("style=\"transform").count();
+    assert!(
+        inline_style_count >= 3,
+        "expected at least 3 inline-style KineticBox descendants; got {inline_style_count}",
+    );
+}

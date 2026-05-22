@@ -1,6 +1,7 @@
 use dioxus::prelude::*;
 use ui_motion::{Ease, Transition};
-use ui_runtime::{use_animation_value, use_presence_state, ReducedMotion};
+use ui_runtime::{use_animation_value, use_presence_state, use_timeline_sample, ReducedMotion};
+use ui_timeline::{MotionCue, MotionSegment, MotionTarget, Timeline, TimelineClock, TimelineTrack};
 
 #[component]
 fn AnimationProbe(target: f32, transition: Transition) -> Element {
@@ -72,4 +73,40 @@ fn presence_state_initial_present_true_is_visible_in_ssr() {
 fn presence_state_initial_present_false_is_unmounted_in_ssr() {
     let html = dioxus_ssr::render_element(rsx! { PresenceProbe { present: false } });
     assert!(html.contains("data-state=\"unmounted\""), "got {html}",);
+}
+
+#[component]
+fn TimelineSampleProbe(timeline: Timeline, clock: TimelineClock) -> Element {
+    let sample = use_timeline_sample(timeline, clock);
+    let opacity = sample()
+        .states
+        .first()
+        .and_then(|s| s.opacity)
+        .unwrap_or(-1.0);
+    rsx! {
+        div { "data-opacity": "{opacity}" }
+    }
+}
+
+#[test]
+fn use_timeline_sample_in_ssr_returns_initial_sample() {
+    let cue = MotionCue::Opacity {
+        from: 0.0,
+        to: 1.0,
+        transition: Transition::Tween {
+            duration_ms: 220,
+            ease: Ease::Linear,
+        },
+    };
+    let timeline = Timeline::new("t", 220.0).with_track(TimelineTrack::new(
+        MotionTarget::node("hero"),
+        vec![MotionSegment::new(0.0, 220.0, cue)],
+    ));
+    let html = dioxus_ssr::render_element(rsx! {
+        TimelineSampleProbe {
+            timeline: timeline,
+            clock: TimelineClock::Manual { elapsed_ms: 110.0 }
+        }
+    });
+    assert!(html.contains("data-opacity=\"0.5\""), "got {html}");
 }

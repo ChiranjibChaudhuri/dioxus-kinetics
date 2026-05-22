@@ -8,18 +8,20 @@ pub mod prelude {
     pub use ui_dioxus::{
         ActionBar, ActionControl, BlankState, Button, ButtonVariant, CaptureStage, Checkbox,
         ChoiceMark, CommandFinder, CommandGroup, CommandItem, CommandMenu, ContentPlane,
-        ContextHint, Dialog, EmptyState, FrameClip, FrameLayer, FrameStage, GlassLayer,
+        ContextHint, Cue, Dialog, EmptyState, FrameClip, FrameLayer, FrameStage, GlassLayer,
         GlassSurface, IconButton, IconButtonSize, IconButtonTone, KineticBox, KineticText,
         MetricCard, MetricReadout, MetricTone, ModalLayer, NavigationRail, NoticeStack, Presence,
-        PresenceCue, PresenceGate, Sidebar, SidebarItem, SidebarSection, Stack, StateSwitch,
-        Surface, Switch, TabItem, TabPanel, Tabs, TextEntry, TextField, TimelineScope, Toast,
-        ToastTone, Toolbar, Tooltip, ViewSwitcher,
+        PresenceCue, PresenceGate, Sequence, SequenceContext, Sidebar, SidebarItem, SidebarSection,
+        Stack, StateSwitch, Surface, Switch, TabItem, TabPanel, Tabs, TextEntry, TextField,
+        TimelineScope, Toast, ToastTone, Toolbar, Tooltip, ViewSwitcher,
     };
     pub use ui_glass::{
         resolve_glass, GlassDensity, GlassLevel, GlassPolicy, GlassRecipe, GlassRequest, GlassTone,
     };
     pub use ui_layout::{compute_flip, FlipDelta, Rect};
     pub use ui_styles::{library_css, BASE_CSS, COMPONENT_CSS};
+    #[cfg(feature = "timeline")]
+    pub use ui_timeline::{Axis, MotionCue, ResolvedMotionState, TimelineClock};
     pub use ui_tokens::{
         Color, Density, MotionPreference, MotionScale, RadiusScale, SemanticColors, SpacingScale,
         Theme, ThemeMode, TransparencyPreference,
@@ -42,7 +44,8 @@ pub mod prelude {
 
     #[cfg(feature = "runtime")]
     pub use ui_runtime::{
-        use_animation_value, use_presence_state, use_reduced_motion, ReducedMotion,
+        use_animation_value, use_presence_state, use_reduced_motion, use_timeline_sample,
+        ReducedMotion,
     };
 
     #[cfg(feature = "icons")]
@@ -88,6 +91,10 @@ pub fn public_api_names() -> Vec<&'static str> {
         "PresenceCue",
         "Transition",
         "Sequence",
+        "Cue",
+        "SequenceContext",
+        "Axis",
+        "ResolvedMotionState",
         "SharedLayout",
         "SharedElement",
         "Timeline",
@@ -113,6 +120,9 @@ pub fn public_api_names() -> Vec<&'static str> {
         "Trash",
         "Search",
     ]);
+
+    #[cfg(feature = "runtime")]
+    names.push("use_timeline_sample");
 
     names
 }

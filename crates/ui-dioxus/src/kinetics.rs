@@ -1,7 +1,129 @@
+use std::collections::HashMap;
+
 use dioxus::prelude::*;
 use ui_motion::{Ease, Transition};
-use ui_runtime::{use_animation_value, use_presence_state, PresenceState};
-use ui_timeline::{KineticId, TimelineId};
+use ui_runtime::{use_animation_value, use_presence_state, use_timeline_sample, PresenceState};
+use ui_timeline::{
+    FillMode, KineticId, MotionCue, MotionSegment, MotionTarget, ResolvedMotionState, Timeline,
+    TimelineClock, TimelineId, TimelineTrack,
+};
+
+#[derive(Clone, Debug, PartialEq)]
+pub struct Cue {
+    pub target_id: String,
+    pub start_ms: f32,
+    pub motion: MotionCue,
+}
+
+impl Cue {
+    pub fn new(target_id: impl Into<String>, start_ms: f32, motion: MotionCue) -> Self {
+        Self {
+            target_id: target_id.into(),
+            start_ms,
+            motion,
+        }
+    }
+}
+
+#[derive(Clone, Default)]
+pub struct SequenceContext {
+    pub states: HashMap<String, ResolvedMotionState>,
+}
+
+fn cue_duration_ms(motion: &MotionCue) -> f32 {
+    let transition = match motion {
+        MotionCue::Opacity { transition, .. } => transition,
+        MotionCue::Translate { transition, .. } => transition,
+        MotionCue::Scale { transition, .. } => transition,
+        MotionCue::Rotate { transition, .. } => transition,
+    };
+    match transition {
+        ui_motion::Transition::Tween { duration_ms, .. } => *duration_ms as f32,
+        ui_motion::Transition::Spring(_) => 600.0,
+    }
+}
+
+fn cues_to_timeline(id: &str, cues: Vec<Cue>) -> Timeline {
+    let mut max_end = 0.0_f32;
+    let mut timeline = Timeline::new(id, 0.0);
+    for cue in cues {
+        let duration_ms = cue_duration_ms(&cue.motion);
+        let end = cue.start_ms + duration_ms;
+        if end > max_end {
+            max_end = end;
+        }
+        let track = TimelineTrack::new(
+            MotionTarget::node(cue.target_id.clone()),
+            vec![MotionSegment::new(cue.start_ms, duration_ms, cue.motion)],
+        );
+        timeline = timeline.with_track(track);
+    }
+    Timeline {
+        duration_ms: max_end,
+        fill: FillMode::Forwards,
+        ..timeline
+    }
+}
+
+#[component]
+pub fn Sequence(
+    #[props(default)] timeline: Option<Timeline>,
+    #[props(default)] cues: Option<Vec<Cue>>,
+    #[props(default = "sequence".to_string())] id: String,
+    #[props(default = TimelineClock::Playback { elapsed_ms: 0.0 })] clock: TimelineClock,
+    children: Element,
+) -> Element {
+    let resolved_timeline = timeline
+        .clone()
+        .or_else(|| cues.clone().map(|cues| cues_to_timeline(&id, cues)));
+
+    let Some(timeline_value) = resolved_timeline else {
+        return rsx! {
+            section {
+                class: "ui-sequence",
+                "data-timeline-id": "{id}",
+                {children}
+            }
+        };
+    };
+
+    let sample = use_timeline_sample(timeline_value, clock);
+    let mut ctx_signal = use_signal(|| SequenceContext::default());
+    use_context_provider(|| ctx_signal);
+
+    use_effect(move || {
+        let snapshot = sample();
+        let mut states = HashMap::new();
+        for state in snapshot.states {
+            if let MotionTarget::Node(kinetic_id) = &state.target {
+                states.insert(kinetic_id.0.clone(), state.clone());
+            }
+        }
+        ctx_signal.set(SequenceContext { states });
+    });
+
+    // Synchronous initial population so SSR shows the initial inline styles.
+    {
+        let snapshot = sample();
+        let mut states = HashMap::new();
+        for state in snapshot.states {
+            if let MotionTarget::Node(kinetic_id) = &state.target {
+                states.insert(kinetic_id.0.clone(), state.clone());
+            }
+        }
+        if !states.is_empty() {
+            ctx_signal.set(SequenceContext { states });
+        }
+    }
+
+    rsx! {
+        section {
+            class: "ui-sequence",
+            "data-timeline-id": "{id}",
+            {children}
+        }
+    }
+}
 
 #[component]
 pub fn TimelineScope(id: String, #[props(default)] autoplay: bool, children: Element) -> Element {
@@ -23,13 +145,18 @@ pub fn KineticBox(
     #[props(default = "fade-in".to_string())] cue: String,
     children: Element,
 ) -> Element {
-    let kinetic_id = KineticId::new(id);
+    let kinetic_id = KineticId::new(id.clone());
+    let style = try_consume_context::<Signal<SequenceContext>>()
+        .and_then(|sig| sig.read().states.get(&kinetic_id.0).cloned())
+        .map(|state| state.inline_style())
+        .unwrap_or_default();
 
     rsx! {
         div {
             class: "ui-kinetic-box",
             "data-kinetic-id": "{kinetic_id.0}",
             "data-motion-cue": "{cue}",
+            style: "{style}",
             {children}
         }
     }

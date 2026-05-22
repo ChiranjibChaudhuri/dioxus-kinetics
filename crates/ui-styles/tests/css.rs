@@ -1,6 +1,11 @@
 use ui_styles::{library_css, BASE_CSS, COMPONENT_CSS};
 
 #[test]
+fn component_css_covers_sequence_wrapper() {
+    assert!(COMPONENT_CSS.contains(".ui-sequence"));
+}
+
+#[test]
 fn base_css_exposes_theme_density_and_preference_hooks() {
     let css = BASE_CSS;
 

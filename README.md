@@ -36,12 +36,12 @@ Ready rendered components:
 - `Toast`
 - `Tooltip`
 - `EmptyState`
+- `Sequence`
 
 Reserved coming-soon names stay visible in the gallery without fake implementations:
 
 - `IconButton`
 - `Presence`
-- `Sequence`
 - `SharedLayout`
 - `SharedElement`
 

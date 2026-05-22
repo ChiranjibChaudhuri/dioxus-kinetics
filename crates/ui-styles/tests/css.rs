@@ -52,6 +52,38 @@ fn library_css_concatenates_base_and_component_css() {
 }
 
 #[test]
+fn glass_surface_differentiates_levels_and_tones() {
+    let css = COMPONENT_CSS;
+
+    // Levels drive blur strength and elevation.
+    for level in ["subtle", "floating", "overlay", "chrome"] {
+        let selector = format!(r#".ui-glass-surface[data-glass-level="{level}"]"#);
+        assert!(
+            css.contains(&selector),
+            "missing glass level selector: {selector}"
+        );
+    }
+
+    // Tones tint the translucent background.
+    for tone in ["neutral", "primary", "info", "success", "warning", "danger"] {
+        let selector = format!(r#".ui-glass-surface[data-glass-tone="{tone}"]"#);
+        assert!(
+            css.contains(&selector),
+            "missing glass tone selector: {selector}"
+        );
+    }
+
+    // Density adjusts padding rhythm.
+    for density in ["compact", "comfortable", "spacious"] {
+        let selector = format!(r#".ui-glass-surface[data-glass-density="{density}"]"#);
+        assert!(
+            css.contains(&selector),
+            "missing glass density selector: {selector}"
+        );
+    }
+}
+
+#[test]
 fn component_css_covers_icon_button_and_presence() {
     let css = COMPONENT_CSS;
     for selector in [

@@ -199,10 +199,75 @@ pub const COMPONENT_CSS: &str = r#"
 .ui-command-menu-panel {
     background: var(--ui-glass);
     backdrop-filter: blur(18px) saturate(160%);
+    -webkit-backdrop-filter: blur(18px) saturate(160%);
 }
 
 .ui-glass-surface {
     box-shadow: var(--ui-elevation-2);
+    border-color: color-mix(in srgb, var(--ui-fg) 10%, transparent);
+}
+
+/* Level: depth of the material, governs blur strength and elevation. */
+.ui-glass-surface[data-glass-level="subtle"] {
+    backdrop-filter: blur(10px) saturate(140%);
+    -webkit-backdrop-filter: blur(10px) saturate(140%);
+    box-shadow: var(--ui-elevation-0);
+}
+
+.ui-glass-surface[data-glass-level="floating"] {
+    backdrop-filter: blur(18px) saturate(160%);
+    -webkit-backdrop-filter: blur(18px) saturate(160%);
+    box-shadow: var(--ui-elevation-2);
+}
+
+.ui-glass-surface[data-glass-level="overlay"] {
+    backdrop-filter: blur(26px) saturate(180%);
+    -webkit-backdrop-filter: blur(26px) saturate(180%);
+    box-shadow: var(--ui-elevation-3);
+}
+
+.ui-glass-surface[data-glass-level="chrome"] {
+    backdrop-filter: blur(32px) saturate(200%);
+    -webkit-backdrop-filter: blur(32px) saturate(200%);
+    box-shadow: var(--ui-elevation-3);
+}
+
+/* Tone: tints the glass background; mixes color into the translucent layer. */
+.ui-glass-surface[data-glass-tone="neutral"] {
+    background: var(--ui-glass);
+}
+
+.ui-glass-surface[data-glass-tone="primary"] {
+    background: color-mix(in srgb, var(--ui-primary), var(--ui-glass) 72%);
+}
+
+.ui-glass-surface[data-glass-tone="info"] {
+    background: color-mix(in srgb, var(--ui-info), var(--ui-glass) 72%);
+}
+
+.ui-glass-surface[data-glass-tone="success"] {
+    background: color-mix(in srgb, var(--ui-success), var(--ui-glass) 72%);
+}
+
+.ui-glass-surface[data-glass-tone="warning"] {
+    background: color-mix(in srgb, var(--ui-warning), var(--ui-glass) 72%);
+}
+
+.ui-glass-surface[data-glass-tone="danger"] {
+    background: color-mix(in srgb, var(--ui-danger), var(--ui-glass) 72%);
+}
+
+/* Density: padding rhythm inside the glass surface. */
+.ui-glass-surface[data-glass-density="compact"] {
+    padding: var(--ui-space-3);
+}
+
+.ui-glass-surface[data-glass-density="comfortable"] {
+    padding: var(--ui-space-4);
+}
+
+.ui-glass-surface[data-glass-density="spacious"] {
+    padding: var(--ui-space-5);
 }
 
 .ui-dialog-panel {

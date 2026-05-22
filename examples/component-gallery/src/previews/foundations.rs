@@ -17,7 +17,7 @@ pub fn glass_layer_preview() -> Element {
         div { class: "gallery-variant-grid gallery-variant-grid--3x3",
             for (level, level_label) in levels.iter() {
                 for (tone, tone_label) in tones.iter() {
-                    div { class: "gallery-variant-tile",
+                    div { class: "gallery-variant-tile gallery-variant-tile--material",
                         span { class: "gallery-variant-label", "{level_label} · {tone_label}" }
                         GlassLayer {
                             level: *level,

@@ -293,6 +293,31 @@ body {
     min-height: 96px;
 }
 
+/* Material previews need a colorful surface beneath them; otherwise
+   `backdrop-filter: blur` has nothing to blur and every glass variant
+   renders as the same white tile. The radial mix gives the blur something
+   visibly translucent + tinted to work with. */
+.gallery-variant-tile--material {
+    position: relative;
+    isolation: isolate;
+    overflow: hidden;
+    background:
+        radial-gradient(circle at 22% 28%, color-mix(in srgb, var(--ui-primary), transparent 55%), transparent 60%),
+        radial-gradient(circle at 78% 32%, color-mix(in srgb, var(--ui-info), transparent 55%), transparent 62%),
+        radial-gradient(circle at 50% 82%, color-mix(in srgb, var(--ui-success), transparent 60%), transparent 65%),
+        linear-gradient(135deg, color-mix(in srgb, var(--ui-warning), transparent 70%), transparent),
+        var(--ui-surface);
+}
+
+.gallery-variant-tile--material .ui-glass-surface {
+    min-height: 64px;
+    display: grid;
+    place-items: center;
+    text-align: center;
+    color: var(--ui-fg);
+    font-weight: 600;
+}
+
 .gallery-variant-label {
     font-size: 11px;
     color: var(--ui-muted-fg);
@@ -402,6 +427,22 @@ body::before {
 
 [data-ui-theme="dark"] .gallery-section--glass-stage::before {
     opacity: 0.42;
+}
+
+/* On glass-stage sections, let the gradient bleed through the entry cards so
+   the backdrop reads as one continuous stage rather than a stray horizontal
+   stripe between the heading and the first opaque card. */
+.gallery-section--glass-stage .gallery-entry {
+    background: color-mix(in srgb, var(--ui-surface), transparent 35%);
+    backdrop-filter: blur(22px) saturate(160%);
+    -webkit-backdrop-filter: blur(22px) saturate(160%);
+    border-color: color-mix(in srgb, var(--ui-fg) 10%, transparent);
+}
+
+[data-ui-glass-policy="solid"] .gallery-section--glass-stage .gallery-entry {
+    background: var(--ui-surface);
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
 }
 
 .gallery-controls {

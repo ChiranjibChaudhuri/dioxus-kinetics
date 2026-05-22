@@ -1,19 +1,29 @@
 use dioxus::prelude::*;
 use kinetics::prelude::*;
 
+use crate::demo_frame::ReplayFrame;
+
 pub fn presence_preview() -> Element {
     rsx! {
         div { class: "gallery-variant-grid gallery-variant-grid--2col",
             div { class: "gallery-variant-tile",
-                span { class: "gallery-variant-label", "Present" }
-                Presence { present: true, cue: PresenceCue::Rise,
-                    p { "Visible state" }
+                ReplayFrame {
+                    label: "Enter",
+                    children: rsx! {
+                        Presence { present: true, cue: PresenceCue::Rise,
+                            p { "Visible state" }
+                        }
+                    },
                 }
             }
             div { class: "gallery-variant-tile",
-                span { class: "gallery-variant-label", "Hidden" }
-                Presence { present: false, cue: PresenceCue::Rise,
-                    p { "Hidden state" }
+                ReplayFrame {
+                    label: "Exit",
+                    children: rsx! {
+                        Presence { present: false, cue: PresenceCue::Rise,
+                            p { "Hidden state" }
+                        }
+                    },
                 }
             }
         }
@@ -129,9 +139,13 @@ pub fn kinetic_box_preview() -> Element {
         div { class: "gallery-variant-grid gallery-variant-grid--3col",
             for cue in cues {
                 div { class: "gallery-variant-tile",
-                    span { class: "gallery-variant-label", "{cue}" }
-                    KineticBox { id: "cue-{cue}", cue: cue.to_string(),
-                        p { "Cue preview" }
+                    ReplayFrame {
+                        label: cue,
+                        children: rsx! {
+                            KineticBox { id: "cue-{cue}", cue: cue.to_string(),
+                                p { "Cue preview" }
+                            }
+                        },
                     }
                 }
             }
@@ -143,15 +157,23 @@ pub fn presence_gate_preview() -> Element {
     rsx! {
         div { class: "gallery-variant-grid gallery-variant-grid--2col",
             div { class: "gallery-variant-tile",
-                span { class: "gallery-variant-label", "Present" }
-                PresenceGate { present: true,
-                    p { "Visible state" }
+                ReplayFrame {
+                    label: "Present",
+                    children: rsx! {
+                        PresenceGate { present: true,
+                            p { "Visible state" }
+                        }
+                    },
                 }
             }
             div { class: "gallery-variant-tile",
-                span { class: "gallery-variant-label", "Hidden" }
-                PresenceGate { present: false }
-                p { "Hidden state" }
+                ReplayFrame {
+                    label: "Hidden",
+                    children: rsx! {
+                        PresenceGate { present: false }
+                        p { "Hidden state" }
+                    },
+                }
             }
         }
     }

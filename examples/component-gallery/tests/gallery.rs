@@ -527,3 +527,18 @@ fn gallery_css_includes_ambient_mesh_and_toggle_group_styles() {
     // Sticky position on the controls bar so it stays reachable while scrolling.
     assert!(html.contains("position: sticky"));
 }
+
+#[test]
+fn motion_previews_use_replay_frame() {
+    let html = dioxus_ssr::render_element(rsx! {
+        component_gallery::App {}
+    });
+    // Each motion-category live demo should be wrapped in a gallery-demo-frame.
+    let frame_count = html.matches("gallery-demo-frame").count();
+    assert!(
+        frame_count >= 3,
+        "expected >=3 demo frames in motion previews, got {frame_count}"
+    );
+    // Replay button is present.
+    assert!(html.contains("Replay"));
+}

@@ -19,7 +19,10 @@ pub use display::{EmptyState as BlankState, MetricCard as MetricReadout};
 pub use display::{EmptyState, MetricCard, MetricTone};
 pub use forms::{Checkbox, Switch, TextField};
 pub use forms::{Checkbox as ChoiceMark, Switch as StateSwitch, TextField as TextEntry};
-pub use kinetics::{KineticBox, KineticText, Presence, PresenceCue, PresenceGate, TimelineScope};
+pub use kinetics::{
+    Cue, KineticBox, KineticText, Presence, PresenceCue, PresenceGate, Sequence, SequenceContext,
+    TimelineScope,
+};
 pub use navigation::{Sidebar, SidebarItem, SidebarSection, TabItem, TabPanel, Tabs, Toolbar};
 pub use navigation::{Sidebar as NavigationRail, Tabs as ViewSwitcher, Toolbar as ActionBar};
 pub use overlays::{CommandGroup, CommandItem, CommandMenu, Dialog, Toast, ToastTone, Tooltip};

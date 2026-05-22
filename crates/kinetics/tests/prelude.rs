@@ -209,3 +209,20 @@ fn public_api_includes_sequence_runtime_names() {
         assert!(names.contains(&expected), "missing {expected}");
     }
 }
+
+#[test]
+fn public_api_includes_shared_layout_and_shared_element() {
+    let names = kinetics::public_api_names();
+    for expected in [
+        "SharedLayout",
+        "SharedElement",
+        "SharedTransition",
+        "SharedElementRegistry",
+        "ElementSnapshot",
+        "use_shared_element_registry",
+        "use_element_rect",
+        "use_element_computed_style",
+    ] {
+        assert!(names.contains(&expected), "missing {expected}");
+    }
+}

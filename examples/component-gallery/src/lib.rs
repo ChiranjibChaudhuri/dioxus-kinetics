@@ -1,6 +1,7 @@
 #![forbid(unsafe_code)]
 
 mod app;
+pub mod controls;
 mod brand;
 mod docs;
 mod styles;

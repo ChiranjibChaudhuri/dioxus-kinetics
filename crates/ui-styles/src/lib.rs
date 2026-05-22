@@ -184,6 +184,7 @@ pub const COMPONENT_CSS: &str = r#"
     border-radius: var(--ui-radius-lg);
     background: var(--ui-surface);
     color: var(--ui-fg);
+    box-shadow: var(--ui-elevation-0);
 }
 
 .ui-surface,
@@ -198,7 +199,18 @@ pub const COMPONENT_CSS: &str = r#"
 .ui-command-menu-panel {
     background: var(--ui-glass);
     backdrop-filter: blur(18px) saturate(160%);
-    box-shadow: var(--ui-shadow-lifted);
+}
+
+.ui-glass-surface {
+    box-shadow: var(--ui-elevation-2);
+}
+
+.ui-dialog-panel {
+    box-shadow: var(--ui-elevation-3);
+}
+
+.ui-command-menu-panel {
+    box-shadow: var(--ui-elevation-2);
 }
 
 .ui-stack {
@@ -416,7 +428,7 @@ pub const COMPONENT_CSS: &str = r#"
     border-radius: var(--ui-radius-lg);
     background: var(--ui-surface);
     padding: var(--ui-space-4);
-    box-shadow: var(--ui-shadow-soft);
+    box-shadow: var(--ui-elevation-2);
 }
 
 .ui-toast--success { border-color: color-mix(in srgb, var(--ui-success), transparent 62%); }
@@ -464,6 +476,7 @@ pub const COMPONENT_CSS: &str = r#"
     background: var(--ui-fg);
     color: var(--ui-bg);
     padding: 6px 8px;
+    box-shadow: var(--ui-elevation-1);
 }
 
 .ui-toolbar {
@@ -510,6 +523,10 @@ pub const COMPONENT_CSS: &str = r#"
     padding: var(--ui-space-4);
 }
 
+.ui-metric-card {
+    box-shadow: var(--ui-elevation-1);
+}
+
 .ui-metric-card-value {
     font-size: 28px;
     font-weight: 800;
@@ -541,7 +558,7 @@ pub const COMPONENT_CSS: &str = r#"
     background: var(--ui-material-bg, var(--ui-glass));
     border: 1px solid var(--ui-material-border, var(--ui-border));
     border-radius: var(--ui-radius-lg);
-    box-shadow: var(--ui-material-shadow, var(--ui-shadow-soft));
+    box-shadow: var(--ui-material-shadow, var(--ui-elevation-2));
     backdrop-filter: blur(var(--ui-material-blur, 18px)) saturate(var(--ui-material-saturate, 160%));
     -webkit-backdrop-filter: blur(var(--ui-material-blur, 18px)) saturate(var(--ui-material-saturate, 160%));
 }

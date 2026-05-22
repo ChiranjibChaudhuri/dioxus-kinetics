@@ -117,3 +117,69 @@ fn dark_theme_re_declares_elevation_variables() {
     assert!(dark_block.contains("--ui-elevation-0:"));
     assert!(dark_block.contains("--ui-elevation-3:"));
 }
+
+#[test]
+fn surface_uses_elevation_0() {
+    let css = library_css();
+    let block = component_block(&css, ".ui-surface,");
+    assert!(
+        block.contains("box-shadow: var(--ui-elevation-0)"),
+        "surface block missing elevation-0: {block}"
+    );
+}
+
+#[test]
+fn metric_card_uses_elevation_1() {
+    let css = library_css();
+    let block = component_block(&css, ".ui-metric-card,");
+    assert!(
+        block.contains("box-shadow: var(--ui-elevation-1)")
+            || css.contains(".ui-metric-card {")
+                && css[css.find(".ui-metric-card {").unwrap()..]
+                    .contains("box-shadow: var(--ui-elevation-1)")
+    );
+}
+
+#[test]
+fn tooltip_uses_elevation_1() {
+    let css = library_css();
+    assert!(
+        css.contains(".ui-tooltip-content")
+            && css[css.find(".ui-tooltip-content").unwrap()..]
+                .contains("box-shadow: var(--ui-elevation-1)")
+    );
+}
+
+#[test]
+fn toast_uses_elevation_2() {
+    let css = library_css();
+    let idx = css.find(".ui-toast {").expect(".ui-toast rule exists");
+    assert!(
+        css[idx..].split('}').next().unwrap().contains("box-shadow: var(--ui-elevation-2)")
+    );
+}
+
+#[test]
+fn command_menu_panel_uses_elevation_2() {
+    let css = library_css();
+    let idx = css
+        .find(".ui-command-menu-panel")
+        .expect(".ui-command-menu-panel rule exists");
+    assert!(css[idx..].contains("box-shadow: var(--ui-elevation-2)"));
+}
+
+#[test]
+fn dialog_panel_uses_elevation_3() {
+    let css = library_css();
+    let idx = css
+        .find(".ui-dialog-panel")
+        .expect(".ui-dialog-panel rule exists");
+    assert!(css[idx..].contains("box-shadow: var(--ui-elevation-3)"));
+}
+
+fn component_block<'a>(css: &'a str, selector_prefix: &str) -> &'a str {
+    let idx = css.find(selector_prefix).expect("selector exists");
+    let rest = &css[idx..];
+    let end = rest.find('}').unwrap_or(rest.len());
+    &rest[..end]
+}

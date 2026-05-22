@@ -133,6 +133,46 @@ fn focus_tab(value: &str) {
     ));
 }
 
+#[cfg(test)]
+mod tests {
+    use super::step_tab;
+
+    fn ids() -> Vec<String> {
+        vec!["one".into(), "two".into(), "three".into()]
+    }
+
+    #[test]
+    fn step_tab_moves_forward() {
+        assert_eq!(step_tab(&ids(), "one", 1).as_deref(), Some("two"));
+    }
+
+    #[test]
+    fn step_tab_wraps_to_first_after_last() {
+        assert_eq!(step_tab(&ids(), "three", 1).as_deref(), Some("one"));
+    }
+
+    #[test]
+    fn step_tab_wraps_backwards_from_first() {
+        assert_eq!(step_tab(&ids(), "one", -1).as_deref(), Some("three"));
+    }
+
+    #[test]
+    fn step_tab_unknown_current_starts_at_first_for_forward() {
+        assert_eq!(step_tab(&ids(), "missing", 1).as_deref(), Some("one"));
+    }
+
+    #[test]
+    fn step_tab_unknown_current_starts_at_last_for_backward() {
+        assert_eq!(step_tab(&ids(), "missing", -1).as_deref(), Some("three"));
+    }
+
+    #[test]
+    fn step_tab_empty_returns_none() {
+        let empty: Vec<String> = Vec::new();
+        assert!(step_tab(&empty, "anything", 1).is_none());
+    }
+}
+
 #[component]
 pub fn Toolbar(
     primary: Vec<String>,

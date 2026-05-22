@@ -53,5 +53,14 @@ ui-capture = { workspace = true, optional = true }
 ui-runtime = { workspace = true, optional = true }
 ui-icons = { workspace = true, optional = true }
 
+[dev-dependencies]
+dioxus.workspace = true
+dioxus-ssr.workspace = true
+
 [lib]
 path = "src/lib.rs"
+
+[[test]]
+name = "a11y"
+path = "tests/a11y.rs"
+required-features = ["a11y-tests"]

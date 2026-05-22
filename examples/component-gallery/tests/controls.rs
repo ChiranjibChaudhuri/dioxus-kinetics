@@ -33,3 +33,14 @@ fn enums_round_trip_via_attr_value() {
     assert_eq!(GlassPolicyUi::from_attr("solid"), Some(GlassPolicyUi::Solid));
     assert_eq!(DensityPref::from_attr("compact"), Some(DensityPref::Compact));
 }
+
+#[test]
+fn gallery_default_constants_match_documented_fallbacks() {
+    use component_gallery::controls::{
+        DEFAULT_DENSITY, DEFAULT_GLASS, DEFAULT_MOTION, DEFAULT_THEME,
+    };
+    assert_eq!(DEFAULT_THEME, ThemePref::Light);
+    assert_eq!(DEFAULT_DENSITY, DensityPref::Comfortable);
+    assert_eq!(DEFAULT_MOTION, MotionPref::Normal);
+    assert_eq!(DEFAULT_GLASS, GlassPolicyUi::Translucent);
+}

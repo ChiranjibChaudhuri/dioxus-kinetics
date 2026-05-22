@@ -121,3 +121,28 @@ impl GlassPolicyUi {
         }
     }
 }
+
+use dioxus::prelude::*;
+
+pub const DEFAULT_THEME: ThemePref = ThemePref::Light;
+pub const DEFAULT_DENSITY: DensityPref = DensityPref::Comfortable;
+pub const DEFAULT_MOTION: MotionPref = MotionPref::Normal;
+pub const DEFAULT_GLASS: GlassPolicyUi = GlassPolicyUi::Translucent;
+
+#[derive(Clone, Copy)]
+pub struct GalleryPrefs {
+    pub theme: Signal<ThemePref>,
+    pub density: Signal<DensityPref>,
+    pub motion: Signal<MotionPref>,
+    pub glass: Signal<GlassPolicyUi>,
+}
+
+impl GalleryPrefs {
+    pub fn use_provided() -> Self {
+        let theme = use_signal(|| DEFAULT_THEME);
+        let density = use_signal(|| DEFAULT_DENSITY);
+        let motion = use_signal(|| DEFAULT_MOTION);
+        let glass = use_signal(|| DEFAULT_GLASS);
+        Self { theme, density, motion, glass }
+    }
+}

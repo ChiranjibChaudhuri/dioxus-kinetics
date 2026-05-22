@@ -194,3 +194,18 @@ fn public_api_includes_runtime_and_icons() {
         );
     }
 }
+
+#[test]
+fn public_api_includes_sequence_runtime_names() {
+    let names = kinetics::public_api_names();
+    for expected in [
+        "Sequence",
+        "Cue",
+        "SequenceContext",
+        "Axis",
+        "use_timeline_sample",
+        "ResolvedMotionState",
+    ] {
+        assert!(names.contains(&expected), "missing {expected}");
+    }
+}

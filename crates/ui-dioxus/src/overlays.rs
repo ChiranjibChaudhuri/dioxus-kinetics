@@ -7,6 +7,8 @@ pub fn Dialog(
     #[props(default)] description: String,
     #[props(default)] body: String,
     #[props(default)] actions: Vec<String>,
+    #[props(default)] on_dismiss: Option<EventHandler<()>>,
+    #[props(default)] on_action: Option<EventHandler<String>>,
 ) -> Element {
     if !open {
         return rsx! {};
@@ -14,7 +16,14 @@ pub fn Dialog(
 
     rsx! {
         div { class: "ui-dialog", role: "dialog", "aria-modal": "true", "aria-labelledby": "ui-dialog-title",
-            div { class: "ui-dialog-backdrop" }
+            div {
+                class: "ui-dialog-backdrop",
+                onclick: move |_| {
+                    if let Some(handler) = on_dismiss.as_ref() {
+                        handler.call(());
+                    }
+                },
+            }
             div { class: "ui-dialog-panel",
                 h2 { id: "ui-dialog-title", class: "ui-dialog-title", "{title}" }
                 if !description.is_empty() {
@@ -26,7 +35,19 @@ pub fn Dialog(
                 if !actions.is_empty() {
                     div { class: "ui-dialog-actions",
                         for action in actions {
-                            button { class: "ui-button ui-button--secondary", r#type: "button", "{action}" }
+                            button {
+                                class: "ui-button ui-button--secondary",
+                                r#type: "button",
+                                onclick: {
+                                    let action = action.clone();
+                                    move |_| {
+                                        if let Some(handler) = on_action.as_ref() {
+                                            handler.call(action.clone());
+                                        }
+                                    }
+                                },
+                                "{action}"
+                            }
                         }
                     }
                 }

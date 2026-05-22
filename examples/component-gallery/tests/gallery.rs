@@ -560,3 +560,17 @@ fn shared_layout_preview_uses_flip_frame_with_swap_control() {
     assert!(html.contains("gallery-demo-frame--flip"));
     assert!(html.contains("Swap layout"));
 }
+
+#[test]
+fn dialog_preview_renders_open_trigger_and_starts_closed() {
+    let html = dioxus_ssr::render_element(rsx! {
+        component_gallery::App {}
+    });
+    // Trigger button labelled "Show dialog" is present.
+    assert!(html.contains("Show dialog"));
+    // Default state is closed → dialog panel markup is NOT in the rendered HTML for the preview tile.
+    // The existing tests assert ".ui-dialog" appears in CSS — that's still true.
+    // We assert no aria-modal in the preview area by counting overall occurrences.
+    let aria_modal_count = html.matches(r#"aria-modal="true""#).count();
+    assert_eq!(aria_modal_count, 0, "dialog should start closed in preview");
+}

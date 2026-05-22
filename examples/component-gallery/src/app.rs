@@ -69,8 +69,16 @@ fn CategorySection(category: ComponentCategory) -> Element {
         .filter(|doc| doc.category == category)
         .collect::<Vec<_>>();
 
+    let stage_class = match category {
+        ComponentCategory::Foundations | ComponentCategory::Surfaces => {
+            " gallery-section--glass-stage"
+        }
+        _ => "",
+    };
+    let class = format!("gallery-section{stage_class}");
+
     rsx! {
-        section { id: "{category.slug()}", class: "gallery-section",
+        section { id: "{category.slug()}", class: "{class}",
             div { class: "gallery-section-heading",
                 h3 { "{category.label()}" }
                 p { "{category.description()}" }

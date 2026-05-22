@@ -506,3 +506,24 @@ fn preference_bar_renders_all_four_toggle_groups() {
         );
     }
 }
+
+#[test]
+fn gallery_css_includes_ambient_mesh_and_toggle_group_styles() {
+    let html = dioxus_ssr::render_element(rsx! {
+        component_gallery::App {}
+    });
+
+    for selector in [
+        ".gallery-toggle-group",
+        ".gallery-ambient-mesh",
+        ".gallery-section--glass-stage",
+    ] {
+        assert!(
+            html.contains(selector),
+            "missing CSS selector {selector}",
+        );
+    }
+
+    // Sticky position on the controls bar so it stays reachable while scrolling.
+    assert!(html.contains("position: sticky"));
+}

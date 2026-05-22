@@ -23,7 +23,7 @@ mod measurement_native;
 #[cfg(target_arch = "wasm32")]
 mod measurement_web;
 
-pub use animation::use_animation_value;
+pub use animation::{use_animation_value, use_animation_value_from};
 pub use measurement::{use_element_computed_style, use_element_rect, MountedRectCallback};
 pub use presence::{use_presence_animation, use_presence_state};
 pub use reduced_motion::{use_reduced_motion, ReducedMotion};

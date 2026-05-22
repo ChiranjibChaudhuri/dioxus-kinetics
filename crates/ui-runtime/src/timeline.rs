@@ -17,31 +17,29 @@ struct TimelineRuntime {
 
 pub fn use_timeline_sample(timeline: Timeline, clock: TimelineClock) -> ReadSignal<TimelineSample> {
     let reduced = use_reduced_motion();
-    let initial = if reduced {
-        timeline.sample(TimelineClock::Manual {
+    let effective_clock = if reduced {
+        TimelineClock::Manual {
             elapsed_ms: timeline.duration_ms,
-        })
+        }
     } else {
-        timeline.sample(clock)
+        clock
     };
-    let mut sample = use_signal(|| initial);
+
+    // Seed the signal with the first sample so SSR and initial render emit the
+    // correct inline styles before any effect runs.
+    let initial_sample = timeline.sample(effective_clock);
+    let mut sample = use_signal(|| initial_sample.clone());
 
     let runtime = use_hook(|| TimelineRuntime {
         handle: Rc::new(RefCell::new(None)),
         elapsed_ms: Rc::new(RefCell::new(0.0)),
     });
 
-    use_effect(move || {
-        if reduced {
-            *runtime.handle.borrow_mut() = None;
-            sample.set(timeline.sample(TimelineClock::Manual {
-                elapsed_ms: timeline.duration_ms,
-            }));
-            return;
-        }
-
-        match clock {
-            TimelineClock::Playback { elapsed_ms: start } => {
+    match effective_clock {
+        TimelineClock::Playback { elapsed_ms: start } => {
+            // For Playback, drive elapsed_ms via a frame loop. Spawn the loop
+            // once on first render; re-renders reuse the existing handle.
+            if runtime.handle.borrow().is_none() {
                 *runtime.elapsed_ms.borrow_mut() = start;
                 let timeline_clone = timeline.clone();
                 let elapsed_cell = runtime.elapsed_ms.clone();
@@ -62,12 +60,24 @@ pub fn use_timeline_sample(timeline: Timeline, clock: TimelineClock) -> ReadSign
                 });
                 *runtime.handle.borrow_mut() = Some(handle);
             }
-            other => {
+        }
+        _ => {
+            // For Manual / Frame / Scroll clocks, sample synchronously based
+            // on the current prop value. Dioxus hooks do not track non-signal
+            // arguments, so the only reliable way to reflect a changed clock
+            // is to push the new sample through the signal on every render
+            // (peek/set is idempotent when the value is unchanged).
+            //
+            // Also cancel any in-flight frame loop from a prior Playback clock
+            // so we do not keep firing samples behind a switched mode.
+            if runtime.handle.borrow().is_some() {
                 *runtime.handle.borrow_mut() = None;
-                sample.set(timeline.sample(other));
+            }
+            if *sample.peek() != initial_sample {
+                sample.set(initial_sample);
             }
         }
-    });
+    }
 
     ReadSignal::from(sample)
 }

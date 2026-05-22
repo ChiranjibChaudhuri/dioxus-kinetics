@@ -398,13 +398,19 @@ fn gallery_includes_presence_entry_with_lifecycle_attrs() {
         component_gallery::App {}
     });
 
+    // SSR renders the pre-animation state (state=entering) so the client can
+    // play a visible enter animation after hydration. The DOM still contains
+    // the content (good for accessibility / SEO) but with --ui-presence-t: 0
+    // so it animates in.
     assert!(html.contains("data-presence-cue=\"rise\""), "got {html}");
     assert!(
-        html.contains("data-presence-state=\"visible\""),
+        html.contains("data-presence-state=\"entering\""),
         "got {html}"
     );
-    assert!(html.contains("Present"));
-    assert!(html.contains("Hidden"));
+    // The Presence preview labels: "Tween enter", "Tween exit", "Spring enter",
+    // "Spring exit" — make sure the demo frame still renders.
+    assert!(html.contains("Tween enter"));
+    assert!(html.contains("Tween exit"));
 }
 
 #[test]

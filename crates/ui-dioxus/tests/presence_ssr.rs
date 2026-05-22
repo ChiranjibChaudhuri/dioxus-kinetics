@@ -3,6 +3,9 @@ use ui_dioxus::{Presence, PresenceCue};
 
 #[test]
 fn presence_true_renders_content_with_data_attrs() {
+    // SSR renders the pre-animation state (entering, t=0) so the client
+    // animation can play visibly on mount. Content is still in the DOM —
+    // accessibility/SEO see "hello" — it just animates in after hydration.
     let html = dioxus_ssr::render_element(rsx! {
         Presence { present: true, cue: PresenceCue::Fade,
             p { "hello" }
@@ -11,10 +14,10 @@ fn presence_true_renders_content_with_data_attrs() {
 
     assert!(html.contains("data-presence-cue=\"fade\""), "got {html}");
     assert!(
-        html.contains("data-presence-state=\"visible\""),
+        html.contains("data-presence-state=\"entering\""),
         "got {html}",
     );
-    assert!(html.contains("--ui-presence-t: 1"), "got {html}");
+    assert!(html.contains("--ui-presence-t: 0"), "got {html}");
     assert!(html.contains("hello"));
 }
 

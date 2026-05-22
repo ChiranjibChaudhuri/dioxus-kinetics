@@ -19,15 +19,32 @@ struct AnimationContext {
 }
 
 pub fn use_animation_value(target: f32, transition: Transition) -> ReadSignal<f32> {
+    use_animation_value_from(target, target, transition)
+}
+
+/// Animates a signal from `initial` toward `target` whenever `target` changes.
+///
+/// Unlike [`use_animation_value`], the value signal is seeded with `initial`,
+/// so the first client effect run animates from `initial` to `target` —
+/// producing a visible motion on mount when the two differ. SSR returns
+/// `initial` (no effects run); callers that need SSR to surface the settled
+/// value should keep `initial == target` and use [`use_animation_value`].
+pub fn use_animation_value_from(
+    initial: f32,
+    target: f32,
+    transition: Transition,
+) -> ReadSignal<f32> {
     let reduced = use_reduced_motion();
-    let mut value = use_signal(|| target);
+    let mut value = use_signal(|| initial);
 
     let ctx = use_hook(|| AnimationContext {
         handle: Rc::new(RefCell::new(None)),
         velocity: Rc::new(RefCell::new(0.0)),
-        last_target: Rc::new(RefCell::new(target)),
+        // Seed last_target with `initial` so the very first effect run sees
+        // `target != last_target` and starts an animation from initial.
+        last_target: Rc::new(RefCell::new(initial)),
         elapsed_ms: Rc::new(RefCell::new(0.0)),
-        start_value: Rc::new(RefCell::new(target)),
+        start_value: Rc::new(RefCell::new(initial)),
     });
 
     use_effect(move || {

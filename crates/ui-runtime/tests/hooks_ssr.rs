@@ -67,9 +67,12 @@ fn PresenceProbe(present: bool) -> Element {
 }
 
 #[test]
-fn presence_state_initial_present_true_is_visible_in_ssr() {
+fn presence_state_initial_present_true_renders_entering_in_ssr() {
+    // SSR returns the pre-animation state so the client can play a visible
+    // mount animation after hydration. Content is still in the DOM (good for
+    // accessibility / SEO) but with the entering visual.
     let html = dioxus_ssr::render_element(rsx! { PresenceProbe { present: true } });
-    assert!(html.contains("data-state=\"visible\""), "got {html}",);
+    assert!(html.contains("data-state=\"entering\""), "got {html}",);
 }
 
 #[test]
@@ -100,9 +103,11 @@ fn PresenceAnimationProbe(present: bool) -> Element {
 
 #[test]
 fn presence_animation_returns_state_and_value_pair_in_ssr() {
+    // SSR shows the pre-animation state (value=0, state=entering) so the
+    // client side can play a visible mount animation after hydration.
     let html = dioxus_ssr::render_element(rsx! { PresenceAnimationProbe { present: true } });
-    assert!(html.contains("data-state=\"visible\""), "got {html}");
-    assert!(html.contains("data-value=\"1\""), "got {html}");
+    assert!(html.contains("data-state=\"entering\""), "got {html}");
+    assert!(html.contains("data-value=\"0\""), "got {html}");
 }
 
 #[component]

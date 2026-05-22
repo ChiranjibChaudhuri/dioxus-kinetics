@@ -55,9 +55,14 @@ fn cues_to_timeline(id: &str, cues: Vec<Cue>) -> Timeline {
         );
         timeline = timeline.with_track(track);
     }
+    // `Both` so that segments with a `start_ms > 0` emit their `from` value
+    // before the segment starts (otherwise body/cta in a staggered sequence
+    // render in their final state at t=0 and only the first cue is visible).
+    // Forwards-fill still applies past the end, so the timeline settles to
+    // its `to` value as before.
     Timeline {
         duration_ms: max_end,
-        fill: FillMode::Forwards,
+        fill: FillMode::Both,
         ..timeline
     }
 }

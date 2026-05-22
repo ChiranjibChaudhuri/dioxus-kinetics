@@ -3,7 +3,7 @@
 use dioxus::prelude::*;
 use ui_motion::Transition;
 
-use crate::animation::use_animation_value;
+use crate::animation::use_animation_value_from;
 use crate::state::{advance_presence, PresenceInputs, PresenceState};
 
 /// Returns the lifecycle state for a `present` flag plus the underlying
@@ -25,7 +25,13 @@ pub fn use_presence_animation(
     });
 
     let active_transition = if present { enter } else { exit };
-    let value = use_animation_value(if present { 1.0 } else { 0.0 }, active_transition);
+    // Seed the value at the "from" side (0 for present, 1 for absent) so that
+    // mounting a Presence with present=true actually plays an enter animation,
+    // not just renders the settled state. On SSR, no effects run, so the
+    // visible state resolution below detects value≠target and leaves state
+    // as Entering, then the client side animates 0→1 after hydration.
+    let (initial, target) = if present { (0.0, 1.0) } else { (1.0, 0.0) };
+    let value = use_animation_value_from(initial, target, active_transition);
 
     use_effect(move || {
         let snapshot = state();

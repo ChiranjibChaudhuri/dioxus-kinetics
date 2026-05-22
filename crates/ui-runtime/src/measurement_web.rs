@@ -41,9 +41,16 @@ pub fn use_element_computed_style_impl(
 fn mounted_event_rect(evt: &MountedEvent) -> Option<Rect> {
     let element = evt.downcast::<Element>()?;
     let dom_rect = element.get_bounding_client_rect();
+    // Store rects in *document* coordinates (viewport rect + current scroll).
+    // The page may scroll between mounts of cross-tree shared elements, so a
+    // viewport-relative rect is not stable as a "previous position" reference.
+    let (scroll_x, scroll_y) = match web_sys::window() {
+        Some(win) => (win.scroll_x().unwrap_or(0.0), win.scroll_y().unwrap_or(0.0)),
+        None => (0.0, 0.0),
+    };
     Some(Rect {
-        x: dom_rect.left() as f32,
-        y: dom_rect.top() as f32,
+        x: dom_rect.left() as f32 + scroll_x as f32,
+        y: dom_rect.top() as f32 + scroll_y as f32,
         width: dom_rect.width() as f32,
         height: dom_rect.height() as f32,
     })

@@ -640,6 +640,60 @@ pub const COMPONENT_CSS: &str = r#"
     transition: opacity var(--ui-motion-normal), transform var(--ui-motion-normal);
 }
 
+/* Standalone KineticBoxes (no parent Sequence/Timeline driving them via an
+   inline `style`) animate themselves on mount using a CSS keyframe matching
+   their cue. The `:not([style])` guard means that when a Sequence supplies an
+   inline transform/opacity, the JS-driven values win and the keyframe is
+   skipped. */
+@keyframes kinetic-rise-in {
+    from { opacity: 0; transform: translateY(8px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes kinetic-fade-in {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+}
+
+@keyframes kinetic-slide-up {
+    from { opacity: 0; transform: translateY(16px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+.ui-kinetic-box[data-motion-cue="rise-in"]:not([style*="opacity"]):not([style*="transform"]) {
+    animation: kinetic-rise-in 320ms ease both;
+}
+
+.ui-kinetic-box[data-motion-cue="fade-in"]:not([style*="opacity"]):not([style*="transform"]) {
+    animation: kinetic-fade-in 320ms ease both;
+}
+
+.ui-kinetic-box[data-motion-cue="slide-up"]:not([style*="opacity"]):not([style*="transform"]) {
+    animation: kinetic-slide-up 320ms ease both;
+}
+
+/* Inside a TimelineScope, autoplay=false means an external trigger (slider,
+   intersection observer, etc.) drives the cues; suppress the on-mount CSS
+   animation so the scope stays static until explicitly played. */
+.ui-timeline-scope[data-autoplay="false"] .ui-kinetic-box {
+    animation: none !important;
+}
+
+/* Stagger autoplay'd KineticBoxes by their wrapper's data-stagger-index so a
+   row of boxes ripple in one after another instead of firing simultaneously. */
+.ui-timeline-scope[data-autoplay="true"] [data-stagger-index="0"] .ui-kinetic-box {
+    animation-delay: 0ms;
+}
+.ui-timeline-scope[data-autoplay="true"] [data-stagger-index="1"] .ui-kinetic-box {
+    animation-delay: 80ms;
+}
+.ui-timeline-scope[data-autoplay="true"] [data-stagger-index="2"] .ui-kinetic-box {
+    animation-delay: 160ms;
+}
+.ui-timeline-scope[data-autoplay="true"] [data-stagger-index="3"] .ui-kinetic-box {
+    animation-delay: 240ms;
+}
+
 .ui-frame-stage,
 .ui-capture-stage {
     position: relative;
@@ -702,30 +756,41 @@ pub const COMPONENT_CSS: &str = r#"
     display: contents;
 }
 
-.ui-presence[data-presence-cue="fade"] {
+/* `.ui-presence` uses `display: contents` so the wrapper does not contribute
+   a layout box. Opacity and transform on a `display: contents` element have
+   no effect (there is no box to transform), so each presence cue applies its
+   visual to direct children instead. */
+.ui-presence[data-presence-cue="fade"] > * {
     opacity: var(--ui-presence-t);
+    transition: opacity var(--ui-motion-normal);
 }
 
-.ui-presence[data-presence-cue="rise"] {
+.ui-presence[data-presence-cue="rise"] > * {
     opacity: var(--ui-presence-t);
     transform: translateY(calc((1 - var(--ui-presence-t)) * 8px));
+    transition: opacity var(--ui-motion-normal), transform var(--ui-motion-normal);
 }
 
-.ui-presence[data-presence-cue="slide"] {
+.ui-presence[data-presence-cue="slide"] > * {
     opacity: var(--ui-presence-t);
     transform: translateX(calc((1 - var(--ui-presence-t)) * 16px));
+    transition: opacity var(--ui-motion-normal), transform var(--ui-motion-normal);
 }
 
-.ui-presence[data-presence-cue="scale"] {
+.ui-presence[data-presence-cue="scale"] > * {
     opacity: var(--ui-presence-t);
     transform: scale(calc(0.92 + var(--ui-presence-t) * 0.08));
+    transition: opacity var(--ui-motion-normal), transform var(--ui-motion-normal);
 }
 
 @media (prefers-reduced-motion: reduce) {
     .ui-presence {
         --ui-presence-t: 1 !important;
+    }
+    .ui-presence > * {
         transform: none !important;
         opacity: 1 !important;
+        transition: none !important;
     }
 }
 
@@ -759,6 +824,10 @@ pub const COMPONENT_CSS: &str = r#"
 
 [data-ui-motion="reduced"] .ui-presence {
     --ui-presence-t: 1 !important;
+}
+
+[data-ui-motion="reduced"] .ui-presence > * {
+    transform: none !important;
     opacity: 1 !important;
 }
 

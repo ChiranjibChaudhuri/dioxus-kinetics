@@ -183,3 +183,19 @@ fn component_block<'a>(css: &'a str, selector_prefix: &str) -> &'a str {
     let end = rest.find('}').unwrap_or(rest.len());
     &rest[..end]
 }
+
+#[test]
+fn reduced_motion_ancestor_scope_disables_transitions_globally() {
+    let css = library_css();
+    assert!(css.contains(r#"[data-ui-motion="reduced"]"#),
+        "expected motion-policy ancestor scope");
+    // The scope must neutralize transitions on at least the kinetic + button + switch + menu classes.
+    let block_start = css.find(r#"[data-ui-motion="reduced"]"#).unwrap();
+    let block = &css[block_start..];
+    for selector in [".ui-button", ".ui-kinetic-box", ".ui-switch-thumb", ".ui-icon-button"] {
+        assert!(
+            block.contains(selector),
+            "motion-reduced scope should target {selector}"
+        );
+    }
+}

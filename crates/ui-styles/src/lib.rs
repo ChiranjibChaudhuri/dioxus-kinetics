@@ -676,6 +676,26 @@ pub const COMPONENT_CSS: &str = r#"
     display: block;
     will-change: transform, opacity;
 }
+
+[data-ui-motion="reduced"] .ui-button,
+[data-ui-motion="reduced"] .ui-field-control,
+[data-ui-motion="reduced"] .ui-command-menu-input,
+[data-ui-motion="reduced"] .ui-icon-button,
+[data-ui-motion="reduced"] .ui-switch-thumb,
+[data-ui-motion="reduced"] .ui-kinetic-box,
+[data-ui-motion="reduced"] .ui-kinetic-text,
+[data-ui-motion="reduced"] .ui-frame-layer,
+[data-ui-motion="reduced"] .ui-shared-element,
+[data-ui-motion="reduced"] .ui-presence {
+    transition: none !important;
+    animation: none !important;
+    transform: none !important;
+}
+
+[data-ui-motion="reduced"] .ui-presence {
+    --ui-presence-t: 1 !important;
+    opacity: 1 !important;
+}
 "#;
 
 pub fn library_css() -> String {

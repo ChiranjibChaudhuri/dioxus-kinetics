@@ -15,7 +15,7 @@ pub fn button_preview() -> Element {
 pub fn command_menu_preview() -> Element {
     rsx! {
         CommandMenu {
-            open: false,
+            open: true,
             query: "rep",
             selected_id: "reports",
             groups: vec![CommandGroup::new(

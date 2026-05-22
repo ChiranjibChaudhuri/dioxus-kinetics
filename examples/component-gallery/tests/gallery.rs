@@ -568,9 +568,10 @@ fn dialog_preview_renders_open_trigger_and_starts_closed() {
     });
     // Trigger button labelled "Show dialog" is present.
     assert!(html.contains("Show dialog"));
-    // Default state is closed → dialog panel markup is NOT in the rendered HTML for the preview tile.
-    // The existing tests assert ".ui-dialog" appears in CSS — that's still true.
-    // We assert no aria-modal in the preview area by counting overall occurrences.
-    let aria_modal_count = html.matches(r#"aria-modal="true""#).count();
-    assert_eq!(aria_modal_count, 0, "dialog should start closed in preview");
+    // Default state is closed → no Dialog panel markup rendered.
+    // The id="ui-dialog-title" is emitted only by the Dialog component when open.
+    assert!(
+        !html.contains(r#"id="ui-dialog-title""#),
+        "dialog should start closed in preview",
+    );
 }

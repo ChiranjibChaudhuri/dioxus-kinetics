@@ -282,11 +282,11 @@ const COMPONENT_DOCS: [ComponentDoc; 27] = [
     ComponentDoc {
         name: "Sequence",
         category: ComponentCategory::Motion,
-        status: ComponentStatus::ComingSoon,
-        summary: "Orders small motion steps into predictable product transitions.",
+        status: ComponentStatus::Ready,
+        summary: "Orchestrates multiple kinetic boxes through a coordinated timeline of property cues.",
         snippet: SEQUENCE_SNIPPET,
-        accessibility: "Coming soon; sequence helpers will preserve reduced-motion fallbacks.",
-        render: None,
+        accessibility: "The sample is deterministic per clock; reduced-motion policies render the settled state.",
+        render: Some(sequence_preview),
     },
     ComponentDoc {
         name: "SharedLayout",
@@ -477,7 +477,14 @@ const PRESENCE_SNIPPET: &str = r#"Presence {
 }"#;
 
 const SEQUENCE_SNIPPET: &str = r#"Sequence {
-    steps: onboarding_steps,
+    cues: Some(vec![
+        Cue::new("title", 0.0, MotionCue::Opacity { from: 0.0, to: 1.0, transition: Transition::tween(220) }),
+        Cue::new("body", 120.0, MotionCue::Translate { axis: Axis::Y, from: 12.0, to: 0.0, transition: Transition::tween(200) }),
+        Cue::new("cta", 320.0, MotionCue::Scale { from: 0.94, to: 1.0, transition: Transition::tween(240) }),
+    ]),
+    KineticBox { id: "title", h3 { "Welcome" } }
+    KineticBox { id: "body", p { "Subtle entry" } }
+    KineticBox { id: "cta", Button { "Get started" } }
 }"#;
 
 const SHARED_LAYOUT_SNIPPET: &str = r#"SharedLayout {
@@ -772,6 +779,67 @@ fn presence_preview() -> Element {
                 Presence { present: false, cue: PresenceCue::Rise,
                     p { "Hidden state" }
                 }
+            }
+        }
+    }
+}
+
+fn sequence_preview() -> Element {
+    let tween_short = Transition::Tween {
+        duration_ms: 220,
+        ease: Ease::Standard,
+    };
+    let tween_med = Transition::Tween {
+        duration_ms: 200,
+        ease: Ease::Standard,
+    };
+    let tween_long = Transition::Tween {
+        duration_ms: 240,
+        ease: Ease::Standard,
+    };
+    let cues = vec![
+        Cue::new(
+            "title",
+            0.0,
+            MotionCue::Opacity {
+                from: 0.0,
+                to: 1.0,
+                transition: tween_short,
+            },
+        ),
+        Cue::new(
+            "body",
+            120.0,
+            MotionCue::Translate {
+                axis: Axis::Y,
+                from: 12.0,
+                to: 0.0,
+                transition: tween_med,
+            },
+        ),
+        Cue::new(
+            "cta",
+            320.0,
+            MotionCue::Scale {
+                from: 0.94,
+                to: 1.0,
+                transition: tween_long,
+            },
+        ),
+    ];
+
+    rsx! {
+        Sequence {
+            cues: Some(cues),
+            clock: TimelineClock::Manual { elapsed_ms: 560.0 },
+            KineticBox { id: "title",
+                h4 { "Welcome" }
+            }
+            KineticBox { id: "body",
+                p { "Subtle entry choreography" }
+            }
+            KineticBox { id: "cta",
+                Button { "Get started" }
             }
         }
     }

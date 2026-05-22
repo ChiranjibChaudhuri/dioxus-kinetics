@@ -4,8 +4,8 @@ use dioxus::prelude::*;
 use ui_motion::{Ease, Transition};
 use ui_runtime::{use_animation_value, use_presence_state, use_timeline_sample, PresenceState};
 use ui_timeline::{
-    KineticId, MotionCue, MotionSegment, MotionTarget, ResolvedMotionState, Timeline, TimelineClock,
-    TimelineId, TimelineTrack,
+    FillMode, KineticId, MotionCue, MotionSegment, MotionTarget, ResolvedMotionState, Timeline,
+    TimelineClock, TimelineId, TimelineTrack,
 };
 
 #[derive(Clone, Debug, PartialEq)]
@@ -60,6 +60,7 @@ fn cues_to_timeline(id: &str, cues: Vec<Cue>) -> Timeline {
     }
     Timeline {
         duration_ms: max_end,
+        fill: FillMode::Forwards,
         ..timeline
     }
 }

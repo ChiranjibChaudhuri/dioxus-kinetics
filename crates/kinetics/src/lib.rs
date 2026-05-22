@@ -16,7 +16,7 @@ pub mod prelude {
         TimelineScope, Toast, ToastTone, Toolbar, Tooltip, ViewSwitcher,
     };
     #[cfg(feature = "timeline")]
-    pub use ui_timeline::{Axis, ResolvedMotionState};
+    pub use ui_timeline::{Axis, MotionCue, ResolvedMotionState, TimelineClock};
     pub use ui_glass::{
         resolve_glass, GlassDensity, GlassLevel, GlassPolicy, GlassRecipe, GlassRequest, GlassTone,
     };

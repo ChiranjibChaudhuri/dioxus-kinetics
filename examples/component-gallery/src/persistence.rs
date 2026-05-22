@@ -1,3 +1,20 @@
+pub const KEY_THEME: &str = "kx-gallery-theme";
+pub const KEY_DENSITY: &str = "kx-gallery-density";
+pub const KEY_MOTION: &str = "kx-gallery-motion";
+pub const KEY_GLASS: &str = "kx-gallery-glass";
+
+pub fn load(key: &str) -> Option<String> {
+    imp::load(key)
+}
+
+pub fn save(key: &str, value: &str) {
+    imp::save(key, value);
+}
+
+pub fn prefers_reduced_motion() -> bool {
+    imp::prefers_reduced_motion()
+}
+
 #[cfg(target_arch = "wasm32")]
 mod imp {
     pub fn load(key: &str) -> Option<String> {
@@ -29,10 +46,3 @@ mod imp {
     pub fn save(_key: &str, _value: &str) {}
     pub fn prefers_reduced_motion() -> bool { false }
 }
-
-pub use imp::*;
-
-pub const KEY_THEME: &str = "kx-gallery-theme";
-pub const KEY_DENSITY: &str = "kx-gallery-density";
-pub const KEY_MOTION: &str = "kx-gallery-motion";
-pub const KEY_GLASS: &str = "kx-gallery-glass";

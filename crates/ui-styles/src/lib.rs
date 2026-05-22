@@ -628,6 +628,15 @@ pub const COMPONENT_CSS: &str = r#"
 .ui-sequence {
     display: block;
 }
+
+.ui-shared-layout {
+    display: contents;
+}
+
+.ui-shared-element {
+    display: block;
+    will-change: transform, opacity;
+}
 "#;
 
 pub fn library_css() -> String {

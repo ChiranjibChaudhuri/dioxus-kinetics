@@ -373,3 +373,52 @@ fn root_readme_uses_kinetics_crate_name() {
     assert!(!readme.contains("unified_ui"));
     assert!(!readme.contains("Unified UI"));
 }
+
+#[test]
+fn gallery_includes_presence_entry_with_lifecycle_attrs() {
+    let docs = component_gallery::component_docs();
+    let p = docs
+        .iter()
+        .find(|d| d.name == "Presence")
+        .expect("Presence doc exists");
+    assert_eq!(p.status, component_gallery::ComponentStatus::Ready);
+    assert!(p.render.is_some());
+
+    let html = dioxus_ssr::render_element(rsx! {
+        component_gallery::App {}
+    });
+
+    assert!(html.contains("data-presence-cue=\"rise\""), "got {html}");
+    assert!(
+        html.contains("data-presence-state=\"visible\""),
+        "got {html}"
+    );
+    assert!(html.contains("Present"));
+    assert!(html.contains("Hidden"));
+}
+
+#[test]
+fn gallery_icon_button_is_ready_with_tone_size_matrix() {
+    let docs = component_gallery::component_docs();
+    let ib = docs
+        .iter()
+        .find(|d| d.name == "IconButton")
+        .expect("IconButton doc exists");
+    assert_eq!(ib.status, component_gallery::ComponentStatus::Ready);
+    assert!(ib.render.is_some());
+
+    let html = dioxus_ssr::render_element(rsx! {
+        component_gallery::App {}
+    });
+
+    for tone in ["Neutral", "Primary", "Danger"] {
+        for size in ["Compact", "Default", "Spacious"] {
+            assert!(
+                html.contains(&format!("{tone} · {size}")),
+                "missing IconButton tile {tone} · {size}",
+            );
+        }
+    }
+    assert!(html.contains("ui-icon-button--danger"));
+    assert!(html.contains("ui-icon-button--compact"));
+}

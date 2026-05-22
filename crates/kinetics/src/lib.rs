@@ -9,10 +9,11 @@ pub mod prelude {
         ActionBar, ActionControl, BlankState, Button, ButtonVariant, CaptureStage, Checkbox,
         ChoiceMark, CommandFinder, CommandGroup, CommandItem, CommandMenu, ContentPlane,
         ContextHint, Dialog, EmptyState, FrameClip, FrameLayer, FrameStage, GlassLayer,
-        GlassSurface, KineticBox, KineticText, MetricCard, MetricReadout, MetricTone, ModalLayer,
-        NavigationRail, NoticeStack, PresenceGate, Sidebar, SidebarItem, SidebarSection, Stack,
-        StateSwitch, Surface, Switch, TabItem, TabPanel, Tabs, TextEntry, TextField, TimelineScope,
-        Toast, ToastTone, Toolbar, Tooltip, ViewSwitcher,
+        GlassSurface, IconButton, IconButtonSize, IconButtonTone, KineticBox, KineticText,
+        MetricCard, MetricReadout, MetricTone, ModalLayer, NavigationRail, NoticeStack, Presence,
+        PresenceCue, PresenceGate, Sidebar, SidebarItem, SidebarSection, Stack, StateSwitch,
+        Surface, Switch, TabItem, TabPanel, Tabs, TextEntry, TextField, TimelineScope, Toast,
+        ToastTone, Toolbar, Tooltip, ViewSwitcher,
     };
     pub use ui_glass::{
         resolve_glass, GlassDensity, GlassLevel, GlassPolicy, GlassRecipe, GlassRequest, GlassTone,
@@ -38,13 +39,23 @@ pub mod prelude {
 
     #[cfg(feature = "capture")]
     pub use ui_capture::CaptureStageDescriptor;
+
+    #[cfg(feature = "runtime")]
+    pub use ui_runtime::{
+        use_animation_value, use_presence_state, use_reduced_motion, ReducedMotion,
+    };
+
+    #[cfg(feature = "icons")]
+    pub use ui_icons::*;
 }
 
-pub fn public_api_names() -> &'static [&'static str] {
-    &[
+pub fn public_api_names() -> Vec<&'static str> {
+    let mut names = vec![
         "Button",
         "ActionControl",
         "IconButton",
+        "IconButtonTone",
+        "IconButtonSize",
         "TextField",
         "TextEntry",
         "Checkbox",
@@ -74,6 +85,7 @@ pub fn public_api_names() -> &'static [&'static str] {
         "GlassSurface",
         "GlassLayer",
         "Presence",
+        "PresenceCue",
         "Transition",
         "Sequence",
         "SharedLayout",
@@ -88,7 +100,21 @@ pub fn public_api_names() -> &'static [&'static str] {
         "FrameClip",
         "FrameLayer",
         "CaptureStage",
-    ]
+    ];
+
+    #[cfg(feature = "icons")]
+    names.extend_from_slice(&[
+        "Close",
+        "Check",
+        "ChevronDown",
+        "ChevronRight",
+        "Plus",
+        "Minus",
+        "Trash",
+        "Search",
+    ]);
+
+    names
 }
 
 #[cfg(feature = "timeline")]

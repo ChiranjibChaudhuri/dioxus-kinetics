@@ -129,11 +129,11 @@ const COMPONENT_DOCS: [ComponentDoc; 27] = [
     ComponentDoc {
         name: "IconButton",
         category: ComponentCategory::Actions,
-        status: ComponentStatus::ComingSoon,
-        summary: "A compact icon-only command control with an accessible label.",
+        status: ComponentStatus::Ready,
+        summary: "A compact icon-only command control with an accessible label, three tones, and three sizes.",
         snippet: ICON_BUTTON_SNIPPET,
-        accessibility: "Reserved for a later icon system while keeping the gallery contract stable.",
-        render: None,
+        accessibility: "Accessible name comes from the `label` prop, exposed on `aria-label`. The icon child uses `aria-hidden`.",
+        render: Some(icon_button_preview),
     },
     ComponentDoc {
         name: "CommandMenu",
@@ -273,11 +273,11 @@ const COMPONENT_DOCS: [ComponentDoc; 27] = [
     ComponentDoc {
         name: "Presence",
         category: ComponentCategory::Motion,
-        status: ComponentStatus::ComingSoon,
-        summary: "Coordinates mounted, exiting, and removed states for animated lifecycles.",
+        status: ComponentStatus::Ready,
+        summary: "Renders children with an enter/exit animation lifecycle; settles into the rendered state on SSR and reduced-motion paths.",
         snippet: PRESENCE_SNIPPET,
-        accessibility: "Coming soon; motion helpers will respect reduced-motion preferences.",
-        render: None,
+        accessibility: "Hidden state renders no children; the entering and visible states keep the DOM stable for assistive tech.",
+        render: Some(presence_preview),
     },
     ComponentDoc {
         name: "Sequence",
@@ -368,8 +368,9 @@ const BUTTON_SNIPPET: &str = r#"Button {
 }"#;
 
 const ICON_BUTTON_SNIPPET: &str = r#"IconButton {
-    label: "Archive",
-    icon: ArchiveIcon,
+    label: "Archive".to_string(),
+    tone: IconButtonTone::Neutral,
+    Close { size: 16 }
 }"#;
 
 const COMMAND_MENU_SNIPPET: &str = r#"CommandMenu {
@@ -470,8 +471,9 @@ const EMPTY_STATE_SNIPPET: &str = r#"EmptyState {
 }"#;
 
 const PRESENCE_SNIPPET: &str = r#"Presence {
-    visible: is_open,
-    Dialog { title: "Invite member" }
+    present: is_visible,
+    cue: PresenceCue::Rise,
+    p { "Hello" }
 }"#;
 
 const SEQUENCE_SNIPPET: &str = r#"Sequence {
@@ -721,6 +723,56 @@ fn empty_state_preview() -> Element {
             title: "No reports yet",
             description: "Create a report to share performance with your team.",
             action_label: "Create report",
+        }
+    }
+}
+
+fn icon_button_preview() -> Element {
+    let tones = [
+        (IconButtonTone::Neutral, "Neutral"),
+        (IconButtonTone::Primary, "Primary"),
+        (IconButtonTone::Danger, "Danger"),
+    ];
+    let sizes = [
+        (IconButtonSize::Compact, "Compact"),
+        (IconButtonSize::Default, "Default"),
+        (IconButtonSize::Spacious, "Spacious"),
+    ];
+
+    rsx! {
+        div { class: "gallery-variant-grid gallery-variant-grid--3x3",
+            for (tone, tone_label) in tones {
+                for (size, size_label) in sizes {
+                    div { class: "gallery-variant-tile",
+                        span { class: "gallery-variant-label", "{tone_label} · {size_label}" }
+                        IconButton {
+                            label: format!("{tone_label} {size_label}"),
+                            tone: tone,
+                            size: size,
+                            Plus { size: 16 }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+fn presence_preview() -> Element {
+    rsx! {
+        div { class: "gallery-variant-grid gallery-variant-grid--2col",
+            div { class: "gallery-variant-tile",
+                span { class: "gallery-variant-label", "Present" }
+                Presence { present: true, cue: PresenceCue::Rise,
+                    p { "Visible state" }
+                }
+            }
+            div { class: "gallery-variant-tile",
+                span { class: "gallery-variant-label", "Hidden" }
+                Presence { present: false, cue: PresenceCue::Rise,
+                    p { "Hidden state" }
+                }
+            }
         }
     }
 }

@@ -47,6 +47,28 @@ fn library_css_concatenates_base_and_component_css() {
 }
 
 #[test]
+fn component_css_covers_icon_button_and_presence() {
+    let css = COMPONENT_CSS;
+    for selector in [
+        ".ui-icon-button",
+        ".ui-icon-button--neutral",
+        ".ui-icon-button--primary",
+        ".ui-icon-button--danger",
+        ".ui-icon-button--compact",
+        ".ui-icon-button--default",
+        ".ui-icon-button--spacious",
+        ".ui-icon-button-glyph",
+        ".ui-presence",
+        "[data-presence-cue=\"fade\"]",
+        "[data-presence-cue=\"rise\"]",
+        "[data-presence-cue=\"slide\"]",
+        "[data-presence-cue=\"scale\"]",
+    ] {
+        assert!(css.contains(selector), "missing selector {selector}");
+    }
+}
+
+#[test]
 fn component_css_covers_native_kinetics_systems() {
     let css = COMPONENT_CSS;
 

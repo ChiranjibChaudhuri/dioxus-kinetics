@@ -1,5 +1,6 @@
 #![forbid(unsafe_code)]
 
+mod buttons;
 mod capture;
 mod composition;
 mod display;
@@ -11,13 +12,14 @@ mod overlays;
 use dioxus::prelude::*;
 use ui_glass::{GlassDensity, GlassLevel, GlassTone};
 
+pub use buttons::{IconButton, IconButtonSize, IconButtonTone};
 pub use capture::CaptureStage;
 pub use composition::{FrameClip, FrameLayer, FrameStage};
 pub use display::{EmptyState as BlankState, MetricCard as MetricReadout};
 pub use display::{EmptyState, MetricCard, MetricTone};
 pub use forms::{Checkbox, Switch, TextField};
 pub use forms::{Checkbox as ChoiceMark, Switch as StateSwitch, TextField as TextEntry};
-pub use kinetics::{KineticBox, KineticText, PresenceGate, TimelineScope};
+pub use kinetics::{KineticBox, KineticText, Presence, PresenceCue, PresenceGate, TimelineScope};
 pub use navigation::{Sidebar, SidebarItem, SidebarSection, TabItem, TabPanel, Tabs, Toolbar};
 pub use navigation::{Sidebar as NavigationRail, Tabs as ViewSwitcher, Toolbar as ActionBar};
 pub use overlays::{CommandGroup, CommandItem, CommandMenu, Dialog, Toast, ToastTone, Tooltip};

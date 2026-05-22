@@ -73,6 +73,8 @@ crates/
   ui-timeline/      native timeline, stagger, presence, scroll, and shared movement contracts
   ui-composition/   native frame composition and deterministic frame sampling
   ui-capture/       native capture stages, viewport profiles, marks, and export manifests
+  ui-runtime/       animation runtime: frame scheduler and dioxus hooks
+  ui-icons/         curated inline-svg icon components
   kinetics/         public facade and prelude
 examples/
   component-gallery/ runnable Dioxus documentation gallery
@@ -97,6 +99,8 @@ Default `kinetics` features:
 - `timeline`
 - `composition`
 - `capture`
+- `runtime`
+- `icons`
 
 Optional features:
 

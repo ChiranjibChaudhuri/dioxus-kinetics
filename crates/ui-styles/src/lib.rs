@@ -548,6 +548,82 @@ pub const COMPONENT_CSS: &str = r#"
 .ui-frame-clip {
     display: contents;
 }
+
+.ui-icon-button {
+    display: inline-grid;
+    place-items: center;
+    border: 1px solid var(--ui-border);
+    border-radius: var(--ui-radius-md);
+    background: var(--ui-surface);
+    color: var(--ui-fg);
+    cursor: pointer;
+    transition: background var(--ui-motion-fast), border-color var(--ui-motion-fast), transform var(--ui-motion-fast);
+}
+
+.ui-icon-button:hover:not(:disabled) {
+    background: var(--ui-surface-muted);
+    transform: translateY(-1px);
+}
+
+.ui-icon-button:active:not(:disabled) {
+    transform: translateY(0);
+}
+
+.ui-icon-button:focus-visible {
+    outline: 2px solid var(--ui-focus);
+    outline-offset: 2px;
+}
+
+.ui-icon-button:disabled {
+    opacity: 0.52;
+    cursor: not-allowed;
+}
+
+.ui-icon-button--neutral { color: var(--ui-fg); }
+.ui-icon-button--primary { color: var(--ui-primary); }
+.ui-icon-button--danger { color: var(--ui-danger); }
+
+.ui-icon-button--compact { width: 28px; height: 28px; }
+.ui-icon-button--default { width: 32px; height: 32px; }
+.ui-icon-button--spacious { width: 40px; height: 40px; }
+
+.ui-icon-button-glyph {
+    display: grid;
+    place-items: center;
+    pointer-events: none;
+}
+
+.ui-presence {
+    --ui-presence-t: 1;
+    display: contents;
+}
+
+.ui-presence[data-presence-cue="fade"] {
+    opacity: var(--ui-presence-t);
+}
+
+.ui-presence[data-presence-cue="rise"] {
+    opacity: var(--ui-presence-t);
+    transform: translateY(calc((1 - var(--ui-presence-t)) * 8px));
+}
+
+.ui-presence[data-presence-cue="slide"] {
+    opacity: var(--ui-presence-t);
+    transform: translateX(calc((1 - var(--ui-presence-t)) * 16px));
+}
+
+.ui-presence[data-presence-cue="scale"] {
+    opacity: var(--ui-presence-t);
+    transform: scale(calc(0.92 + var(--ui-presence-t) * 0.08));
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .ui-presence {
+        --ui-presence-t: 1 !important;
+        transform: none !important;
+        opacity: 1 !important;
+    }
+}
 "#;
 
 pub fn library_css() -> String {

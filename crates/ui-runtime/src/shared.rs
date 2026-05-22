@@ -67,8 +67,7 @@ impl Default for SharedTransition {
 /// stored in a `Signal`. Using `Rc` because `SharedElementRegistry` contains a
 /// `RefCell` and is therefore not `Clone`.
 pub fn use_shared_element_registry() -> Signal<Rc<SharedElementRegistry>> {
-    try_consume_context::<Signal<Rc<SharedElementRegistry>>>()
-        .unwrap_or_else(|| {
-            use_context_provider(|| Signal::new(Rc::new(SharedElementRegistry::default())))
-        })
+    try_consume_context::<Signal<Rc<SharedElementRegistry>>>().unwrap_or_else(|| {
+        use_context_provider(|| Signal::new(Rc::new(SharedElementRegistry::default())))
+    })
 }

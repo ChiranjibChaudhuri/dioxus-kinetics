@@ -4,6 +4,8 @@ use std::collections::HashMap;
 
 use dioxus::prelude::*;
 use ui_layout::Rect;
+use wasm_bindgen::JsCast;
+use web_sys::{Element, HtmlElement};
 
 use super::measurement::MountedRectCallback;
 
@@ -36,22 +38,39 @@ pub fn use_element_computed_style_impl(
     (callback, ReadSignal::from(signal))
 }
 
-fn mounted_event_rect(_evt: &MountedEvent) -> Option<Rect> {
-    // Dioxus 0.7's MountedEvent does not directly expose the underlying
-    // web_sys::Element through a stable public API. The mounted data is
-    // accessible via `evt.data`, but the concrete type is renderer-specific
-    // (`dioxus-web`'s internal `WebEventData`). Until that API is stabilised
-    // or a helper crate is added, we return None and accept that wasm builds
-    // compile but do not actually measure.
-    //
-    // Known limitation: real rect measurement on wasm is not yet implemented.
-    None
+fn mounted_event_rect(evt: &MountedEvent) -> Option<Rect> {
+    let element = evt.downcast::<Element>()?;
+    let dom_rect = element.get_bounding_client_rect();
+    Some(Rect {
+        x: dom_rect.left() as f32,
+        y: dom_rect.top() as f32,
+        width: dom_rect.width() as f32,
+        height: dom_rect.height() as f32,
+    })
 }
 
 fn mounted_event_computed_style(
-    _evt: &MountedEvent,
-    _properties: &'static [&'static str],
+    evt: &MountedEvent,
+    properties: &'static [&'static str],
 ) -> Option<HashMap<&'static str, String>> {
-    // Same limitation as mounted_event_rect above.
-    None
+    let element = evt.downcast::<Element>()?;
+    // `get_computed_style` lives on `Window`; the element itself does not expose
+    // it. Fall back to inline style for non-HTML elements (SVG, MathML) where
+    // window().get_computed_style() may still work but returns CSSOM defaults.
+    let window = web_sys::window()?;
+    let declaration = window
+        .get_computed_style(element)
+        .ok()
+        .flatten()
+        .or_else(|| element.dyn_ref::<HtmlElement>().map(|html| html.style()))?;
+
+    let mut map = HashMap::with_capacity(properties.len());
+    for property in properties {
+        if let Ok(value) = declaration.get_property_value(property) {
+            if !value.is_empty() {
+                map.insert(*property, value);
+            }
+        }
+    }
+    Some(map)
 }

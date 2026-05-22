@@ -37,10 +37,7 @@ fn cue_duration_ms(motion: &MotionCue) -> f32 {
         MotionCue::Scale { transition, .. } => transition,
         MotionCue::Rotate { transition, .. } => transition,
     };
-    match transition {
-        ui_motion::Transition::Tween { duration_ms, .. } => *duration_ms as f32,
-        ui_motion::Transition::Spring(_) => 600.0,
-    }
+    transition.estimated_duration_ms()
 }
 
 fn cues_to_timeline(id: &str, cues: Vec<Cue>) -> Timeline {
@@ -88,7 +85,20 @@ pub fn Sequence(
     };
 
     let sample = use_timeline_sample(timeline_value, clock);
-    let mut ctx_signal = use_signal(|| SequenceContext::default());
+
+    // Seed the context exactly once with the initial sample so SSR renders the
+    // settled inline styles for each kinetic id. `use_hook` runs only on the
+    // first render, avoiding a per-render race with the effect below.
+    let mut ctx_signal = use_hook(|| {
+        let snapshot = sample();
+        let mut states = HashMap::new();
+        for state in snapshot.states {
+            if let MotionTarget::Node(kinetic_id) = &state.target {
+                states.insert(kinetic_id.0.clone(), state.clone());
+            }
+        }
+        Signal::new(SequenceContext { states })
+    });
     use_context_provider(|| ctx_signal);
 
     use_effect(move || {
@@ -101,20 +111,6 @@ pub fn Sequence(
         }
         ctx_signal.set(SequenceContext { states });
     });
-
-    // Synchronous initial population so SSR shows the initial inline styles.
-    {
-        let snapshot = sample();
-        let mut states = HashMap::new();
-        for state in snapshot.states {
-            if let MotionTarget::Node(kinetic_id) = &state.target {
-                states.insert(kinetic_id.0.clone(), state.clone());
-            }
-        }
-        if !states.is_empty() {
-            ctx_signal.set(SequenceContext { states });
-        }
-    }
 
     rsx! {
         section {

@@ -16,6 +16,48 @@ impl Spring {
         }
     }
 
+    /// Estimates the time (in milliseconds) until the spring settles to within
+    /// `tolerance` of its rest position. Uses the underdamped decay envelope
+    /// `e^{-zeta * omega_n * t}`; for critically- or overdamped springs the
+    /// same closed form holds as a conservative upper bound.
+    ///
+    /// Returns `f32::INFINITY` if the spring has no restoring force or no
+    /// damping (it would never settle deterministically). Callers that need a
+    /// finite value should clamp.
+    pub fn settling_duration_ms(self, tolerance: f32) -> f32 {
+        let stiffness = if self.stiffness.is_finite() {
+            self.stiffness.max(0.0)
+        } else {
+            0.0
+        };
+        let damping = if self.damping.is_finite() {
+            self.damping.max(0.0)
+        } else {
+            0.0
+        };
+        let mass = if self.mass.is_finite() && self.mass > 0.0 {
+            self.mass
+        } else {
+            1.0
+        };
+        let tolerance = if tolerance.is_finite() && tolerance > 0.0 {
+            tolerance.min(1.0)
+        } else {
+            1e-3
+        };
+        if stiffness <= 0.0 || damping <= 0.0 {
+            return f32::INFINITY;
+        }
+        let omega_n = (stiffness / mass).sqrt();
+        let c_crit = 2.0 * (mass * stiffness).sqrt();
+        let zeta = damping / c_crit;
+        let sigma = zeta * omega_n;
+        if sigma <= 0.0 {
+            return f32::INFINITY;
+        }
+        (1.0 / tolerance).ln() / sigma * 1000.0
+    }
+
     pub fn step(self, value: f32, target: f32, velocity: f32, delta_seconds: f32) -> SpringStep {
         let stiffness = if self.stiffness.is_finite() {
             self.stiffness.max(0.0)
@@ -166,6 +208,24 @@ impl Transition {
         match self {
             Self::Tween { duration_ms, .. } => Some(duration_ms),
             Self::Spring(_) => None,
+        }
+    }
+
+    /// Returns a finite duration estimate suitable for timeline budgeting. For
+    /// tweens this is the configured duration; for springs it is the settling
+    /// time derived from the damping envelope, clamped to a reasonable upper
+    /// bound to avoid `Infinity` for undamped or undertuned springs.
+    pub fn estimated_duration_ms(self) -> f32 {
+        match self {
+            Self::Tween { duration_ms, .. } => duration_ms as f32,
+            Self::Spring(spring) => {
+                let estimate = spring.settling_duration_ms(0.005);
+                if estimate.is_finite() {
+                    estimate.clamp(0.0, 4_000.0)
+                } else {
+                    2_000.0
+                }
+            }
         }
     }
 }

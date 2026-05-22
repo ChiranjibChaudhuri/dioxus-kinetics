@@ -18,8 +18,8 @@ pub use capture::CaptureStage;
 pub use composition::{FrameClip, FrameLayer, FrameStage};
 pub use display::{EmptyState as BlankState, MetricCard as MetricReadout};
 pub use display::{EmptyState, MetricCard, MetricTone};
-pub use forms::{Checkbox, Switch, TextField};
 pub use forms::{Checkbox as ChoiceMark, Switch as StateSwitch, TextField as TextEntry};
+pub use forms::{Checkbox, Switch, TextField, TextFieldType};
 pub use kinetics::{
     Cue, KineticBox, KineticText, Presence, PresenceCue, PresenceGate, Sequence, SequenceContext,
     TimelineScope,
@@ -61,13 +61,28 @@ impl ButtonVariant {
 pub fn Button(
     #[props(default)] variant: ButtonVariant,
     #[props(default)] disabled: bool,
+    #[props(default)] loading: bool,
+    #[props(default = "button".to_string())] button_type: String,
+    onclick: Option<EventHandler<MouseEvent>>,
     children: Element,
 ) -> Element {
+    let class = if loading {
+        format!("{} ui-button--loading", variant.class_name())
+    } else {
+        variant.class_name().to_string()
+    };
+
     rsx! {
         button {
-            class: "{variant.class_name()}",
-            disabled,
-            r#type: "button",
+            class: "{class}",
+            disabled: disabled || loading,
+            r#type: "{button_type}",
+            "aria-busy": if loading { "true" } else { "false" },
+            onclick: move |evt| {
+                if let Some(handler) = &onclick {
+                    handler.call(evt);
+                }
+            },
             {children}
         }
     }

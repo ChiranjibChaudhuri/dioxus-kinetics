@@ -106,3 +106,40 @@ fn fixed_duration_ms_distinguishes_tween_from_spring() {
         None
     );
 }
+
+#[test]
+fn spring_settling_duration_is_finite_for_damped_spring() {
+    let estimate = Spring::snappy().settling_duration_ms(0.005);
+    assert!(
+        estimate.is_finite(),
+        "expected finite estimate, got {estimate}"
+    );
+    assert!(estimate > 0.0);
+    // Snappy spring (stiffness 420, damping 34, mass 1) should settle well
+    // below the previous hardcoded 600 ms guard.
+    assert!(
+        estimate < 1_000.0,
+        "expected fast settling; got {estimate} ms"
+    );
+}
+
+#[test]
+fn spring_settling_duration_is_infinite_without_damping() {
+    let undamped = Spring {
+        stiffness: 200.0,
+        damping: 0.0,
+        mass: 1.0,
+    };
+    assert!(!undamped.settling_duration_ms(0.005).is_finite());
+}
+
+#[test]
+fn transition_estimated_duration_ms_returns_finite_clamped_spring_estimate() {
+    let est_tween = Transition::tween(220).estimated_duration_ms();
+    assert!((est_tween - 220.0).abs() < 0.001);
+
+    let est_spring = Transition::spring(Spring::snappy()).estimated_duration_ms();
+    assert!(est_spring.is_finite());
+    assert!(est_spring > 0.0);
+    assert!(est_spring <= 4_000.0);
+}

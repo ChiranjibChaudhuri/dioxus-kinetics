@@ -32,7 +32,9 @@ mod imp {
     }
 
     pub fn prefers_reduced_motion() -> bool {
-        let Some(window) = web_sys::window() else { return false; };
+        let Some(window) = web_sys::window() else {
+            return false;
+        };
         match window.match_media("(prefers-reduced-motion: reduce)") {
             Ok(Some(mql)) => mql.matches(),
             _ => false,
@@ -42,7 +44,11 @@ mod imp {
 
 #[cfg(not(target_arch = "wasm32"))]
 mod imp {
-    pub fn load(_key: &str) -> Option<String> { None }
+    pub fn load(_key: &str) -> Option<String> {
+        None
+    }
     pub fn save(_key: &str, _value: &str) {}
-    pub fn prefers_reduced_motion() -> bool { false }
+    pub fn prefers_reduced_motion() -> bool {
+        false
+    }
 }

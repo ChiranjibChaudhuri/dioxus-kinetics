@@ -154,9 +154,11 @@ fn tooltip_uses_elevation_1() {
 fn toast_uses_elevation_2() {
     let css = library_css();
     let idx = css.find(".ui-toast {").expect(".ui-toast rule exists");
-    assert!(
-        css[idx..].split('}').next().unwrap().contains("box-shadow: var(--ui-elevation-2)")
-    );
+    assert!(css[idx..]
+        .split('}')
+        .next()
+        .unwrap()
+        .contains("box-shadow: var(--ui-elevation-2)"));
 }
 
 #[test]
@@ -187,12 +189,19 @@ fn component_block<'a>(css: &'a str, selector_prefix: &str) -> &'a str {
 #[test]
 fn reduced_motion_ancestor_scope_disables_transitions_globally() {
     let css = library_css();
-    assert!(css.contains(r#"[data-ui-motion="reduced"]"#),
-        "expected motion-policy ancestor scope");
+    assert!(
+        css.contains(r#"[data-ui-motion="reduced"]"#),
+        "expected motion-policy ancestor scope"
+    );
     // The scope must neutralize transitions on at least the kinetic + button + switch + menu classes.
     let block_start = css.find(r#"[data-ui-motion="reduced"]"#).unwrap();
     let block = &css[block_start..];
-    for selector in [".ui-button", ".ui-kinetic-box", ".ui-switch-thumb", ".ui-icon-button"] {
+    for selector in [
+        ".ui-button",
+        ".ui-kinetic-box",
+        ".ui-switch-thumb",
+        ".ui-icon-button",
+    ] {
         assert!(
             block.contains(selector),
             "motion-reduced scope should target {selector}"
@@ -206,7 +215,12 @@ fn solid_glass_ancestor_scope_targets_every_backdrop_filter_class() {
     assert!(css.contains(r#"[data-ui-glass-policy="solid"]"#));
 
     // Enumerate every class that introduces backdrop-filter and ensure the ancestor scope covers it.
-    for class in [".ui-glass-surface", ".ui-glass-layer", ".ui-dialog-panel", ".ui-command-menu-panel"] {
+    for class in [
+        ".ui-glass-surface",
+        ".ui-glass-layer",
+        ".ui-dialog-panel",
+        ".ui-command-menu-panel",
+    ] {
         let pattern = format!(r#"[data-ui-glass-policy="solid"] {class}"#);
         assert!(
             css.contains(&pattern),

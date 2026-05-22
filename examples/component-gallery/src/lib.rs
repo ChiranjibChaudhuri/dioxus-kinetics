@@ -1,8 +1,8 @@
 #![forbid(unsafe_code)]
 
 mod app;
-pub mod controls;
 mod brand;
+pub mod controls;
 pub mod demo_frame;
 mod docs;
 mod persistence;

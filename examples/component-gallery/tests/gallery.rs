@@ -512,10 +512,7 @@ fn gallery_css_includes_ambient_mesh_and_toggle_group_styles() {
         ".gallery-ambient-mesh",
         ".gallery-section--glass-stage",
     ] {
-        assert!(
-            html.contains(selector),
-            "missing CSS selector {selector}",
-        );
+        assert!(html.contains(selector), "missing CSS selector {selector}",);
     }
 
     // Sticky position on the controls bar so it stays reachable while scrolling.
@@ -549,7 +546,10 @@ fn timeline_previews_use_scrub_frame_with_range_slider() {
         "expected >=2 scrub frames (Sequence, TimelineScope, FrameStage), got {scrub_count}"
     );
     let range_count = html.matches(r#"type="range""#).count();
-    assert!(range_count >= 2, "expected >=2 range sliders, got {range_count}");
+    assert!(
+        range_count >= 2,
+        "expected >=2 range sliders, got {range_count}"
+    );
 }
 
 #[test]
@@ -582,7 +582,12 @@ fn toast_preview_renders_trigger_buttons_for_each_tone() {
         component_gallery::App {}
     });
     // The four toast-trigger buttons.
-    for label in ["Trigger success", "Trigger info", "Trigger warning", "Trigger error"] {
+    for label in [
+        "Trigger success",
+        "Trigger info",
+        "Trigger warning",
+        "Trigger error",
+    ] {
         assert!(html.contains(label), "missing toast trigger: {label}");
     }
     // Stage container is always rendered (empty by default).

@@ -53,16 +53,20 @@ fn ToastPreviewBody() -> Element {
 
     let mut push = move |tone: ToastTone, title: &'static str, description: &'static str| {
         let id = TOAST_ID.fetch_add(1, Ordering::Relaxed);
-        toasts.write().push(ToastInstance { id, tone, title, description });
+        toasts.write().push(ToastInstance {
+            id,
+            tone,
+            title,
+            description,
+        });
         let mut t = toasts;
         spawn(async move {
             #[cfg(target_arch = "wasm32")]
             {
                 let promise = js_sys::Promise::new(&mut |resolve, _| {
                     let win = web_sys::window().unwrap();
-                    let _ = win.set_timeout_with_callback_and_timeout_and_arguments_0(
-                        &resolve, 3000,
-                    );
+                    let _ =
+                        win.set_timeout_with_callback_and_timeout_and_arguments_0(&resolve, 3000);
                 });
                 let _ = wasm_bindgen_futures::JsFuture::from(promise).await;
             }

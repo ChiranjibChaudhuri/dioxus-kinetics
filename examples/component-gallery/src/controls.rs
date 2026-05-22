@@ -178,7 +178,12 @@ impl GalleryPrefs {
             persistence::save(KEY_GLASS, glass.read().attr_value());
         });
 
-        Self { theme, density, motion, glass }
+        Self {
+            theme,
+            density,
+            motion,
+            glass,
+        }
     }
 }
 

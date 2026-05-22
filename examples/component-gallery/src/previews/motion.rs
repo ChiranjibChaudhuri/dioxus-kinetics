@@ -45,16 +45,47 @@ pub fn sequence_preview() -> Element {
 fn SequenceBody() -> Element {
     let elapsed = use_context::<ScrubElapsedMs>().0;
     let elapsed_ms = *elapsed.read();
-    let tween_short = Transition::Tween { duration_ms: 220, ease: Ease::Standard };
-    let tween_med = Transition::Tween { duration_ms: 200, ease: Ease::Standard };
-    let tween_long = Transition::Tween { duration_ms: 240, ease: Ease::Standard };
+    let tween_short = Transition::Tween {
+        duration_ms: 220,
+        ease: Ease::Standard,
+    };
+    let tween_med = Transition::Tween {
+        duration_ms: 200,
+        ease: Ease::Standard,
+    };
+    let tween_long = Transition::Tween {
+        duration_ms: 240,
+        ease: Ease::Standard,
+    };
     let cues = vec![
-        Cue::new("title", 0.0,
-            MotionCue::Opacity { from: 0.0, to: 1.0, transition: tween_short }),
-        Cue::new("body", 120.0,
-            MotionCue::Translate { axis: Axis::Y, from: 12.0, to: 0.0, transition: tween_med }),
-        Cue::new("cta", 320.0,
-            MotionCue::Scale { from: 0.94, to: 1.0, transition: tween_long }),
+        Cue::new(
+            "title",
+            0.0,
+            MotionCue::Opacity {
+                from: 0.0,
+                to: 1.0,
+                transition: tween_short,
+            },
+        ),
+        Cue::new(
+            "body",
+            120.0,
+            MotionCue::Translate {
+                axis: Axis::Y,
+                from: 12.0,
+                to: 0.0,
+                transition: tween_med,
+            },
+        ),
+        Cue::new(
+            "cta",
+            320.0,
+            MotionCue::Scale {
+                from: 0.94,
+                to: 1.0,
+                transition: tween_long,
+            },
+        ),
     ];
     rsx! {
         Sequence {

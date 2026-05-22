@@ -30,8 +30,14 @@ fn enums_round_trip_via_attr_value() {
     assert_eq!(ThemePref::from_attr("dark"), Some(ThemePref::Dark));
     assert_eq!(ThemePref::from_attr("nope"), None);
     assert_eq!(MotionPref::from_attr("reduced"), Some(MotionPref::Reduced));
-    assert_eq!(GlassPolicyUi::from_attr("solid"), Some(GlassPolicyUi::Solid));
-    assert_eq!(DensityPref::from_attr("compact"), Some(DensityPref::Compact));
+    assert_eq!(
+        GlassPolicyUi::from_attr("solid"),
+        Some(GlassPolicyUi::Solid)
+    );
+    assert_eq!(
+        DensityPref::from_attr("compact"),
+        Some(DensityPref::Compact)
+    );
 }
 
 #[test]

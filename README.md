@@ -135,6 +135,12 @@ Run the gallery with the Dioxus CLI when available:
 dx serve --package component-gallery
 ```
 
+The CLI defaults to port `8080`. If another process already owns 8080 (a common culprit on Windows is the Apache instance bundled with EnterpriseDB Postgres at `httpd.exe`), `dx serve` will print "Serving your app" but you will see the other process at `http://localhost:8080`. Diagnose with `netstat -ano | findstr :8080` and pass a free port:
+
+```powershell
+dx serve --package component-gallery --port 9173
+```
+
 The gallery is registry-driven. To add a future component to the docs, update the registry in `examples/component-gallery/src/docs.rs` with its category, status, summary, snippet, accessibility note, and renderer.
 
 ## Quick Start

@@ -139,10 +139,45 @@ pub struct GalleryPrefs {
 
 impl GalleryPrefs {
     pub fn use_provided() -> Self {
-        let theme = use_signal(|| DEFAULT_THEME);
-        let density = use_signal(|| DEFAULT_DENSITY);
-        let motion = use_signal(|| DEFAULT_MOTION);
-        let glass = use_signal(|| DEFAULT_GLASS);
+        use crate::persistence::{self, KEY_DENSITY, KEY_GLASS, KEY_MOTION, KEY_THEME};
+
+        let initial_theme = persistence::load(KEY_THEME)
+            .and_then(|v| ThemePref::from_attr(&v))
+            .unwrap_or(DEFAULT_THEME);
+        let initial_density = persistence::load(KEY_DENSITY)
+            .and_then(|v| DensityPref::from_attr(&v))
+            .unwrap_or(DEFAULT_DENSITY);
+        let initial_motion = persistence::load(KEY_MOTION)
+            .and_then(|v| MotionPref::from_attr(&v))
+            .unwrap_or_else(|| {
+                if persistence::prefers_reduced_motion() {
+                    MotionPref::Reduced
+                } else {
+                    DEFAULT_MOTION
+                }
+            });
+        let initial_glass = persistence::load(KEY_GLASS)
+            .and_then(|v| GlassPolicyUi::from_attr(&v))
+            .unwrap_or(DEFAULT_GLASS);
+
+        let theme = use_signal(|| initial_theme);
+        let density = use_signal(|| initial_density);
+        let motion = use_signal(|| initial_motion);
+        let glass = use_signal(|| initial_glass);
+
+        use_effect(move || {
+            persistence::save(KEY_THEME, theme.read().attr_value());
+        });
+        use_effect(move || {
+            persistence::save(KEY_DENSITY, density.read().attr_value());
+        });
+        use_effect(move || {
+            persistence::save(KEY_MOTION, motion.read().attr_value());
+        });
+        use_effect(move || {
+            persistence::save(KEY_GLASS, glass.read().attr_value());
+        });
+
         Self { theme, density, motion, glass }
     }
 }

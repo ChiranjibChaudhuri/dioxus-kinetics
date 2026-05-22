@@ -53,9 +53,8 @@ pub fn use_timeline_sample(timeline: Timeline, clock: TimelineClock) -> ReadSign
                         *elapsed += dt_ms as f32;
                         *elapsed
                     };
-                    sample_signal.set(timeline_clone.sample(TimelineClock::Playback {
-                        elapsed_ms: now,
-                    }));
+                    sample_signal
+                        .set(timeline_clone.sample(TimelineClock::Playback { elapsed_ms: now }));
                     if now >= total {
                         return ControlFlow::Stop;
                     }

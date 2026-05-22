@@ -1,9 +1,7 @@
 use dioxus::prelude::*;
 use ui_dioxus::{Cue, KineticBox, Sequence};
 use ui_motion::{Ease, Transition};
-use ui_timeline::{
-    MotionCue, MotionSegment, MotionTarget, Timeline, TimelineClock, TimelineTrack,
-};
+use ui_timeline::{MotionCue, MotionSegment, MotionTarget, Timeline, TimelineClock, TimelineTrack};
 
 fn linear_220() -> Transition {
     Transition::Tween {

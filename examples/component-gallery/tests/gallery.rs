@@ -437,8 +437,8 @@ fn gallery_sequence_preview_renders_three_cues_with_inline_styles() {
         component_gallery::App {}
     });
 
-    let inline_style_count = html.matches("style=\"opacity").count()
-        + html.matches("style=\"transform").count();
+    let inline_style_count =
+        html.matches("style=\"opacity").count() + html.matches("style=\"transform").count();
     assert!(
         inline_style_count >= 3,
         "expected at least 3 inline-style KineticBox descendants; got {inline_style_count}",

@@ -78,7 +78,11 @@ fn presence_state_initial_present_false_is_unmounted_in_ssr() {
 #[component]
 fn TimelineSampleProbe(timeline: Timeline, clock: TimelineClock) -> Element {
     let sample = use_timeline_sample(timeline, clock);
-    let opacity = sample().states.first().and_then(|s| s.opacity).unwrap_or(-1.0);
+    let opacity = sample()
+        .states
+        .first()
+        .and_then(|s| s.opacity)
+        .unwrap_or(-1.0);
     rsx! {
         div { "data-opacity": "{opacity}" }
     }

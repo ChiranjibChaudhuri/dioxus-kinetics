@@ -368,23 +368,40 @@ impl MotionCue {
 
     fn reduced_motion(self) -> Self {
         match self {
-            Self::Opacity { from, to, transition } => Self::Opacity {
+            Self::Opacity {
+                from,
+                to,
+                transition,
+            } => Self::Opacity {
                 from,
                 to,
                 transition: transition.reduced(),
             },
-            Self::Translate { axis, from, to, transition } => Self::Translate {
+            Self::Translate {
+                axis,
+                from,
+                to,
+                transition,
+            } => Self::Translate {
                 axis,
                 from,
                 to,
                 transition: transition.reduced(),
             },
-            Self::Scale { from, to, transition } => Self::Scale {
+            Self::Scale {
+                from,
+                to,
+                transition,
+            } => Self::Scale {
                 from,
                 to,
                 transition: transition.reduced(),
             },
-            Self::Rotate { from_deg, to_deg, transition } => Self::Rotate {
+            Self::Rotate {
+                from_deg,
+                to_deg,
+                transition,
+            } => Self::Rotate {
                 from_deg,
                 to_deg,
                 transition: transition.reduced(),
@@ -399,14 +416,23 @@ impl MotionCue {
             0.0
         };
         match self {
-            Self::Opacity { from, to, transition } => {
+            Self::Opacity {
+                from,
+                to,
+                transition,
+            } => {
                 let eased = apply_transition_progress(p, transition);
                 MotionCueSample {
                     opacity: Some(interpolate(from, to, eased, Clamp::Yes)),
                     ..Default::default()
                 }
             }
-            Self::Translate { axis, from, to, transition } => {
+            Self::Translate {
+                axis,
+                from,
+                to,
+                transition,
+            } => {
                 let eased = apply_transition_progress(p, transition);
                 let value = interpolate(from, to, eased, Clamp::Yes);
                 let mut sample = MotionCueSample::default();
@@ -416,14 +442,22 @@ impl MotionCue {
                 }
                 sample
             }
-            Self::Scale { from, to, transition } => {
+            Self::Scale {
+                from,
+                to,
+                transition,
+            } => {
                 let eased = apply_transition_progress(p, transition);
                 MotionCueSample {
                     scale: Some(interpolate(from, to, eased, Clamp::Yes)),
                     ..Default::default()
                 }
             }
-            Self::Rotate { from_deg, to_deg, transition } => {
+            Self::Rotate {
+                from_deg,
+                to_deg,
+                transition,
+            } => {
                 let eased = apply_transition_progress(p, transition);
                 MotionCueSample {
                     rotate_deg: Some(interpolate(from_deg, to_deg, eased, Clamp::Yes)),

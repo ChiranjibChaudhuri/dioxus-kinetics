@@ -15,13 +15,13 @@ pub mod prelude {
         Stack, StateSwitch, Surface, Switch, TabItem, TabPanel, Tabs, TextEntry, TextField,
         TimelineScope, Toast, ToastTone, Toolbar, Tooltip, ViewSwitcher,
     };
-    #[cfg(feature = "timeline")]
-    pub use ui_timeline::{Axis, MotionCue, ResolvedMotionState, TimelineClock};
     pub use ui_glass::{
         resolve_glass, GlassDensity, GlassLevel, GlassPolicy, GlassRecipe, GlassRequest, GlassTone,
     };
     pub use ui_layout::{compute_flip, FlipDelta, Rect};
     pub use ui_styles::{library_css, BASE_CSS, COMPONENT_CSS};
+    #[cfg(feature = "timeline")]
+    pub use ui_timeline::{Axis, MotionCue, ResolvedMotionState, TimelineClock};
     pub use ui_tokens::{
         Color, Density, MotionPreference, MotionScale, RadiusScale, SemanticColors, SpacingScale,
         Theme, ThemeMode, TransparencyPreference,

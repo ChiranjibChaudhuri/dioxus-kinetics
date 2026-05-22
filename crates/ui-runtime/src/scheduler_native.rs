@@ -3,7 +3,6 @@
 #![cfg(not(target_arch = "wasm32"))]
 
 use std::time::{Duration, Instant};
-use tokio::runtime::Handle;
 use tokio::task::JoinHandle;
 use tokio::time::{interval, MissedTickBehavior};
 
@@ -25,12 +24,9 @@ impl Drop for FrameHandle {
 
 pub fn spawn_frame_loop<F>(mut callback: F) -> FrameHandle
 where
-    F: FnMut(f64) -> ControlFlow + Send + 'static,
+    F: FnMut(f64) -> ControlFlow + 'static,
 {
-    let Ok(handle) = Handle::try_current() else {
-        return FrameHandle { join: None };
-    };
-    let join = handle.spawn(async move {
+    let join = tokio::task::spawn_local(async move {
         let mut ticker = interval(Duration::from_millis(FRAME_PERIOD_MS));
         ticker.set_missed_tick_behavior(MissedTickBehavior::Delay);
         let mut last = Instant::now();

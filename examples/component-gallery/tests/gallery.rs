@@ -278,17 +278,11 @@ fn gallery_timeline_scope_preview_renders_three_variants() {
 }
 
 #[test]
-fn gallery_frame_stage_preview_renders_three_frame_snapshots() {
+fn gallery_frame_stage_preview_renders_starting_frame_caption() {
     let html = dioxus_ssr::render_element(rsx! {
         component_gallery::App {}
     });
-
-    for caption in ["Frame 0 / 180", "Frame 90 / 180", "Frame 179 / 180"] {
-        assert!(
-            html.contains(caption),
-            "missing FrameStage caption {caption}",
-        );
-    }
+    assert!(html.contains("Frame 0 / 180"));
 }
 
 #[test]
@@ -439,8 +433,8 @@ fn gallery_sequence_preview_renders_three_cues_with_inline_styles() {
     let inline_style_count =
         html.matches("style=\"opacity").count() + html.matches("style=\"transform").count();
     assert!(
-        inline_style_count >= 3,
-        "expected at least 3 inline-style KineticBox descendants; got {inline_style_count}",
+        inline_style_count >= 1,
+        "expected at least 1 inline-style KineticBox descendant on initial scrub frame; got {inline_style_count}",
     );
 }
 
@@ -541,4 +535,19 @@ fn motion_previews_use_replay_frame() {
     );
     // Replay button is present.
     assert!(html.contains("Replay"));
+}
+
+#[test]
+fn timeline_previews_use_scrub_frame_with_range_slider() {
+    let html = dioxus_ssr::render_element(rsx! {
+        component_gallery::App {}
+    });
+
+    let scrub_count = html.matches("gallery-demo-frame--scrub").count();
+    assert!(
+        scrub_count >= 2,
+        "expected >=2 scrub frames (Sequence, TimelineScope, FrameStage), got {scrub_count}"
+    );
+    let range_count = html.matches(r#"type="range""#).count();
+    assert!(range_count >= 2, "expected >=2 range sliders, got {range_count}");
 }

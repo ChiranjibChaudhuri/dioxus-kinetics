@@ -3,6 +3,7 @@
 mod app;
 pub mod controls;
 mod brand;
+pub mod demo_frame;
 mod docs;
 mod persistence;
 mod previews;

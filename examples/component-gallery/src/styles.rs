@@ -445,4 +445,30 @@ body::before {
     min-height: 28px;
     font-size: 13px;
 }
+
+.gallery-demo-frame {
+    display: grid;
+    gap: var(--ui-space-2);
+    padding: var(--ui-space-3);
+    border: 1px dashed var(--ui-border);
+    border-radius: var(--ui-radius-md);
+    background: var(--ui-surface);
+}
+
+.gallery-demo-frame-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--ui-space-2);
+}
+
+.gallery-demo-frame-replay {
+    min-height: 26px;
+    padding: 2px 10px;
+    font-size: 12px;
+}
+
+[data-ui-motion="reduced"] .gallery-demo-frame-replay {
+    display: none;
+}
 "#;

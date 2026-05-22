@@ -41,6 +41,45 @@ pub fn ScrubFrame(
     use_context_provider(|| ScrubElapsedMs(elapsed));
     use_context_provider(|| ScrubFps(fps.unwrap_or(30)));
 
+    #[cfg(target_arch = "wasm32")]
+    use_effect(move || {
+        if !*playing.read() {
+            return;
+        }
+        let mut eval = dioxus::document::eval(&format!(
+            r#"
+                const start = performance.now();
+                const dur = {duration_ms};
+                let raf;
+                const tick = (now) => {{
+                    const t = now - start;
+                    if (t >= dur) {{
+                        dioxus.send(dur);
+                        return;
+                    }}
+                    dioxus.send(t);
+                    raf = requestAnimationFrame(tick);
+                }};
+                raf = requestAnimationFrame(tick);
+            "#,
+        ));
+        spawn(async move {
+            loop {
+                match eval.recv::<f64>().await {
+                    Ok(t) => {
+                        let t_f32 = t as f32;
+                        elapsed.set(t_f32);
+                        if t_f32 >= duration_ms {
+                            playing.set(false);
+                            break;
+                        }
+                    }
+                    Err(_) => break,
+                }
+            }
+        });
+    });
+
     let max_str = format!("{:.0}", duration_ms);
     let value_str = format!("{:.0}", *elapsed.read());
 

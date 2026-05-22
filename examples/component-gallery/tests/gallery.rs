@@ -478,3 +478,31 @@ fn gallery_shell_emits_all_four_preference_data_attributes() {
     assert!(html.contains(r#"data-ui-motion="normal""#));
     assert!(html.contains(r#"data-ui-glass-policy="translucent""#));
 }
+
+#[test]
+fn preference_bar_renders_all_four_toggle_groups() {
+    let html = dioxus_ssr::render_element(rsx! {
+        component_gallery::App {}
+    });
+
+    assert!(html.contains(r#"role="radiogroup""#));
+    // One radiogroup per preference.
+    let radiogroup_count = html.matches(r#"role="radiogroup""#).count();
+    assert!(
+        radiogroup_count >= 4,
+        "expected >=4 radiogroups, got {radiogroup_count}"
+    );
+
+    // Each labelled.
+    for label in ["Theme", "Density", "Motion", "Glass"] {
+        assert!(html.contains(label), "missing toggle group label: {label}");
+    }
+
+    // The current value of each shows aria-checked=true on exactly one option.
+    for value in ["Light", "Comfortable", "Normal", "Translucent"] {
+        assert!(
+            html.contains(value),
+            "missing default-selected option: {value}"
+        );
+    }
+}

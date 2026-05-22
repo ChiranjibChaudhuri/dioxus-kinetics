@@ -48,19 +48,7 @@ pub fn App() -> Element {
                         "Semantic components grouped by product function, with live rendered examples for available primitives and disabled coming-soon entries for the next phase."
                     }
                 }
-                section { class: "gallery-controls", "aria-label": "Preview settings",
-                    div { class: "gallery-control-group",
-                        span { class: "gallery-control-label", "Theme" }
-                        button { class: "ui-button ui-button--primary", r#type: "button", "Light" }
-                        button { class: "ui-button ui-button--secondary", r#type: "button", "Dark" }
-                    }
-                    div { class: "gallery-control-group",
-                        span { class: "gallery-control-label", "Density" }
-                        button { class: "ui-button ui-button--secondary", r#type: "button", "Compact" }
-                        button { class: "ui-button ui-button--primary", r#type: "button", "Comfortable" }
-                        button { class: "ui-button ui-button--secondary", r#type: "button", "Spacious" }
-                    }
-                }
+                crate::controls::PreferenceBar {}
                 nav { class: "gallery-mobile-tabs", aria_label: "Component categories",
                     for category in categories() {
                         a { href: "#{category.slug()}", "{category.label()}" }

@@ -146,3 +146,97 @@ impl GalleryPrefs {
         Self { theme, density, motion, glass }
     }
 }
+
+#[derive(Clone, PartialEq, Props)]
+pub struct ToggleGroupProps {
+    pub label: &'static str,
+    pub options: Vec<(&'static str, &'static str, bool)>,
+    pub on_select: EventHandler<&'static str>,
+}
+
+#[component]
+pub fn ToggleGroup(props: ToggleGroupProps) -> Element {
+    rsx! {
+        div { class: "gallery-toggle-group", role: "radiogroup", "aria-label": "{props.label}",
+            span { class: "gallery-control-label", "{props.label}" }
+            for (value, label, selected) in props.options.iter().copied() {
+                button {
+                    class: if selected { "ui-button ui-button--primary" } else { "ui-button ui-button--secondary" },
+                    role: "radio",
+                    "aria-checked": "{selected}",
+                    r#type: "button",
+                    onclick: move |_| props.on_select.call(value),
+                    "{label}"
+                }
+            }
+        }
+    }
+}
+
+#[component]
+pub fn PreferenceBar() -> Element {
+    let prefs = use_context::<GalleryPrefs>();
+    let mut theme_sig = prefs.theme;
+    let mut density_sig = prefs.density;
+    let mut motion_sig = prefs.motion;
+    let mut glass_sig = prefs.glass;
+
+    let theme_now = *theme_sig.read();
+    let density_now = *density_sig.read();
+    let motion_now = *motion_sig.read();
+    let glass_now = *glass_sig.read();
+
+    rsx! {
+        section { class: "gallery-controls", "aria-label": "Preview settings",
+            ToggleGroup {
+                label: "Theme",
+                options: vec![
+                    ("light", ThemePref::Light.label(), theme_now == ThemePref::Light),
+                    ("dark", ThemePref::Dark.label(), theme_now == ThemePref::Dark),
+                ],
+                on_select: move |v: &str| {
+                    if let Some(next) = ThemePref::from_attr(v) {
+                        theme_sig.set(next);
+                    }
+                },
+            }
+            ToggleGroup {
+                label: "Density",
+                options: vec![
+                    ("compact", DensityPref::Compact.label(), density_now == DensityPref::Compact),
+                    ("comfortable", DensityPref::Comfortable.label(), density_now == DensityPref::Comfortable),
+                    ("spacious", DensityPref::Spacious.label(), density_now == DensityPref::Spacious),
+                ],
+                on_select: move |v: &str| {
+                    if let Some(next) = DensityPref::from_attr(v) {
+                        density_sig.set(next);
+                    }
+                },
+            }
+            ToggleGroup {
+                label: "Motion",
+                options: vec![
+                    ("normal", MotionPref::Normal.label(), motion_now == MotionPref::Normal),
+                    ("reduced", MotionPref::Reduced.label(), motion_now == MotionPref::Reduced),
+                ],
+                on_select: move |v: &str| {
+                    if let Some(next) = MotionPref::from_attr(v) {
+                        motion_sig.set(next);
+                    }
+                },
+            }
+            ToggleGroup {
+                label: "Glass",
+                options: vec![
+                    ("translucent", GlassPolicyUi::Translucent.label(), glass_now == GlassPolicyUi::Translucent),
+                    ("solid", GlassPolicyUi::Solid.label(), glass_now == GlassPolicyUi::Solid),
+                ],
+                on_select: move |v: &str| {
+                    if let Some(next) = GlassPolicyUi::from_attr(v) {
+                        glass_sig.set(next);
+                    }
+                },
+            }
+        }
+    }
+}

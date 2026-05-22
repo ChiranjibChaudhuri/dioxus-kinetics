@@ -203,58 +203,68 @@ pub const COMPONENT_CSS: &str = r#"
 }
 
 .ui-glass-surface {
+    /* Default tone (neutral) maps to the surface white; tone selectors below
+       override `--ui-glass-tint` for the per-tone color and the level selectors
+       compose the tint with the level-specific opacity. */
+    --ui-glass-tint: #ffffff;
     box-shadow: var(--ui-elevation-2);
     border-color: color-mix(in srgb, var(--ui-fg) 10%, transparent);
 }
 
-/* Level: depth of the material, governs blur strength and elevation. */
+/* Tone: sets the dominant color of the glass material. */
+.ui-glass-surface[data-glass-tone="neutral"] { --ui-glass-tint: #ffffff; }
+.ui-glass-surface[data-glass-tone="primary"] { --ui-glass-tint: var(--ui-primary); }
+.ui-glass-surface[data-glass-tone="info"]    { --ui-glass-tint: var(--ui-info); }
+.ui-glass-surface[data-glass-tone="success"] { --ui-glass-tint: var(--ui-success); }
+.ui-glass-surface[data-glass-tone="warning"] { --ui-glass-tint: var(--ui-warning); }
+.ui-glass-surface[data-glass-tone="danger"]  { --ui-glass-tint: var(--ui-danger); }
+
+[data-ui-theme="dark"] .ui-glass-surface[data-glass-tone="neutral"] {
+    --ui-glass-tint: #161c26;
+}
+
+/* Level: depth of the material. Controls translucency, blur, and elevation.
+   Each level uses a distinctly different alpha so rows of the same tone read
+   as visibly different at small preview sizes (subtle ≈ ghost, floating ≈
+   standard glass, overlay ≈ vivid material). */
 .ui-glass-surface[data-glass-level="subtle"] {
-    backdrop-filter: blur(10px) saturate(140%);
-    -webkit-backdrop-filter: blur(10px) saturate(140%);
+    background: color-mix(in srgb, var(--ui-glass-tint) 22%, transparent);
+    backdrop-filter: blur(8px) saturate(130%);
+    -webkit-backdrop-filter: blur(8px) saturate(130%);
     box-shadow: var(--ui-elevation-0);
+    border-color: color-mix(in srgb, var(--ui-fg) 8%, transparent);
 }
 
 .ui-glass-surface[data-glass-level="floating"] {
+    background: color-mix(in srgb, var(--ui-glass-tint) 55%, color-mix(in srgb, #ffffff 60%, transparent));
     backdrop-filter: blur(18px) saturate(160%);
     -webkit-backdrop-filter: blur(18px) saturate(160%);
     box-shadow: var(--ui-elevation-2);
+    border-color: color-mix(in srgb, var(--ui-fg) 12%, transparent);
 }
 
 .ui-glass-surface[data-glass-level="overlay"] {
-    backdrop-filter: blur(26px) saturate(180%);
-    -webkit-backdrop-filter: blur(26px) saturate(180%);
+    background: color-mix(in srgb, var(--ui-glass-tint) 80%, #ffffff);
+    backdrop-filter: blur(28px) saturate(200%);
+    -webkit-backdrop-filter: blur(28px) saturate(200%);
     box-shadow: var(--ui-elevation-3);
+    border-color: color-mix(in srgb, var(--ui-fg) 16%, transparent);
 }
 
 .ui-glass-surface[data-glass-level="chrome"] {
-    backdrop-filter: blur(32px) saturate(200%);
-    -webkit-backdrop-filter: blur(32px) saturate(200%);
+    background: var(--ui-glass-tint);
+    backdrop-filter: blur(32px) saturate(220%);
+    -webkit-backdrop-filter: blur(32px) saturate(220%);
     box-shadow: var(--ui-elevation-3);
+    border-color: color-mix(in srgb, var(--ui-fg) 20%, transparent);
 }
 
-/* Tone: tints the glass background; mixes color into the translucent layer. */
-.ui-glass-surface[data-glass-tone="neutral"] {
-    background: var(--ui-glass);
+[data-ui-theme="dark"] .ui-glass-surface[data-glass-level="floating"] {
+    background: color-mix(in srgb, var(--ui-glass-tint) 55%, color-mix(in srgb, #161c26 60%, transparent));
 }
 
-.ui-glass-surface[data-glass-tone="primary"] {
-    background: color-mix(in srgb, var(--ui-primary), var(--ui-glass) 55%);
-}
-
-.ui-glass-surface[data-glass-tone="info"] {
-    background: color-mix(in srgb, var(--ui-info), var(--ui-glass) 55%);
-}
-
-.ui-glass-surface[data-glass-tone="success"] {
-    background: color-mix(in srgb, var(--ui-success), var(--ui-glass) 55%);
-}
-
-.ui-glass-surface[data-glass-tone="warning"] {
-    background: color-mix(in srgb, var(--ui-warning), var(--ui-glass) 55%);
-}
-
-.ui-glass-surface[data-glass-tone="danger"] {
-    background: color-mix(in srgb, var(--ui-danger), var(--ui-glass) 55%);
+[data-ui-theme="dark"] .ui-glass-surface[data-glass-level="overlay"] {
+    background: color-mix(in srgb, var(--ui-glass-tint) 80%, #161c26);
 }
 
 /* Density: padding rhythm inside the glass surface. */

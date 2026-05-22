@@ -1,7 +1,7 @@
 use ui_motion::{Ease, Transition};
 use ui_timeline::{
-    Axis, FillMode, MotionCue, MotionSegment, MotionTarget, RepeatMode, StaggerFlow, Timeline,
-    TimelineClock, TimelineLabel, TimelineTrack,
+    Axis, FillMode, MotionCue, MotionSegment, MotionTarget, RepeatMode, ResolvedMotionState,
+    StaggerFlow, Timeline, TimelineClock, TimelineLabel, TimelineTrack,
 };
 
 #[test]
@@ -238,4 +238,57 @@ fn motion_cue_opacity_still_works() {
     let sample = cue.sample(0.5);
     assert_eq!(sample.opacity, Some(0.5));
     assert_eq!(sample.translate_x, None);
+}
+
+// Task 2 tests – ResolvedMotionState::inline_style()
+
+#[test]
+fn resolved_motion_state_inline_style_composes_transform() {
+    let state = ResolvedMotionState {
+        target: MotionTarget::self_node(),
+        opacity: Some(0.6),
+        translate_x: Some(12.0),
+        translate_y: None,
+        scale: Some(0.95),
+        rotate_deg: None,
+    };
+    let css = state.inline_style();
+    assert!(css.contains("opacity: 0.6"), "got {css}");
+    assert!(
+        css.contains("transform: translate(12px, 0px) scale(0.95)"),
+        "got {css}",
+    );
+}
+
+#[test]
+fn resolved_motion_state_inline_style_only_opacity() {
+    let state = ResolvedMotionState {
+        opacity: Some(0.4),
+        ..Default::default()
+    };
+    assert_eq!(state.inline_style(), "opacity: 0.4");
+}
+
+#[test]
+fn resolved_motion_state_inline_style_only_rotate() {
+    let state = ResolvedMotionState {
+        rotate_deg: Some(5.0),
+        ..Default::default()
+    };
+    assert_eq!(state.inline_style(), "transform: rotate(5deg)");
+}
+
+#[test]
+fn resolved_motion_state_inline_style_translate_y_only() {
+    let state = ResolvedMotionState {
+        translate_y: Some(8.0),
+        ..Default::default()
+    };
+    assert_eq!(state.inline_style(), "transform: translate(0px, 8px)");
+}
+
+#[test]
+fn resolved_motion_state_inline_style_empty_state_returns_empty_string() {
+    let state = ResolvedMotionState::default();
+    assert_eq!(state.inline_style(), "");
 }

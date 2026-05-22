@@ -11,17 +11,26 @@ pub fn stack_preview() -> Element {
 }
 
 pub fn tabs_preview() -> Element {
+    rsx! { TabsPreviewBody {} }
+}
+
+#[component]
+fn TabsPreviewBody() -> Element {
+    let mut selected = use_signal(|| "billing".to_string());
     rsx! {
         Tabs {
-            selected: "billing",
+            selected: selected.read().clone(),
             items: vec![
                 TabItem::new("overview", "Overview"),
                 TabItem::new("billing", "Billing"),
+                TabItem::new("usage", "Usage"),
             ],
             panels: vec![
                 TabPanel::new("overview", "Account summary"),
                 TabPanel::new("billing", "Payment method active"),
+                TabPanel::new("usage", "92% of monthly quota used"),
             ],
+            onselect: move |next: String| selected.set(next),
         }
     }
 }

@@ -141,6 +141,16 @@ pub fn Checkbox(
         "false"
     };
 
+    // `indeterminate` is a DOM property, not an HTML attribute. We have to sync
+    // it imperatively after mount and whenever the value changes; otherwise the
+    // native tri-state visual never appears.
+    let sync_id = id.clone();
+    use_effect(move || {
+        let _ = checked; // re-run when checked toggles so we always reapply
+        sync_indeterminate(&sync_id, indeterminate);
+    });
+    let mount_id = id.clone();
+
     rsx! {
         div { class: "{wrapper_class}",
             input {
@@ -150,6 +160,9 @@ pub fn Checkbox(
                 checked,
                 disabled,
                 "aria-checked": "{aria_checked}",
+                onmounted: move |_evt| {
+                    sync_indeterminate(&mount_id, indeterminate);
+                },
                 onchange: move |evt| {
                     if let Some(handler) = &onchange {
                         handler.call(evt);
@@ -166,6 +179,24 @@ pub fn Checkbox(
     }
 }
 
+fn sync_indeterminate(id: &str, indeterminate: bool) {
+    if id.is_empty() {
+        return;
+    }
+    // Only forward simple identifier characters; the value is interpolated into
+    // a script string. Reject anything that could break out of the literal.
+    if !id
+        .chars()
+        .all(|c| c.is_ascii_alphanumeric() || c == '-' || c == '_' || c == ':' || c == '.')
+    {
+        return;
+    }
+    let value = if indeterminate { "true" } else { "false" };
+    let _ = dioxus::document::eval(&format!(
+        "const el = document.getElementById('{id}'); if (el) el.indeterminate = {value};"
+    ));
+}
+
 #[component]
 pub fn Switch(
     id: String,
@@ -177,6 +208,13 @@ pub fn Switch(
 ) -> Element {
     let aria_checked = if checked { "true" } else { "false" };
     let aria_disabled = if disabled { "true" } else { "false" };
+    let label_id = format!("{id}-label");
+    let description_id = format!("{id}-description");
+    let described_by = if description.is_empty() {
+        String::new()
+    } else {
+        description_id.clone()
+    };
 
     rsx! {
         div { class: "ui-switch",
@@ -188,6 +226,8 @@ pub fn Switch(
                 disabled,
                 "aria-checked": "{aria_checked}",
                 "aria-disabled": "{aria_disabled}",
+                "aria-labelledby": "{label_id}",
+                "aria-describedby": "{described_by}",
                 onclick: move |_evt| {
                     if disabled {
                         return;
@@ -199,9 +239,22 @@ pub fn Switch(
                 span { class: "ui-switch-thumb" }
             }
             div { class: "ui-switch-copy",
-                label { class: "ui-switch-label", r#for: "{id}", "{label}" }
+                span {
+                    id: "{label_id}",
+                    class: "ui-switch-label",
+                    role: "presentation",
+                    onclick: move |_evt| {
+                        if disabled {
+                            return;
+                        }
+                        if let Some(handler) = &onchange {
+                            handler.call(!checked);
+                        }
+                    },
+                    "{label}"
+                }
                 if !description.is_empty() {
-                    p { class: "ui-switch-description", "{description}" }
+                    p { id: "{description_id}", class: "ui-switch-description", "{description}" }
                 }
             }
         }

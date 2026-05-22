@@ -15,8 +15,18 @@ pub fn prefers_reduced_motion() -> bool {
     imp::prefers_reduced_motion()
 }
 
+/// Subscribe to OS-level `prefers-reduced-motion` changes. The callback fires
+/// whenever the media-query state flips. Returns `true` if a listener was
+/// registered successfully (so callers can skip a manual one-shot read).
+pub fn subscribe_reduced_motion(on_change: impl FnMut(bool) + 'static) -> bool {
+    imp::subscribe_reduced_motion(on_change)
+}
+
 #[cfg(target_arch = "wasm32")]
 mod imp {
+    use wasm_bindgen::closure::Closure;
+    use wasm_bindgen::JsCast;
+
     pub fn load(key: &str) -> Option<String> {
         let window = web_sys::window()?;
         let storage = window.local_storage().ok()??;
@@ -40,6 +50,29 @@ mod imp {
             _ => false,
         }
     }
+
+    pub fn subscribe_reduced_motion(mut on_change: impl FnMut(bool) + 'static) -> bool {
+        let Some(window) = web_sys::window() else {
+            return false;
+        };
+        let mql = match window.match_media("(prefers-reduced-motion: reduce)") {
+            Ok(Some(mql)) => mql,
+            _ => return false,
+        };
+        let closure = Closure::wrap(Box::new(move |evt: web_sys::MediaQueryListEvent| {
+            on_change(evt.matches());
+        }) as Box<dyn FnMut(_)>);
+        if mql
+            .add_event_listener_with_callback("change", closure.as_ref().unchecked_ref())
+            .is_err()
+        {
+            return false;
+        }
+        // Listener lifetime is tied to the gallery's lifetime (the entire page);
+        // leak the closure rather than tracking it through component teardown.
+        closure.forget();
+        true
+    }
 }
 
 #[cfg(not(target_arch = "wasm32"))]
@@ -49,6 +82,9 @@ mod imp {
     }
     pub fn save(_key: &str, _value: &str) {}
     pub fn prefers_reduced_motion() -> bool {
+        false
+    }
+    pub fn subscribe_reduced_motion(_on_change: impl FnMut(bool) + 'static) -> bool {
         false
     }
 }

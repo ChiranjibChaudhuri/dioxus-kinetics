@@ -37,9 +37,35 @@ pub fn Tabs(
     panels: Vec<TabPanel>,
     onselect: Option<EventHandler<String>>,
 ) -> Element {
+    let tab_ids: Vec<String> = items.iter().map(|item| item.value.clone()).collect();
+
     rsx! {
         div { class: "ui-tabs",
-            div { class: "ui-tabs-list", role: "tablist", "aria-orientation": "horizontal",
+            div {
+                class: "ui-tabs-list",
+                role: "tablist",
+                "aria-orientation": "horizontal",
+                onkeydown: {
+                    let ids = tab_ids.clone();
+                    let selected_now = selected.clone();
+                    move |evt: KeyboardEvent| {
+                        let next = match evt.key() {
+                            Key::ArrowRight => step_tab(&ids, &selected_now, 1),
+                            Key::ArrowLeft => step_tab(&ids, &selected_now, -1),
+                            Key::Home => ids.first().cloned(),
+                            Key::End => ids.last().cloned(),
+                            _ => None,
+                        };
+                        if let Some(next_id) = next {
+                            evt.prevent_default();
+                            evt.stop_propagation();
+                            if let Some(handler) = &onselect {
+                                handler.call(next_id.clone());
+                            }
+                            focus_tab(&next_id);
+                        }
+                    }
+                },
                 for item in items.iter() {
                     {
                         let value = item.value.clone();
@@ -77,6 +103,34 @@ pub fn Tabs(
             }
         }
     }
+}
+
+fn step_tab(ids: &[String], current: &str, delta: i32) -> Option<String> {
+    if ids.is_empty() {
+        return None;
+    }
+    let index = ids
+        .iter()
+        .position(|candidate| candidate == current)
+        .map(|i| i as i32)
+        .unwrap_or(if delta >= 0 { -1 } else { ids.len() as i32 });
+    let len = ids.len() as i32;
+    let next = ((index + delta) % len + len) % len;
+    ids.get(next as usize).cloned()
+}
+
+fn focus_tab(value: &str) {
+    // Manual focus follows selection for the WAI-ARIA tab pattern. Allow only
+    // identifier characters before interpolating into the JS literal.
+    if !value
+        .chars()
+        .all(|c| c.is_ascii_alphanumeric() || c == '-' || c == '_' || c == ':' || c == '.')
+    {
+        return;
+    }
+    let _ = dioxus::document::eval(&format!(
+        "const el = document.getElementById('tab-{value}'); if (el) el.focus();"
+    ));
 }
 
 #[component]

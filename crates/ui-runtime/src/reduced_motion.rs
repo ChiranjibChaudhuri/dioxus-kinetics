@@ -3,14 +3,8 @@
 
 use dioxus::prelude::*;
 
-#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
 pub struct ReducedMotion(pub bool);
-
-impl Default for ReducedMotion {
-    fn default() -> Self {
-        Self(false)
-    }
-}
 
 pub fn use_reduced_motion() -> bool {
     try_consume_context::<ReducedMotion>()

@@ -2,7 +2,7 @@ use std::collections::HashMap;
 
 use dioxus::prelude::*;
 use ui_motion::{Ease, Transition};
-use ui_runtime::{use_animation_value, use_presence_state, use_timeline_sample, PresenceState};
+use ui_runtime::{use_presence_animation, use_timeline_sample, PresenceState};
 use ui_timeline::{
     FillMode, KineticId, MotionCue, MotionSegment, MotionTarget, ResolvedMotionState, Timeline,
     TimelineClock, TimelineId, TimelineTrack,
@@ -177,6 +177,11 @@ pub fn KineticText(
     }
 }
 
+/// A binary gate that synchronously removes its children when `present` is
+/// false. Unlike [`Presence`], it does **not** keep the children mounted during
+/// an exit animation — there is no exit transition. Use [`Presence`] when you
+/// need an animated unmount; reach for `PresenceGate` only when the goal is a
+/// keyed conditional render that should never animate out.
 #[component]
 pub fn PresenceGate(#[props(default = true)] present: bool, children: Element) -> Element {
     if !present {
@@ -230,11 +235,7 @@ pub fn Presence(
     #[props(default)] cue: PresenceCue,
     children: Element,
 ) -> Element {
-    let state = use_presence_state(present, enter, exit);
-    let value = use_animation_value(
-        if present { 1.0 } else { 0.0 },
-        if present { enter } else { exit },
-    );
+    let (state, value) = use_presence_animation(present, enter, exit);
 
     if state() == PresenceState::Unmounted {
         return rsx! {};

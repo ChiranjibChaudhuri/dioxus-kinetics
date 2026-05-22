@@ -4,10 +4,10 @@ use kinetics::prelude::*;
 
 pub fn shared_layout_preview() -> Element {
     rsx! {
-        FlipFrame {
-            label: "Cross-tree layout swap",
-            layout_a: rsx! {
-                SharedLayout {
+        SharedLayout {
+            FlipFrame {
+                label: "Cross-tree layout swap",
+                layout_a: rsx! {
                     div { class: "gallery-variant-grid gallery-variant-grid--2col",
                         div { class: "gallery-variant-tile",
                             SharedElement { id: "card-left".to_string(),
@@ -20,10 +20,8 @@ pub fn shared_layout_preview() -> Element {
                             }
                         }
                     }
-                }
-            },
-            layout_b: rsx! {
-                SharedLayout {
+                },
+                layout_b: rsx! {
                     div { class: "gallery-variant-grid gallery-variant-grid--2col",
                         div { class: "gallery-variant-tile",
                             SharedElement { id: "card-right".to_string(),
@@ -36,18 +34,18 @@ pub fn shared_layout_preview() -> Element {
                             }
                         }
                     }
-                }
-            },
+                },
+            }
         }
     }
 }
 
 pub fn shared_element_preview() -> Element {
     rsx! {
-        FlipFrame {
-            label: "Shared element FLIP",
-            layout_a: rsx! {
-                SharedLayout {
+        SharedLayout {
+            FlipFrame {
+                label: "Shared element FLIP",
+                layout_a: rsx! {
                     div { class: "gallery-variant-grid gallery-variant-grid--2col",
                         div { class: "gallery-variant-tile",
                             SharedElement { id: "demo-hero".to_string(),
@@ -58,10 +56,8 @@ pub fn shared_element_preview() -> Element {
                             span { class: "gallery-variant-label", "Other slot" }
                         }
                     }
-                }
-            },
-            layout_b: rsx! {
-                SharedLayout {
+                },
+                layout_b: rsx! {
                     div { class: "gallery-variant-grid gallery-variant-grid--2col",
                         div { class: "gallery-variant-tile",
                             span { class: "gallery-variant-label", "Other slot" }
@@ -72,8 +68,8 @@ pub fn shared_element_preview() -> Element {
                             }
                         }
                     }
-                }
-            },
+                },
+            }
         }
     }
 }

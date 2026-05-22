@@ -6,11 +6,16 @@ use ui_motion::Transition;
 use crate::animation::use_animation_value;
 use crate::state::{advance_presence, PresenceInputs, PresenceState};
 
-pub fn use_presence_state(
+/// Returns the lifecycle state for a `present` flag plus the underlying
+/// animated `t` value (`0.0` hidden, `1.0` visible). Callers that need both
+/// — for example to drive a `--ui-presence-t` CSS variable — should use this
+/// hook and reuse the value rather than running a second [`use_animation_value`]
+/// in parallel.
+pub fn use_presence_animation(
     present: bool,
     enter: Transition,
     exit: Transition,
-) -> ReadSignal<PresenceState> {
+) -> (ReadSignal<PresenceState>, ReadSignal<f32>) {
     let mut state = use_signal(|| {
         if present {
             PresenceState::Entering
@@ -41,5 +46,13 @@ pub fn use_presence_state(
         state.set(PresenceState::Visible);
     }
 
-    ReadSignal::from(state)
+    (ReadSignal::from(state), value)
+}
+
+pub fn use_presence_state(
+    present: bool,
+    enter: Transition,
+    exit: Transition,
+) -> ReadSignal<PresenceState> {
+    use_presence_animation(present, enter, exit).0
 }

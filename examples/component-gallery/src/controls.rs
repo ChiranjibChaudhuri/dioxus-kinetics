@@ -141,29 +141,48 @@ impl GalleryPrefs {
     pub fn use_provided() -> Self {
         use crate::persistence::{self, KEY_DENSITY, KEY_GLASS, KEY_MOTION, KEY_THEME};
 
+        let stored_motion = persistence::load(KEY_MOTION).and_then(|v| MotionPref::from_attr(&v));
         let initial_theme = persistence::load(KEY_THEME)
             .and_then(|v| ThemePref::from_attr(&v))
             .unwrap_or(DEFAULT_THEME);
         let initial_density = persistence::load(KEY_DENSITY)
             .and_then(|v| DensityPref::from_attr(&v))
             .unwrap_or(DEFAULT_DENSITY);
-        let initial_motion = persistence::load(KEY_MOTION)
-            .and_then(|v| MotionPref::from_attr(&v))
-            .unwrap_or_else(|| {
-                if persistence::prefers_reduced_motion() {
-                    MotionPref::Reduced
-                } else {
-                    DEFAULT_MOTION
-                }
-            });
+        let initial_motion = stored_motion.unwrap_or_else(|| {
+            if persistence::prefers_reduced_motion() {
+                MotionPref::Reduced
+            } else {
+                DEFAULT_MOTION
+            }
+        });
         let initial_glass = persistence::load(KEY_GLASS)
             .and_then(|v| GlassPolicyUi::from_attr(&v))
             .unwrap_or(DEFAULT_GLASS);
 
         let theme = use_signal(|| initial_theme);
         let density = use_signal(|| initial_density);
-        let motion = use_signal(|| initial_motion);
+        let mut motion = use_signal(|| initial_motion);
         let glass = use_signal(|| initial_glass);
+
+        // Subscribe once to OS-level reduced-motion changes. Only push the OS
+        // value into the signal when the user has not pinned an explicit
+        // override via the toggle — `stored_motion.is_none()` at startup.
+        let allow_os_override = use_hook(|| stored_motion.is_none());
+        use_hook(move || {
+            persistence::subscribe_reduced_motion(move |matches| {
+                if !allow_os_override {
+                    return;
+                }
+                let next = if matches {
+                    MotionPref::Reduced
+                } else {
+                    MotionPref::Normal
+                };
+                if *motion.peek() != next {
+                    motion.set(next);
+                }
+            });
+        });
 
         use_effect(move || {
             persistence::save(KEY_THEME, theme.read().attr_value());

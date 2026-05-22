@@ -25,7 +25,7 @@ mod measurement_web;
 
 pub use animation::use_animation_value;
 pub use measurement::{use_element_computed_style, use_element_rect, MountedRectCallback};
-pub use presence::use_presence_state;
+pub use presence::{use_presence_animation, use_presence_state};
 pub use reduced_motion::{use_reduced_motion, ReducedMotion};
 pub use scheduler::{spawn_frame_loop, ControlFlow, FrameHandle};
 pub use shared::{

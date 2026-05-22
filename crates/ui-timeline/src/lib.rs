@@ -20,8 +20,9 @@ impl KineticId {
     }
 }
 
-#[derive(Clone, Debug, PartialEq, Eq)]
+#[derive(Clone, Debug, Default, PartialEq, Eq)]
 pub enum MotionTarget {
+    #[default]
     SelfNode,
     Node(KineticId),
 }
@@ -33,12 +34,6 @@ impl MotionTarget {
 
     pub fn node(id: impl Into<String>) -> Self {
         Self::Node(KineticId::new(id))
-    }
-}
-
-impl Default for MotionTarget {
-    fn default() -> Self {
-        Self::SelfNode
     }
 }
 

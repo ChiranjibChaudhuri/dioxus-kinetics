@@ -47,7 +47,14 @@ pub fn Dialog(
                     }
                 },
             }
-            div { class: "ui-dialog-panel", tabindex: "-1",
+            div {
+                class: "ui-dialog-panel",
+                tabindex: "-1",
+                onmounted: move |evt| {
+                    spawn(async move {
+                        let _ = evt.set_focus(true).await;
+                    });
+                },
                 h2 { id: "ui-dialog-title", class: "ui-dialog-title", "{title}" }
                 if has_description {
                     p { id: "ui-dialog-description", class: "ui-dialog-description", "{description}" }
@@ -205,6 +212,7 @@ pub fn CommandMenu(
     #[props(default)] groups: Vec<CommandGroup>,
     on_query: Option<EventHandler<String>>,
     on_select: Option<EventHandler<String>>,
+    on_selection_change: Option<EventHandler<String>>,
     on_dismiss: Option<EventHandler<()>>,
 ) -> Element {
     if !open {
@@ -249,7 +257,7 @@ pub fn CommandMenu(
                         }
                     }
                     Key::ArrowDown => {
-                        if let Some(handler) = &on_query {
+                        if let Some(handler) = &on_selection_change {
                             let next = step_selection(&flat_ids_for_key, &selected_for_key, 1);
                             if let Some(next_id) = next {
                                 evt.prevent_default();
@@ -258,7 +266,7 @@ pub fn CommandMenu(
                         }
                     }
                     Key::ArrowUp => {
-                        if let Some(handler) = &on_query {
+                        if let Some(handler) = &on_selection_change {
                             let next = step_selection(&flat_ids_for_key, &selected_for_key, -1);
                             if let Some(next_id) = next {
                                 evt.prevent_default();

@@ -1,5 +1,40 @@
 use dioxus::prelude::*;
 
+/// Installs a Tab-cycling focus trap on the most recently mounted
+/// `.ui-dialog-panel`. The handler is registered on the panel element so when
+/// the panel is removed from the DOM, the listener is garbage-collected
+/// together with it — no Rust-side teardown needed.
+fn install_dialog_focus_trap() {
+    const FOCUSABLE_SELECTOR: &str =
+        "button:not([disabled]),[href],input:not([disabled]),select:not([disabled]),textarea:not([disabled]),[tabindex]:not([tabindex=\"-1\"])";
+    let script = format!(
+        r#"
+        (function() {{
+            const panel = document.querySelector('.ui-dialog-panel');
+            if (!panel || panel.__kineticsTrap) return;
+            panel.__kineticsTrap = true;
+            panel.addEventListener('keydown', (e) => {{
+                if (e.key !== 'Tab') return;
+                const f = panel.querySelectorAll('{selector}');
+                if (f.length === 0) {{ e.preventDefault(); panel.focus(); return; }}
+                const first = f[0];
+                const last = f[f.length - 1];
+                const active = document.activeElement;
+                if (e.shiftKey && (active === first || active === panel)) {{
+                    e.preventDefault();
+                    last.focus();
+                }} else if (!e.shiftKey && active === last) {{
+                    e.preventDefault();
+                    first.focus();
+                }}
+            }});
+        }})();
+        "#,
+        selector = FOCUSABLE_SELECTOR,
+    );
+    let _ = dioxus::document::eval(&script);
+}
+
 #[component]
 pub fn Dialog(
     title: String,
@@ -54,6 +89,7 @@ pub fn Dialog(
                     spawn(async move {
                         let _ = evt.set_focus(true).await;
                     });
+                    install_dialog_focus_trap();
                 },
                 h2 { id: "ui-dialog-title", class: "ui-dialog-title", "{title}" }
                 if has_description {

@@ -119,3 +119,32 @@ pub fn ScrubFrame(
         }
     }
 }
+
+#[component]
+pub fn FlipFrame(label: &'static str, layout_a: Element, layout_b: Element) -> Element {
+    let mut at_b = use_signal(|| false);
+
+    rsx! {
+        div { class: "gallery-demo-frame gallery-demo-frame--flip",
+            div { class: "gallery-demo-frame-header",
+                span { class: "gallery-variant-label", "{label}" }
+                button {
+                    class: "ui-button ui-button--secondary gallery-demo-frame-swap",
+                    r#type: "button",
+                    onclick: move |_| {
+                        let now = *at_b.read();
+                        at_b.set(!now);
+                    },
+                    "Swap layout"
+                }
+            }
+            div { class: "gallery-demo-frame-body",
+                if *at_b.read() {
+                    {layout_b}
+                } else {
+                    {layout_a}
+                }
+            }
+        }
+    }
+}

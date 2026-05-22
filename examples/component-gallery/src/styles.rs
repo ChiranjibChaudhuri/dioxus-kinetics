@@ -492,4 +492,10 @@ body::before {
     padding: 2px 10px;
     font-size: 12px;
 }
+
+.gallery-demo-frame-swap {
+    min-height: 26px;
+    padding: 2px 10px;
+    font-size: 12px;
+}
 "#;

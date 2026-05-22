@@ -91,3 +91,9 @@ fn component_css_covers_native_kinetics_systems() {
         assert!(css.contains(selector), "missing selector {selector}");
     }
 }
+
+#[test]
+fn component_css_covers_shared_layout_and_shared_element() {
+    assert!(COMPONENT_CSS.contains(".ui-shared-layout"));
+    assert!(COMPONENT_CSS.contains(".ui-shared-element"));
+}

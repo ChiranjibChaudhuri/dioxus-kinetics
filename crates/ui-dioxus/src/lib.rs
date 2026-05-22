@@ -6,6 +6,7 @@ mod composition;
 mod display;
 mod forms;
 mod kinetics;
+mod layout;
 mod navigation;
 mod overlays;
 
@@ -23,6 +24,7 @@ pub use kinetics::{
     Cue, KineticBox, KineticText, Presence, PresenceCue, PresenceGate, Sequence, SequenceContext,
     TimelineScope,
 };
+pub use layout::{SharedElement, SharedLayout};
 pub use navigation::{Sidebar, SidebarItem, SidebarSection, TabItem, TabPanel, Tabs, Toolbar};
 pub use navigation::{Sidebar as NavigationRail, Tabs as ViewSwitcher, Toolbar as ActionBar};
 pub use overlays::{CommandGroup, CommandItem, CommandMenu, Dialog, Toast, ToastTone, Tooltip};

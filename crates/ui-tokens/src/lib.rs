@@ -1,5 +1,7 @@
 #![forbid(unsafe_code)]
 
+pub mod elevation;
+
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub struct Color {
     pub r: u8,

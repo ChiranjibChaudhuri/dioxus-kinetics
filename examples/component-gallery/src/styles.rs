@@ -471,4 +471,25 @@ body::before {
 [data-ui-motion="reduced"] .gallery-demo-frame-replay {
     display: none;
 }
+
+.gallery-demo-frame-transport {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--ui-space-2);
+}
+
+.gallery-demo-frame-transport input[type="range"] {
+    width: 120px;
+}
+
+.gallery-demo-frame-elapsed {
+    color: var(--ui-muted-fg);
+    font-size: 12px;
+}
+
+.gallery-demo-frame-play {
+    min-height: 26px;
+    padding: 2px 10px;
+    font-size: 12px;
+}
 "#;

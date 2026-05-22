@@ -624,6 +624,10 @@ pub const COMPONENT_CSS: &str = r#"
         opacity: 1 !important;
     }
 }
+
+.ui-sequence {
+    display: block;
+}
 "#;
 
 pub fn library_css() -> String {

@@ -551,3 +551,12 @@ fn timeline_previews_use_scrub_frame_with_range_slider() {
     let range_count = html.matches(r#"type="range""#).count();
     assert!(range_count >= 2, "expected >=2 range sliders, got {range_count}");
 }
+
+#[test]
+fn shared_layout_preview_uses_flip_frame_with_swap_control() {
+    let html = dioxus_ssr::render_element(rsx! {
+        component_gallery::App {}
+    });
+    assert!(html.contains("gallery-demo-frame--flip"));
+    assert!(html.contains("Swap layout"));
+}

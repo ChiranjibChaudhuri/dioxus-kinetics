@@ -123,6 +123,9 @@ body {
 
 .gallery-section {
     padding: 24px 0 12px;
+    /* Anchor jumps from the sidebar nav land just below the sticky preference
+       bar so the section heading is never hidden behind it. */
+    scroll-margin-top: 96px;
 }
 
 .gallery-grid {
@@ -293,20 +296,21 @@ body {
     min-height: 96px;
 }
 
-/* Material previews need a colorful surface beneath them; otherwise
-   `backdrop-filter: blur` has nothing to blur and every glass variant
-   renders as the same white tile. The radial mix gives the blur something
-   visibly translucent + tinted to work with. */
+/* Material previews need *some* contrast beneath them so backdrop-filter:blur
+   has texture to work with — otherwise every variant collapses to the same
+   white tile. We use a single soft diagonal gradient (not a busy multi-color
+   mesh) so the per-tone tint applied to the glass on top stays the dominant
+   signal across the 3×3 grid. */
 .gallery-variant-tile--material {
     position: relative;
     isolation: isolate;
     overflow: hidden;
     background:
-        radial-gradient(circle at 22% 28%, color-mix(in srgb, var(--ui-primary), transparent 55%), transparent 60%),
-        radial-gradient(circle at 78% 32%, color-mix(in srgb, var(--ui-info), transparent 55%), transparent 62%),
-        radial-gradient(circle at 50% 82%, color-mix(in srgb, var(--ui-success), transparent 60%), transparent 65%),
-        linear-gradient(135deg, color-mix(in srgb, var(--ui-warning), transparent 70%), transparent),
-        var(--ui-surface);
+        linear-gradient(135deg,
+            color-mix(in srgb, var(--ui-fg), transparent 78%) 0%,
+            color-mix(in srgb, var(--ui-fg), transparent 92%) 60%,
+            transparent 100%),
+        var(--ui-surface-muted);
 }
 
 .gallery-variant-tile--material .ui-glass-surface {
@@ -411,38 +415,46 @@ body::before {
     isolation: isolate;
 }
 
-.gallery-section--glass-stage::before {
+/* The colorful stage backdrop now lives inside each entry card via its own
+   ::before, contained by the card's rounded clip — no more stripe bleeding
+   above the first card or below the last. */
+.gallery-section--glass-stage .gallery-entry {
+    position: relative;
+    overflow: hidden;
+    background: color-mix(in srgb, var(--ui-surface), transparent 22%);
+    backdrop-filter: blur(20px) saturate(160%);
+    -webkit-backdrop-filter: blur(20px) saturate(160%);
+    border-color: color-mix(in srgb, var(--ui-fg) 12%, transparent);
+    box-shadow: var(--ui-elevation-1);
+}
+
+.gallery-section--glass-stage .gallery-entry::before {
     content: "";
     position: absolute;
-    inset: var(--ui-space-4);
+    inset: 0;
     z-index: -1;
-    border-radius: var(--ui-radius-lg);
+    border-radius: inherit;
     background:
-        radial-gradient(circle at 25% 30%, color-mix(in srgb, var(--ui-primary), transparent 30%), transparent 55%),
-        radial-gradient(circle at 80% 28%, color-mix(in srgb, var(--ui-success), transparent 30%), transparent 55%),
-        radial-gradient(circle at 50% 80%, color-mix(in srgb, var(--ui-warning), transparent 30%), transparent 60%),
-        linear-gradient(135deg, color-mix(in srgb, var(--ui-info), transparent 50%), transparent);
-    opacity: 0.6;
+        radial-gradient(circle at 18% 22%, color-mix(in srgb, var(--ui-primary), transparent 40%), transparent 55%),
+        radial-gradient(circle at 82% 28%, color-mix(in srgb, var(--ui-success), transparent 45%), transparent 55%),
+        radial-gradient(circle at 50% 88%, color-mix(in srgb, var(--ui-warning), transparent 45%), transparent 60%),
+        linear-gradient(135deg, color-mix(in srgb, var(--ui-info), transparent 60%), transparent);
+    opacity: 0.55;
+    pointer-events: none;
 }
 
-[data-ui-theme="dark"] .gallery-section--glass-stage::before {
-    opacity: 0.42;
-}
-
-/* On glass-stage sections, let the gradient bleed through the entry cards so
-   the backdrop reads as one continuous stage rather than a stray horizontal
-   stripe between the heading and the first opaque card. */
-.gallery-section--glass-stage .gallery-entry {
-    background: color-mix(in srgb, var(--ui-surface), transparent 35%);
-    backdrop-filter: blur(22px) saturate(160%);
-    -webkit-backdrop-filter: blur(22px) saturate(160%);
-    border-color: color-mix(in srgb, var(--ui-fg) 10%, transparent);
+[data-ui-theme="dark"] .gallery-section--glass-stage .gallery-entry::before {
+    opacity: 0.4;
 }
 
 [data-ui-glass-policy="solid"] .gallery-section--glass-stage .gallery-entry {
     background: var(--ui-surface);
     backdrop-filter: none;
     -webkit-backdrop-filter: none;
+}
+
+[data-ui-glass-policy="solid"] .gallery-section--glass-stage .gallery-entry::before {
+    display: none;
 }
 
 .gallery-controls {

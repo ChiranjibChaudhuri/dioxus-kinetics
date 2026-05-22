@@ -238,23 +238,23 @@ pub const COMPONENT_CSS: &str = r#"
 }
 
 .ui-glass-surface[data-glass-tone="primary"] {
-    background: color-mix(in srgb, var(--ui-primary), var(--ui-glass) 72%);
+    background: color-mix(in srgb, var(--ui-primary), var(--ui-glass) 55%);
 }
 
 .ui-glass-surface[data-glass-tone="info"] {
-    background: color-mix(in srgb, var(--ui-info), var(--ui-glass) 72%);
+    background: color-mix(in srgb, var(--ui-info), var(--ui-glass) 55%);
 }
 
 .ui-glass-surface[data-glass-tone="success"] {
-    background: color-mix(in srgb, var(--ui-success), var(--ui-glass) 72%);
+    background: color-mix(in srgb, var(--ui-success), var(--ui-glass) 55%);
 }
 
 .ui-glass-surface[data-glass-tone="warning"] {
-    background: color-mix(in srgb, var(--ui-warning), var(--ui-glass) 72%);
+    background: color-mix(in srgb, var(--ui-warning), var(--ui-glass) 55%);
 }
 
 .ui-glass-surface[data-glass-tone="danger"] {
-    background: color-mix(in srgb, var(--ui-danger), var(--ui-glass) 72%);
+    background: color-mix(in srgb, var(--ui-danger), var(--ui-glass) 55%);
 }
 
 /* Density: padding rhythm inside the glass surface. */

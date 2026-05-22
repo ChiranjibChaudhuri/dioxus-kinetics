@@ -1,9 +1,6 @@
 pub const GALLERY_CSS: &str = r#"
 body {
     min-width: 320px;
-    background:
-        linear-gradient(135deg, rgba(205, 231, 255, 0.72), rgba(255, 255, 255, 0.0) 34%),
-        linear-gradient(180deg, var(--ui-bg) 0%, #eef2f7 100%);
 }
 
 .gallery-shell {
@@ -425,6 +422,7 @@ body::before {
     z-index: 4;
     flex-wrap: wrap;
     align-items: center;
+    justify-content: flex-start;
     gap: var(--ui-space-3);
     margin: 0 0 var(--ui-space-4);
     padding: var(--ui-space-3) var(--ui-space-4);

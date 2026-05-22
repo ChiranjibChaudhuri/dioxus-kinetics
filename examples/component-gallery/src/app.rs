@@ -4,6 +4,17 @@ use ui_styles::library_css;
 use crate::docs::{categories, component_docs, ComponentCategory, ComponentDoc, ComponentStatus};
 use crate::styles::GALLERY_CSS;
 
+fn populated_categories() -> Vec<ComponentCategory> {
+    // Skip categories that have no docs assigned yet. Otherwise the gallery
+    // renders empty placeholder sections (a heading + no entries) and dead
+    // anchor links in the side nav, which read as broken rather than planned.
+    categories()
+        .iter()
+        .copied()
+        .filter(|cat| component_docs().iter().any(|doc| doc.category == *cat))
+        .collect()
+}
+
 #[component]
 pub fn App() -> Element {
     let prefs = crate::controls::GalleryPrefs::use_provided();
@@ -15,6 +26,7 @@ pub fn App() -> Element {
     let glass_attr = prefs.glass.read().attr_value();
 
     let shared_css = library_css();
+    let active_categories = populated_categories();
 
     rsx! {
         style { "{shared_css}" }
@@ -35,7 +47,7 @@ pub fn App() -> Element {
                     span { class: "visually-hidden", "Kinetics component gallery" }
                 }
                 nav { class: "gallery-nav", aria_label: "Component categories",
-                    for category in categories() {
+                    for category in active_categories.iter() {
                         a { href: "#{category.slug()}", "{category.label()}" }
                     }
                 }
@@ -50,11 +62,11 @@ pub fn App() -> Element {
                 }
                 crate::controls::PreferenceBar {}
                 nav { class: "gallery-mobile-tabs", aria_label: "Component categories",
-                    for category in categories() {
+                    for category in active_categories.iter() {
                         a { href: "#{category.slug()}", "{category.label()}" }
                     }
                 }
-                for category in categories() {
+                for category in active_categories.iter() {
                     CategorySection { category: *category }
                 }
             }

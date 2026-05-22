@@ -515,8 +515,19 @@ body::before {
 
 .gallery-demo-frame-transport {
     display: inline-flex;
+    flex-wrap: wrap;
     align-items: center;
     gap: var(--ui-space-2);
+    min-width: 0;
+}
+
+.gallery-demo-frame {
+    min-width: 0;
+}
+
+.gallery-demo-frame-header {
+    flex-wrap: wrap;
+    row-gap: var(--ui-space-2);
 }
 
 .gallery-demo-frame-transport input[type="range"] {

@@ -109,8 +109,25 @@ fn gallery_renders_ready_examples_and_coming_soon_entries() {
     });
 
     assert!(html.contains("Kinetics Component Gallery"));
+    // Only categories that have at least one doc render; empty placeholder
+    // sections (Navigation, Data workflows) are intentionally hidden.
     for category in component_gallery::categories() {
-        assert!(html.contains(category.label()));
+        let has_docs = component_gallery::component_docs()
+            .iter()
+            .any(|doc| doc.category == *category);
+        if has_docs {
+            assert!(
+                html.contains(category.label()),
+                "expected populated category {:?} in gallery html",
+                category
+            );
+        } else {
+            assert!(
+                !html.contains(&format!("\"{}\"", category.slug())),
+                "expected empty category {:?} to be skipped",
+                category
+            );
+        }
     }
     assert!(html.contains("Button"));
     assert!(html.contains("Save changes"));

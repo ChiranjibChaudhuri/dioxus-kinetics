@@ -588,3 +588,12 @@ fn toast_preview_renders_trigger_buttons_for_each_tone() {
     // Stage container is always rendered (empty by default).
     assert!(html.contains("gallery-toast-stage"));
 }
+
+#[test]
+fn tooltip_preview_renders_trigger_label() {
+    let html = dioxus_ssr::render_element(rsx! {
+        component_gallery::App {}
+    });
+    assert!(html.contains("Net revenue"));
+    assert!(html.contains("Hover or focus the trigger"));
+}

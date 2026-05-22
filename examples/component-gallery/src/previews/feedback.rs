@@ -117,12 +117,31 @@ fn ToastPreviewBody() -> Element {
 }
 
 pub fn tooltip_preview() -> Element {
+    rsx! { TooltipPreviewBody {} }
+}
+
+#[component]
+fn TooltipPreviewBody() -> Element {
+    let mut visible = use_signal(|| false);
     rsx! {
-        Tooltip {
-            id: "net-revenue-tip",
-            visible: true,
-            trigger_label: "Net revenue",
-            content: "Revenue after refunds and credits.",
+        div { class: "gallery-demo-frame",
+            div { class: "gallery-demo-frame-header",
+                span { class: "gallery-variant-label", "Tooltip" }
+                span { class: "gallery-demo-frame-elapsed", "Hover or focus the trigger" }
+            }
+            div {
+                class: "gallery-demo-frame-body",
+                onmouseenter: move |_| visible.set(true),
+                onmouseleave: move |_| visible.set(false),
+                onfocusin: move |_| visible.set(true),
+                onfocusout: move |_| visible.set(false),
+                Tooltip {
+                    id: "net-revenue-tip",
+                    visible: *visible.read(),
+                    trigger_label: "Net revenue",
+                    content: "Revenue after refunds and credits.",
+                }
+            }
         }
     }
 }

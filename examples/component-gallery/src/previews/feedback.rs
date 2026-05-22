@@ -1,5 +1,16 @@
 use dioxus::prelude::*;
 use kinetics::prelude::*;
+use std::sync::atomic::{AtomicU32, Ordering};
+
+static TOAST_ID: AtomicU32 = AtomicU32::new(0);
+
+#[derive(Clone, PartialEq)]
+struct ToastInstance {
+    id: u32,
+    tone: ToastTone,
+    title: &'static str,
+    description: &'static str,
+}
 
 pub fn dialog_preview() -> Element {
     rsx! { DialogPreviewBody {} }
@@ -33,13 +44,74 @@ fn DialogPreviewBody() -> Element {
 }
 
 pub fn toast_preview() -> Element {
+    rsx! { ToastPreviewBody {} }
+}
+
+#[component]
+fn ToastPreviewBody() -> Element {
+    let mut toasts: Signal<Vec<ToastInstance>> = use_signal(Vec::new);
+
+    let mut push = move |tone: ToastTone, title: &'static str, description: &'static str| {
+        let id = TOAST_ID.fetch_add(1, Ordering::Relaxed);
+        toasts.write().push(ToastInstance { id, tone, title, description });
+        let mut t = toasts;
+        spawn(async move {
+            #[cfg(target_arch = "wasm32")]
+            {
+                let promise = js_sys::Promise::new(&mut |resolve, _| {
+                    let win = web_sys::window().unwrap();
+                    let _ = win.set_timeout_with_callback_and_timeout_and_arguments_0(
+                        &resolve, 3000,
+                    );
+                });
+                let _ = wasm_bindgen_futures::JsFuture::from(promise).await;
+            }
+            t.write().retain(|x| x.id != id);
+        });
+    };
+
     rsx! {
-        Toast {
-            tone: ToastTone::Success,
-            title: "Report exported",
-            description: "The PDF is ready.",
-            action_label: "Open",
-            dismiss_label: "Dismiss",
+        div { class: "gallery-demo-frame",
+            div { class: "gallery-demo-frame-header",
+                span { class: "gallery-variant-label", "Toast" }
+                div { class: "gallery-demo-frame-transport",
+                    button {
+                        class: "ui-button ui-button--secondary",
+                        r#type: "button",
+                        onclick: move |_| push(ToastTone::Success, "Report exported", "The PDF is ready."),
+                        "Trigger success"
+                    }
+                    button {
+                        class: "ui-button ui-button--secondary",
+                        r#type: "button",
+                        onclick: move |_| push(ToastTone::Info, "Sync started", "Pulling the latest data."),
+                        "Trigger info"
+                    }
+                    button {
+                        class: "ui-button ui-button--secondary",
+                        r#type: "button",
+                        onclick: move |_| push(ToastTone::Warning, "Quota close", "You are at 92% of the plan."),
+                        "Trigger warning"
+                    }
+                    button {
+                        class: "ui-button ui-button--secondary",
+                        r#type: "button",
+                        onclick: move |_| push(ToastTone::Danger, "Export failed", "Retry or contact support."),
+                        "Trigger error"
+                    }
+                }
+            }
+            div { class: "gallery-toast-stage",
+                for t in toasts.read().iter() {
+                    Toast {
+                        key: "{t.id}",
+                        tone: t.tone,
+                        title: t.title,
+                        description: t.description,
+                        dismiss_label: "Dismiss",
+                    }
+                }
+            }
         }
     }
 }

@@ -498,4 +498,14 @@ body::before {
     padding: 2px 10px;
     font-size: 12px;
 }
+
+.gallery-toast-stage {
+    display: grid;
+    gap: var(--ui-space-2);
+    min-height: 60px;
+    padding: var(--ui-space-2);
+    border: 1px dashed var(--ui-border);
+    border-radius: var(--ui-radius-md);
+    background: var(--ui-surface-muted);
+}
 "#;

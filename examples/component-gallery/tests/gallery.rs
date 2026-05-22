@@ -575,3 +575,16 @@ fn dialog_preview_renders_open_trigger_and_starts_closed() {
         "dialog should start closed in preview",
     );
 }
+
+#[test]
+fn toast_preview_renders_trigger_buttons_for_each_tone() {
+    let html = dioxus_ssr::render_element(rsx! {
+        component_gallery::App {}
+    });
+    // The four toast-trigger buttons.
+    for label in ["Trigger success", "Trigger info", "Trigger warning", "Trigger error"] {
+        assert!(html.contains(label), "missing toast trigger: {label}");
+    }
+    // Stage container is always rendered (empty by default).
+    assert!(html.contains("gallery-toast-stage"));
+}

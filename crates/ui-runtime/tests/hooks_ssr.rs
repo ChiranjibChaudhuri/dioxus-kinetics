@@ -1,6 +1,9 @@
 use dioxus::prelude::*;
 use ui_motion::{Ease, Transition};
-use ui_runtime::{use_animation_value, use_presence_state, use_timeline_sample, ReducedMotion};
+use ui_runtime::{
+    use_animation_value, use_presence_animation, use_presence_state, use_timeline_sample,
+    ReducedMotion,
+};
 use ui_timeline::{MotionCue, MotionSegment, MotionTarget, Timeline, TimelineClock, TimelineTrack};
 
 #[component]
@@ -73,6 +76,33 @@ fn presence_state_initial_present_true_is_visible_in_ssr() {
 fn presence_state_initial_present_false_is_unmounted_in_ssr() {
     let html = dioxus_ssr::render_element(rsx! { PresenceProbe { present: false } });
     assert!(html.contains("data-state=\"unmounted\""), "got {html}",);
+}
+
+#[component]
+fn PresenceAnimationProbe(present: bool) -> Element {
+    let (state, value) = use_presence_animation(
+        present,
+        Transition::Tween {
+            duration_ms: 220,
+            ease: Ease::Standard,
+        },
+        Transition::Tween {
+            duration_ms: 180,
+            ease: Ease::Standard,
+        },
+    );
+    let s = state();
+    let v = value();
+    rsx! {
+        div { "data-state": "{s.as_str()}", "data-value": "{v}" }
+    }
+}
+
+#[test]
+fn presence_animation_returns_state_and_value_pair_in_ssr() {
+    let html = dioxus_ssr::render_element(rsx! { PresenceAnimationProbe { present: true } });
+    assert!(html.contains("data-state=\"visible\""), "got {html}");
+    assert!(html.contains("data-value=\"1\""), "got {html}");
 }
 
 #[component]

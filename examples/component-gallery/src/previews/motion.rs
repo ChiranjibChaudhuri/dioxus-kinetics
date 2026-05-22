@@ -4,11 +4,14 @@ use kinetics::prelude::*;
 use crate::demo_frame::{ReplayFrame, ScrubElapsedMs, ScrubFrame};
 
 pub fn presence_preview() -> Element {
+    let spring_enter = Transition::Spring(Spring::snappy());
+    let spring_exit = Transition::Spring(Spring::snappy());
+
     rsx! {
         div { class: "gallery-variant-grid gallery-variant-grid--2col",
             div { class: "gallery-variant-tile",
                 ReplayFrame {
-                    label: "Enter",
+                    label: "Tween enter",
                     children: rsx! {
                         Presence { present: true, cue: PresenceCue::Rise,
                             p { "Visible state" }
@@ -18,10 +21,38 @@ pub fn presence_preview() -> Element {
             }
             div { class: "gallery-variant-tile",
                 ReplayFrame {
-                    label: "Exit",
+                    label: "Tween exit",
                     children: rsx! {
                         Presence { present: false, cue: PresenceCue::Rise,
                             p { "Hidden state" }
+                        }
+                    },
+                }
+            }
+            div { class: "gallery-variant-tile",
+                ReplayFrame {
+                    label: "Spring enter",
+                    children: rsx! {
+                        Presence {
+                            present: true,
+                            enter: spring_enter,
+                            exit: spring_exit,
+                            cue: PresenceCue::Scale,
+                            p { "Spring-driven entry" }
+                        }
+                    },
+                }
+            }
+            div { class: "gallery-variant-tile",
+                ReplayFrame {
+                    label: "Spring exit",
+                    children: rsx! {
+                        Presence {
+                            present: false,
+                            enter: spring_enter,
+                            exit: spring_exit,
+                            cue: PresenceCue::Scale,
+                            p { "Spring-driven exit" }
                         }
                     },
                 }

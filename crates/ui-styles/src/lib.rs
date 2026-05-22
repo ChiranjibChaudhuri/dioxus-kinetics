@@ -696,6 +696,15 @@ pub const COMPONENT_CSS: &str = r#"
     --ui-presence-t: 1 !important;
     opacity: 1 !important;
 }
+
+[data-ui-glass-policy="solid"] .ui-glass-surface,
+[data-ui-glass-policy="solid"] .ui-glass-layer,
+[data-ui-glass-policy="solid"] .ui-dialog-panel,
+[data-ui-glass-policy="solid"] .ui-command-menu-panel {
+    background: var(--ui-glass-solid) !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+}
 "#;
 
 pub fn library_css() -> String {

@@ -199,3 +199,27 @@ fn reduced_motion_ancestor_scope_disables_transitions_globally() {
         );
     }
 }
+
+#[test]
+fn solid_glass_ancestor_scope_targets_every_backdrop_filter_class() {
+    let css = library_css();
+    assert!(css.contains(r#"[data-ui-glass-policy="solid"]"#));
+
+    // Enumerate every class that introduces backdrop-filter and ensure the ancestor scope covers it.
+    for class in [".ui-glass-surface", ".ui-glass-layer", ".ui-dialog-panel", ".ui-command-menu-panel"] {
+        let pattern = format!(r#"[data-ui-glass-policy="solid"] {class}"#);
+        assert!(
+            css.contains(&pattern),
+            "missing solid-glass override for {class}: pattern {pattern}",
+        );
+    }
+}
+
+#[test]
+fn solid_glass_ancestor_scope_neutralizes_backdrop_filter() {
+    let css = library_css();
+    let idx = css.find(r#"[data-ui-glass-policy="solid"]"#).unwrap();
+    let block = &css[idx..];
+    assert!(block.contains("backdrop-filter: none"));
+    assert!(block.contains("background: var(--ui-glass-solid)"));
+}

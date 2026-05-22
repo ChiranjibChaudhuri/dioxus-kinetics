@@ -466,3 +466,15 @@ fn gallery_shared_layout_and_shared_element_are_ready() {
     assert!(html.contains("data-shared-id=\""));
     assert!(html.contains("class=\"ui-shared-layout\""));
 }
+
+#[test]
+fn gallery_shell_emits_all_four_preference_data_attributes() {
+    let html = dioxus_ssr::render_element(rsx! {
+        component_gallery::App {}
+    });
+
+    assert!(html.contains(r#"data-ui-theme="light""#));
+    assert!(html.contains(r#"data-ui-density="comfortable""#));
+    assert!(html.contains(r#"data-ui-motion="normal""#));
+    assert!(html.contains(r#"data-ui-glass-policy="translucent""#));
+}

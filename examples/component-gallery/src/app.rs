@@ -6,6 +6,14 @@ use crate::styles::GALLERY_CSS;
 
 #[component]
 pub fn App() -> Element {
+    let prefs = crate::controls::GalleryPrefs::use_provided();
+    use_context_provider(|| prefs);
+
+    let theme_attr = prefs.theme.read().attr_value();
+    let density_attr = prefs.density.read().attr_value();
+    let motion_attr = prefs.motion.read().attr_value();
+    let glass_attr = prefs.glass.read().attr_value();
+
     let shared_css = library_css();
 
     rsx! {
@@ -13,8 +21,10 @@ pub fn App() -> Element {
         style { "{GALLERY_CSS}" }
         div {
             class: "gallery-shell",
-            "data-ui-theme": "light",
-            "data-ui-density": "comfortable",
+            "data-ui-theme": "{theme_attr}",
+            "data-ui-density": "{density_attr}",
+            "data-ui-motion": "{motion_attr}",
+            "data-ui-glass-policy": "{glass_attr}",
             aside { class: "gallery-rail",
                 div { class: "gallery-brand",
                     div {

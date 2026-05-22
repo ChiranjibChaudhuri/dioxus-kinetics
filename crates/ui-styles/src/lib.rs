@@ -1,8 +1,12 @@
 #![forbid(unsafe_code)]
 
-pub const BASE_CSS: &str = r#"
+use ui_tokens::elevation::{DARK_ELEVATION, LIGHT_ELEVATION};
+
+pub fn base_css() -> String {
+    format!(
+        r#"
 :root,
-[data-ui-theme="light"] {
+[data-ui-theme="light"] {{
     color-scheme: light;
     --ui-font-sans: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
     --ui-bg: #f6f8fb;
@@ -22,6 +26,10 @@ pub const BASE_CSS: &str = r#"
     --ui-info: #1476bf;
     --ui-shadow-soft: 0 18px 46px rgba(27, 39, 61, 0.10);
     --ui-shadow-lifted: 0 24px 80px rgba(13, 20, 32, 0.24);
+    --ui-elevation-0: {l0};
+    --ui-elevation-1: {l1};
+    --ui-elevation-2: {l2};
+    --ui-elevation-3: {l3};
     --ui-radius-sm: 6px;
     --ui-radius-md: 8px;
     --ui-radius-lg: 12px;
@@ -33,9 +41,9 @@ pub const BASE_CSS: &str = r#"
     --ui-control-height: 36px;
     --ui-motion-fast: 120ms;
     --ui-motion-normal: 180ms;
-}
+}}
 
-[data-ui-theme="dark"] {
+[data-ui-theme="dark"] {{
     color-scheme: dark;
     --ui-bg: #0d1117;
     --ui-surface: #151b23;
@@ -49,57 +57,71 @@ pub const BASE_CSS: &str = r#"
     --ui-focus: #64b5ff;
     --ui-shadow-soft: 0 18px 46px rgba(0, 0, 0, 0.24);
     --ui-shadow-lifted: 0 26px 90px rgba(0, 0, 0, 0.42);
-}
+    --ui-elevation-0: {d0};
+    --ui-elevation-1: {d1};
+    --ui-elevation-2: {d2};
+    --ui-elevation-3: {d3};
+}}
 
-[data-ui-density="compact"] {
+[data-ui-density="compact"] {{
     --ui-control-height: 32px;
     --ui-space-3: 10px;
     --ui-space-4: 12px;
-}
+}}
 
-[data-ui-density="comfortable"] {
+[data-ui-density="comfortable"] {{
     --ui-control-height: 36px;
-}
+}}
 
-[data-ui-density="spacious"] {
+[data-ui-density="spacious"] {{
     --ui-control-height: 42px;
     --ui-space-3: 14px;
     --ui-space-4: 20px;
-}
+}}
 
-[data-ui-transparency="reduced"] {
+[data-ui-transparency="reduced"] {{
     --ui-glass: var(--ui-glass-solid);
-}
+}}
 
-* {
+* {{
     box-sizing: border-box;
-}
+}}
 
-body {
+body {{
     margin: 0;
     font-family: var(--ui-font-sans);
     background: var(--ui-bg);
     color: var(--ui-fg);
-}
+}}
 
 button,
 input,
 textarea,
-select {
+select {{
     font: inherit;
-}
+}}
 
-@media (prefers-reduced-motion: reduce) {
+@media (prefers-reduced-motion: reduce) {{
     *,
     *::before,
-    *::after {
+    *::after {{
         transition-duration: 0.01ms !important;
         animation-duration: 0.01ms !important;
         animation-iteration-count: 1 !important;
         scroll-behavior: auto !important;
-    }
+    }}
+}}
+"#,
+        l0 = LIGHT_ELEVATION.e0,
+        l1 = LIGHT_ELEVATION.e1,
+        l2 = LIGHT_ELEVATION.e2,
+        l3 = LIGHT_ELEVATION.e3,
+        d0 = DARK_ELEVATION.e0,
+        d1 = DARK_ELEVATION.e1,
+        d2 = DARK_ELEVATION.e2,
+        d3 = DARK_ELEVATION.e3,
+    )
 }
-"#;
 
 pub const COMPONENT_CSS: &str = r#"
 .ui-button,
@@ -162,6 +184,7 @@ pub const COMPONENT_CSS: &str = r#"
     border-radius: var(--ui-radius-lg);
     background: var(--ui-surface);
     color: var(--ui-fg);
+    box-shadow: var(--ui-elevation-0);
 }
 
 .ui-surface,
@@ -176,7 +199,18 @@ pub const COMPONENT_CSS: &str = r#"
 .ui-command-menu-panel {
     background: var(--ui-glass);
     backdrop-filter: blur(18px) saturate(160%);
-    box-shadow: var(--ui-shadow-lifted);
+}
+
+.ui-glass-surface {
+    box-shadow: var(--ui-elevation-2);
+}
+
+.ui-dialog-panel {
+    box-shadow: var(--ui-elevation-3);
+}
+
+.ui-command-menu-panel {
+    box-shadow: var(--ui-elevation-2);
 }
 
 .ui-stack {
@@ -394,7 +428,7 @@ pub const COMPONENT_CSS: &str = r#"
     border-radius: var(--ui-radius-lg);
     background: var(--ui-surface);
     padding: var(--ui-space-4);
-    box-shadow: var(--ui-shadow-soft);
+    box-shadow: var(--ui-elevation-2);
 }
 
 .ui-toast--success { border-color: color-mix(in srgb, var(--ui-success), transparent 62%); }
@@ -442,6 +476,7 @@ pub const COMPONENT_CSS: &str = r#"
     background: var(--ui-fg);
     color: var(--ui-bg);
     padding: 6px 8px;
+    box-shadow: var(--ui-elevation-1);
 }
 
 .ui-toolbar {
@@ -488,6 +523,10 @@ pub const COMPONENT_CSS: &str = r#"
     padding: var(--ui-space-4);
 }
 
+.ui-metric-card {
+    box-shadow: var(--ui-elevation-1);
+}
+
 .ui-metric-card-value {
     font-size: 28px;
     font-weight: 800;
@@ -519,7 +558,7 @@ pub const COMPONENT_CSS: &str = r#"
     background: var(--ui-material-bg, var(--ui-glass));
     border: 1px solid var(--ui-material-border, var(--ui-border));
     border-radius: var(--ui-radius-lg);
-    box-shadow: var(--ui-material-shadow, var(--ui-shadow-soft));
+    box-shadow: var(--ui-material-shadow, var(--ui-elevation-2));
     backdrop-filter: blur(var(--ui-material-blur, 18px)) saturate(var(--ui-material-saturate, 160%));
     -webkit-backdrop-filter: blur(var(--ui-material-blur, 18px)) saturate(var(--ui-material-saturate, 160%));
 }
@@ -637,11 +676,41 @@ pub const COMPONENT_CSS: &str = r#"
     display: block;
     will-change: transform, opacity;
 }
+
+[data-ui-motion="reduced"] .ui-button,
+[data-ui-motion="reduced"] .ui-field-control,
+[data-ui-motion="reduced"] .ui-command-menu-input,
+[data-ui-motion="reduced"] .ui-icon-button,
+[data-ui-motion="reduced"] .ui-switch-thumb,
+[data-ui-motion="reduced"] .ui-kinetic-box,
+[data-ui-motion="reduced"] .ui-kinetic-text,
+[data-ui-motion="reduced"] .ui-frame-layer,
+[data-ui-motion="reduced"] .ui-shared-element,
+[data-ui-motion="reduced"] .ui-presence {
+    transition: none !important;
+    animation: none !important;
+    transform: none !important;
+}
+
+[data-ui-motion="reduced"] .ui-presence {
+    --ui-presence-t: 1 !important;
+    opacity: 1 !important;
+}
+
+[data-ui-glass-policy="solid"] .ui-glass-surface,
+[data-ui-glass-policy="solid"] .ui-glass-layer,
+[data-ui-glass-policy="solid"] .ui-dialog-panel,
+[data-ui-glass-policy="solid"] .ui-command-menu-panel {
+    background: var(--ui-glass-solid) !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+}
 "#;
 
 pub fn library_css() -> String {
-    let mut css = String::with_capacity(BASE_CSS.len() + COMPONENT_CSS.len() + 1);
-    css.push_str(BASE_CSS);
+    let base = base_css();
+    let mut css = String::with_capacity(base.len() + COMPONENT_CSS.len() + 1);
+    css.push_str(&base);
     css.push('\n');
     css.push_str(COMPONENT_CSS);
     css

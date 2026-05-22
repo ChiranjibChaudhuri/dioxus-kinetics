@@ -19,7 +19,7 @@ pub mod prelude {
         resolve_glass, GlassDensity, GlassLevel, GlassPolicy, GlassRecipe, GlassRequest, GlassTone,
     };
     pub use ui_layout::{compute_flip, FlipDelta, Rect};
-    pub use ui_styles::{library_css, BASE_CSS, COMPONENT_CSS};
+    pub use ui_styles::{base_css, library_css, COMPONENT_CSS};
     #[cfg(feature = "timeline")]
     pub use ui_timeline::{Axis, MotionCue, ResolvedMotionState, TimelineClock};
     pub use ui_tokens::{

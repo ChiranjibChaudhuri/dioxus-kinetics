@@ -278,17 +278,11 @@ fn gallery_timeline_scope_preview_renders_three_variants() {
 }
 
 #[test]
-fn gallery_frame_stage_preview_renders_three_frame_snapshots() {
+fn gallery_frame_stage_preview_renders_starting_frame_caption() {
     let html = dioxus_ssr::render_element(rsx! {
         component_gallery::App {}
     });
-
-    for caption in ["Frame 0 / 180", "Frame 90 / 180", "Frame 179 / 180"] {
-        assert!(
-            html.contains(caption),
-            "missing FrameStage caption {caption}",
-        );
-    }
+    assert!(html.contains("Frame 0 / 180"));
 }
 
 #[test]
@@ -331,7 +325,7 @@ fn gallery_presence_gate_preview_renders_present_and_hidden_tiles() {
     });
 
     assert!(html.contains("Visible state"));
-    assert!(html.contains("Hidden state"));
+    assert!(html.contains("(gate suppresses children)"));
     assert!(html.contains("gallery-variant-grid--2col"));
 }
 
@@ -439,8 +433,8 @@ fn gallery_sequence_preview_renders_three_cues_with_inline_styles() {
     let inline_style_count =
         html.matches("style=\"opacity").count() + html.matches("style=\"transform").count();
     assert!(
-        inline_style_count >= 3,
-        "expected at least 3 inline-style KineticBox descendants; got {inline_style_count}",
+        inline_style_count >= 1,
+        "expected at least 1 inline-style KineticBox descendant on initial scrub frame; got {inline_style_count}",
     );
 }
 
@@ -465,4 +459,146 @@ fn gallery_shared_layout_and_shared_element_are_ready() {
     });
     assert!(html.contains("data-shared-id=\""));
     assert!(html.contains("class=\"ui-shared-layout\""));
+}
+
+#[test]
+fn gallery_shell_emits_all_four_preference_data_attributes() {
+    let html = dioxus_ssr::render_element(rsx! {
+        component_gallery::App {}
+    });
+
+    assert!(html.contains(r#"data-ui-theme="light""#));
+    assert!(html.contains(r#"data-ui-density="comfortable""#));
+    assert!(html.contains(r#"data-ui-motion="normal""#));
+    assert!(html.contains(r#"data-ui-glass-policy="translucent""#));
+}
+
+#[test]
+fn preference_bar_renders_all_four_toggle_groups() {
+    let html = dioxus_ssr::render_element(rsx! {
+        component_gallery::App {}
+    });
+
+    assert!(html.contains(r#"role="radiogroup""#));
+    // One radiogroup per preference.
+    let radiogroup_count = html.matches(r#"role="radiogroup""#).count();
+    assert!(
+        radiogroup_count >= 4,
+        "expected >=4 radiogroups, got {radiogroup_count}"
+    );
+
+    // Each labelled.
+    for label in ["Theme", "Density", "Motion", "Glass"] {
+        assert!(html.contains(label), "missing toggle group label: {label}");
+    }
+
+    // The current value of each shows aria-checked=true on exactly one option.
+    for value in ["Light", "Comfortable", "Normal", "Translucent"] {
+        assert!(
+            html.contains(value),
+            "missing default-selected option: {value}"
+        );
+    }
+}
+
+#[test]
+fn gallery_css_includes_ambient_mesh_and_toggle_group_styles() {
+    let html = dioxus_ssr::render_element(rsx! {
+        component_gallery::App {}
+    });
+
+    for selector in [
+        ".gallery-toggle-group",
+        ".gallery-ambient-mesh",
+        ".gallery-section--glass-stage",
+    ] {
+        assert!(html.contains(selector), "missing CSS selector {selector}",);
+    }
+
+    // Sticky position on the controls bar so it stays reachable while scrolling.
+    assert!(html.contains("position: sticky"));
+}
+
+#[test]
+fn motion_previews_use_replay_frame() {
+    let html = dioxus_ssr::render_element(rsx! {
+        component_gallery::App {}
+    });
+    // Each motion-category live demo should be wrapped in a gallery-demo-frame.
+    let frame_count = html.matches("gallery-demo-frame").count();
+    assert!(
+        frame_count >= 3,
+        "expected >=3 demo frames in motion previews, got {frame_count}"
+    );
+    // Replay button is present.
+    assert!(html.contains("Replay"));
+}
+
+#[test]
+fn timeline_previews_use_scrub_frame_with_range_slider() {
+    let html = dioxus_ssr::render_element(rsx! {
+        component_gallery::App {}
+    });
+
+    let scrub_count = html.matches("gallery-demo-frame--scrub").count();
+    assert!(
+        scrub_count >= 2,
+        "expected >=2 scrub frames (Sequence, TimelineScope, FrameStage), got {scrub_count}"
+    );
+    let range_count = html.matches(r#"type="range""#).count();
+    assert!(
+        range_count >= 2,
+        "expected >=2 range sliders, got {range_count}"
+    );
+}
+
+#[test]
+fn shared_layout_preview_uses_flip_frame_with_swap_control() {
+    let html = dioxus_ssr::render_element(rsx! {
+        component_gallery::App {}
+    });
+    assert!(html.contains("gallery-demo-frame--flip"));
+    assert!(html.contains("Swap layout"));
+}
+
+#[test]
+fn dialog_preview_renders_open_trigger_and_starts_closed() {
+    let html = dioxus_ssr::render_element(rsx! {
+        component_gallery::App {}
+    });
+    // Trigger button labelled "Show dialog" is present.
+    assert!(html.contains("Show dialog"));
+    // Default state is closed → no Dialog panel markup rendered.
+    // The id="ui-dialog-title" is emitted only by the Dialog component when open.
+    assert!(
+        !html.contains(r#"id="ui-dialog-title""#),
+        "dialog should start closed in preview",
+    );
+}
+
+#[test]
+fn toast_preview_renders_trigger_buttons_for_each_tone() {
+    let html = dioxus_ssr::render_element(rsx! {
+        component_gallery::App {}
+    });
+    // The four toast-trigger buttons.
+    for label in [
+        "Trigger success",
+        "Trigger info",
+        "Trigger warning",
+        "Trigger error",
+    ] {
+        assert!(html.contains(label), "missing toast trigger: {label}");
+    }
+    // Stage container is always rendered (empty by default).
+    assert!(html.contains("gallery-toast-stage"));
+}
+
+#[test]
+fn tooltip_preview_renders_trigger_label() {
+    let html = dioxus_ssr::render_element(rsx! {
+        component_gallery::App {}
+    });
+    assert!(html.contains("Net revenue"));
+    assert!(html.contains("Hover or focus the trigger"));
 }

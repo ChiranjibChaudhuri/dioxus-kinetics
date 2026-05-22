@@ -6,6 +6,14 @@ use crate::styles::GALLERY_CSS;
 
 #[component]
 pub fn App() -> Element {
+    let prefs = crate::controls::GalleryPrefs::use_provided();
+    use_context_provider(|| prefs);
+
+    let theme_attr = prefs.theme.read().attr_value();
+    let density_attr = prefs.density.read().attr_value();
+    let motion_attr = prefs.motion.read().attr_value();
+    let glass_attr = prefs.glass.read().attr_value();
+
     let shared_css = library_css();
 
     rsx! {
@@ -13,8 +21,10 @@ pub fn App() -> Element {
         style { "{GALLERY_CSS}" }
         div {
             class: "gallery-shell",
-            "data-ui-theme": "light",
-            "data-ui-density": "comfortable",
+            "data-ui-theme": "{theme_attr}",
+            "data-ui-density": "{density_attr}",
+            "data-ui-motion": "{motion_attr}",
+            "data-ui-glass-policy": "{glass_attr}",
             aside { class: "gallery-rail",
                 div { class: "gallery-brand",
                     div {
@@ -38,19 +48,7 @@ pub fn App() -> Element {
                         "Semantic components grouped by product function, with live rendered examples for available primitives and disabled coming-soon entries for the next phase."
                     }
                 }
-                section { class: "gallery-controls", "aria-label": "Preview settings",
-                    div { class: "gallery-control-group",
-                        span { class: "gallery-control-label", "Theme" }
-                        button { class: "ui-button ui-button--primary", r#type: "button", "Light" }
-                        button { class: "ui-button ui-button--secondary", r#type: "button", "Dark" }
-                    }
-                    div { class: "gallery-control-group",
-                        span { class: "gallery-control-label", "Density" }
-                        button { class: "ui-button ui-button--secondary", r#type: "button", "Compact" }
-                        button { class: "ui-button ui-button--primary", r#type: "button", "Comfortable" }
-                        button { class: "ui-button ui-button--secondary", r#type: "button", "Spacious" }
-                    }
-                }
+                crate::controls::PreferenceBar {}
                 nav { class: "gallery-mobile-tabs", aria_label: "Component categories",
                     for category in categories() {
                         a { href: "#{category.slug()}", "{category.label()}" }
@@ -71,8 +69,16 @@ fn CategorySection(category: ComponentCategory) -> Element {
         .filter(|doc| doc.category == category)
         .collect::<Vec<_>>();
 
+    let stage_class = match category {
+        ComponentCategory::Foundations | ComponentCategory::Surfaces => {
+            " gallery-section--glass-stage"
+        }
+        _ => "",
+    };
+    let class = format!("gallery-section{stage_class}");
+
     rsx! {
-        section { id: "{category.slug()}", class: "gallery-section",
+        section { id: "{category.slug()}", class: "{class}",
             div { class: "gallery-section-heading",
                 h3 { "{category.label()}" }
                 p { "{category.description()}" }

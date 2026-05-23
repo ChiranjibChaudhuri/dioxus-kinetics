@@ -104,7 +104,15 @@ fn fs_main(in: VsOut) -> @location(0) vec4<f32> {
         let noise = textureSample(noise_tex, noise_samp,
             in.uv * u.noise_frequency + vec2<f32>(u.noise_seed, 0.0)
         ).xy * 2.0 - 1.0;
-        let disp = (normal * u.surface_curvature + noise) * u.refract_strength * u.thickness;
+        var disp = (normal * u.surface_curvature + noise) * u.refract_strength * u.thickness;
+        if (FEAT_POINTER) {
+            // Pointer is in surface-local normalized space (-1..1).
+            let pull = (u.pointer - vec2<f32>(local.x / half_size.x, local.y / half_size.y));
+            disp = disp + pull * 0.5 * u.refract_strength;
+        }
+        if (FEAT_SCROLL) {
+            disp = disp + u.scroll_velocity * 0.02;
+        }
         sample_uv = in.uv + disp * 0.01;
     }
 

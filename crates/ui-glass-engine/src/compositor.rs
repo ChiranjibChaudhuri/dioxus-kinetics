@@ -60,6 +60,38 @@ impl Compositor {
             .or_insert_with(|| build_blur_pipeline(&self.device, key.direction, key.taps))
     }
 
+    /// Test-only entry point: render a single region while overriding the
+    /// uniform values. Used by golden tests for POINTER / SCROLL / time-driven
+    /// features before Plan 3's ui-motion bridge replaces this path.
+    #[cfg(any(test, feature = "headless"))]
+    pub fn render_with_uniforms(
+        &mut self,
+        bg_view: &wgpu::TextureView,
+        output_view: &wgpu::TextureView,
+        canvas_size: [f32; 2],
+        rect_px: [f32; 4],
+        material: &LiquidMaterial,
+        uniforms_override: GlassUniforms,
+    ) {
+        let compose_key = ComposeKey { features: material.features };
+        let blur_h_key = BlurKey { direction: BlurDirection::Horizontal, taps: 13 };
+        let blur_v_key = BlurKey { direction: BlurDirection::Vertical, taps: 13 };
+        let _ = self.ensure_compose(compose_key);
+        let _ = self.ensure_blur(blur_h_key);
+        let _ = self.ensure_blur(blur_v_key);
+        let compose = self.compose_cache.get(&compose_key).unwrap();
+        let blur_h = self.blur_cache.get(&blur_h_key).unwrap();
+        let blur_v = self.blur_cache.get(&blur_v_key).unwrap();
+        let mut uniforms = uniforms_override;
+        uniforms.rect = rect_px;
+        uniforms.canvas_size = canvas_size;
+        render_glass_to_texture(
+            &self.device, &self.queue, bg_view, output_view, &uniforms,
+            blur_h, blur_v, compose,
+            &self.noise_view, &self.noise_sampler,
+        );
+    }
+
     pub fn render(
         &mut self,
         bg_view: &wgpu::TextureView,

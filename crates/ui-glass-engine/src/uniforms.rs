@@ -67,6 +67,21 @@ impl Default for GlassUniforms {
 }
 
 impl GlassUniforms {
+    pub fn with_pointer(mut self, pointer_norm: [f32; 2]) -> Self {
+        self.pointer = pointer_norm;
+        self
+    }
+
+    pub fn with_scroll_velocity(mut self, vel_norm: [f32; 2]) -> Self {
+        self.scroll_velocity = vel_norm;
+        self
+    }
+
+    pub fn with_time(mut self, seconds: f32) -> Self {
+        self.time_seconds = seconds;
+        self
+    }
+
     pub fn from_material(
         material: &ui_glass::LiquidMaterial,
         rect_px: [f32; 4],

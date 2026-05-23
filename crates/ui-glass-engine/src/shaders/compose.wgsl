@@ -77,6 +77,11 @@ fn apply_saturation(c: vec3<f32>, sat: f32) -> vec3<f32> {
     return mix(vec3<f32>(luma), c, sat);
 }
 
+fn orb(p: vec2<f32>, center: vec2<f32>, radius: f32) -> f32 {
+    let d = length(p - center);
+    return exp(-(d * d) / (radius * radius));
+}
+
 @fragment
 fn fs_main(in: VsOut) -> @location(0) vec4<f32> {
     // Map the fragment's UV onto the surface rect.
@@ -129,6 +134,16 @@ fn fs_main(in: VsOut) -> @location(0) vec4<f32> {
     if (FEAT_INNER_SHADOW) {
         let inner = smoothstep(-max(u.inner_shadow_px, 0.5), 0.0, sdf);
         color = color * (1.0 - inner * u.inner_shadow_alpha);
+    }
+
+    if (FEAT_AMBIENT_MESH) {
+        // Animated mesh contribution: three soft color centers orbiting slowly.
+        let t = u.time_seconds * 0.2;
+        let p = local / max(half_size.x, 1.0);
+        let c0 = vec3<f32>(0.30, 0.55, 0.95) * orb(p, vec2<f32>(cos(t),       sin(t)),       0.6);
+        let c1 = vec3<f32>(0.90, 0.45, 0.65) * orb(p, vec2<f32>(cos(t + 2.1), sin(t + 2.1)), 0.6);
+        let c2 = vec3<f32>(0.55, 0.95, 0.65) * orb(p, vec2<f32>(cos(t + 4.2), sin(t + 4.2)), 0.6);
+        color = color + (c0 + c1 + c2) * 0.18;
     }
 
     return vec4<f32>(color, 1.0);

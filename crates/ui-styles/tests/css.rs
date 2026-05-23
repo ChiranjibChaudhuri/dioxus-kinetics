@@ -52,19 +52,23 @@ fn library_css_concatenates_base_and_component_css() {
 }
 
 #[test]
-fn glass_surface_differentiates_levels_and_tones() {
+fn glass_surface_differentiates_tones_and_density() {
     let css = COMPONENT_CSS;
 
-    // Levels drive blur strength and elevation.
+    // Level-specific blur/tint rules have been retired (the engine renders the
+    // actual glass effect; CSS only handles Tier 5 solid fallback). Verify that
+    // the per-level selectors are gone so this test catches any accidental
+    // re-introduction.
     for level in ["subtle", "floating", "overlay", "chrome"] {
         let selector = format!(r#".ui-glass-surface[data-glass-level="{level}"]"#);
         assert!(
-            css.contains(&selector),
-            "missing glass level selector: {selector}"
+            !css.contains(&selector),
+            "engine-redundant glass level selector should be absent: {selector}"
         );
     }
 
-    // Tones tint the translucent background.
+    // Tones set --ui-glass-tint; the SVG filter fallback path reads this
+    // variable from computed style so these rules must remain.
     for tone in ["neutral", "primary", "info", "success", "warning", "danger"] {
         let selector = format!(r#".ui-glass-surface[data-glass-tone="{tone}"]"#);
         assert!(

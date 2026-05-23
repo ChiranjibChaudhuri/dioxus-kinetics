@@ -194,7 +194,6 @@ pub const COMPONENT_CSS: &str = r#"
     padding: var(--ui-space-4);
 }
 
-.ui-glass-surface,
 .ui-dialog-panel,
 .ui-command-menu-panel {
     background: var(--ui-glass);
@@ -204,14 +203,22 @@ pub const COMPONENT_CSS: &str = r#"
 
 .ui-glass-surface {
     /* Default tone (neutral) maps to the surface white; tone selectors below
-       override `--ui-glass-tint` for the per-tone color and the level selectors
-       compose the tint with the level-specific opacity. */
+       override `--ui-glass-tint` for the per-tone color. The SVG filter fallback
+       path may reference --ui-glass-tint via computed styles so the variable
+       must stay present even though the engine renders the actual blur/tint. */
     --ui-glass-tint: #ffffff;
+    /* Tier 5 (Solid) fallback base. The engine renders the actual glass
+       effect when the liquid-glass feature is on; this rule only takes
+       effect when neither WebGPU nor WebGL2 is available AND no SVG
+       backdrop filter is reachable. */
+    background: var(--ui-glass-solid);
     box-shadow: var(--ui-elevation-2);
-    border-color: color-mix(in srgb, var(--ui-fg) 10%, transparent);
+    border-color: var(--ui-border);
 }
 
-/* Tone: sets the dominant color of the glass material. */
+/* Tone: sets the dominant color of the glass material. The SVG filter path
+   reads --ui-glass-tint from computed style, so keep these rules even though
+   the engine path uses its own per-tone logic. */
 .ui-glass-surface[data-glass-tone="neutral"] { --ui-glass-tint: #ffffff; }
 .ui-glass-surface[data-glass-tone="primary"] { --ui-glass-tint: var(--ui-primary); }
 .ui-glass-surface[data-glass-tone="info"]    { --ui-glass-tint: var(--ui-info); }
@@ -221,50 +228,6 @@ pub const COMPONENT_CSS: &str = r#"
 
 [data-ui-theme="dark"] .ui-glass-surface[data-glass-tone="neutral"] {
     --ui-glass-tint: #161c26;
-}
-
-/* Level: depth of the material. Controls translucency, blur, and elevation.
-   Each level uses a distinctly different alpha so rows of the same tone read
-   as visibly different at small preview sizes (subtle ≈ ghost, floating ≈
-   standard glass, overlay ≈ vivid material). */
-.ui-glass-surface[data-glass-level="subtle"] {
-    background: color-mix(in srgb, var(--ui-glass-tint) 22%, transparent);
-    backdrop-filter: blur(8px) saturate(130%);
-    -webkit-backdrop-filter: blur(8px) saturate(130%);
-    box-shadow: var(--ui-elevation-0);
-    border-color: color-mix(in srgb, var(--ui-fg) 8%, transparent);
-}
-
-.ui-glass-surface[data-glass-level="floating"] {
-    background: color-mix(in srgb, var(--ui-glass-tint) 55%, color-mix(in srgb, #ffffff 60%, transparent));
-    backdrop-filter: blur(18px) saturate(160%);
-    -webkit-backdrop-filter: blur(18px) saturate(160%);
-    box-shadow: var(--ui-elevation-2);
-    border-color: color-mix(in srgb, var(--ui-fg) 12%, transparent);
-}
-
-.ui-glass-surface[data-glass-level="overlay"] {
-    background: color-mix(in srgb, var(--ui-glass-tint) 80%, #ffffff);
-    backdrop-filter: blur(28px) saturate(200%);
-    -webkit-backdrop-filter: blur(28px) saturate(200%);
-    box-shadow: var(--ui-elevation-3);
-    border-color: color-mix(in srgb, var(--ui-fg) 16%, transparent);
-}
-
-.ui-glass-surface[data-glass-level="chrome"] {
-    background: var(--ui-glass-tint);
-    backdrop-filter: blur(32px) saturate(220%);
-    -webkit-backdrop-filter: blur(32px) saturate(220%);
-    box-shadow: var(--ui-elevation-3);
-    border-color: color-mix(in srgb, var(--ui-fg) 20%, transparent);
-}
-
-[data-ui-theme="dark"] .ui-glass-surface[data-glass-level="floating"] {
-    background: color-mix(in srgb, var(--ui-glass-tint) 55%, color-mix(in srgb, #161c26 60%, transparent));
-}
-
-[data-ui-theme="dark"] .ui-glass-surface[data-glass-level="overlay"] {
-    background: color-mix(in srgb, var(--ui-glass-tint) 80%, #161c26);
 }
 
 /* Density: padding rhythm inside the glass surface. */

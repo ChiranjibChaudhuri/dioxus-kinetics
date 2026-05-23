@@ -35,7 +35,10 @@ fn DialogPreviewBody() -> Element {
                 title: "Archive workspace",
                 description: "Move this workspace out of active navigation.",
                 body: "Team members can still request access later.",
-                actions: vec!["Cancel".to_string(), "Move it".to_string()],
+                actions: vec![
+                    DialogAction::ghost("cancel", "Cancel"),
+                    DialogAction::primary("archive", "Move it"),
+                ],
                 on_dismiss: move |_| open.set(false),
                 on_action: move |_action: String| open.set(false),
             }

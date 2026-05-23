@@ -9,6 +9,6 @@ mod toast;
 mod tooltip;
 
 pub use command_menu::{CommandGroup, CommandItem, CommandMenu};
-pub use dialog::Dialog;
+pub use dialog::{Dialog, DialogAction, DialogActionTone};
 pub use toast::{Toast, ToastTone};
 pub use tooltip::Tooltip;

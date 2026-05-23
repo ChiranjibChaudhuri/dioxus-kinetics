@@ -1,8 +1,8 @@
 use dioxus::prelude::*;
 use ui_dioxus::{
-    Checkbox, CommandGroup, CommandItem, CommandMenu, Dialog, EmptyState, MetricCard, MetricTone,
-    Sidebar, SidebarItem, SidebarSection, Switch, TabItem, TabPanel, Tabs, TextField, Toast,
-    ToastTone, Toolbar, Tooltip,
+    Checkbox, CommandGroup, CommandItem, CommandMenu, Dialog, DialogAction, EmptyState, MetricCard,
+    MetricTone, Sidebar, SidebarItem, SidebarSection, Switch, TabItem, TabPanel, Tabs, TextField,
+    Toast, ToastTone, Toolbar, Tooltip,
 };
 
 #[test]
@@ -146,7 +146,10 @@ fn dialog_toast_and_tooltip_render_overlay_semantics() {
             title: "Delete workspace",
             description: "This action cannot be undone.",
             body: "All reports and settings will be archived.",
-            actions: vec!["Cancel".to_string(), "Delete".to_string()],
+            actions: vec![
+                DialogAction::ghost("cancel", "Cancel"),
+                DialogAction::danger("delete", "Delete"),
+            ],
         }
     });
     let closed_dialog = dioxus_ssr::render_element(rsx! {

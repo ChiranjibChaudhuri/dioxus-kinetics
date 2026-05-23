@@ -45,7 +45,10 @@ pub use kinetics::{
 pub use layout::{SharedElement, SharedLayout};
 pub use navigation::{Sidebar, SidebarItem, SidebarSection, TabItem, TabPanel, Tabs, Toolbar};
 pub use navigation::{Sidebar as NavigationRail, Tabs as ViewSwitcher, Toolbar as ActionBar};
-pub use overlays::{CommandGroup, CommandItem, CommandMenu, Dialog, Toast, ToastTone, Tooltip};
+pub use overlays::{
+    CommandGroup, CommandItem, CommandMenu, Dialog, DialogAction, DialogActionTone, Toast,
+    ToastTone, Tooltip,
+};
 pub use overlays::{
     CommandMenu as CommandFinder, Dialog as ModalLayer, Toast as NoticeStack,
     Tooltip as ContextHint,

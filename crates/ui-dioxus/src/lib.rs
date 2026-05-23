@@ -11,6 +11,7 @@ mod layout;
 mod navigation;
 mod overlays;
 mod popover;
+mod select;
 
 use dioxus::prelude::*;
 use ui_glass::{GlassDensity, GlassLevel, GlassTone};
@@ -58,6 +59,7 @@ pub use overlays::{
     ToastTone, Tooltip,
 };
 pub use popover::{Popover, PopoverSide};
+pub use select::{Select, SelectOption};
 pub use overlays::{
     CommandMenu as CommandFinder, Dialog as ModalLayer, Toast as NoticeStack,
     Tooltip as ContextHint,

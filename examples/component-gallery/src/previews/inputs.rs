@@ -49,6 +49,30 @@ pub fn slider_preview() -> Element {
     rsx! { SliderPreviewBody {} }
 }
 
+pub fn select_preview() -> Element {
+    rsx! { SelectPreviewBody {} }
+}
+
+#[component]
+fn SelectPreviewBody() -> Element {
+    let mut value = use_signal(|| "monthly".to_string());
+    let options = vec![
+        SelectOption::new("monthly", "Monthly"),
+        SelectOption::new("quarterly", "Quarterly"),
+        SelectOption::new("annual", "Annual"),
+        SelectOption::new("legacy", "Legacy (read-only)").disabled(),
+    ];
+    rsx! {
+        Select {
+            id: "billing-cadence",
+            label: "Billing cadence",
+            selected: value.read().clone(),
+            options,
+            on_select: move |v: String| value.set(v),
+        }
+    }
+}
+
 #[component]
 fn SliderPreviewBody() -> Element {
     let mut volume = use_signal(|| 60.0_f32);

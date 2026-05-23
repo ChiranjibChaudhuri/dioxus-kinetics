@@ -820,6 +820,56 @@ pub const COMPONENT_CSS: &str = r#"
     display: inline-flex;
 }
 
+.ui-select {
+    display: grid;
+    gap: var(--ui-space-1);
+}
+
+.ui-select-label {
+    color: var(--ui-fg);
+    font-weight: 600;
+    font-size: 13px;
+}
+
+.ui-select-trigger {
+    display: inline-flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--ui-space-2);
+    min-width: 220px;
+    padding: 6px 10px;
+    border: 1px solid var(--ui-border);
+    border-radius: var(--ui-radius-md);
+    background: var(--ui-surface);
+    color: var(--ui-fg);
+    cursor: pointer;
+    font: inherit;
+}
+
+.ui-select-trigger[disabled] { opacity: 0.45; cursor: not-allowed; }
+.ui-select-trigger--placeholder { color: var(--ui-muted-fg); }
+.ui-select-chevron { color: var(--ui-muted-fg); }
+
+.ui-select-listbox {
+    margin: 0;
+    padding: 4px;
+    list-style: none;
+    min-width: 220px;
+    max-height: 280px;
+    overflow-y: auto;
+}
+
+.ui-select-option {
+    padding: 6px 10px;
+    border-radius: calc(var(--ui-radius-md) - 2px);
+    cursor: pointer;
+    color: var(--ui-fg);
+}
+
+.ui-select-option:hover { background: var(--ui-surface-muted); }
+.ui-select-option--selected { background: var(--ui-surface-muted); font-weight: 600; }
+.ui-select-option--disabled { color: var(--ui-muted-fg); cursor: not-allowed; }
+
 .ui-command-menu {
     display: grid;
     gap: var(--ui-space-3);

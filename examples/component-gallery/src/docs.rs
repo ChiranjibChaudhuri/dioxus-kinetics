@@ -9,7 +9,9 @@ use crate::previews::{
         skeleton_preview, toast_preview, tooltip_preview,
     },
     foundations::glass_layer_preview,
-    inputs::{checkbox_preview, slider_preview, switch_preview, text_field_preview},
+    inputs::{
+        checkbox_preview, select_preview, slider_preview, switch_preview, text_field_preview,
+    },
     liquid_glass::liquid_surface_preview,
     layout::{accordion_preview, stack_preview, tabs_preview},
     motion::{
@@ -405,11 +407,11 @@ const COMPONENT_DOCS: [ComponentDoc; 42] = [
     ComponentDoc {
         name: "Select",
         category: ComponentCategory::Inputs,
-        status: ComponentStatus::ComingSoon,
-        summary: "Single-select dropdown with optional async/searchable Combobox mode. Arrow-key navigation, typeahead filter, and `aria-activedescendant` plumbing.",
-        snippet: "// Spec 7 — Select + Combobox",
-        accessibility: "WAI-ARIA 1.2 listbox + combobox pattern.",
-        render: None,
+        status: ComponentStatus::Ready,
+        summary: "Single-select dropdown built on `Popover`. Trigger shows the selected option's label (or placeholder); the popover renders a `role=\"listbox\"` of options with selection state, disabled rows, and a chevron icon.",
+        snippet: SELECT_SNIPPET,
+        accessibility: "Trigger is `role=\"combobox\"` with `aria-haspopup=\"listbox\"`; options are `role=\"option\"` with `aria-selected` + `aria-disabled`. Typeahead filter + Combobox mode is a future spec.",
+        render: Some(select_preview),
     },
     ComponentDoc {
         name: "DatePicker",
@@ -750,6 +752,17 @@ const SKELETON_SNIPPET: &str = r#"Skeleton {
     height: "20px",
     width: "60%",
     radius: "6px",
+}"#;
+
+const SELECT_SNIPPET: &str = r#"Select {
+    id: "billing-cadence",
+    label: "Billing cadence",
+    selected: "monthly",
+    options: vec![
+        SelectOption::new("monthly", "Monthly"),
+        SelectOption::new("annual", "Annual"),
+    ],
+    on_select: move |v: String| /* update */ {},
 }"#;
 
 const POPOVER_SNIPPET: &str = r#"Popover {

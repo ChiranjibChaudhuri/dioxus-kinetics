@@ -1,7 +1,7 @@
 # Component Gallery Audit Report
 
-- Started: 2026-05-23T18:50:23.901Z
-- Finished: 2026-05-23T18:55:17.484Z
+- Started: 2026-05-23T19:24:30.496Z
+- Finished: 2026-05-23T19:28:35.030Z
 
 ## Summary
 
@@ -25,12 +25,12 @@
 | EmptyState | pass | n/a | pass | ready |  |
 | Dialog | pass | pass | pass | ready |  |
 | Toast | pass | pass | pass | ready |  |
-| Tooltip | pass | pass | pass | ready |  |
+| Tooltip | pass | fail | pass | regression | motion@default: Error: [2mexpect([22m[31mlocator[39m[2m).[22mtoBeVisible[2m([22m[2m)[22m failed |
 | Presence | pass | pass | pass | ready |  |
 | PresenceGate | pass | pass | pass | ready |  |
-| KineticBox | pass | fail | pass | regression | motion@default: Error: [2mexpect([22m[31mreceived[39m[2m).[22mtoBeTruthy[2m()[22m |
+| KineticBox | pass | pass | pass | ready |  |
 | Sequence | pass | pass | pass | ready |  |
-| TimelineScope | pass | fail | pass | regression | motion@default: Error: [2mexpect([22m[31mreceived[39m[2m).[22mtoBeGreaterThan[2m([22m[32mexpected[39m[2m)[22m |
+| TimelineScope | pass | pass | pass | ready |  |
 | FrameStage | pass | pass | pass | ready |  |
 | SharedElement | pass | pass | pass | ready |  |
 | SharedLayout | pass | pass | pass | ready |  |

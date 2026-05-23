@@ -455,6 +455,70 @@ impl LiquidMaterial {
         self.thickness_px = px;
         self
     }
+
+    pub fn chrome() -> Self {
+        Self::new()
+            .blur(32.0)
+            .saturation(1.6)
+            .refract(0.15)
+            .specular(0.78, 0.5)
+            .inner_shadow(6.0, 0.18)
+            .edge_falloff(2.0)
+            .radius(0.0)
+            .thickness(2.0)
+    }
+
+    pub fn floating() -> Self {
+        Self::new()
+            .blur(18.0)
+            .saturation(1.6)
+            .refract(0.25)
+            .disperse(1.0)
+            .specular(0.78, 0.6)
+            .inner_shadow(4.0, 0.14)
+            .edge_falloff(1.5)
+            .radius(14.0)
+            .thickness(1.5)
+    }
+
+    pub fn overlay() -> Self {
+        Self::new()
+            .blur(24.0)
+            .saturation(1.8)
+            .refract(0.35)
+            .disperse(2.0)
+            .specular(0.78, 0.7)
+            .inner_shadow(6.0, 0.22)
+            .edge_falloff(2.0)
+            .radius(18.0)
+            .thickness(2.0)
+    }
+
+    pub fn sheet() -> Self {
+        Self::floating()
+            .ambient_mesh(AmbientMesh::Aurora)
+            .radius(20.0)
+    }
+
+    pub fn tooltip() -> Self {
+        Self::new()
+            .blur(10.0)
+            .saturation(1.3)
+            .inner_shadow(2.0, 0.10)
+            .radius(8.0)
+            .thickness(1.0)
+    }
+
+    pub fn button() -> Self {
+        Self::new()
+            .blur(12.0)
+            .saturation(1.4)
+            .specular(0.78, 0.5)
+            .inner_shadow(2.0, 0.12)
+            .pointer_reactive()
+            .radius(10.0)
+            .thickness(1.0)
+    }
 }
 
 impl Default for LiquidMaterial {

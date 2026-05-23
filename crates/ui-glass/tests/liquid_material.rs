@@ -137,3 +137,52 @@ fn builder_chains_compose_features() {
     assert!(m.features.contains(ui_glass::GlassFeatures::SPECULAR));
     assert!(m.features.contains(ui_glass::GlassFeatures::POINTER));
 }
+
+use ui_glass::GlassFeatures as F;
+
+#[test]
+fn preset_floating_has_blur_specular_inner_shadow() {
+    let m = LiquidMaterial::floating();
+    assert!(m.features.contains(F::BLUR));
+    assert!(m.features.contains(F::SPECULAR));
+    assert!(m.features.contains(F::INNER_SHADOW));
+    assert!(m.blur_radius_px > 0.0);
+    assert!(m.radius_px > 0.0);
+}
+
+#[test]
+fn preset_chrome_has_heavy_blur_low_refract() {
+    let m = LiquidMaterial::chrome();
+    assert!(m.features.contains(F::BLUR));
+    assert!(m.blur_radius_px >= 28.0);
+    if m.features.contains(F::REFRACT) {
+        assert!(m.refraction_strength <= 0.2);
+    }
+}
+
+#[test]
+fn preset_overlay_has_strong_refract_and_disperse() {
+    let m = LiquidMaterial::overlay();
+    assert!(m.features.contains(F::REFRACT));
+    assert!(m.features.contains(F::DISPERSE));
+    assert!(m.refraction_strength >= 0.3);
+}
+
+#[test]
+fn preset_sheet_has_ambient_mesh() {
+    let m = LiquidMaterial::sheet();
+    assert!(m.features.contains(F::AMBIENT_MESH));
+}
+
+#[test]
+fn preset_tooltip_has_no_reactivity() {
+    let m = LiquidMaterial::tooltip();
+    assert!(!m.features.contains(F::POINTER));
+    assert!(!m.features.contains(F::SCROLL));
+}
+
+#[test]
+fn preset_button_is_pointer_reactive() {
+    let m = LiquidMaterial::button();
+    assert!(m.features.contains(F::POINTER));
+}

@@ -23,7 +23,7 @@ ui-tokens.workspace = true
 dioxus-ssr.workspace = true
 
 [features]
-default = []
+default = ["liquid-glass"]
 liquid-glass = ["dep:ui-glass-dioxus", "dep:ui-glass-engine"]
 
 [lib]

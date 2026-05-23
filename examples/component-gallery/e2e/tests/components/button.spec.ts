@@ -25,6 +25,7 @@ test.describe("Button", () => {
     const dangerBtn = page
       .locator("article.gallery-entry")
       .filter({ has: page.locator('h4:text-is("Button")') })
+      .locator(".gallery-preview--ready")
       .getByRole("button", { name: "Delete" });
     await expect(dangerBtn).toHaveClass(/ui-button--danger/);
   });

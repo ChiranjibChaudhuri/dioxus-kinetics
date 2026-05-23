@@ -162,3 +162,65 @@ pub fn empty_state_preview() -> Element {
         }
     }
 }
+
+pub fn alert_preview() -> Element {
+    let tones = [
+        (AlertTone::Neutral, "Neutral", "Cache warming up", "Some metrics may lag by a few minutes."),
+        (AlertTone::Success, "Success", "Export complete", "The CSV is ready to download."),
+        (AlertTone::Warning, "Warning", "Quota at 92%", "Plan auto-upgrades on Friday at midnight."),
+        (AlertTone::Danger, "Danger", "Sync failed", "Two reports are out of date; retry to refresh."),
+        (AlertTone::Info, "Info", "New feature available", "Try the redesigned billing dashboard."),
+    ];
+    rsx! {
+        div { class: "gallery-variant-grid gallery-variant-grid--stack",
+            for (tone, label, title, description) in tones {
+                div { class: "gallery-variant-tile",
+                    span { class: "gallery-variant-label", "{label}" }
+                    Alert { tone, title, description }
+                }
+            }
+        }
+    }
+}
+
+pub fn progress_preview() -> Element {
+    rsx! {
+        div { class: "gallery-variant-grid gallery-variant-grid--stack",
+            div { class: "gallery-variant-tile",
+                span { class: "gallery-variant-label", "Determinate · 0%" }
+                Progress { label: "Importing rows", value: 0.0, description: "0 / 12 400" }
+            }
+            div { class: "gallery-variant-tile",
+                span { class: "gallery-variant-label", "Determinate · 65%" }
+                Progress { label: "Importing rows", value: 0.65, description: "8 060 / 12 400" }
+            }
+            div { class: "gallery-variant-tile",
+                span { class: "gallery-variant-label", "Determinate · 100%" }
+                Progress { label: "Importing rows", value: 1.0, description: "12 400 / 12 400 complete" }
+            }
+            div { class: "gallery-variant-tile",
+                span { class: "gallery-variant-label", "Indeterminate" }
+                Progress { label: "Connecting…", description: "Waiting on the data broker." }
+            }
+        }
+    }
+}
+
+pub fn skeleton_preview() -> Element {
+    rsx! {
+        div { class: "gallery-variant-grid gallery-variant-grid--stack",
+            div { class: "gallery-variant-tile",
+                span { class: "gallery-variant-label", "Headline placeholder" }
+                Skeleton { height: "20px".to_string(), width: "60%".to_string(), radius: "6px".to_string() }
+            }
+            div { class: "gallery-variant-tile",
+                span { class: "gallery-variant-label", "Paragraph placeholder" }
+                div { style: "display: grid; gap: 6px;",
+                    Skeleton { height: "12px".to_string(), width: "100%".to_string(), radius: "4px".to_string() }
+                    Skeleton { height: "12px".to_string(), width: "92%".to_string(), radius: "4px".to_string() }
+                    Skeleton { height: "12px".to_string(), width: "78%".to_string(), radius: "4px".to_string() }
+                }
+            }
+        }
+    }
+}

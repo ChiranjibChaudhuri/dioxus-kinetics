@@ -4,7 +4,10 @@ use crate::previews::{
     actions::{button_preview, command_menu_preview, icon_button_preview, toolbar_preview},
     capture::capture_stage_preview,
     composition::frame_stage_preview,
-    feedback::{dialog_preview, empty_state_preview, toast_preview, tooltip_preview},
+    feedback::{
+        alert_preview, dialog_preview, empty_state_preview, progress_preview, skeleton_preview,
+        toast_preview, tooltip_preview,
+    },
     foundations::glass_layer_preview,
     inputs::{checkbox_preview, switch_preview, text_field_preview},
     liquid_glass::liquid_surface_preview,
@@ -133,7 +136,7 @@ pub fn component_docs() -> &'static [ComponentDoc] {
 
 const BASIC_ACCESSIBILITY: &str = "Renders native semantic elements and stable focusable controls.";
 
-const COMPONENT_DOCS: [ComponentDoc; 41] = [
+const COMPONENT_DOCS: [ComponentDoc; 42] = [
     ComponentDoc {
         name: "Button",
         category: ComponentCategory::Actions,
@@ -444,20 +447,29 @@ const COMPONENT_DOCS: [ComponentDoc; 41] = [
     ComponentDoc {
         name: "Alert",
         category: ComponentCategory::Feedback,
-        status: ComponentStatus::ComingSoon,
-        summary: "Non-dismissible page-level message banner with severity tones. Complements Toast for persistent context.",
-        snippet: "// Spec 12 — Alert banner + ARIA live regions",
-        accessibility: "`role=\"alert\"` for high-severity tones; polite live region otherwise.",
-        render: None,
+        status: ComponentStatus::Ready,
+        summary: "Page-level message banner with severity tones (Neutral/Success/Warning/Danger/Info). Persists in layout; complements Toast for non-ephemeral context.",
+        snippet: ALERT_SNIPPET,
+        accessibility: "`role=\"alert\"` for high-severity tones (Danger/Warning); `role=\"status\"` (polite live region) otherwise.",
+        render: Some(alert_preview),
     },
     ComponentDoc {
         name: "Progress",
         category: ComponentCategory::Feedback,
-        status: ComponentStatus::ComingSoon,
-        summary: "Determinate progress bar and indeterminate spinner variants. Pairs with `Skeleton` for content loading placeholders.",
-        snippet: "// Spec 13 — Progress + Skeleton",
-        accessibility: "WAI-ARIA progressbar pattern with `aria-valuenow`/`aria-valuetext`.",
-        render: None,
+        status: ComponentStatus::Ready,
+        summary: "Determinate progress bar (value 0.0–1.0) and indeterminate spinner-style variant. Pair with `Skeleton` for content-shape loading placeholders.",
+        snippet: PROGRESS_SNIPPET,
+        accessibility: "WAI-ARIA progressbar pattern with `aria-valuenow`/`aria-valuetext`; indeterminate animation respects `prefers-reduced-motion`.",
+        render: Some(progress_preview),
+    },
+    ComponentDoc {
+        name: "Skeleton",
+        category: ComponentCategory::Feedback,
+        status: ComponentStatus::Ready,
+        summary: "Neutral pulsing block that preserves content shape while data loads. Composable to build headline/paragraph/card placeholders.",
+        snippet: SKELETON_SNIPPET,
+        accessibility: "`aria-hidden=\"true\"` (the skeleton is decorative; the surrounding live region or label announces loading state).",
+        render: Some(skeleton_preview),
     },
     ComponentDoc {
         name: "DataTable",
@@ -717,4 +729,22 @@ const KINETIC_TEXT_SNIPPET: &str = r#"KineticText {
     id: "headline",
     text: "Welcome aboard",
     cue: "text-flow",
+}"#;
+
+const ALERT_SNIPPET: &str = r#"Alert {
+    tone: AlertTone::Warning,
+    title: "Quota at 92%",
+    description: "Plan auto-upgrades on Friday at midnight.",
+}"#;
+
+const PROGRESS_SNIPPET: &str = r#"Progress {
+    label: "Importing rows",
+    value: 0.65,
+    description: "8 060 / 12 400",
+}"#;
+
+const SKELETON_SNIPPET: &str = r#"Skeleton {
+    height: "20px",
+    width: "60%",
+    radius: "6px",
 }"#;

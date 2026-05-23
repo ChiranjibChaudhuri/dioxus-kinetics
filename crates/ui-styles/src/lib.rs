@@ -474,6 +474,125 @@ pub const COMPONENT_CSS: &str = r#"
 .ui-toast--danger { border-color: color-mix(in srgb, var(--ui-danger), transparent 62%); }
 .ui-toast--info { border-color: color-mix(in srgb, var(--ui-info), transparent 62%); }
 
+.ui-alert {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: var(--ui-space-3);
+    border: 1px solid var(--ui-border);
+    border-left-width: 4px;
+    border-radius: var(--ui-radius-md);
+    background: var(--ui-surface);
+    padding: var(--ui-space-3) var(--ui-space-4);
+}
+
+.ui-alert--neutral { border-left-color: var(--ui-border); }
+.ui-alert--success { border-left-color: var(--ui-success); background: color-mix(in srgb, var(--ui-success), transparent 90%); }
+.ui-alert--warning { border-left-color: var(--ui-warning); background: color-mix(in srgb, var(--ui-warning), transparent 90%); }
+.ui-alert--danger  { border-left-color: var(--ui-danger);  background: color-mix(in srgb, var(--ui-danger),  transparent 90%); }
+.ui-alert--info    { border-left-color: var(--ui-info);    background: color-mix(in srgb, var(--ui-info),    transparent 92%); }
+
+.ui-alert-content {
+    display: grid;
+    gap: var(--ui-space-1);
+    flex: 1;
+}
+
+.ui-alert-title {
+    color: var(--ui-fg);
+    font-weight: 700;
+}
+
+.ui-alert-description {
+    margin: 0;
+    color: var(--ui-muted-fg);
+    line-height: 1.45;
+}
+
+.ui-alert-dismiss {
+    align-self: flex-start;
+}
+
+.ui-progress {
+    display: grid;
+    gap: var(--ui-space-1);
+    width: 100%;
+}
+
+.ui-progress-label {
+    color: var(--ui-fg);
+    font-weight: 600;
+    font-size: 13px;
+}
+
+.ui-progress-track {
+    position: relative;
+    height: 8px;
+    border-radius: 999px;
+    background: var(--ui-surface-muted);
+    overflow: hidden;
+}
+
+.ui-progress-fill {
+    height: 100%;
+    border-radius: inherit;
+    background: var(--ui-accent);
+    transition: width 200ms ease-out;
+}
+
+.ui-progress--indeterminate .ui-progress-fill {
+    width: 33%;
+    animation: ui-progress-slide 1200ms ease-in-out infinite;
+}
+
+.ui-progress-description {
+    margin: 0;
+    color: var(--ui-muted-fg);
+    font-size: 12px;
+}
+
+@keyframes ui-progress-slide {
+    0%   { transform: translateX(-100%); }
+    100% { transform: translateX(300%); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .ui-progress--indeterminate .ui-progress-fill {
+        animation: none;
+        width: 100%;
+        opacity: 0.4;
+    }
+}
+
+[data-ui-motion="reduced"] .ui-progress--indeterminate .ui-progress-fill {
+    animation: none;
+    width: 100%;
+    opacity: 0.4;
+}
+
+.ui-skeleton {
+    background: var(--ui-surface-muted);
+    background-image: linear-gradient(
+        90deg,
+        var(--ui-surface-muted) 0%,
+        color-mix(in srgb, var(--ui-surface-muted), transparent 30%) 50%,
+        var(--ui-surface-muted) 100%
+    );
+    background-size: 200% 100%;
+    animation: ui-skeleton-shimmer 1400ms ease-in-out infinite;
+}
+
+@keyframes ui-skeleton-shimmer {
+    0%   { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .ui-skeleton { animation: none; }
+}
+
+[data-ui-motion="reduced"] .ui-skeleton { animation: none; }
+
 .ui-command-menu {
     display: grid;
     gap: var(--ui-space-3);

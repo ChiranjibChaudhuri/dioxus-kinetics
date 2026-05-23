@@ -35,7 +35,9 @@ pub use buttons::{IconButton, IconButtonSize, IconButtonTone};
 pub use capture::CaptureStage;
 pub use composition::{FrameClip, FrameLayer, FrameStage};
 pub use display::{EmptyState as BlankState, MetricCard as MetricReadout};
-pub use display::{EmptyState, MetricCard, MetricTone};
+pub use display::{
+    Alert, AlertTone, EmptyState, MetricCard, MetricTone, Progress, Skeleton,
+};
 pub use forms::{Checkbox as ChoiceMark, Switch as StateSwitch, TextField as TextEntry};
 pub use forms::{Checkbox, Switch, TextField, TextFieldType};
 pub use kinetics::{

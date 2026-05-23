@@ -52,6 +52,144 @@ pub fn MetricCard(
     }
 }
 
+/// Tone of an `Alert` banner, mapped to a CSS modifier class. Danger and
+/// Warning tones render as `role="alert"` (assertive announcement);
+/// Neutral / Success / Info render as `role="status"` (polite live region).
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
+pub enum AlertTone {
+    #[default]
+    Neutral,
+    Success,
+    Warning,
+    Danger,
+    Info,
+}
+
+impl AlertTone {
+    pub const fn class_name(self) -> &'static str {
+        match self {
+            Self::Neutral => "ui-alert ui-alert--neutral",
+            Self::Success => "ui-alert ui-alert--success",
+            Self::Warning => "ui-alert ui-alert--warning",
+            Self::Danger => "ui-alert ui-alert--danger",
+            Self::Info => "ui-alert ui-alert--info",
+        }
+    }
+
+    pub const fn role(self) -> &'static str {
+        match self {
+            Self::Danger | Self::Warning => "alert",
+            _ => "status",
+        }
+    }
+}
+
+/// A page-level message banner. Unlike `Toast`, Alert is non-dismissible
+/// by default and persists in the layout (no auto-timeout). Set
+/// `dismissible: true` and provide `on_dismiss` to opt into a close
+/// button.
+#[component]
+pub fn Alert(
+    title: String,
+    #[props(default)] tone: AlertTone,
+    #[props(default)] description: String,
+    #[props(default)] dismissible: bool,
+    #[props(default = "Dismiss".to_string())] dismiss_label: String,
+    on_dismiss: Option<EventHandler<()>>,
+) -> Element {
+    rsx! {
+        div { class: "{tone.class_name()}", role: "{tone.role()}",
+            div { class: "ui-alert-content",
+                strong { class: "ui-alert-title", "{title}" }
+                if !description.is_empty() {
+                    p { class: "ui-alert-description", "{description}" }
+                }
+            }
+            if dismissible {
+                button {
+                    class: "ui-button ui-button--ghost ui-alert-dismiss",
+                    r#type: "button",
+                    "aria-label": "{dismiss_label}",
+                    onclick: move |_evt| {
+                        if let Some(handler) = &on_dismiss {
+                            handler.call(());
+                        }
+                    },
+                    "{dismiss_label}"
+                }
+            }
+        }
+    }
+}
+
+/// A determinate progress bar with an optional `value` in [0.0, 1.0].
+/// When `value` is `None`, renders an indeterminate spinner-style bar
+/// (CSS-animated; respects `prefers-reduced-motion` via the host stylesheet).
+#[component]
+pub fn Progress(
+    #[props(default)] label: String,
+    #[props(default)] value: Option<f32>,
+    #[props(default)] description: String,
+) -> Element {
+    let pct = value.map(|v| (v.clamp(0.0, 1.0) * 100.0).round() as u32);
+    let (class, value_attr, value_text) = match pct {
+        Some(p) => (
+            "ui-progress ui-progress--determinate",
+            format!("{p}"),
+            format!("{p}%"),
+        ),
+        None => (
+            "ui-progress ui-progress--indeterminate",
+            String::new(),
+            "Loading…".to_string(),
+        ),
+    };
+
+    rsx! {
+        div { class: "{class}",
+            if !label.is_empty() {
+                div { class: "ui-progress-label", "{label}" }
+            }
+            div {
+                class: "ui-progress-track",
+                role: "progressbar",
+                "aria-valuemin": "0",
+                "aria-valuemax": "100",
+                "aria-valuenow": "{value_attr}",
+                "aria-valuetext": "{value_text}",
+                "aria-label": if label.is_empty() { "Progress" } else { "" },
+                div {
+                    class: "ui-progress-fill",
+                    style: if let Some(p) = pct { format!("width:{p}%") } else { String::new() },
+                }
+            }
+            if !description.is_empty() {
+                p { class: "ui-progress-description", "{description}" }
+            }
+        }
+    }
+}
+
+/// A loading placeholder rendered as a neutral pulsing block. Pair with
+/// `Progress` for explicit progress indicators; `Skeleton` is for content
+/// shape preservation while data loads.
+#[component]
+pub fn Skeleton(
+    #[props(default = "1em".to_string())] height: String,
+    #[props(default = "100%".to_string())] width: String,
+    #[props(default = "4px".to_string())] radius: String,
+) -> Element {
+    let style =
+        format!("height:{height};width:{width};border-radius:{radius};");
+    rsx! {
+        div {
+            class: "ui-skeleton",
+            style: "{style}",
+            "aria-hidden": "true",
+        }
+    }
+}
+
 #[component]
 pub fn EmptyState(
     title: String,

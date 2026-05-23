@@ -6,15 +6,15 @@ pub mod prelude {
         A11yContract, ComponentContract, ComponentId, ComponentRole, FocusPolicy, TargetSize,
     };
     pub use ui_dioxus::{
-        ActionBar, ActionControl, BlankState, Button, ButtonVariant, CaptureStage, Checkbox,
-        ChoiceMark, CommandFinder, CommandGroup, CommandItem, CommandMenu, ContentPlane,
-        ContextHint, Cue, Dialog, DialogAction, DialogActionTone, EmptyState, FrameClip,
-        FrameLayer, FrameStage, GlassLayer, GlassSurface, IconButton, IconButtonSize,
+        ActionBar, ActionControl, Alert, AlertTone, BlankState, Button, ButtonVariant,
+        CaptureStage, Checkbox, ChoiceMark, CommandFinder, CommandGroup, CommandItem, CommandMenu,
+        ContentPlane, ContextHint, Cue, Dialog, DialogAction, DialogActionTone, EmptyState,
+        FrameClip, FrameLayer, FrameStage, GlassLayer, GlassSurface, IconButton, IconButtonSize,
         IconButtonTone, KineticBox, KineticText, MetricCard, MetricReadout, MetricTone, ModalLayer,
-        NavigationRail, NoticeStack, Presence, PresenceCue, PresenceGate, Sequence,
-        SequenceContext, SharedElement, SharedLayout, Sidebar, SidebarItem, SidebarSection, Stack,
-        StateSwitch, Surface, Switch, TabItem, TabPanel, Tabs, TextEntry, TextField, TimelineScope,
-        Toast, ToastTone, Toolbar, Tooltip, ViewSwitcher,
+        NavigationRail, NoticeStack, Presence, PresenceCue, PresenceGate, Progress, Sequence,
+        SequenceContext, SharedElement, SharedLayout, Sidebar, SidebarItem, SidebarSection,
+        Skeleton, Stack, StateSwitch, Surface, Switch, TabItem, TabPanel, Tabs, TextEntry,
+        TextField, TimelineScope, Toast, ToastTone, Toolbar, Tooltip, ViewSwitcher,
     };
     pub use ui_glass::{
         resolve_glass, GlassDensity, GlassLevel, GlassPolicy, GlassRecipe, GlassRequest, GlassTone,

@@ -1,0 +1,25 @@
+[package]
+name = "ui-glass-engine"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[dependencies]
+ui-glass.workspace = true
+ui-tokens.workspace = true
+wgpu.workspace = true
+bytemuck.workspace = true
+
+[target.'cfg(not(target_arch = "wasm32"))'.dependencies]
+wgpu = { workspace = true, features = ["vulkan", "metal", "dx12", "gles", "wgsl"] }
+
+[target.'cfg(target_arch = "wasm32")'.dependencies]
+wgpu = { workspace = true, features = ["webgpu", "webgl", "wgsl"] }
+
+[dev-dependencies]
+pollster.workspace = true
+image.workspace = true
+
+[lib]
+path = "src/lib.rs"

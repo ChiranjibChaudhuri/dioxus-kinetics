@@ -17,6 +17,7 @@ members = [
     "crates/ui-runtime",
     "crates/ui-icons",
     "examples/component-gallery",
+    "crates/ui-glass-engine",
 ]
 
 [workspace.package]
@@ -43,4 +44,9 @@ ui-styles = { path = "crates/ui-styles" }
 kinetics = { path = "crates/kinetics" }
 ui-runtime = { path = "crates/ui-runtime" }
 ui-icons = { path = "crates/ui-icons" }
+ui-glass-engine = { path = "crates/ui-glass-engine" }
 bitflags = "2.6"
+wgpu = { version = "26", default-features = false, features = ["wgsl"] }
+bytemuck = { version = "1.16", features = ["derive"] }
+pollster = "0.4"
+image = { version = "0.25", default-features = false, features = ["png"] }

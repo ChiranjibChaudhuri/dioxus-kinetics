@@ -56,6 +56,20 @@ pub fn use_animation_value_from(
             return;
         }
 
+        #[cfg(target_arch = "wasm32")]
+        if crate::waapi::is_supported() {
+            // WAAPI owns in-flight interpolation; the Rust-side signal
+            // jumps to the target value synchronously. The visible motion
+            // is driven by the consumer's `UseAnimationTarget::play_on(element)`
+            // call from its `onmounted` handler. We do NOT spawn a RAF
+            // loop here; doing so would race against the compositor's
+            // keyframe interpolation and produce the pointer-events
+            // flakiness Spec 2's audit surfaced on Dialog/Toast/Tooltip.
+            *context.handle.borrow_mut() = None;
+            value.set(current_target);
+            return;
+        }
+
         let start = value();
         *context.elapsed_ms.borrow_mut() = 0.0;
         *context.start_value.borrow_mut() = start;

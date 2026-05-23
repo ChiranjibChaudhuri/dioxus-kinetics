@@ -158,16 +158,10 @@ fn disperse_changes_output() {
 
 #[test]
 fn specular_changes_output() {
-    // The shader uses pow(n_dot_l, 16.0) which makes the highlight narrow.
-    // Using a large edge_falloff (> half-width of the glass region) ensures the
-    // smoothstep never saturates inside the rect, so the highlight gradient
-    // covers the whole interior rather than being restricted to a 1-pixel rim.
-    // High intensity (4.0) ensures even the pow-attenuated pixels register above
-    // the abs_diff > 1 threshold.
     let off = render_with_checkerboard(W, H, base());
     let on = render_with_checkerboard(
         W, H,
-        base().specular(0.0_f32, 4.0).edge_falloff(60.0),
+        base().specular(45.0_f32.to_radians(), 0.8).edge_falloff(20.0),
     );
     let frac = diff_count(&off, &on) as f64 / off.len() as f64;
     assert!(frac > MIN_AFFECTED_FRACTION, "SPECULAR changed only {:.2}% of pixels", frac * 100.0);

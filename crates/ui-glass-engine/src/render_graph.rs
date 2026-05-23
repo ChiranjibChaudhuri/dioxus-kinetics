@@ -8,7 +8,7 @@ use crate::pipeline::{
     blur_bind_group_layout, build_blur_pipeline, build_compose_pipeline, compose_bind_group_layout,
     BlurDirection, ComposeKey,
 };
-use crate::uniforms::GlassUniforms;
+use crate::uniforms::{BlurUniforms, GlassUniforms};
 
 /// One end-to-end pass: input bg texture → output RGBA8 texture, with the
 /// material's blur radius applied via two separable passes and the composite
@@ -53,18 +53,7 @@ pub fn render_glass_to_texture(
     });
 
     // Blur uniform buffer
-    #[repr(C)]
-    #[derive(Clone, Copy, bytemuck::Pod, bytemuck::Zeroable)]
-    struct BlurUniforms {
-        canvas_size: [f32; 2],
-        blur_radius_px: f32,
-        _pad: f32,
-    }
-    let blur_u = BlurUniforms {
-        canvas_size: uniforms.canvas_size,
-        blur_radius_px: uniforms.blur_radius,
-        _pad: 0.0,
-    };
+    let blur_u = BlurUniforms::new(uniforms.canvas_size, uniforms.blur_radius);
     let blur_buf = device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
         label: Some("blur-uniforms"),
         contents: bytemuck::bytes_of(&blur_u),

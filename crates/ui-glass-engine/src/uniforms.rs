@@ -106,3 +106,17 @@ impl GlassUniforms {
         }
     }
 }
+
+#[repr(C)]
+#[derive(Clone, Copy, Debug, Pod, Zeroable)]
+pub struct BlurUniforms {
+    pub canvas_size: [f32; 2],
+    pub blur_radius_px: f32,
+    pub _pad: f32,
+}
+
+impl BlurUniforms {
+    pub fn new(canvas_size: [f32; 2], blur_radius_px: f32) -> Self {
+        Self { canvas_size, blur_radius_px, _pad: 0.0 }
+    }
+}

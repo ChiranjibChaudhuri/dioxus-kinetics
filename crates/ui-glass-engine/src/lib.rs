@@ -15,5 +15,5 @@ pub mod uniforms;
 pub mod headless;
 
 pub use compositor::{Compositor, GlassRegion};
-pub use uniforms::GlassUniforms;
+pub use uniforms::{BlurUniforms, GlassUniforms};
 pub use render_graph::render_glass_to_texture;

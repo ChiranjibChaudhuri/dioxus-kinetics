@@ -1,4 +1,5 @@
 use dioxus::prelude::*;
+use ui_runtime::ReducedMotion;
 use ui_styles::library_css;
 
 use crate::docs::{categories, component_docs, ComponentCategory, ComponentDoc, ComponentStatus};
@@ -24,6 +25,9 @@ pub fn App() -> Element {
     let density_attr = prefs.density.read().attr_value();
     let motion_attr = prefs.motion.read().attr_value();
     let glass_attr = prefs.glass.read().attr_value();
+
+    let reduced = matches!(*prefs.motion.read(), crate::controls::MotionPref::Reduced);
+    use_context_provider(|| ReducedMotion(reduced));
 
     let shared_css = library_css();
     let active_categories = populated_categories();

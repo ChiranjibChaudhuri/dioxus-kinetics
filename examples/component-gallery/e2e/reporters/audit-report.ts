@@ -20,7 +20,7 @@ const __dirname = dirname(__filename);
 type Layer = "smoke" | "motion" | "visual";
 type Variant = "default" | "dark" | "reduced-motion" | "solid-glass";
 
-type RowKey = `${string}::${Layer}::${Variant}`;
+type RowKey = `${string}::${Layer}::${Variant}::${string}`;
 
 type Outcome = "pass" | "fail" | "flaky" | "skipped";
 
@@ -34,8 +34,8 @@ type Run = {
   rows: Map<RowKey, Cell>;
 };
 
-function rowKey(name: string, layer: Layer, variant: Variant): RowKey {
-  return `${name}::${layer}::${variant}` as RowKey;
+function rowKey(name: string, layer: Layer, variant: Variant, testTitle: string): RowKey {
+  return `${name}::${layer}::${variant}::${testTitle}` as RowKey;
 }
 
 function classifyLayer(testFile: string): Layer {
@@ -45,8 +45,11 @@ function classifyLayer(testFile: string): Layer {
 }
 
 function classifyVariant(title: string): Variant {
-  const m = title.match(/@(default|dark|reduced-motion|solid-glass)/);
-  if (m) return m[1] as Variant;
+  const tagged = title.match(/@(default|dark|reduced-motion|solid-glass)/);
+  if (tagged) return tagged[1] as Variant;
+  if (/reduced motion/i.test(title)) return "reduced-motion";
+  if (/solid[- ]glass/i.test(title)) return "solid-glass";
+  if (/dark/i.test(title)) return "dark";
   return "default";
 }
 
@@ -87,10 +90,12 @@ export function renderTable(
       if (!entry.layers[layer]) continue;
       let worst: Outcome | undefined;
       for (const variant of ["default", "dark", "reduced-motion", "solid-glass"] as Variant[]) {
-        const cell = rows.get(rowKey(entry.name, layer, variant));
-        if (!cell) continue;
-        if (cell.notes.length > 0) notes.push(`${layer}@${variant}: ${cell.notes.join("; ")}`);
-        worst = worseOutcome(worst, cell.outcome);
+        const prefix = `${entry.name}::${layer}::${variant}::`;
+        for (const [key, cell] of rows) {
+          if (!key.startsWith(prefix)) continue;
+          if (cell.notes.length > 0) notes.push(`${layer}@${variant}: ${cell.notes.join("; ")}`);
+          worst = worseOutcome(worst, cell.outcome);
+        }
       }
       cells[layer] = outcomeLabel(worst);
     }
@@ -133,8 +138,9 @@ class AuditReportReporter implements Reporter {
     const component = classifyComponent(test);
     if (!component) return;
     const layer = classifyLayer(test.location?.file ?? "");
-    const variant = classifyVariant(test.titlePath().join(" "));
-    const key = rowKey(component, layer, variant);
+    const titlePath = test.titlePath().join(" ");
+    const variant = classifyVariant(titlePath);
+    const key = rowKey(component, layer, variant, test.title);
     const outcome = outcomeOf(result);
     const notes: string[] = [];
     if (outcome === "fail" && result.errors[0]?.message) {

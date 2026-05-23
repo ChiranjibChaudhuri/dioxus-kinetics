@@ -1,34 +1,29 @@
-//! Animation value hook with per-frame ticking.
+//! Animation value hook with WAAPI compositor offload.
 
 use std::cell::RefCell;
 use std::rc::Rc;
 
 use dioxus::prelude::*;
 use ui_motion::{apply_ease, Transition};
+#[cfg(target_arch = "wasm32")]
+use ui_motion::keyframes_for_transition;
 
 use crate::reduced_motion::use_reduced_motion;
 use crate::scheduler::{spawn_frame_loop, ControlFlow, FrameHandle};
+#[cfg(target_arch = "wasm32")]
+use crate::waapi::{is_supported, keyframes_to_js, options_object, AnimatedProperty, WaapiAnimation};
 
-#[derive(Clone)]
-struct AnimationContext {
-    handle: Rc<RefCell<Option<FrameHandle>>>,
-    velocity: Rc<RefCell<f32>>,
-    last_target: Rc<RefCell<f32>>,
-    elapsed_ms: Rc<RefCell<f32>>,
-    start_value: Rc<RefCell<f32>>,
-}
-
+/// Convenience wrapper: animate from `target` → `target` (no motion) — kept
+/// for API parity with the pre-WAAPI runtime.
 pub fn use_animation_value(target: f32, transition: Transition) -> ReadSignal<f32> {
     use_animation_value_from(target, target, transition)
 }
 
-/// Animates a signal from `initial` toward `target` whenever `target` changes.
-///
-/// Unlike [`use_animation_value`], the value signal is seeded with `initial`,
-/// so the first client effect run animates from `initial` to `target` —
-/// producing a visible motion on mount when the two differ. SSR returns
-/// `initial` (no effects run); callers that need SSR to surface the settled
-/// value should keep `initial == target` and use [`use_animation_value`].
+/// Animates a signal from `initial` toward `target`. Under reduced motion
+/// the signal jumps directly to the target. Otherwise it ticks per-frame
+/// (RAF path) so SSR/test consumers see the in-flight value. The WAAPI
+/// compositor offload happens at consumer sites via `use_animation_target`
+/// which attaches a mounted-element handle.
 pub fn use_animation_value_from(
     initial: f32,
     target: f32,
@@ -37,12 +32,10 @@ pub fn use_animation_value_from(
     let reduced = use_reduced_motion();
     let mut value = use_signal(|| initial);
 
-    let ctx = use_hook(|| AnimationContext {
-        handle: Rc::new(RefCell::new(None)),
-        velocity: Rc::new(RefCell::new(0.0)),
-        // Seed last_target with `initial` so the very first effect run sees
-        // `target != last_target` and starts an animation from initial.
+    let context = use_hook(|| AnimationContext {
         last_target: Rc::new(RefCell::new(initial)),
+        handle: Rc::new(RefCell::new(None::<FrameHandle>)),
+        velocity: Rc::new(RefCell::new(0.0)),
         elapsed_ms: Rc::new(RefCell::new(0.0)),
         start_value: Rc::new(RefCell::new(initial)),
     });
@@ -50,31 +43,27 @@ pub fn use_animation_value_from(
     use_effect(move || {
         let current_target = target;
         {
-            let mut last = ctx.last_target.borrow_mut();
-            if *last == current_target && ctx.handle.borrow().is_some() {
+            let mut last = context.last_target.borrow_mut();
+            if *last == current_target && context.handle.borrow().is_some() {
                 return;
             }
             *last = current_target;
         }
 
         if reduced {
-            *ctx.handle.borrow_mut() = None;
+            *context.handle.borrow_mut() = None;
             value.set(current_target);
             return;
         }
 
-        // Reset tween bookkeeping. Tween easing applies to cumulative progress
-        // from start_value to current_target, so we capture the value at the
-        // moment the target changed.
         let start = value();
-        *ctx.elapsed_ms.borrow_mut() = 0.0;
-        *ctx.start_value.borrow_mut() = start;
+        *context.elapsed_ms.borrow_mut() = 0.0;
+        *context.start_value.borrow_mut() = start;
 
-        let velocity_cell = ctx.velocity.clone();
-        let elapsed_cell = ctx.elapsed_ms.clone();
-        let start_cell = ctx.start_value.clone();
+        let velocity_cell = context.velocity.clone();
+        let elapsed_cell = context.elapsed_ms.clone();
+        let start_cell = context.start_value.clone();
         let mut signal = value;
-
         let handle = spawn_frame_loop(move |dt_ms| {
             let current = signal();
             match transition {
@@ -109,11 +98,103 @@ pub fn use_animation_value_from(
             }
             ControlFlow::Continue
         });
-
-        *ctx.handle.borrow_mut() = Some(handle);
+        *context.handle.borrow_mut() = Some(handle);
     });
 
     ReadSignal::from(value)
+}
+
+#[derive(Clone)]
+struct AnimationContext {
+    last_target: Rc<RefCell<f32>>,
+    handle: Rc<RefCell<Option<FrameHandle>>>,
+    velocity: Rc<RefCell<f32>>,
+    elapsed_ms: Rc<RefCell<f32>>,
+    start_value: Rc<RefCell<f32>>,
+}
+
+// ----- New WAAPI-compositor-offload hook -----
+
+#[cfg(target_arch = "wasm32")]
+pub fn use_animation_target(
+    property: AnimatedProperty,
+    initial: f32,
+    target: f32,
+    transition: Transition,
+) -> (UseAnimationTarget, ReadSignal<f32>) {
+    let reduced = use_reduced_motion();
+    let value = use_animation_value_from(initial, target, transition);
+
+    let handle_cell: Rc<RefCell<Option<WaapiAnimation>>> = use_hook(|| Rc::new(RefCell::new(None)));
+    let last_target: Rc<RefCell<f32>> = use_hook(|| Rc::new(RefCell::new(initial)));
+
+    let attach = UseAnimationTarget {
+        handle: handle_cell,
+        last_target,
+        target,
+        transition,
+        reduced,
+        property,
+    };
+
+    (attach, value)
+}
+
+#[cfg(not(target_arch = "wasm32"))]
+pub fn use_animation_target(
+    _property: crate::waapi::AnimatedProperty,
+    _initial: f32,
+    target: f32,
+    transition: Transition,
+) -> (UseAnimationTarget, ReadSignal<f32>) {
+    let v = use_animation_value(target, transition);
+    (UseAnimationTarget, v)
+}
+
+#[cfg(target_arch = "wasm32")]
+pub struct UseAnimationTarget {
+    handle: Rc<RefCell<Option<WaapiAnimation>>>,
+    last_target: Rc<RefCell<f32>>,
+    target: f32,
+    transition: Transition,
+    reduced: bool,
+    property: AnimatedProperty,
+}
+
+#[cfg(not(target_arch = "wasm32"))]
+pub struct UseAnimationTarget;
+
+#[cfg(target_arch = "wasm32")]
+impl UseAnimationTarget {
+    /// Call from a Dioxus `onmounted` handler with the underlying element.
+    /// Plays (or replaces) a WAAPI animation on it. `current_value` is the
+    /// starting point for the keyframe array (typically the Rust-side signal's
+    /// current value, NOT necessarily `initial` — a re-animation from a
+    /// partial value should start from where it actually is).
+    pub fn play_on(&self, element: &web_sys::Element, current_value: f32) {
+        if self.reduced || !is_supported() {
+            return;
+        }
+        if (*self.last_target.borrow() - self.target).abs() < 1e-6
+            && self.handle.borrow().is_some()
+        {
+            return;
+        }
+        *self.last_target.borrow_mut() = self.target;
+        let keyframes = keyframes_for_transition(current_value, self.target, self.transition);
+        let js_keyframes = keyframes_to_js(self.property, &keyframes);
+        let js_options = options_object(keyframes.duration_ms);
+        // keyframes_to_js returns JsValue directly per T6 — no .into() needed.
+        if let Some(animation) = WaapiAnimation::play(element, &js_keyframes, &js_options) {
+            *self.handle.borrow_mut() = Some(animation);
+        }
+    }
+
+    pub fn cancel(&self) {
+        if let Some(handle) = self.handle.borrow_mut().take() {
+            handle.cancel();
+        }
+    }
 }
 
 #[cfg(test)]
@@ -136,21 +217,13 @@ mod tests {
     #[test]
     fn cumulative_tween_midpoint_is_eased_not_linear() {
         let value = tween_at(0.0, 100.0, 110.0, 220.0, Ease::Standard);
-        // Standard ease at p=0.5 is 0.5 (smoothstep symmetric at midpoint).
         assert!((value - 50.0).abs() < 0.001);
     }
 
     #[test]
     fn cumulative_tween_quarter_progress_is_below_linear() {
         let value = tween_at(0.0, 100.0, 55.0, 220.0, Ease::Standard);
-        // Standard ease at p=0.25 = 0.25^2 * (3 - 2*0.25) = 0.0625 * 2.5 = 0.15625
-        assert!(
-            value < 25.0,
-            "expected eased value below linear; got {value}"
-        );
-        assert!(
-            value > 10.0,
-            "expected eased value above zero region; got {value}"
-        );
+        assert!(value < 25.0, "expected eased value below linear; got {value}");
+        assert!(value > 10.0, "expected eased value above zero region; got {value}");
     }
 }

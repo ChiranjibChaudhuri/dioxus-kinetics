@@ -13,6 +13,7 @@ ui-glass.workspace = true
 ui-glass-dioxus.workspace = true
 ui-glass-engine.workspace = true
 ui-tokens.workspace = true
+ui-runtime.workspace = true
 
 [dev-dependencies]
 dioxus-ssr.workspace = true

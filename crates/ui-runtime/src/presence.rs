@@ -16,20 +16,17 @@ pub fn use_presence_animation(
     enter: Transition,
     exit: Transition,
 ) -> (ReadSignal<PresenceState>, ReadSignal<f32>) {
+    let reduced = crate::reduced_motion::use_reduced_motion();
+
     let mut state = use_signal(|| {
         if present {
-            PresenceState::Entering
+            if reduced { PresenceState::Visible } else { PresenceState::Entering }
         } else {
             PresenceState::Unmounted
         }
     });
 
     let active_transition = if present { enter } else { exit };
-    // Seed the value at the "from" side (0 for present, 1 for absent) so that
-    // mounting a Presence with present=true actually plays an enter animation,
-    // not just renders the settled state. On SSR, no effects run, so the
-    // visible state resolution below detects value≠target and leaves state
-    // as Entering, then the client side animates 0→1 after hydration.
     let (initial, target) = if present { (0.0, 1.0) } else { (1.0, 0.0) };
     let value = use_animation_value_from(initial, target, active_transition);
 
@@ -45,11 +42,12 @@ pub fn use_presence_animation(
         }
     });
 
-    // Synchronous SSR/reduced-motion resolution: if Entering and value
-    // is already at target (1.0), settle to Visible immediately.
     let snapshot = state();
     if snapshot == PresenceState::Entering && (value() - 1.0).abs() <= 0.001 {
         state.set(PresenceState::Visible);
+    }
+    if snapshot == PresenceState::Exiting && value().abs() <= 0.001 {
+        state.set(PresenceState::Unmounted);
     }
 
     (ReadSignal::from(state), value)

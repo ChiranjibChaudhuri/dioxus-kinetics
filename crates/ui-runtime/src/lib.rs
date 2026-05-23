@@ -23,10 +23,20 @@ mod measurement_native;
 #[cfg(target_arch = "wasm32")]
 mod measurement_web;
 
-pub use animation::{use_animation_value, use_animation_value_from};
+#[cfg(target_arch = "wasm32")]
+pub mod waapi;
+#[cfg(not(target_arch = "wasm32"))]
+#[path = "waapi_stub.rs"]
+pub mod waapi;
+
+pub use animation::{
+    use_animation_target, use_animation_value, use_animation_value_from, UseAnimationTarget,
+};
 pub use measurement::{use_element_computed_style, use_element_rect, MountedRectCallback};
 pub use presence::{use_presence_animation, use_presence_state};
-pub use reduced_motion::{use_reduced_motion, ReducedMotion};
+pub use reduced_motion::{
+    detect_reduced_motion_at_root, use_reduced_motion, ReducedMotion, ReducedMotionProvider,
+};
 pub use scheduler::{spawn_frame_loop, ControlFlow, FrameHandle};
 pub use shared::{
     now_ms, use_shared_element_registry, ElementSnapshot, SharedElementRegistry, SharedTransition,
@@ -34,3 +44,4 @@ pub use shared::{
 };
 pub use state::{advance_presence, PresenceInputs, PresenceState, PresenceTransition};
 pub use timeline::use_timeline_sample;
+pub use waapi::{is_supported as is_waapi_supported, AnimatedProperty, WaapiAnimation};

@@ -65,5 +65,10 @@ export async function mountGallery(
 
 async function selectRadio(page: Page, groupLabel: string, optionLabel: string) {
   const group = page.getByRole("radiogroup", { name: groupLabel });
-  await group.getByRole("radio", { name: optionLabel }).click();
+  const radio = group.getByRole("radio", { name: optionLabel });
+  // The gallery's toggle groups render `<button role="radio" onclick>` —
+  // NOT `<input type="radio" onchange>`. We dispatch a real click via
+  // .click({ force: true }) which bypasses Playwright's actionability
+  // checks (sibling tile prose can intercept the pointer in WebKit).
+  await radio.click({ force: true });
 }

@@ -260,3 +260,165 @@ fn finite_or_zero(value: f32) -> f32 {
         0.0
     }
 }
+
+// ---------------------------------------------------------------------------
+// Keyframe compilation for WAAPI consumption.
+//
+// A `Keyframes` value is a series of per-frame property maps that can be
+// handed to `Element.animate(...)` in the browser. Tweens are sampled at
+// 30fps × duration_ms so that smoothstep (the Standard ease) round-trips
+// exactly through WAAPI's linear interpolation. Springs are sampled at
+// 60fps × settling_duration_ms.
+// ---------------------------------------------------------------------------
+
+#[derive(Clone, Debug, PartialEq)]
+pub struct Keyframes {
+    pub frames: Vec<Keyframe>,
+    pub duration_ms: f32,
+}
+
+#[derive(Clone, Debug, PartialEq)]
+pub struct Keyframe {
+    /// Offset within [0.0, 1.0]; passed to WAAPI verbatim.
+    pub offset: f32,
+    /// Animated value at this offset (the caller decides which CSS
+    /// property it maps to — opacity, transform component, etc.).
+    pub value: f32,
+}
+
+const TWEEN_FPS: f32 = 30.0;
+const SPRING_FPS: f32 = 60.0;
+const SPRING_TOLERANCE: f32 = 0.005;
+
+/// Compile a transition between `from` and `to` into a `Keyframes` array
+/// suitable for `Element.animate(...)`. The number of frames depends on
+/// the transition: tweens use 30fps sampling, springs use 60fps sampling.
+pub fn keyframes_for_transition(from: f32, to: f32, transition: Transition) -> Keyframes {
+    match transition {
+        Transition::Tween { duration_ms, ease } => tween_keyframes(from, to, duration_ms, ease),
+        Transition::Spring(spring) => spring_keyframes(from, to, spring),
+    }
+}
+
+fn tween_keyframes(from: f32, to: f32, duration_ms: u32, ease: Ease) -> Keyframes {
+    let duration = duration_ms as f32;
+    if duration == 0.0 {
+        return Keyframes {
+            frames: vec![
+                Keyframe { offset: 0.0, value: to },
+                Keyframe { offset: 1.0, value: to },
+            ],
+            duration_ms: 0.0,
+        };
+    }
+    let count = ((duration * TWEEN_FPS / 1000.0).ceil() as usize).max(2);
+    let mut frames = Vec::with_capacity(count + 1);
+    for i in 0..=count {
+        let progress = i as f32 / count as f32;
+        let eased = apply_ease(progress, ease);
+        let value = from + (to - from) * eased;
+        frames.push(Keyframe { offset: progress, value });
+    }
+    Keyframes { frames, duration_ms: duration }
+}
+
+fn spring_keyframes(from: f32, to: f32, spring: Spring) -> Keyframes {
+    let settle = spring.settling_duration_ms(SPRING_TOLERANCE).clamp(50.0, 4_000.0);
+    let count = ((settle * SPRING_FPS / 1000.0).ceil() as usize).max(2);
+    let dt = 1.0 / SPRING_FPS;
+    let mut value = from;
+    let mut velocity = 0.0_f32;
+    let mut frames = Vec::with_capacity(count + 2);
+    frames.push(Keyframe { offset: 0.0, value: from });
+    for i in 1..=count {
+        let step = spring.step(value, to, velocity, dt);
+        value = step.value;
+        velocity = step.velocity;
+        frames.push(Keyframe {
+            offset: (i as f32) / (count as f32),
+            value,
+        });
+    }
+    if let Some(last) = frames.last_mut() {
+        last.value = to;
+    }
+    Keyframes { frames, duration_ms: settle }
+}
+
+#[cfg(test)]
+mod keyframe_tests {
+    use super::*;
+
+    #[test]
+    fn tween_first_frame_is_from() {
+        let kf = keyframes_for_transition(
+            0.0,
+            1.0,
+            Transition::Tween { duration_ms: 220, ease: Ease::Standard },
+        );
+        assert_eq!(kf.frames.first().unwrap().offset, 0.0);
+        assert!((kf.frames.first().unwrap().value - 0.0).abs() < 1e-4);
+    }
+
+    #[test]
+    fn tween_last_frame_is_to() {
+        let kf = keyframes_for_transition(
+            0.0,
+            1.0,
+            Transition::Tween { duration_ms: 220, ease: Ease::Standard },
+        );
+        assert_eq!(kf.frames.last().unwrap().offset, 1.0);
+        assert!((kf.frames.last().unwrap().value - 1.0).abs() < 1e-4);
+    }
+
+    #[test]
+    fn tween_midpoint_matches_apply_ease() {
+        let kf = keyframes_for_transition(
+            0.0,
+            100.0,
+            Transition::Tween { duration_ms: 220, ease: Ease::Standard },
+        );
+        let near_mid = kf
+            .frames
+            .iter()
+            .min_by(|a, b| (a.offset - 0.5).abs().partial_cmp(&(b.offset - 0.5).abs()).unwrap())
+            .unwrap();
+        let expected = 0.0 + (100.0 - 0.0) * apply_ease(near_mid.offset, Ease::Standard);
+        assert!((near_mid.value - expected).abs() < 1e-3);
+    }
+
+    #[test]
+    fn spring_first_frame_is_from() {
+        let kf = keyframes_for_transition(0.0, 1.0, Transition::Spring(Spring::snappy()));
+        assert_eq!(kf.frames.first().unwrap().offset, 0.0);
+        assert!((kf.frames.first().unwrap().value - 0.0).abs() < 1e-4);
+    }
+
+    #[test]
+    fn spring_last_frame_pins_to_target() {
+        let kf = keyframes_for_transition(0.0, 1.0, Transition::Spring(Spring::snappy()));
+        let last = kf.frames.last().unwrap();
+        assert_eq!(last.offset, 1.0);
+        assert!((last.value - 1.0).abs() < 1e-6);
+    }
+
+    #[test]
+    fn spring_duration_matches_settling() {
+        let spring = Spring::snappy();
+        let kf = keyframes_for_transition(0.0, 1.0, Transition::Spring(spring));
+        let expected = spring.settling_duration_ms(SPRING_TOLERANCE).clamp(50.0, 4_000.0);
+        assert!((kf.duration_ms - expected).abs() < 1e-3);
+    }
+
+    #[test]
+    fn zero_duration_tween_emits_two_frames_pinned_to_target() {
+        let kf = keyframes_for_transition(
+            0.0,
+            5.0,
+            Transition::Tween { duration_ms: 0, ease: Ease::Linear },
+        );
+        assert_eq!(kf.frames.len(), 2);
+        assert!((kf.frames[0].value - 5.0).abs() < 1e-6);
+        assert!((kf.frames[1].value - 5.0).abs() < 1e-6);
+    }
+}

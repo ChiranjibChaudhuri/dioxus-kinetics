@@ -22,6 +22,9 @@ ui-tokens.workspace = true
 [dev-dependencies]
 dioxus-ssr.workspace = true
 
+[target.'cfg(target_arch = "wasm32")'.dependencies]
+web-sys = { version = "0.3", features = ["Element"] }
+
 [features]
 default = ["liquid-glass"]
 liquid-glass = ["dep:ui-glass-dioxus", "dep:ui-glass-engine"]

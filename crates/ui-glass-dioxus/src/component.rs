@@ -105,6 +105,14 @@ fn handle_canvas_mounted(
     height: u32,
 ) {
     use crate::web::{canvas_from_mounted, resize_canvas_to_css_size};
+
+    // Idempotency guard: if a SurfaceState already exists for this component,
+    // don't re-spawn wgpu init + listeners + frame loop. Dioxus may re-fire
+    // onmounted on the same element in some rehydration/route-change paths.
+    if surface_state.read().is_some() {
+        return;
+    }
+
     let Some(canvas) = canvas_from_mounted(&evt) else { return; };
     let physical_size = resize_canvas_to_css_size(&canvas);
     let canvas_for_listeners = canvas.clone();
@@ -204,7 +212,7 @@ fn start_frame_loop(
         state.compositor.render(
             &bg_view,
             &output_view,
-            [state.physical_size.0 as f32, state.physical_size.1 as f32],
+            [width as f32, height as f32],
             &[region],
         );
 

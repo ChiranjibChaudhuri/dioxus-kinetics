@@ -126,5 +126,10 @@ fn fs_main(in: VsOut) -> @location(0) vec4<f32> {
         color = color + vec3<f32>(spec * (1.0 - edge_mask));
     }
 
+    if (FEAT_INNER_SHADOW) {
+        let inner = smoothstep(-max(u.inner_shadow_px, 0.5), 0.0, sdf);
+        color = color * (1.0 - inner * u.inner_shadow_alpha);
+    }
+
     return vec4<f32>(color, 1.0);
 }

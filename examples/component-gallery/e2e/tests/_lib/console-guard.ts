@@ -24,6 +24,9 @@ export function expectNoConsoleErrors(
     ...(opts?.allowlist ?? []),
   ];
 
+  // Warns are intentionally tolerated — the audit's smoke layer only catches
+  // hard errors (console.error + pageerror). Animation regressions emit no
+  // errors and are caught by the motion + visual layers instead.
   page.on("console", (msg) => {
     if (msg.type() !== "error") return;
     const text = msg.text();

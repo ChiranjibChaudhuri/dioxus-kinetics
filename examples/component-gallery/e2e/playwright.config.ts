@@ -34,7 +34,7 @@ const DEV_LOOP_URL = process.env.KINETICS_DEV_LOOP_URL ?? "http://localhost:9173
 export default defineConfig({
   testDir: "./tests",
   // Exclude the Vitest unit-test subtree — Playwright would crash on vitest imports.
-  testIgnore: ["**/_lib/**"],
+  testIgnore: ["**/_lib/__tests__/**"],
   fullyParallel: false,
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 1 : 0,

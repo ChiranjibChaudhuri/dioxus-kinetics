@@ -516,7 +516,10 @@ import { existsSync } from "node:fs";
 import { resolve } from "node:path";
 
 const PROJECT_ROOT = resolve(__dirname, "..");
-const DIST_DIR = resolve(PROJECT_ROOT, "dist");
+// NOTE: `dx build --release` outputs to <workspace-root>/target/dx/<package>/release/web/public/
+// regardless of Dioxus.toml `out_dir` (which is only the CLI label).
+const WORKSPACE_ROOT = resolve(PROJECT_ROOT, "..", "..");
+const DIST_DIR = resolve(WORKSPACE_ROOT, "target", "dx", "component-gallery", "release", "web", "public");
 const INDEX_HTML = resolve(DIST_DIR, "index.html");
 
 export default async function globalSetup() {
@@ -561,12 +564,17 @@ import { defineConfig, devices } from "@playwright/test";
 import { resolve } from "node:path";
 
 const PROJECT_ROOT = resolve(__dirname, "..");
-const DIST_DIR = resolve(PROJECT_ROOT, "dist");
+// NOTE: `dx build --release` outputs to <workspace-root>/target/dx/<package>/release/web/public/
+// regardless of Dioxus.toml `out_dir` (which is only the CLI label).
+const WORKSPACE_ROOT = resolve(PROJECT_ROOT, "..", "..");
+const DIST_DIR = resolve(WORKSPACE_ROOT, "target", "dx", "component-gallery", "release", "web", "public");
 const STATIC_PORT = 4173;
 const DEV_LOOP_URL = process.env.KINETICS_DEV_LOOP_URL ?? "http://localhost:9173";
 
 export default defineConfig({
   testDir: "./tests",
+  // Vitest unit tests live alongside _lib helpers; exclude them from Playwright.
+  testIgnore: ["**/_lib/__tests__/**"],
   fullyParallel: false,
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 1 : 0,

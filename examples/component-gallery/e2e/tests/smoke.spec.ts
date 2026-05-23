@@ -2,6 +2,7 @@ import { test, expect } from "@playwright/test";
 import { mountGallery, type Variant } from "./_lib/mount.js";
 import { expectNoConsoleErrors } from "./_lib/console-guard.js";
 import { COMPONENT_MANIFEST } from "./_lib/component-manifest.js";
+import { getMode } from "./_lib/test-mode.js";
 
 const VARIANTS: Variant[] = ["default", "dark", "reduced-motion", "solid-glass"];
 
@@ -9,7 +10,7 @@ for (const variant of VARIANTS) {
   test.describe(`smoke @${variant}`, () => {
     for (const entry of COMPONENT_MANIFEST) {
       test(`${entry.name} renders without console errors`, async ({ page }, testInfo) => {
-        const mode = (testInfo.project.metadata as { mode?: "static" | "dev-loop" }).mode ?? "static";
+        const mode = getMode(testInfo);
         const guard = expectNoConsoleErrors(page, { mode });
         await mountGallery(page, { variant });
 

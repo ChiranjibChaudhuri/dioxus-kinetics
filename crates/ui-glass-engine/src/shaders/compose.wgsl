@@ -117,5 +117,14 @@ fn fs_main(in: VsOut) -> @location(0) vec4<f32> {
     var color = apply_saturation(bg.rgb, u.saturation);
     color = mix(color, u.tint.rgb, u.tint.a);
 
+    // Virtual light specular along normal.
+    if (FEAT_SPECULAR) {
+        let n_dot_l = max(dot(normal, u.light_dir), 0.0);
+        let spec = pow(n_dot_l, 16.0) * u.light_intensity;
+        // Concentrate the highlight near the edge.
+        let edge_mask = smoothstep(0.0, max(u.edge_falloff, 0.5), -sdf);
+        color = color + vec3<f32>(spec * (1.0 - edge_mask));
+    }
+
     return vec4<f32>(color, 1.0);
 }

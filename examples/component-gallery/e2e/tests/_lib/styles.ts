@@ -6,17 +6,10 @@ export type StyleSnapshot = Partial<{
   presenceT: number;
 }>;
 
-/**
- * Read inline-style values from an element's `style="..."` attribute, NOT
- * computed style. The gallery's motion engine writes inline styles per frame,
- * and computed style would round-trip through the engine's stylesheet, which
- * defeats the assertion. Returns undefined for properties not present.
- */
-export async function readStyles(
-  locator: Locator,
+export function parseInlineStyles(
+  raw: string,
   props: Array<keyof StyleSnapshot>
-): Promise<StyleSnapshot> {
-  const raw = (await locator.getAttribute("style")) ?? "";
+): StyleSnapshot {
   const decls = new Map<string, string>();
   for (const part of raw.split(";")) {
     const idx = part.indexOf(":");
@@ -53,4 +46,12 @@ export async function readStyles(
     }
   }
   return out;
+}
+
+export async function readStyles(
+  locator: Locator,
+  props: Array<keyof StyleSnapshot>
+): Promise<StyleSnapshot> {
+  const raw = (await locator.getAttribute("style")) ?? "";
+  return parseInlineStyles(raw, props);
 }

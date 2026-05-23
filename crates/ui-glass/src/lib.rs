@@ -2,6 +2,25 @@
 
 use ui_tokens::{Color, Theme, TransparencyPreference};
 
+bitflags::bitflags! {
+    /// Per-trait toggles for the glass uber-shader. Each bit corresponds to a
+    /// WGSL `override` specialization constant in `compose.wgsl`. Pipelines are
+    /// cached keyed by the feature set, so a surface with only `BLUR | TINT_ADAPT`
+    /// runs a pipeline where every other branch is eliminated at compile time.
+    #[derive(Clone, Copy, Debug, Default, PartialEq, Eq, Hash)]
+    pub struct GlassFeatures: u32 {
+        const BLUR         = 1 << 0;
+        const REFRACT      = 1 << 1;
+        const DISPERSE     = 1 << 2;
+        const SPECULAR     = 1 << 3;
+        const INNER_SHADOW = 1 << 4;
+        const AMBIENT_MESH = 1 << 5;
+        const POINTER      = 1 << 6;
+        const SCROLL       = 1 << 7;
+        const TINT_ADAPT   = 1 << 8;
+    }
+}
+
 #[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
 pub enum GlassLevel {
     #[default]

@@ -43,3 +43,4 @@ ui-styles = { path = "crates/ui-styles" }
 kinetics = { path = "crates/kinetics" }
 ui-runtime = { path = "crates/ui-runtime" }
 ui-icons = { path = "crates/ui-icons" }
+bitflags = "2.6"

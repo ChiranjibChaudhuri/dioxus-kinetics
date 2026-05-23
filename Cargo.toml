@@ -18,6 +18,7 @@ members = [
     "crates/ui-icons",
     "examples/component-gallery",
     "crates/ui-glass-engine",
+    "crates/ui-glass-dioxus",
 ]
 
 [workspace.package]
@@ -45,6 +46,9 @@ kinetics = { path = "crates/kinetics" }
 ui-runtime = { path = "crates/ui-runtime" }
 ui-icons = { path = "crates/ui-icons" }
 ui-glass-engine = { path = "crates/ui-glass-engine" }
+ui-glass-dioxus = { path = "crates/ui-glass-dioxus" }
+gloo-events = "0.2"
+gloo-utils = "0.2"
 bitflags = "2.6"
 wgpu = { version = "26", default-features = false, features = ["wgsl"] }
 bytemuck = { version = "1.16", features = ["derive"] }

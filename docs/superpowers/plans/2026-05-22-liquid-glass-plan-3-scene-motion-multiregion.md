@@ -1996,3 +1996,17 @@ Plan 4 will:
 - Build `<LiquidSurface>` Dioxus component that mounts a `<canvas>`, initializes wgpu via web-sys, drives the compositor's `update_inputs` from Dioxus pointer events and ui-motion signals.
 - Coordinate canvas size + z-index with the DOM layout so the canvas sits behind foreground widgets with `pointer-events: none`.
 - Handle mount/unmount lifecycle and SSR fallback (component renders to a `<div>` placeholder on the server, hydrates the canvas on the client).
+
+---
+
+## Status
+
+Plan 3 complete. Engine is callable from production code with `BackgroundSource`
+per region, `BackgroundScene` per route, and `MotionInputs` driving pointer /
+scroll / time uniforms. Multi-region overlap composites correctly via cleared
+output target + LoadOp::Load on compose. SPECULAR exponent reduced from 16 to
+4 so highlights are visible without test workarounds.
+
+Next: Plan 4 — `<LiquidSurface>` Dioxus component, canvas mount, pointer event
+forwarding, per-route compositor lifecycle, and ui-motion subscription that
+drives `update_inputs` per rAF tick.

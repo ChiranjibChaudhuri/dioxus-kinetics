@@ -7,6 +7,7 @@
 //! pipeline cache, and minimal shader (blur + SDF + tint).
 
 pub mod background;
+pub mod capabilities;
 pub mod compositor;
 pub mod motion;
 pub mod noise;
@@ -17,6 +18,7 @@ pub mod uniforms;
 #[cfg(feature = "headless")]
 pub mod headless;
 
+pub use capabilities::{detect, Capabilities, Tier};
 pub use compositor::{Compositor, GlassRegion};
 pub use motion::MotionInputs;
 pub use uniforms::{BlurUniforms, GlassUniforms};

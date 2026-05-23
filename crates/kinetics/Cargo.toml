@@ -20,6 +20,7 @@ default = [
     "capture",
     "runtime",
     "icons",
+    "liquid-glass",
 ]
 web = ["dep:ui-dom"]
 desktop = ["dep:ui-dom"]
@@ -27,6 +28,7 @@ mobile = ["dep:ui-dom"]
 native = ["dep:ui-native"]
 tokens = []
 glass = []
+liquid-glass = ["ui-dioxus/liquid-glass"]
 motion = []
 layout-motion = []
 a11y = []

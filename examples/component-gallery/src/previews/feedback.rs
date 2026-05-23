@@ -165,11 +165,36 @@ pub fn empty_state_preview() -> Element {
 
 pub fn alert_preview() -> Element {
     let tones = [
-        (AlertTone::Neutral, "Neutral", "Cache warming up", "Some metrics may lag by a few minutes."),
-        (AlertTone::Success, "Success", "Export complete", "The CSV is ready to download."),
-        (AlertTone::Warning, "Warning", "Quota at 92%", "Plan auto-upgrades on Friday at midnight."),
-        (AlertTone::Danger, "Danger", "Sync failed", "Two reports are out of date; retry to refresh."),
-        (AlertTone::Info, "Info", "New feature available", "Try the redesigned billing dashboard."),
+        (
+            AlertTone::Neutral,
+            "Neutral",
+            "Cache warming up",
+            "Some metrics may lag by a few minutes.",
+        ),
+        (
+            AlertTone::Success,
+            "Success",
+            "Export complete",
+            "The CSV is ready to download.",
+        ),
+        (
+            AlertTone::Warning,
+            "Warning",
+            "Quota at 92%",
+            "Plan auto-upgrades on Friday at midnight.",
+        ),
+        (
+            AlertTone::Danger,
+            "Danger",
+            "Sync failed",
+            "Two reports are out of date; retry to refresh.",
+        ),
+        (
+            AlertTone::Info,
+            "Info",
+            "New feature available",
+            "Try the redesigned billing dashboard.",
+        ),
     ];
     rsx! {
         div { class: "gallery-variant-grid gallery-variant-grid--stack",

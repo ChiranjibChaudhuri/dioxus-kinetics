@@ -174,10 +174,7 @@ pub fn compose_bind_group_layout(device: &Arc<wgpu::Device>) -> wgpu::BindGroupL
     })
 }
 
-pub fn build_compose_pipeline(
-    device: &Arc<wgpu::Device>,
-    key: ComposeKey,
-) -> wgpu::RenderPipeline {
+pub fn build_compose_pipeline(device: &Arc<wgpu::Device>, key: ComposeKey) -> wgpu::RenderPipeline {
     use ui_glass::GlassFeatures as F;
     let module = device.create_shader_module(wgpu::ShaderModuleDescriptor {
         label: Some("compose.wgsl"),
@@ -193,14 +190,43 @@ pub fn build_compose_pipeline(
 
     let f = key.features;
     let constants: &[(&str, f64)] = &[
-        ("FEAT_REFRACT",      if f.contains(F::REFRACT)      { 1.0 } else { 0.0 }),
-        ("FEAT_DISPERSE",     if f.contains(F::DISPERSE)     { 1.0 } else { 0.0 }),
-        ("FEAT_SPECULAR",     if f.contains(F::SPECULAR)     { 1.0 } else { 0.0 }),
-        ("FEAT_INNER_SHADOW", if f.contains(F::INNER_SHADOW) { 1.0 } else { 0.0 }),
-        ("FEAT_AMBIENT_MESH", if f.contains(F::AMBIENT_MESH) { 1.0 } else { 0.0 }),
-        ("FEAT_POINTER",      if f.contains(F::POINTER)      { 1.0 } else { 0.0 }),
-        ("FEAT_SCROLL",       if f.contains(F::SCROLL)       { 1.0 } else { 0.0 }),
-        ("FEAT_TINT_ADAPT",   if f.contains(F::TINT_ADAPT)   { 1.0 } else { 0.0 }),
+        (
+            "FEAT_REFRACT",
+            if f.contains(F::REFRACT) { 1.0 } else { 0.0 },
+        ),
+        (
+            "FEAT_DISPERSE",
+            if f.contains(F::DISPERSE) { 1.0 } else { 0.0 },
+        ),
+        (
+            "FEAT_SPECULAR",
+            if f.contains(F::SPECULAR) { 1.0 } else { 0.0 },
+        ),
+        (
+            "FEAT_INNER_SHADOW",
+            if f.contains(F::INNER_SHADOW) {
+                1.0
+            } else {
+                0.0
+            },
+        ),
+        (
+            "FEAT_AMBIENT_MESH",
+            if f.contains(F::AMBIENT_MESH) {
+                1.0
+            } else {
+                0.0
+            },
+        ),
+        (
+            "FEAT_POINTER",
+            if f.contains(F::POINTER) { 1.0 } else { 0.0 },
+        ),
+        ("FEAT_SCROLL", if f.contains(F::SCROLL) { 1.0 } else { 0.0 }),
+        (
+            "FEAT_TINT_ADAPT",
+            if f.contains(F::TINT_ADAPT) { 1.0 } else { 0.0 },
+        ),
     ];
 
     device.create_render_pipeline(&wgpu::RenderPipelineDescriptor {
@@ -318,11 +344,14 @@ pub fn build_mipmap_pipeline(device: &Arc<wgpu::Device>) -> wgpu::RenderPipeline
         label: Some("mipmap-pipeline"),
         layout: Some(&layout),
         vertex: wgpu::VertexState {
-            module: &module, entry_point: Some("vs_main"),
-            buffers: &[], compilation_options: Default::default(),
+            module: &module,
+            entry_point: Some("vs_main"),
+            buffers: &[],
+            compilation_options: Default::default(),
         },
         fragment: Some(wgpu::FragmentState {
-            module: &module, entry_point: Some("fs_main"),
+            module: &module,
+            entry_point: Some("fs_main"),
             targets: &[Some(wgpu::ColorTargetState {
                 format: wgpu::TextureFormat::Rgba8UnormSrgb,
                 blend: Some(wgpu::BlendState::REPLACE),

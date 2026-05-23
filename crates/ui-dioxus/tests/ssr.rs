@@ -1,7 +1,7 @@
 use dioxus::prelude::*;
-use ui_dioxus::{Button, ButtonVariant, Surface};
 #[cfg(not(feature = "liquid-glass"))]
 use ui_dioxus::GlassSurface;
+use ui_dioxus::{Button, ButtonVariant, Surface};
 #[cfg(not(feature = "liquid-glass"))]
 use ui_glass::{GlassLevel, GlassTone};
 

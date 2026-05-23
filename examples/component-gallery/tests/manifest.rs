@@ -5,9 +5,7 @@
 
 use component_gallery::{component_docs, ComponentStatus};
 
-const MANIFEST_TS: &str = include_str!(
-    "../e2e/tests/_lib/component-manifest.ts"
-);
+const MANIFEST_TS: &str = include_str!("../e2e/tests/_lib/component-manifest.ts");
 
 fn ts_manifest_names() -> Vec<String> {
     let mut names = Vec::new();
@@ -18,7 +16,9 @@ fn ts_manifest_names() -> Vec<String> {
         if !trimmed.starts_with("{ name:") {
             continue;
         }
-        let Some(start) = trimmed.find("\"") else { continue };
+        let Some(start) = trimmed.find("\"") else {
+            continue;
+        };
         let rest = &trimmed[start + 1..];
         let Some(end) = rest.find("\"") else { continue };
         names.push(rest[..end].to_string());
@@ -48,7 +48,10 @@ fn ts_manifest_includes_every_ready_component() {
         raw_entry_marker_count
     );
 
-    for doc in component_docs().iter().filter(|d| d.status == ComponentStatus::Ready) {
+    for doc in component_docs()
+        .iter()
+        .filter(|d| d.status == ComponentStatus::Ready)
+    {
         assert!(
             ts_names.iter().any(|n| n == doc.name),
             "Ready component {:?} is missing from e2e/tests/_lib/component-manifest.ts. \

@@ -1,7 +1,7 @@
 #![cfg(target_arch = "wasm32")]
 
-use wasm_bindgen_test::*;
 use ui_runtime::detect_reduced_motion_at_root;
+use wasm_bindgen_test::*;
 
 wasm_bindgen_test_configure!(run_in_browser);
 
@@ -29,7 +29,11 @@ fn returns_false_when_no_signal_present() {
 
 fn media_query_says_reduce() -> bool {
     web_sys::window()
-        .and_then(|w| w.match_media("(prefers-reduced-motion: reduce)").ok().flatten())
+        .and_then(|w| {
+            w.match_media("(prefers-reduced-motion: reduce)")
+                .ok()
+                .flatten()
+        })
         .map(|m| m.matches())
         .unwrap_or(false)
 }

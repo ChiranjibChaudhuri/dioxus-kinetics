@@ -24,13 +24,20 @@ pub fn render_glass_to_texture(
     mipped_bg_view: &wgpu::TextureView,
     mipped_bg_sampler: &wgpu::Sampler,
 ) {
-    let (w, h) = (uniforms.canvas_size[0] as u32, uniforms.canvas_size[1] as u32);
+    let (w, h) = (
+        uniforms.canvas_size[0] as u32,
+        uniforms.canvas_size[1] as u32,
+    );
 
     // Two scratch textures for separable blur.
     let make_scratch = |label: &str| {
         device.create_texture(&wgpu::TextureDescriptor {
             label: Some(label),
-            size: wgpu::Extent3d { width: w, height: h, depth_or_array_layers: 1 },
+            size: wgpu::Extent3d {
+                width: w,
+                height: h,
+                depth_or_array_layers: 1,
+            },
             mip_level_count: 1,
             sample_count: 1,
             dimension: wgpu::TextureDimension::D2,
@@ -67,18 +74,36 @@ pub fn render_glass_to_texture(
         label: Some("blur-h-bg"),
         layout: &blur_bgl,
         entries: &[
-            wgpu::BindGroupEntry { binding: 0, resource: blur_buf.as_entire_binding() },
-            wgpu::BindGroupEntry { binding: 1, resource: wgpu::BindingResource::TextureView(bg_view) },
-            wgpu::BindGroupEntry { binding: 2, resource: wgpu::BindingResource::Sampler(&sampler) },
+            wgpu::BindGroupEntry {
+                binding: 0,
+                resource: blur_buf.as_entire_binding(),
+            },
+            wgpu::BindGroupEntry {
+                binding: 1,
+                resource: wgpu::BindingResource::TextureView(bg_view),
+            },
+            wgpu::BindGroupEntry {
+                binding: 2,
+                resource: wgpu::BindingResource::Sampler(&sampler),
+            },
         ],
     });
     let bg_v = device.create_bind_group(&wgpu::BindGroupDescriptor {
         label: Some("blur-v-bg"),
         layout: &blur_bgl,
         entries: &[
-            wgpu::BindGroupEntry { binding: 0, resource: blur_buf.as_entire_binding() },
-            wgpu::BindGroupEntry { binding: 1, resource: wgpu::BindingResource::TextureView(&scratch_h_view) },
-            wgpu::BindGroupEntry { binding: 2, resource: wgpu::BindingResource::Sampler(&sampler) },
+            wgpu::BindGroupEntry {
+                binding: 0,
+                resource: blur_buf.as_entire_binding(),
+            },
+            wgpu::BindGroupEntry {
+                binding: 1,
+                resource: wgpu::BindingResource::TextureView(&scratch_h_view),
+            },
+            wgpu::BindGroupEntry {
+                binding: 2,
+                resource: wgpu::BindingResource::Sampler(&sampler),
+            },
         ],
     });
 
@@ -93,13 +118,34 @@ pub fn render_glass_to_texture(
         label: Some("compose-bg"),
         layout: &compose_bgl,
         entries: &[
-            wgpu::BindGroupEntry { binding: 0, resource: compose_buf.as_entire_binding() },
-            wgpu::BindGroupEntry { binding: 1, resource: wgpu::BindingResource::TextureView(&scratch_v_view) },
-            wgpu::BindGroupEntry { binding: 2, resource: wgpu::BindingResource::Sampler(&sampler) },
-            wgpu::BindGroupEntry { binding: 3, resource: wgpu::BindingResource::TextureView(noise_view) },
-            wgpu::BindGroupEntry { binding: 4, resource: wgpu::BindingResource::Sampler(noise_sampler) },
-            wgpu::BindGroupEntry { binding: 5, resource: wgpu::BindingResource::TextureView(mipped_bg_view) },
-            wgpu::BindGroupEntry { binding: 6, resource: wgpu::BindingResource::Sampler(mipped_bg_sampler) },
+            wgpu::BindGroupEntry {
+                binding: 0,
+                resource: compose_buf.as_entire_binding(),
+            },
+            wgpu::BindGroupEntry {
+                binding: 1,
+                resource: wgpu::BindingResource::TextureView(&scratch_v_view),
+            },
+            wgpu::BindGroupEntry {
+                binding: 2,
+                resource: wgpu::BindingResource::Sampler(&sampler),
+            },
+            wgpu::BindGroupEntry {
+                binding: 3,
+                resource: wgpu::BindingResource::TextureView(noise_view),
+            },
+            wgpu::BindGroupEntry {
+                binding: 4,
+                resource: wgpu::BindingResource::Sampler(noise_sampler),
+            },
+            wgpu::BindGroupEntry {
+                binding: 5,
+                resource: wgpu::BindingResource::TextureView(mipped_bg_view),
+            },
+            wgpu::BindGroupEntry {
+                binding: 6,
+                resource: wgpu::BindingResource::Sampler(mipped_bg_sampler),
+            },
         ],
     });
 
@@ -139,9 +185,30 @@ pub fn render_glass_to_texture(
         pass.draw(0..3, 0..1);
     }
 
-    run_pass(&mut encoder, &scratch_h_view, blur_h_pipeline, &bg_h, "blur-h", true);
-    run_pass(&mut encoder, &scratch_v_view, blur_v_pipeline, &bg_v, "blur-v", true);
-    run_pass(&mut encoder, output_view, compose_pipeline, &compose_bg, "compose", false);
+    run_pass(
+        &mut encoder,
+        &scratch_h_view,
+        blur_h_pipeline,
+        &bg_h,
+        "blur-h",
+        true,
+    );
+    run_pass(
+        &mut encoder,
+        &scratch_v_view,
+        blur_v_pipeline,
+        &bg_v,
+        "blur-v",
+        true,
+    );
+    run_pass(
+        &mut encoder,
+        output_view,
+        compose_pipeline,
+        &compose_bg,
+        "compose",
+        false,
+    );
 
     queue.submit(Some(encoder.finish()));
 }

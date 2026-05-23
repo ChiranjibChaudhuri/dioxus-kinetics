@@ -1,5 +1,5 @@
 mod common;
-use common::{render_with_material, golden_check};
+use common::{golden_check, render_with_material};
 use ui_glass::{AmbientMesh, LiquidMaterial};
 
 #[test]
@@ -7,7 +7,8 @@ fn ambient_mesh_isolated_matches_golden() {
     // time_seconds is 0 in the test pipeline (no rAF clock); the mesh evaluates
     // to a deterministic configuration suitable for golden capture.
     let pixels = render_with_material(
-        128, 128,
+        128,
+        128,
         LiquidMaterial::new()
             .blur(8.0)
             .ambient_mesh(AmbientMesh::Aurora)

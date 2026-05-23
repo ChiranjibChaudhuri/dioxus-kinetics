@@ -51,15 +51,24 @@ impl DialogAction {
     }
 
     pub fn primary(id: impl Into<String>, label: impl Into<String>) -> Self {
-        Self { tone: DialogActionTone::Primary, ..Self::new(id, label) }
+        Self {
+            tone: DialogActionTone::Primary,
+            ..Self::new(id, label)
+        }
     }
 
     pub fn danger(id: impl Into<String>, label: impl Into<String>) -> Self {
-        Self { tone: DialogActionTone::Danger, ..Self::new(id, label) }
+        Self {
+            tone: DialogActionTone::Danger,
+            ..Self::new(id, label)
+        }
     }
 
     pub fn ghost(id: impl Into<String>, label: impl Into<String>) -> Self {
-        Self { tone: DialogActionTone::Ghost, ..Self::new(id, label) }
+        Self {
+            tone: DialogActionTone::Ghost,
+            ..Self::new(id, label)
+        }
     }
 }
 

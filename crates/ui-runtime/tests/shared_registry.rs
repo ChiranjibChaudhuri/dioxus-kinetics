@@ -15,7 +15,10 @@ fn now_ms_returns_positive_increasing_value() {
     let a = now_ms();
     let b = now_ms();
     assert!(a > 0.0, "now_ms should return a non-zero clock reading");
-    assert!(b >= a, "now_ms should be monotonic non-decreasing on a single thread");
+    assert!(
+        b >= a,
+        "now_ms should be monotonic non-decreasing on a single thread"
+    );
 }
 
 #[test]

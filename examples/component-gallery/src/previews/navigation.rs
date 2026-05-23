@@ -98,4 +98,3 @@ fn SegmentedControlPreviewBody() -> Element {
         }
     }
 }
-

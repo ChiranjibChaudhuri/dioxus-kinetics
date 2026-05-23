@@ -15,8 +15,14 @@ fn gradient_linear_with_stops() {
     let g = Gradient::linear(
         0.5,
         vec![
-            GradientStop { offset: 0.0, color: Color::rgba(0, 0, 0, 1.0) },
-            GradientStop { offset: 1.0, color: Color::rgba(255, 255, 255, 1.0) },
+            GradientStop {
+                offset: 0.0,
+                color: Color::rgba(0, 0, 0, 1.0),
+            },
+            GradientStop {
+                offset: 1.0,
+                color: Color::rgba(255, 255, 255, 1.0),
+            },
         ],
     );
     assert_eq!(g.stops().len(), 2);
@@ -28,7 +34,10 @@ fn gradient_radial_with_center_and_stops() {
     let g = Gradient::radial(
         [0.5, 0.5],
         0.7,
-        vec![GradientStop { offset: 0.0, color: Color::rgba(255, 0, 0, 1.0) }],
+        vec![GradientStop {
+            offset: 0.0,
+            color: Color::rgba(255, 0, 0, 1.0),
+        }],
     );
     assert!(g.is_radial());
 }
@@ -38,7 +47,10 @@ fn gradient_conic_with_angle() {
     let g = Gradient::conic(
         [0.5, 0.5],
         0.0,
-        vec![GradientStop { offset: 0.0, color: Color::rgba(0, 255, 0, 1.0) }],
+        vec![GradientStop {
+            offset: 0.0,
+            color: Color::rgba(0, 255, 0, 1.0),
+        }],
     );
     assert!(g.is_conic());
 }

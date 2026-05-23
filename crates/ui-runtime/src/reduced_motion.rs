@@ -29,7 +29,11 @@ pub fn detect_reduced_motion_at_root() -> bool {
 #[cfg(target_arch = "wasm32")]
 fn media_query_reduce() -> bool {
     web_sys::window()
-        .and_then(|w| w.match_media("(prefers-reduced-motion: reduce)").ok().flatten())
+        .and_then(|w| {
+            w.match_media("(prefers-reduced-motion: reduce)")
+                .ok()
+                .flatten()
+        })
         .map(|m| m.matches())
         .unwrap_or(false)
 }
@@ -71,7 +75,9 @@ pub fn ReducedMotionProvider(children: Element) -> Element {
         use wasm_bindgen::prelude::Closure;
         use wasm_bindgen::JsCast;
 
-        let Some(window) = web_sys::window() else { return };
+        let Some(window) = web_sys::window() else {
+            return;
+        };
 
         // 1. MediaQueryList listener for prefers-reduced-motion changes.
         let mql = window
@@ -83,10 +89,8 @@ pub fn ReducedMotionProvider(children: Element) -> Element {
             let closure = Closure::wrap(Box::new(move |_evt: web_sys::Event| {
                 signal.set(detect_reduced_motion_at_root());
             }) as Box<dyn FnMut(_)>);
-            let _ = mql.add_event_listener_with_callback(
-                "change",
-                closure.as_ref().unchecked_ref(),
-            );
+            let _ =
+                mql.add_event_listener_with_callback("change", closure.as_ref().unchecked_ref());
             closure.forget();
         }
 
@@ -94,11 +98,11 @@ pub fn ReducedMotionProvider(children: Element) -> Element {
         if let Some(document) = window.document() {
             if let Some(body) = document.body() {
                 let mut signal = reduced;
-                let cb = Closure::wrap(Box::new(move |_records: js_sys::Array,
-                                                     _obs: web_sys::MutationObserver| {
-                    signal.set(detect_reduced_motion_at_root());
-                })
-                    as Box<dyn FnMut(_, _)>);
+                let cb = Closure::wrap(Box::new(
+                    move |_records: js_sys::Array, _obs: web_sys::MutationObserver| {
+                        signal.set(detect_reduced_motion_at_root());
+                    },
+                ) as Box<dyn FnMut(_, _)>);
                 if let Ok(observer) = web_sys::MutationObserver::new(cb.as_ref().unchecked_ref()) {
                     let init = js_sys::Object::new();
                     js_sys::Reflect::set(&init, &"attributes".into(), &true.into()).ok();

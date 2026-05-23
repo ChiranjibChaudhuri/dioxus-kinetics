@@ -14,11 +14,7 @@ pub struct AccordionSection {
 }
 
 impl AccordionSection {
-    pub fn new(
-        id: impl Into<String>,
-        header: impl Into<String>,
-        body: impl Into<String>,
-    ) -> Self {
+    pub fn new(id: impl Into<String>, header: impl Into<String>, body: impl Into<String>) -> Self {
         Self {
             id: id.into(),
             header: header.into(),

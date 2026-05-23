@@ -26,12 +26,19 @@ fn compositor_renders_single_region_without_panic() {
 fn make_solid_bg(
     device: &std::sync::Arc<wgpu::Device>,
     queue: &std::sync::Arc<wgpu::Queue>,
-    w: u32, h: u32, rgba: [u8; 4],
+    w: u32,
+    h: u32,
+    rgba: [u8; 4],
 ) -> wgpu::Texture {
     let t = device.create_texture(&wgpu::TextureDescriptor {
         label: Some("bg"),
-        size: wgpu::Extent3d { width: w, height: h, depth_or_array_layers: 1 },
-        mip_level_count: 1, sample_count: 1,
+        size: wgpu::Extent3d {
+            width: w,
+            height: h,
+            depth_or_array_layers: 1,
+        },
+        mip_level_count: 1,
+        sample_count: 1,
         dimension: wgpu::TextureDimension::D2,
         format: wgpu::TextureFormat::Rgba8UnormSrgb,
         usage: wgpu::TextureUsages::TEXTURE_BINDING | wgpu::TextureUsages::COPY_DST,
@@ -40,15 +47,22 @@ fn make_solid_bg(
     let pixels: Vec<u8> = (0..(w * h)).flat_map(|_| rgba).collect();
     queue.write_texture(
         wgpu::TexelCopyTextureInfo {
-            texture: &t, mip_level: 0,
+            texture: &t,
+            mip_level: 0,
             origin: wgpu::Origin3d::ZERO,
             aspect: wgpu::TextureAspect::All,
         },
         &pixels,
         wgpu::TexelCopyBufferLayout {
-            offset: 0, bytes_per_row: Some(w * 4), rows_per_image: Some(h),
+            offset: 0,
+            bytes_per_row: Some(w * 4),
+            rows_per_image: Some(h),
         },
-        wgpu::Extent3d { width: w, height: h, depth_or_array_layers: 1 },
+        wgpu::Extent3d {
+            width: w,
+            height: h,
+            depth_or_array_layers: 1,
+        },
     );
     t
 }
@@ -56,8 +70,13 @@ fn make_solid_bg(
 fn make_output(device: &std::sync::Arc<wgpu::Device>, w: u32, h: u32) -> wgpu::Texture {
     device.create_texture(&wgpu::TextureDescriptor {
         label: Some("out"),
-        size: wgpu::Extent3d { width: w, height: h, depth_or_array_layers: 1 },
-        mip_level_count: 1, sample_count: 1,
+        size: wgpu::Extent3d {
+            width: w,
+            height: h,
+            depth_or_array_layers: 1,
+        },
+        mip_level_count: 1,
+        sample_count: 1,
         dimension: wgpu::TextureDimension::D2,
         format: wgpu::TextureFormat::Rgba8UnormSrgb,
         usage: wgpu::TextureUsages::RENDER_ATTACHMENT | wgpu::TextureUsages::COPY_SRC,

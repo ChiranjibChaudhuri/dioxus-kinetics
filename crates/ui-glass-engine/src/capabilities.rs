@@ -60,12 +60,8 @@ pub fn detect() -> Capabilities {
 
     let has_webgpu = window
         .as_ref()
-        .and_then(|w| {
-            js_sys::Reflect::get(w, &wasm_bindgen::JsValue::from_str("navigator")).ok()
-        })
-        .and_then(|nav| {
-            js_sys::Reflect::get(&nav, &wasm_bindgen::JsValue::from_str("gpu")).ok()
-        })
+        .and_then(|w| js_sys::Reflect::get(w, &wasm_bindgen::JsValue::from_str("navigator")).ok())
+        .and_then(|nav| js_sys::Reflect::get(&nav, &wasm_bindgen::JsValue::from_str("gpu")).ok())
         .map(|gpu| !gpu.is_undefined())
         .unwrap_or(false);
 
@@ -82,8 +78,7 @@ pub fn detect() -> Capabilities {
     // backdrop-filter — universal in modern browsers
     let has_backdrop_filter = true;
 
-    let reduced_motion =
-        matches_media_query(window.as_ref(), "(prefers-reduced-motion: reduce)");
+    let reduced_motion = matches_media_query(window.as_ref(), "(prefers-reduced-motion: reduce)");
     let reduced_transparency =
         matches_media_query(window.as_ref(), "(prefers-reduced-transparency: reduce)");
     let high_contrast = matches_media_query(window.as_ref(), "(prefers-contrast: more)");

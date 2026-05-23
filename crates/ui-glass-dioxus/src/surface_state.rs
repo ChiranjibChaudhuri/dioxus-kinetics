@@ -61,33 +61,43 @@ impl SurfaceState {
         let queue = Arc::new(queue);
 
         let caps = surface.get_capabilities(&adapter);
-        let surface_format = caps.formats
+        let surface_format = caps
+            .formats
             .iter()
             .copied()
             .find(|f| f.is_srgb())
             .unwrap_or(caps.formats[0]);
 
-        let alpha_mode = caps.alpha_modes
+        let alpha_mode = caps
+            .alpha_modes
             .iter()
             .copied()
             .find(|m| *m == wgpu::CompositeAlphaMode::PreMultiplied)
             .unwrap_or(caps.alpha_modes[0]);
 
-        surface.configure(&device, &wgpu::SurfaceConfiguration {
-            usage: wgpu::TextureUsages::RENDER_ATTACHMENT,
-            format: surface_format,
-            width: physical_size.0,
-            height: physical_size.1,
-            present_mode: caps.present_modes[0],
-            desired_maximum_frame_latency: 2,
-            alpha_mode,
-            view_formats: vec![],
-        });
+        surface.configure(
+            &device,
+            &wgpu::SurfaceConfiguration {
+                usage: wgpu::TextureUsages::RENDER_ATTACHMENT,
+                format: surface_format,
+                width: physical_size.0,
+                height: physical_size.1,
+                present_mode: caps.present_modes[0],
+                desired_maximum_frame_latency: 2,
+                alpha_mode,
+                view_formats: vec![],
+            },
+        );
 
         let compositor = Compositor::new(device.clone(), queue.clone());
 
         Some(Self {
-            device, queue, surface, surface_format, compositor, physical_size,
+            device,
+            queue,
+            surface,
+            surface_format,
+            compositor,
+            physical_size,
         })
     }
 

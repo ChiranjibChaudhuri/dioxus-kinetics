@@ -51,9 +51,15 @@ impl TestHarness {
         })
     }
 
-    pub fn device(&self) -> &Arc<wgpu::Device> { &self.device }
-    pub fn queue(&self) -> &Arc<wgpu::Queue> { &self.queue }
-    pub fn canvas_size(&self) -> (u32, u32) { self.canvas_size }
+    pub fn device(&self) -> &Arc<wgpu::Device> {
+        &self.device
+    }
+    pub fn queue(&self) -> &Arc<wgpu::Queue> {
+        &self.queue
+    }
+    pub fn canvas_size(&self) -> (u32, u32) {
+        self.canvas_size
+    }
 
     /// Allocate an RGBA8 render target of the given size, clear it to `color`,
     /// then read back the pixels (row-major, top-down, premultiplied).
@@ -61,7 +67,11 @@ impl TestHarness {
         self.canvas_size = (w, h);
         let target = self.device.create_texture(&wgpu::TextureDescriptor {
             label: Some("test-target"),
-            size: wgpu::Extent3d { width: w, height: h, depth_or_array_layers: 1 },
+            size: wgpu::Extent3d {
+                width: w,
+                height: h,
+                depth_or_array_layers: 1,
+            },
             mip_level_count: 1,
             sample_count: 1,
             dimension: wgpu::TextureDimension::D2,
@@ -79,9 +89,11 @@ impl TestHarness {
             mapped_at_creation: false,
         });
 
-        let mut encoder = self.device.create_command_encoder(&wgpu::CommandEncoderDescriptor {
-            label: Some("clear"),
-        });
+        let mut encoder = self
+            .device
+            .create_command_encoder(&wgpu::CommandEncoderDescriptor {
+                label: Some("clear"),
+            });
         {
             let _pass = encoder.begin_render_pass(&wgpu::RenderPassDescriptor {
                 label: Some("clear-pass"),
@@ -90,7 +102,10 @@ impl TestHarness {
                     resolve_target: None,
                     ops: wgpu::Operations {
                         load: wgpu::LoadOp::Clear(wgpu::Color {
-                            r: color[0], g: color[1], b: color[2], a: color[3],
+                            r: color[0],
+                            g: color[1],
+                            b: color[2],
+                            a: color[3],
                         }),
                         store: wgpu::StoreOp::Store,
                     },
@@ -103,7 +118,8 @@ impl TestHarness {
         }
         encoder.copy_texture_to_buffer(
             wgpu::TexelCopyTextureInfo {
-                texture: &target, mip_level: 0,
+                texture: &target,
+                mip_level: 0,
                 origin: wgpu::Origin3d::ZERO,
                 aspect: wgpu::TextureAspect::All,
             },
@@ -115,7 +131,11 @@ impl TestHarness {
                     rows_per_image: Some(h),
                 },
             },
-            wgpu::Extent3d { width: w, height: h, depth_or_array_layers: 1 },
+            wgpu::Extent3d {
+                width: w,
+                height: h,
+                depth_or_array_layers: 1,
+            },
         );
         self.queue.submit(Some(encoder.finish()));
 

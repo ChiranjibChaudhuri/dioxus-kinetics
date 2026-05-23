@@ -1,5 +1,5 @@
-use ui_glass_engine::background::{BackgroundScene, BackgroundSource, MeshKind};
 use ui_glass_engine::background::render::BackgroundRenderer;
+use ui_glass_engine::background::{BackgroundScene, BackgroundSource, MeshKind};
 use ui_glass_engine::headless::TestHarness;
 use ui_tokens::Color;
 
@@ -14,7 +14,9 @@ fn scene_with_multiple_layers_composites() {
     let pixels = r.render_to_pixels(&scene.layers, 32, 32);
     let mut max_blue = 0u8;
     for chunk in pixels.chunks(4) {
-        if chunk[2] > max_blue { max_blue = chunk[2]; }
+        if chunk[2] > max_blue {
+            max_blue = chunk[2];
+        }
     }
     assert!(max_blue > 40, "expected the dark blue base to show through");
 }

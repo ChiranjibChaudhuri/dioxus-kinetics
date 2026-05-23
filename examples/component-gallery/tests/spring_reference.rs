@@ -6,9 +6,9 @@
 //! Update mode: KINETICS_UPDATE_SPRING_REFERENCE=1 cargo test -p component-gallery --test spring_reference
 //! Verify mode (default): cargo test -p component-gallery --test spring_reference
 
-use ui_motion::Spring;
 use serde_json::json;
 use std::path::PathBuf;
+use ui_motion::Spring;
 
 const REFERENCE_PATH_REL: &str = "e2e/tests/_lib/spring-reference.json";
 const SETTLE_TOLERANCE: f32 = 0.005;
@@ -51,8 +51,8 @@ fn spring_reference_json_is_in_sync() {
         )
     });
 
-    let actual_value: serde_json::Value = serde_json::from_str(&actual)
-        .expect("spring-reference.json must be valid JSON");
+    let actual_value: serde_json::Value =
+        serde_json::from_str(&actual).expect("spring-reference.json must be valid JSON");
 
     assert_eq!(
         actual_value, expected,

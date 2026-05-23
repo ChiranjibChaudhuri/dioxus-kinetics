@@ -25,21 +25,29 @@ use ui_glass_engine::pipeline::{build_compose_pipeline, ComposeKey};
 #[test]
 fn compose_pipeline_compiles_with_blur_only() {
     let h = pollster::block_on(TestHarness::new()).unwrap();
-    let key = ComposeKey { features: GlassFeatures::BLUR };
+    let key = ComposeKey {
+        features: GlassFeatures::BLUR,
+    };
     let _p = build_compose_pipeline(h.device(), key);
 }
 
 #[test]
 fn compose_pipeline_compiles_with_all_features_off() {
     let h = pollster::block_on(TestHarness::new()).unwrap();
-    let key = ComposeKey { features: GlassFeatures::empty() };
+    let key = ComposeKey {
+        features: GlassFeatures::empty(),
+    };
     let _p = build_compose_pipeline(h.device(), key);
 }
 
 #[test]
 fn compose_key_is_hashable_for_cache() {
-    let a = ComposeKey { features: GlassFeatures::BLUR };
-    let b = ComposeKey { features: GlassFeatures::BLUR };
+    let a = ComposeKey {
+        features: GlassFeatures::BLUR,
+    };
+    let b = ComposeKey {
+        features: GlassFeatures::BLUR,
+    };
     use std::hash::{Hash, Hasher};
     let mut h1 = std::collections::hash_map::DefaultHasher::new();
     let mut h2 = std::collections::hash_map::DefaultHasher::new();

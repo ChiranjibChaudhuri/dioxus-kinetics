@@ -17,7 +17,8 @@ pub fn filter_id(material: &LiquidMaterial) -> String {
 /// Generate the `<filter>` element body for a material.
 pub fn filter_element(material: &LiquidMaterial) -> String {
     let id = filter_id(material);
-    let mut out = format!("<filter id=\"{id}\" x=\"-20%\" y=\"-20%\" width=\"140%\" height=\"140%\">");
+    let mut out =
+        format!("<filter id=\"{id}\" x=\"-20%\" y=\"-20%\" width=\"140%\" height=\"140%\">");
 
     if material.features.contains(GlassFeatures::REFRACT) {
         let scale = (material.refraction_strength * 10.0) as i32;
@@ -46,7 +47,10 @@ pub fn filter_element(material: &LiquidMaterial) -> String {
 
     if material.features.contains(GlassFeatures::SPECULAR) {
         let intensity = format!("{:.2}", material.light_intensity);
-        let elev = format!("{:.1}", 60.0 + material.light_angle_rad.to_degrees().abs() * 0.1);
+        let elev = format!(
+            "{:.1}",
+            60.0 + material.light_angle_rad.to_degrees().abs() * 0.1
+        );
         out.push_str(&format!(
             "<feSpecularLighting in=\"sat\" specularExponent=\"4\" specularConstant=\"{intensity}\" lighting-color=\"#ffffff\" result=\"spec\">\
              <feDistantLight azimuth=\"45\" elevation=\"{elev}\"/>\

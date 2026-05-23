@@ -20,7 +20,11 @@ pub fn use_presence_animation(
 
     let mut state = use_signal(|| {
         if present {
-            if reduced { PresenceState::Visible } else { PresenceState::Entering }
+            if reduced {
+                PresenceState::Visible
+            } else {
+                PresenceState::Entering
+            }
         } else {
             PresenceState::Unmounted
         }

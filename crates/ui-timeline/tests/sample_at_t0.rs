@@ -12,7 +12,10 @@ fn opacity_cue() -> MotionCue {
     MotionCue::Opacity {
         from: 0.0,
         to: 1.0,
-        transition: Transition::Tween { duration_ms: 220, ease: Ease::Standard },
+        transition: Transition::Tween {
+            duration_ms: 220,
+            ease: Ease::Standard,
+        },
     }
 }
 

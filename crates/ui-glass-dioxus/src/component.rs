@@ -72,7 +72,9 @@ pub fn LiquidSurface(props: LiquidSurfaceProps) -> Element {
     // Step 1: Signal holding the current GlassRegion, built from props.
     // GlassRegion derives Clone + PartialEq so Signal<GlassRegion> is valid.
     let region: Signal<ui_glass_engine::GlassRegion> = use_signal(|| {
-        let r = props.rect.unwrap_or([0.0, 0.0, props.width as f32, props.height as f32]);
+        let r = props
+            .rect
+            .unwrap_or([0.0, 0.0, props.width as f32, props.height as f32]);
         let mut gr = ui_glass_engine::GlassRegion::new(r, props.material);
         if let Some(bg) = props.background.clone() {
             gr = gr.with_background(bg);
@@ -159,16 +161,22 @@ fn handle_canvas_mounted(
         return;
     }
 
-    let Some(canvas) = canvas_from_mounted(&evt) else { return; };
+    let Some(canvas) = canvas_from_mounted(&evt) else {
+        return;
+    };
     let physical_size = resize_canvas_to_css_size(&canvas);
     let canvas_for_listeners = canvas.clone();
 
     spawn(async move {
         if let Some(state) = SurfaceState::from_canvas(canvas, physical_size).await {
             surface_state.set(Some(state));
-            let listeners = crate::motion_bridge::attach_listeners(&canvas_for_listeners, motion_state);
+            let listeners =
+                crate::motion_bridge::attach_listeners(&canvas_for_listeners, motion_state);
             let frame = start_frame_loop(surface_state, motion_state, region, width, height);
-            live.borrow_mut().replace(LiveResources { _frame: frame, _listeners: listeners });
+            live.borrow_mut().replace(LiveResources {
+                _frame: frame,
+                _listeners: listeners,
+            });
         }
     });
 }
@@ -228,11 +236,15 @@ fn start_frame_loop(
         let output_view = frame.texture.create_view(&Default::default());
 
         // 2. Cached transparent fallback bg.
-        state.compositor.ensure_transparent_bg([state.physical_size.0, state.physical_size.1]);
+        state
+            .compositor
+            .ensure_transparent_bg([state.physical_size.0, state.physical_size.1]);
         // Re-create the view each frame — it's free (just a wrapper around the
         // texture handle); allocates no GPU memory. The texture itself is the
         // cached one from ensure_transparent_bg.
-        let bg_view = state.compositor.transparent_bg_texture()
+        let bg_view = state
+            .compositor
+            .transparent_bg_texture()
             .expect("ensure_transparent_bg was called above")
             .create_view(&Default::default());
 
@@ -246,8 +258,12 @@ fn start_frame_loop(
         motion_state.with_mut(|s| {
             s.scroll_velocity_px[0] *= 0.85;
             s.scroll_velocity_px[1] *= 0.85;
-            if s.scroll_velocity_px[0].abs() < 0.01 { s.scroll_velocity_px[0] = 0.0; }
-            if s.scroll_velocity_px[1].abs() < 0.01 { s.scroll_velocity_px[1] = 0.0; }
+            if s.scroll_velocity_px[0].abs() < 0.01 {
+                s.scroll_velocity_px[0] = 0.0;
+            }
+            if s.scroll_velocity_px[1].abs() < 0.01 {
+                s.scroll_velocity_px[1] = 0.0;
+            }
         });
 
         state.compositor.update_inputs(inputs);

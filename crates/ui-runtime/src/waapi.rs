@@ -80,8 +80,18 @@ pub fn options_object(duration_ms: f32, delay_ms: f32) -> JsValue {
         )
         .ok();
     }
-    js_sys::Reflect::set(&obj, &JsValue::from_str("easing"), &JsValue::from_str("linear")).ok();
-    js_sys::Reflect::set(&obj, &JsValue::from_str("fill"), &JsValue::from_str("forwards")).ok();
+    js_sys::Reflect::set(
+        &obj,
+        &JsValue::from_str("easing"),
+        &JsValue::from_str("linear"),
+    )
+    .ok();
+    js_sys::Reflect::set(
+        &obj,
+        &JsValue::from_str("fill"),
+        &JsValue::from_str("forwards"),
+    )
+    .ok();
     obj.into()
 }
 

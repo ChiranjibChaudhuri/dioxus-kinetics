@@ -15,7 +15,10 @@ use ui_glass_engine::headless::TestHarness;
 use ui_glass_engine::{Compositor, GlassRegion};
 
 fn diff_count(a: &[u8], b: &[u8]) -> usize {
-    a.iter().zip(b.iter()).filter(|(x, y)| x.abs_diff(**y) > 1).count()
+    a.iter()
+        .zip(b.iter())
+        .filter(|(x, y)| x.abs_diff(**y) > 1)
+        .count()
 }
 
 const W: u32 = 96;
@@ -24,7 +27,7 @@ const MIN_AFFECTED_FRACTION: f64 = 0.02;
 
 fn base() -> LiquidMaterial {
     LiquidMaterial::new()
-        .blur(2.0)  // small blur so refractive shifts still register
+        .blur(2.0) // small blur so refractive shifts still register
         .radius(20.0)
         .tint(ui_tokens::Color::rgba(255, 255, 255, 1.0), 0.05)
 }
@@ -51,12 +54,18 @@ fn render_with_checkerboard(w: u32, h: u32, material: LiquidMaterial) -> Vec<u8>
 fn create_checkerboard(
     device: &std::sync::Arc<wgpu::Device>,
     queue: &std::sync::Arc<wgpu::Queue>,
-    w: u32, h: u32,
+    w: u32,
+    h: u32,
 ) -> wgpu::Texture {
     let t = device.create_texture(&wgpu::TextureDescriptor {
         label: Some("checker-bg"),
-        size: wgpu::Extent3d { width: w, height: h, depth_or_array_layers: 1 },
-        mip_level_count: 1, sample_count: 1,
+        size: wgpu::Extent3d {
+            width: w,
+            height: h,
+            depth_or_array_layers: 1,
+        },
+        mip_level_count: 1,
+        sample_count: 1,
         dimension: wgpu::TextureDimension::D2,
         format: wgpu::TextureFormat::Rgba8UnormSrgb,
         usage: wgpu::TextureUsages::TEXTURE_BINDING | wgpu::TextureUsages::COPY_DST,
@@ -73,14 +82,22 @@ fn create_checkerboard(
     }
     queue.write_texture(
         wgpu::TexelCopyTextureInfo {
-            texture: &t, mip_level: 0, origin: wgpu::Origin3d::ZERO,
+            texture: &t,
+            mip_level: 0,
+            origin: wgpu::Origin3d::ZERO,
             aspect: wgpu::TextureAspect::All,
         },
         &px,
         wgpu::TexelCopyBufferLayout {
-            offset: 0, bytes_per_row: Some(w * 4), rows_per_image: Some(h),
+            offset: 0,
+            bytes_per_row: Some(w * 4),
+            rows_per_image: Some(h),
         },
-        wgpu::Extent3d { width: w, height: h, depth_or_array_layers: 1 },
+        wgpu::Extent3d {
+            width: w,
+            height: h,
+            depth_or_array_layers: 1,
+        },
     );
     t
 }
@@ -88,8 +105,13 @@ fn create_checkerboard(
 fn create_output(device: &std::sync::Arc<wgpu::Device>, w: u32, h: u32) -> wgpu::Texture {
     device.create_texture(&wgpu::TextureDescriptor {
         label: Some("out"),
-        size: wgpu::Extent3d { width: w, height: h, depth_or_array_layers: 1 },
-        mip_level_count: 1, sample_count: 1,
+        size: wgpu::Extent3d {
+            width: w,
+            height: h,
+            depth_or_array_layers: 1,
+        },
+        mip_level_count: 1,
+        sample_count: 1,
         dimension: wgpu::TextureDimension::D2,
         format: wgpu::TextureFormat::Rgba8UnormSrgb,
         usage: wgpu::TextureUsages::RENDER_ATTACHMENT | wgpu::TextureUsages::COPY_SRC,
@@ -100,7 +122,9 @@ fn create_output(device: &std::sync::Arc<wgpu::Device>, w: u32, h: u32) -> wgpu:
 fn read_back(
     device: &std::sync::Arc<wgpu::Device>,
     queue: &std::sync::Arc<wgpu::Queue>,
-    tex: &wgpu::Texture, w: u32, h: u32,
+    tex: &wgpu::Texture,
+    w: u32,
+    h: u32,
 ) -> Vec<u8> {
     let bpr = ((w * 4 + 255) / 256) * 256;
     let buf = device.create_buffer(&wgpu::BufferDescriptor {
@@ -112,21 +136,31 @@ fn read_back(
     let mut enc = device.create_command_encoder(&Default::default());
     enc.copy_texture_to_buffer(
         wgpu::TexelCopyTextureInfo {
-            texture: tex, mip_level: 0, origin: wgpu::Origin3d::ZERO,
+            texture: tex,
+            mip_level: 0,
+            origin: wgpu::Origin3d::ZERO,
             aspect: wgpu::TextureAspect::All,
         },
         wgpu::TexelCopyBufferInfo {
             buffer: &buf,
             layout: wgpu::TexelCopyBufferLayout {
-                offset: 0, bytes_per_row: Some(bpr), rows_per_image: Some(h),
+                offset: 0,
+                bytes_per_row: Some(bpr),
+                rows_per_image: Some(h),
             },
         },
-        wgpu::Extent3d { width: w, height: h, depth_or_array_layers: 1 },
+        wgpu::Extent3d {
+            width: w,
+            height: h,
+            depth_or_array_layers: 1,
+        },
     );
     queue.submit(Some(enc.finish()));
     let slice = buf.slice(..);
     let (tx, rx) = std::sync::mpsc::channel();
-    slice.map_async(wgpu::MapMode::Read, move |r| { tx.send(r).unwrap(); });
+    slice.map_async(wgpu::MapMode::Read, move |r| {
+        tx.send(r).unwrap();
+    });
     let _ = device.poll(wgpu::PollType::Wait);
     rx.recv().unwrap().unwrap();
     let data = slice.get_mapped_range();
@@ -143,9 +177,21 @@ fn read_back(
 #[test]
 fn refract_changes_output() {
     let off = render_with_checkerboard(W, H, base());
-    let on = render_with_checkerboard(W, H, base().refract(1.0).noise(4.0, 0.0).surface_curvature(0.8).thickness(3.0));
+    let on = render_with_checkerboard(
+        W,
+        H,
+        base()
+            .refract(1.0)
+            .noise(4.0, 0.0)
+            .surface_curvature(0.8)
+            .thickness(3.0),
+    );
     let frac = diff_count(&off, &on) as f64 / off.len() as f64;
-    assert!(frac > MIN_AFFECTED_FRACTION, "REFRACT changed only {:.2}% of pixels", frac * 100.0);
+    assert!(
+        frac > MIN_AFFECTED_FRACTION,
+        "REFRACT changed only {:.2}% of pixels",
+        frac * 100.0
+    );
 }
 
 #[test]
@@ -153,18 +199,29 @@ fn disperse_changes_output() {
     let off = render_with_checkerboard(W, H, base());
     let on = render_with_checkerboard(W, H, base().disperse(6.0));
     let frac = diff_count(&off, &on) as f64 / off.len() as f64;
-    assert!(frac > MIN_AFFECTED_FRACTION, "DISPERSE changed only {:.2}% of pixels", frac * 100.0);
+    assert!(
+        frac > MIN_AFFECTED_FRACTION,
+        "DISPERSE changed only {:.2}% of pixels",
+        frac * 100.0
+    );
 }
 
 #[test]
 fn specular_changes_output() {
     let off = render_with_checkerboard(W, H, base());
     let on = render_with_checkerboard(
-        W, H,
-        base().specular(45.0_f32.to_radians(), 0.8).edge_falloff(20.0),
+        W,
+        H,
+        base()
+            .specular(45.0_f32.to_radians(), 0.8)
+            .edge_falloff(20.0),
     );
     let frac = diff_count(&off, &on) as f64 / off.len() as f64;
-    assert!(frac > MIN_AFFECTED_FRACTION, "SPECULAR changed only {:.2}% of pixels", frac * 100.0);
+    assert!(
+        frac > MIN_AFFECTED_FRACTION,
+        "SPECULAR changed only {:.2}% of pixels",
+        frac * 100.0
+    );
 }
 
 #[test]
@@ -172,7 +229,11 @@ fn inner_shadow_changes_output() {
     let off = render_with_checkerboard(W, H, base());
     let on = render_with_checkerboard(W, H, base().inner_shadow(8.0, 0.5));
     let frac = diff_count(&off, &on) as f64 / off.len() as f64;
-    assert!(frac > MIN_AFFECTED_FRACTION, "INNER_SHADOW changed only {:.2}% of pixels", frac * 100.0);
+    assert!(
+        frac > MIN_AFFECTED_FRACTION,
+        "INNER_SHADOW changed only {:.2}% of pixels",
+        frac * 100.0
+    );
 }
 
 #[test]
@@ -180,7 +241,11 @@ fn ambient_mesh_changes_output() {
     let off = render_with_checkerboard(W, H, base());
     let on = render_with_checkerboard(W, H, base().ambient_mesh(AmbientMesh::Aurora));
     let frac = diff_count(&off, &on) as f64 / off.len() as f64;
-    assert!(frac > MIN_AFFECTED_FRACTION, "AMBIENT_MESH changed only {:.2}% of pixels", frac * 100.0);
+    assert!(
+        frac > MIN_AFFECTED_FRACTION,
+        "AMBIENT_MESH changed only {:.2}% of pixels",
+        frac * 100.0
+    );
 }
 
 #[test]
@@ -188,5 +253,9 @@ fn tint_adapt_changes_output() {
     let off = render_with_checkerboard(W, H, base());
     let on = render_with_checkerboard(W, H, base().adapt_to_background(0.5));
     let frac = diff_count(&off, &on) as f64 / off.len() as f64;
-    assert!(frac > MIN_AFFECTED_FRACTION, "TINT_ADAPT changed only {:.2}% of pixels", frac * 100.0);
+    assert!(
+        frac > MIN_AFFECTED_FRACTION,
+        "TINT_ADAPT changed only {:.2}% of pixels",
+        frac * 100.0
+    );
 }

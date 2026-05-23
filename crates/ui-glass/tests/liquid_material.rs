@@ -258,13 +258,19 @@ fn material_request_compact_density_reduces_radius() {
 
 #[test]
 fn quality_profile_high_includes_all_features() {
-    assert_eq!(ui_glass::QualityProfile::High.feature_mask(), ui_glass::GlassFeatures::all());
+    assert_eq!(
+        ui_glass::QualityProfile::High.feature_mask(),
+        ui_glass::GlassFeatures::all()
+    );
     assert_eq!(ui_glass::QualityProfile::High.blur_taps(), 13);
 }
 
 #[test]
 fn quality_profile_off_clears_all_features() {
-    assert_eq!(ui_glass::QualityProfile::Off.feature_mask(), ui_glass::GlassFeatures::empty());
+    assert_eq!(
+        ui_glass::QualityProfile::Off.feature_mask(),
+        ui_glass::GlassFeatures::empty()
+    );
     assert_eq!(ui_glass::QualityProfile::Off.blur_taps(), 1);
 }
 

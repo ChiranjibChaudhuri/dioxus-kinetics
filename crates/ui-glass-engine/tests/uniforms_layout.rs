@@ -3,7 +3,11 @@ use ui_glass_engine::GlassUniforms;
 #[test]
 fn uniforms_size_is_multiple_of_16_bytes() {
     let size = std::mem::size_of::<GlassUniforms>();
-    assert_eq!(size % 16, 0, "uniform struct must be 16-byte aligned for wgpu");
+    assert_eq!(
+        size % 16,
+        0,
+        "uniform struct must be 16-byte aligned for wgpu"
+    );
 }
 
 #[test]

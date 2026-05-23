@@ -4,14 +4,16 @@ use std::cell::RefCell;
 use std::rc::Rc;
 
 use dioxus::prelude::*;
-use ui_motion::{apply_ease, Transition};
 #[cfg(target_arch = "wasm32")]
 use ui_motion::keyframes_for_transition;
+use ui_motion::{apply_ease, Transition};
 
 use crate::reduced_motion::use_reduced_motion;
 use crate::scheduler::{spawn_frame_loop, ControlFlow, FrameHandle};
 #[cfg(target_arch = "wasm32")]
-use crate::waapi::{is_supported, keyframes_to_js, options_object, AnimatedProperty, WaapiAnimation};
+use crate::waapi::{
+    is_supported, keyframes_to_js, options_object, AnimatedProperty, WaapiAnimation,
+};
 
 /// Convenience wrapper: animate from `target` → `target` (no motion) — kept
 /// for API parity with the pre-WAAPI runtime.
@@ -193,8 +195,7 @@ impl UseAnimationTarget {
         if self.reduced || !is_supported() {
             return;
         }
-        if (*self.last_target.borrow() - self.target).abs() < 1e-6
-            && self.handle.borrow().is_some()
+        if (*self.last_target.borrow() - self.target).abs() < 1e-6 && self.handle.borrow().is_some()
         {
             return;
         }
@@ -256,7 +257,13 @@ mod tests {
     #[test]
     fn cumulative_tween_quarter_progress_is_below_linear() {
         let value = tween_at(0.0, 100.0, 55.0, 220.0, Ease::Standard);
-        assert!(value < 25.0, "expected eased value below linear; got {value}");
-        assert!(value > 10.0, "expected eased value above zero region; got {value}");
+        assert!(
+            value < 25.0,
+            "expected eased value below linear; got {value}"
+        );
+        assert!(
+            value > 10.0,
+            "expected eased value above zero region; got {value}"
+        );
     }
 }

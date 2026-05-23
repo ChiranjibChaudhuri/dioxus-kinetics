@@ -31,7 +31,8 @@ pub fn render_with_material(w: u32, h: u32, material: LiquidMaterial) -> Vec<u8>
 }
 
 pub fn prepare_pointer_scene(
-    w: u32, h: u32,
+    w: u32,
+    h: u32,
     material: LiquidMaterial,
     pointer_norm: [f32; 2],
 ) -> Vec<u8> {
@@ -42,8 +43,9 @@ pub fn prepare_pointer_scene(
     let rect = [inset, inset, w as f32 - inset * 2.0, h as f32 - inset * 2.0];
 
     let mut comp = Compositor::new(harness.device().clone(), harness.queue().clone());
-    let uniforms = ui_glass_engine::GlassUniforms::from_material(&material, rect, [w as f32, h as f32])
-        .with_pointer(pointer_norm);
+    let uniforms =
+        ui_glass_engine::GlassUniforms::from_material(&material, rect, [w as f32, h as f32])
+            .with_pointer(pointer_norm);
     comp.render_with_uniforms(
         &bg.create_view(&Default::default()),
         &out.create_view(&Default::default()),
@@ -56,7 +58,8 @@ pub fn prepare_pointer_scene(
 }
 
 pub fn prepare_scroll_scene(
-    w: u32, h: u32,
+    w: u32,
+    h: u32,
     material: LiquidMaterial,
     scroll_vel: [f32; 2],
 ) -> Vec<u8> {
@@ -67,8 +70,9 @@ pub fn prepare_scroll_scene(
     let rect = [inset, inset, w as f32 - inset * 2.0, h as f32 - inset * 2.0];
 
     let mut comp = Compositor::new(harness.device().clone(), harness.queue().clone());
-    let uniforms = ui_glass_engine::GlassUniforms::from_material(&material, rect, [w as f32, h as f32])
-        .with_scroll_velocity(scroll_vel);
+    let uniforms =
+        ui_glass_engine::GlassUniforms::from_material(&material, rect, [w as f32, h as f32])
+            .with_scroll_velocity(scroll_vel);
     comp.render_with_uniforms(
         &bg.create_view(&Default::default()),
         &out.create_view(&Default::default()),
@@ -93,13 +97,21 @@ pub fn golden_check(golden_rel_path: &str, pixels: &[u8], w: u32, h: u32) {
         return;
     }
     let expected = read_png(&path);
-    assert_eq!(expected.len(), pixels.len(), "size mismatch for {golden_rel_path}");
+    assert_eq!(
+        expected.len(),
+        pixels.len(),
+        "size mismatch for {golden_rel_path}"
+    );
     let mut diffs = 0usize;
     let mut worst = 0u8;
     for (a, b) in expected.iter().zip(pixels.iter()) {
         let d = a.abs_diff(*b);
-        if d > TOLERANCE { diffs += 1; }
-        if d > worst { worst = d; }
+        if d > TOLERANCE {
+            diffs += 1;
+        }
+        if d > worst {
+            worst = d;
+        }
     }
     let max_allowed = pixels.len() / 200;
     assert!(
@@ -112,12 +124,18 @@ pub fn golden_check(golden_rel_path: &str, pixels: &[u8], w: u32, h: u32) {
 fn create_gradient(
     device: &std::sync::Arc<wgpu::Device>,
     queue: &std::sync::Arc<wgpu::Queue>,
-    w: u32, h: u32,
+    w: u32,
+    h: u32,
 ) -> wgpu::Texture {
     let t = device.create_texture(&wgpu::TextureDescriptor {
         label: Some("gradient-bg"),
-        size: wgpu::Extent3d { width: w, height: h, depth_or_array_layers: 1 },
-        mip_level_count: 1, sample_count: 1,
+        size: wgpu::Extent3d {
+            width: w,
+            height: h,
+            depth_or_array_layers: 1,
+        },
+        mip_level_count: 1,
+        sample_count: 1,
         dimension: wgpu::TextureDimension::D2,
         format: wgpu::TextureFormat::Rgba8UnormSrgb,
         usage: wgpu::TextureUsages::TEXTURE_BINDING | wgpu::TextureUsages::COPY_DST,
@@ -134,14 +152,22 @@ fn create_gradient(
     }
     queue.write_texture(
         wgpu::TexelCopyTextureInfo {
-            texture: &t, mip_level: 0, origin: wgpu::Origin3d::ZERO,
+            texture: &t,
+            mip_level: 0,
+            origin: wgpu::Origin3d::ZERO,
             aspect: wgpu::TextureAspect::All,
         },
         &px,
         wgpu::TexelCopyBufferLayout {
-            offset: 0, bytes_per_row: Some(w * 4), rows_per_image: Some(h),
+            offset: 0,
+            bytes_per_row: Some(w * 4),
+            rows_per_image: Some(h),
         },
-        wgpu::Extent3d { width: w, height: h, depth_or_array_layers: 1 },
+        wgpu::Extent3d {
+            width: w,
+            height: h,
+            depth_or_array_layers: 1,
+        },
     );
     t
 }
@@ -149,8 +175,13 @@ fn create_gradient(
 fn create_output(device: &std::sync::Arc<wgpu::Device>, w: u32, h: u32) -> wgpu::Texture {
     device.create_texture(&wgpu::TextureDescriptor {
         label: Some("out"),
-        size: wgpu::Extent3d { width: w, height: h, depth_or_array_layers: 1 },
-        mip_level_count: 1, sample_count: 1,
+        size: wgpu::Extent3d {
+            width: w,
+            height: h,
+            depth_or_array_layers: 1,
+        },
+        mip_level_count: 1,
+        sample_count: 1,
         dimension: wgpu::TextureDimension::D2,
         format: wgpu::TextureFormat::Rgba8UnormSrgb,
         usage: wgpu::TextureUsages::RENDER_ATTACHMENT | wgpu::TextureUsages::COPY_SRC,
@@ -161,7 +192,9 @@ fn create_output(device: &std::sync::Arc<wgpu::Device>, w: u32, h: u32) -> wgpu:
 fn read_back(
     device: &std::sync::Arc<wgpu::Device>,
     queue: &std::sync::Arc<wgpu::Queue>,
-    tex: &wgpu::Texture, w: u32, h: u32,
+    tex: &wgpu::Texture,
+    w: u32,
+    h: u32,
 ) -> Vec<u8> {
     let bpr = ((w * 4 + 255) / 256) * 256;
     let buf = device.create_buffer(&wgpu::BufferDescriptor {
@@ -173,21 +206,31 @@ fn read_back(
     let mut enc = device.create_command_encoder(&Default::default());
     enc.copy_texture_to_buffer(
         wgpu::TexelCopyTextureInfo {
-            texture: tex, mip_level: 0, origin: wgpu::Origin3d::ZERO,
+            texture: tex,
+            mip_level: 0,
+            origin: wgpu::Origin3d::ZERO,
             aspect: wgpu::TextureAspect::All,
         },
         wgpu::TexelCopyBufferInfo {
             buffer: &buf,
             layout: wgpu::TexelCopyBufferLayout {
-                offset: 0, bytes_per_row: Some(bpr), rows_per_image: Some(h),
+                offset: 0,
+                bytes_per_row: Some(bpr),
+                rows_per_image: Some(h),
             },
         },
-        wgpu::Extent3d { width: w, height: h, depth_or_array_layers: 1 },
+        wgpu::Extent3d {
+            width: w,
+            height: h,
+            depth_or_array_layers: 1,
+        },
     );
     queue.submit(Some(enc.finish()));
     let slice = buf.slice(..);
     let (tx, rx) = std::sync::mpsc::channel();
-    slice.map_async(wgpu::MapMode::Read, move |r| { tx.send(r).unwrap(); });
+    slice.map_async(wgpu::MapMode::Read, move |r| {
+        tx.send(r).unwrap();
+    });
     let _ = device.poll(wgpu::PollType::Wait);
     rx.recv().unwrap().unwrap();
     let data = slice.get_mapped_range();
@@ -202,8 +245,8 @@ fn read_back(
 }
 
 fn write_png(path: &std::path::Path, pixels: &[u8], w: u32, h: u32) {
-    let img = image::RgbaImage::from_raw(w, h, pixels.to_vec())
-        .expect("pixel buffer size mismatch");
+    let img =
+        image::RgbaImage::from_raw(w, h, pixels.to_vec()).expect("pixel buffer size mismatch");
     if let Some(parent) = path.parent() {
         std::fs::create_dir_all(parent).unwrap();
     }

@@ -179,8 +179,7 @@ pub fn Skeleton(
     #[props(default = "100%".to_string())] width: String,
     #[props(default = "4px".to_string())] radius: String,
 ) -> Element {
-    let style =
-        format!("height:{height};width:{width};border-radius:{radius};");
+    let style = format!("height:{height};width:{width};border-radius:{radius};");
     rsx! {
         div {
             class: "ui-skeleton",

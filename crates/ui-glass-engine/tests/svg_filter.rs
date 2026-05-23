@@ -18,7 +18,10 @@ fn filter_id_differs_for_different_materials() {
 fn filter_element_contains_blur_when_set() {
     let m = LiquidMaterial::new().blur(12.0);
     let el = filter_element(&m);
-    assert!(el.contains("feGaussianBlur"), "expected feGaussianBlur, got {el}");
+    assert!(
+        el.contains("feGaussianBlur"),
+        "expected feGaussianBlur, got {el}"
+    );
 }
 
 #[test]

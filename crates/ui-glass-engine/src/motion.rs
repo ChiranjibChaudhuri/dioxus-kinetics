@@ -19,10 +19,24 @@ pub struct MotionInputs {
 }
 
 impl MotionInputs {
-    pub fn new() -> Self { Self::default() }
+    pub fn new() -> Self {
+        Self::default()
+    }
 
-    pub fn with_pointer(mut self, px: [f32; 2]) -> Self { self.pointer_px = px; self }
-    pub fn with_scroll_velocity(mut self, vel: [f32; 2]) -> Self { self.scroll_velocity_px = vel; self }
-    pub fn with_time(mut self, t: f32) -> Self { self.time_seconds = t; self }
-    pub fn with_reduced_motion(mut self, on: bool) -> Self { self.reduced_motion = on; self }
+    pub fn with_pointer(mut self, px: [f32; 2]) -> Self {
+        self.pointer_px = px;
+        self
+    }
+    pub fn with_scroll_velocity(mut self, vel: [f32; 2]) -> Self {
+        self.scroll_velocity_px = vel;
+        self
+    }
+    pub fn with_time(mut self, t: f32) -> Self {
+        self.time_seconds = t;
+        self
+    }
+    pub fn with_reduced_motion(mut self, on: bool) -> Self {
+        self.reduced_motion = on;
+        self
+    }
 }

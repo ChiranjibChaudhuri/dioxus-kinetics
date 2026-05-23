@@ -30,25 +30,35 @@ mod kinetic_animation {
     /// Maps a `MotionCue` to the `(property, from, to, transition)` tuple
     /// required by `use_animation_target`. Returns `None` for cue variants
     /// that don't map to a single WAAPI property (currently all cues map).
-    pub(super) fn pick_for_cue(
-        cue: MotionCue,
-    ) -> Option<(AnimatedProperty, f32, f32, Transition)> {
+    pub(super) fn pick_for_cue(cue: MotionCue) -> Option<(AnimatedProperty, f32, f32, Transition)> {
         match cue {
-            MotionCue::Opacity { from, to, transition } => {
-                Some((AnimatedProperty::Opacity, from, to, transition))
-            }
-            MotionCue::Translate { axis: Axis::X, from, to, transition } => {
-                Some((AnimatedProperty::TranslateX, from, to, transition))
-            }
-            MotionCue::Translate { axis: Axis::Y, from, to, transition } => {
-                Some((AnimatedProperty::TranslateY, from, to, transition))
-            }
-            MotionCue::Scale { from, to, transition } => {
-                Some((AnimatedProperty::Scale, from, to, transition))
-            }
-            MotionCue::Rotate { from_deg, to_deg, transition } => {
-                Some((AnimatedProperty::Rotate, from_deg, to_deg, transition))
-            }
+            MotionCue::Opacity {
+                from,
+                to,
+                transition,
+            } => Some((AnimatedProperty::Opacity, from, to, transition)),
+            MotionCue::Translate {
+                axis: Axis::X,
+                from,
+                to,
+                transition,
+            } => Some((AnimatedProperty::TranslateX, from, to, transition)),
+            MotionCue::Translate {
+                axis: Axis::Y,
+                from,
+                to,
+                transition,
+            } => Some((AnimatedProperty::TranslateY, from, to, transition)),
+            MotionCue::Scale {
+                from,
+                to,
+                transition,
+            } => Some((AnimatedProperty::Scale, from, to, transition)),
+            MotionCue::Rotate {
+                from_deg,
+                to_deg,
+                transition,
+            } => Some((AnimatedProperty::Rotate, from_deg, to_deg, transition)),
         }
     }
 }
@@ -231,21 +241,20 @@ pub fn KineticBox(
     // Resolve the cue to (property, from, to, transition).  When there is no
     // cue (KineticBox outside a Sequence) we fall back to a no-op opacity
     // 1.0→1.0 so the hook is always called unconditionally (Dioxus hook rule).
-    let (property, from, to, transition, start_ms) =
-        cue_data
-            .and_then(|(mc, sms)| {
-                kinetic_animation::pick_for_cue(mc).map(|(p, f, t, tr)| (p, f, t, tr, sms))
-            })
-            .unwrap_or((
-                AnimatedProperty::Opacity,
-                1.0,
-                1.0,
-                ui_motion::Transition::Tween {
-                    duration_ms: 0,
-                    ease: ui_motion::Ease::Standard,
-                },
-                0.0,
-            ));
+    let (property, from, to, transition, start_ms) = cue_data
+        .and_then(|(mc, sms)| {
+            kinetic_animation::pick_for_cue(mc).map(|(p, f, t, tr)| (p, f, t, tr, sms))
+        })
+        .unwrap_or((
+            AnimatedProperty::Opacity,
+            1.0,
+            1.0,
+            ui_motion::Transition::Tween {
+                duration_ms: 0,
+                ease: ui_motion::Ease::Standard,
+            },
+            0.0,
+        ));
 
     // `use_animation_target` MUST be called unconditionally every render.
     // The returned handle carries the delay and is consumed in `onmounted`.

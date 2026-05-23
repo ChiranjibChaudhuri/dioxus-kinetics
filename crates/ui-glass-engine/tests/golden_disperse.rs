@@ -1,11 +1,12 @@
 mod common;
-use common::{render_with_material, golden_check};
+use common::{golden_check, render_with_material};
 use ui_glass::LiquidMaterial;
 
 #[test]
 fn disperse_isolated_matches_golden() {
     let pixels = render_with_material(
-        128, 128,
+        128,
+        128,
         LiquidMaterial::new()
             .blur(8.0)
             .disperse(4.0)

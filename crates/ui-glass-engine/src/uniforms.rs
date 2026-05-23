@@ -7,14 +7,14 @@ use bytemuck::{Pod, Zeroable};
 #[repr(C)]
 #[derive(Clone, Copy, Debug, Pod, Zeroable)]
 pub struct GlassUniforms {
-    pub rect: [f32; 4],          // x, y, w, h in canvas px
-    pub tint: [f32; 4],          // rgba
+    pub rect: [f32; 4], // x, y, w, h in canvas px
+    pub tint: [f32; 4], // rgba
 
-    pub canvas_size: [f32; 2],   // px
-    pub pointer: [f32; 2],       // -1..1 normalized to surface
+    pub canvas_size: [f32; 2], // px
+    pub pointer: [f32; 2],     // -1..1 normalized to surface
 
     pub scroll_velocity: [f32; 2],
-    pub light_dir: [f32; 2],     // unit vector from light_angle_rad
+    pub light_dir: [f32; 2], // unit vector from light_angle_rad
 
     pub radius: f32,
     pub thickness: f32,
@@ -132,6 +132,10 @@ pub struct BlurUniforms {
 
 impl BlurUniforms {
     pub fn new(canvas_size: [f32; 2], blur_radius_px: f32) -> Self {
-        Self { canvas_size, blur_radius_px, _pad: 0.0 }
+        Self {
+            canvas_size,
+            blur_radius_px,
+            _pad: 0.0,
+        }
     }
 }

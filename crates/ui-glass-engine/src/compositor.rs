@@ -24,21 +24,29 @@ pub struct Compositor {
     queue: Arc<wgpu::Queue>,
     compose_cache: HashMap<ComposeKey, wgpu::RenderPipeline>,
     blur_cache: HashMap<BlurKey, wgpu::RenderPipeline>,
+    noise_view: wgpu::TextureView,
+    noise_sampler: wgpu::Sampler,
 }
 
 impl Compositor {
     pub fn new(device: Arc<wgpu::Device>, queue: Arc<wgpu::Queue>) -> Self {
+        let (noise_view, noise_sampler) = create_noise_resources(&device, &queue);
         Self {
             device,
             queue,
             compose_cache: HashMap::new(),
             blur_cache: HashMap::new(),
+            noise_view,
+            noise_sampler,
         }
     }
 
     pub fn pipeline_cache_len(&self) -> usize {
         self.compose_cache.len() + self.blur_cache.len()
     }
+
+    pub fn noise_view(&self) -> &wgpu::TextureView { &self.noise_view }
+    pub fn noise_sampler(&self) -> &wgpu::Sampler { &self.noise_sampler }
 
     fn ensure_compose(&mut self, key: ComposeKey) -> &wgpu::RenderPipeline {
         self.compose_cache
@@ -93,7 +101,56 @@ impl Compositor {
                 blur_h,
                 blur_v,
                 compose,
+                &self.noise_view,
+                &self.noise_sampler,
             );
         }
     }
+}
+
+fn create_noise_resources(
+    device: &wgpu::Device,
+    queue: &wgpu::Queue,
+) -> (wgpu::TextureView, wgpu::Sampler) {
+    let (w, h) = (256u32, 256u32);
+    let pixels = crate::noise::generate_noise_rgba(w, h, 0xDEADBEEF);
+
+    let tex = device.create_texture(&wgpu::TextureDescriptor {
+        label: Some("liquid-glass-noise"),
+        size: wgpu::Extent3d { width: w, height: h, depth_or_array_layers: 1 },
+        mip_level_count: 1,
+        sample_count: 1,
+        dimension: wgpu::TextureDimension::D2,
+        format: wgpu::TextureFormat::Rgba8Unorm,
+        usage: wgpu::TextureUsages::TEXTURE_BINDING | wgpu::TextureUsages::COPY_DST,
+        view_formats: &[],
+    });
+    queue.write_texture(
+        wgpu::TexelCopyTextureInfo {
+            texture: &tex,
+            mip_level: 0,
+            origin: wgpu::Origin3d::ZERO,
+            aspect: wgpu::TextureAspect::All,
+        },
+        &pixels,
+        wgpu::TexelCopyBufferLayout {
+            offset: 0,
+            bytes_per_row: Some(w * 4),
+            rows_per_image: Some(h),
+        },
+        wgpu::Extent3d { width: w, height: h, depth_or_array_layers: 1 },
+    );
+
+    let view = tex.create_view(&wgpu::TextureViewDescriptor::default());
+    let sampler = device.create_sampler(&wgpu::SamplerDescriptor {
+        label: Some("liquid-glass-noise-sampler"),
+        address_mode_u: wgpu::AddressMode::Repeat,
+        address_mode_v: wgpu::AddressMode::Repeat,
+        address_mode_w: wgpu::AddressMode::Repeat,
+        mag_filter: wgpu::FilterMode::Linear,
+        min_filter: wgpu::FilterMode::Linear,
+        mipmap_filter: wgpu::FilterMode::Nearest,
+        ..Default::default()
+    });
+    (view, sampler)
 }

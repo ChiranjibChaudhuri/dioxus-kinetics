@@ -41,6 +41,8 @@ struct GlassUniforms {
 @group(0) @binding(0) var<uniform> u: GlassUniforms;
 @group(0) @binding(1) var bg_tex:  texture_2d<f32>;
 @group(0) @binding(2) var bg_samp: sampler;
+@group(0) @binding(3) var noise_tex: texture_2d<f32>;
+@group(0) @binding(4) var noise_samp: sampler;
 
 struct VsOut {
     @builtin(position) pos: vec4<f32>,

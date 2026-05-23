@@ -11,7 +11,7 @@ pub use image_cache::{ImageCache, ImageHandle};
 /// A single layer of the background scene. Compositors materialize one of
 /// these (or the per-surface variant) into the texture that glass surfaces
 /// sample from.
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, PartialEq)]
 pub enum BackgroundSource {
     Color(Color),
     Gradient(Gradient),
@@ -19,7 +19,7 @@ pub enum BackgroundSource {
     Mesh(MeshKind),
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, PartialEq)]
 pub enum ImageSource {
     /// URL or path; resolved through ImageCache.
     Static(String),
@@ -34,19 +34,19 @@ pub enum MeshKind {
     Grain,
 }
 
-#[derive(Clone, Copy, Debug)]
+#[derive(Clone, Copy, Debug, PartialEq)]
 pub struct GradientStop {
     pub offset: f32,
     pub color: Color,
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, PartialEq)]
 pub struct Gradient {
     kind: GradientKind,
     stops: Vec<GradientStop>,
 }
 
-#[derive(Clone, Copy, Debug)]
+#[derive(Clone, Copy, Debug, PartialEq)]
 pub(crate) enum GradientKind {
     Linear { angle_rad: f32 },
     Radial { center: [f32; 2], radius: f32 },

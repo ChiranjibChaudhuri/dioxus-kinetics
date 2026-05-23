@@ -299,6 +299,10 @@ fn gallery_frame_stage_preview_renders_starting_frame_caption() {
     let html = dioxus_ssr::render_element(rsx! {
         component_gallery::App {}
     });
+    // FrameStage preview emits the frame counter in its body; the
+    // surrounding ScrubFrame label is now a generic "FrameStage" to avoid
+    // Playwright strict-mode locator collisions on duplicate text.
+    assert!(html.contains(">FrameStage<"));
     assert!(html.contains("Frame 0 / 180"));
 }
 

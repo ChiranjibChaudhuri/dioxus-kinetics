@@ -7,7 +7,7 @@ pub fn frame_stage_preview() -> Element {
         ScrubFrame {
             duration_ms: 6000.0,
             fps: Some(30),
-            label: "Frame 0 / 180",
+            label: "FrameStage",
             children: rsx! { FrameStageBody {} },
         }
     }

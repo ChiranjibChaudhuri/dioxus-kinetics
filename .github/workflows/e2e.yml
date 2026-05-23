@@ -76,6 +76,23 @@ jobs:
         env:
           CI: "true"
 
+      - name: Detect new Linux baselines that need committing
+        if: always()
+        run: |
+          NEW_BASELINES=$(git status --porcelain examples/component-gallery/e2e/tests/visual.spec.ts-snapshots/ | grep "linux\\.png" || true)
+          if [ -n "$NEW_BASELINES" ]; then
+            echo "::warning::New Linux baselines generated this run. Commit them to make subsequent CI runs deterministic."
+            echo "$NEW_BASELINES"
+          fi
+
+      - name: Upload Linux baselines for review
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: linux-baselines
+          path: examples/component-gallery/e2e/tests/visual.spec.ts-snapshots/*-linux.png
+          if-no-files-found: ignore
+
       - name: Upload audit report
         if: always()
         uses: actions/upload-artifact@v4

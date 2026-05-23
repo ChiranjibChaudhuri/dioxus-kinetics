@@ -123,7 +123,6 @@ impl GlassPolicyUi {
 }
 
 use dioxus::prelude::*;
-use ui_runtime::ReducedMotion;
 
 pub const DEFAULT_THEME: ThemePref = ThemePref::Light;
 pub const DEFAULT_DENSITY: DensityPref = DensityPref::Comfortable;
@@ -245,8 +244,6 @@ pub fn PreferenceBar() -> Element {
     let density_now = *density_sig.read();
     let motion_now = *motion_sig.read();
     let glass_now = *glass_sig.read();
-
-    use_context_provider(|| ReducedMotion(matches!(motion_now, MotionPref::Reduced)));
 
     rsx! {
         section { class: "gallery-controls", "aria-label": "Preview settings",

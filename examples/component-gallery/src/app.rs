@@ -1,5 +1,5 @@
 use dioxus::prelude::*;
-use ui_runtime::ReducedMotionProvider;
+use ui_runtime::ReducedMotion;
 use ui_styles::library_css;
 
 use crate::docs::{categories, component_docs, ComponentCategory, ComponentDoc, ComponentStatus};
@@ -26,13 +26,15 @@ pub fn App() -> Element {
     let motion_attr = prefs.motion.read().attr_value();
     let glass_attr = prefs.glass.read().attr_value();
 
+    let reduced = matches!(*prefs.motion.read(), crate::controls::MotionPref::Reduced);
+    use_context_provider(|| ReducedMotion(reduced));
+
     let shared_css = library_css();
     let active_categories = populated_categories();
 
     rsx! {
         style { "{shared_css}" }
         style { "{GALLERY_CSS}" }
-        ReducedMotionProvider {
         div {
             class: "gallery-shell",
             "data-ui-theme": "{theme_attr}",
@@ -72,7 +74,6 @@ pub fn App() -> Element {
                     CategorySection { category: *category }
                 }
             }
-        }
         }
     }
 }

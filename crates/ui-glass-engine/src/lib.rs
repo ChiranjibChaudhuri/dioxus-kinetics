@@ -15,4 +15,4 @@ pub mod uniforms;
 pub mod headless;
 
 pub use compositor::{Compositor, GlassRegion};
-// `GlassUniforms` is re-exported from Task 7 once the struct exists.
+pub use uniforms::GlassUniforms;

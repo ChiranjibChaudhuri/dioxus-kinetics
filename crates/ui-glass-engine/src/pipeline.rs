@@ -154,6 +154,22 @@ pub fn compose_bind_group_layout(device: &Arc<wgpu::Device>) -> wgpu::BindGroupL
                 ty: wgpu::BindingType::Sampler(wgpu::SamplerBindingType::Filtering),
                 count: None,
             },
+            wgpu::BindGroupLayoutEntry {
+                binding: 5,
+                visibility: wgpu::ShaderStages::FRAGMENT,
+                ty: wgpu::BindingType::Texture {
+                    sample_type: wgpu::TextureSampleType::Float { filterable: true },
+                    view_dimension: wgpu::TextureViewDimension::D2,
+                    multisampled: false,
+                },
+                count: None,
+            },
+            wgpu::BindGroupLayoutEntry {
+                binding: 6,
+                visibility: wgpu::ShaderStages::FRAGMENT,
+                ty: wgpu::BindingType::Sampler(wgpu::SamplerBindingType::Filtering),
+                count: None,
+            },
         ],
     })
 }
@@ -177,7 +193,6 @@ pub fn build_compose_pipeline(
 
     let f = key.features;
     let constants: &[(&str, f64)] = &[
-        ("FEAT_BLUR",         if f.contains(F::BLUR)         { 1.0 } else { 0.0 }),
         ("FEAT_REFRACT",      if f.contains(F::REFRACT)      { 1.0 } else { 0.0 }),
         ("FEAT_DISPERSE",     if f.contains(F::DISPERSE)     { 1.0 } else { 0.0 }),
         ("FEAT_SPECULAR",     if f.contains(F::SPECULAR)     { 1.0 } else { 0.0 }),

@@ -3,7 +3,6 @@
 // INNER_SHADOW, AMBIENT_MESH, POINTER, SCROLL, TINT_ADAPT via the override
 // constants below.
 
-override FEAT_BLUR:         bool = false;
 override FEAT_REFRACT:      bool = false;
 override FEAT_DISPERSE:     bool = false;
 override FEAT_SPECULAR:     bool = false;
@@ -43,6 +42,8 @@ struct GlassUniforms {
 @group(0) @binding(2) var bg_samp: sampler;
 @group(0) @binding(3) var noise_tex: texture_2d<f32>;
 @group(0) @binding(4) var noise_samp: sampler;
+@group(0) @binding(5) var mipped_bg:   texture_2d<f32>;
+@group(0) @binding(6) var mipped_samp: sampler;
 
 struct VsOut {
     @builtin(position) pos: vec4<f32>,
@@ -100,21 +101,22 @@ fn fs_main(in: VsOut) -> @location(0) vec4<f32> {
 
     // Refraction-displaced UV.
     var sample_uv = in.uv;
+    var disp = vec2<f32>(0.0);
     if (FEAT_REFRACT) {
         let noise = textureSample(noise_tex, noise_samp,
             in.uv * u.noise_frequency + vec2<f32>(u.noise_seed, 0.0)
         ).xy * 2.0 - 1.0;
-        var disp = (normal * u.surface_curvature + noise) * u.refract_strength * u.thickness;
-        if (FEAT_POINTER) {
-            // Pointer is in surface-local normalized space (-1..1).
-            let pull = (u.pointer - vec2<f32>(local.x / half_size.x, local.y / half_size.y));
-            disp = disp + pull * 0.5 * u.refract_strength;
-        }
-        if (FEAT_SCROLL) {
-            disp = disp + u.scroll_velocity * 0.02;
-        }
-        sample_uv = in.uv + disp * 0.01;
+        disp = (normal * u.surface_curvature + noise) * u.refract_strength * u.thickness;
     }
+    if (FEAT_POINTER) {
+        // Pointer is in surface-local normalized space (-1..1).
+        let pull = (u.pointer - vec2<f32>(local.x / half_size.x, local.y / half_size.y));
+        disp = disp + pull * 0.5;
+    }
+    if (FEAT_SCROLL) {
+        disp = disp + u.scroll_velocity * 0.02;
+    }
+    sample_uv = in.uv + disp * 0.01;
 
     var bg = textureSample(bg_tex, bg_samp, sample_uv);
 
@@ -131,9 +133,9 @@ fn fs_main(in: VsOut) -> @location(0) vec4<f32> {
     color = mix(color, u.tint.rgb, u.tint.a);
 
     if (FEAT_TINT_ADAPT) {
-        // mip 6 of a 256+ px source is roughly a 4×4 average — close to the
-        // dominant color of the region behind the surface.
-        let avg = textureSampleLevel(bg_tex, bg_samp, sample_uv, 6.0).rgb;
+        // Sample a high mip of the mipmapped background (built per-frame by
+        // Compositor::materialize_mipped_bg). Roughly a 64×-downscaled average.
+        let avg = textureSampleLevel(mipped_bg, mipped_samp, sample_uv, 6.0).rgb;
         color = mix(color, color * avg, clamp(u.adapt_strength, 0.0, 1.0));
     }
 

@@ -21,6 +21,8 @@ pub fn render_glass_to_texture(
     compose_pipeline: &wgpu::RenderPipeline,
     noise_view: &wgpu::TextureView,
     noise_sampler: &wgpu::Sampler,
+    mipped_bg_view: &wgpu::TextureView,
+    mipped_bg_sampler: &wgpu::Sampler,
 ) {
     let (w, h) = (uniforms.canvas_size[0] as u32, uniforms.canvas_size[1] as u32);
 
@@ -96,6 +98,8 @@ pub fn render_glass_to_texture(
             wgpu::BindGroupEntry { binding: 2, resource: wgpu::BindingResource::Sampler(&sampler) },
             wgpu::BindGroupEntry { binding: 3, resource: wgpu::BindingResource::TextureView(noise_view) },
             wgpu::BindGroupEntry { binding: 4, resource: wgpu::BindingResource::Sampler(noise_sampler) },
+            wgpu::BindGroupEntry { binding: 5, resource: wgpu::BindingResource::TextureView(mipped_bg_view) },
+            wgpu::BindGroupEntry { binding: 6, resource: wgpu::BindingResource::Sampler(mipped_bg_sampler) },
         ],
     });
 

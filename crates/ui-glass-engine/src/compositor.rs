@@ -27,12 +27,20 @@ pub struct Compositor {
     noise_view: wgpu::TextureView,
     noise_sampler: wgpu::Sampler,
     mipmap_pipeline: wgpu::RenderPipeline,
+    mip_sampler: wgpu::Sampler,
 }
 
 impl Compositor {
     pub fn new(device: Arc<wgpu::Device>, queue: Arc<wgpu::Queue>) -> Self {
         let (noise_view, noise_sampler) = create_noise_resources(&device, &queue);
         let mipmap_pipeline = crate::pipeline::build_mipmap_pipeline(&device);
+        let mip_sampler = device.create_sampler(&wgpu::SamplerDescriptor {
+            label: Some("mip-bind-sampler"),
+            mag_filter: wgpu::FilterMode::Linear,
+            min_filter: wgpu::FilterMode::Linear,
+            mipmap_filter: wgpu::FilterMode::Linear,
+            ..Default::default()
+        });
         Self {
             device,
             queue,
@@ -41,6 +49,7 @@ impl Compositor {
             noise_view,
             noise_sampler,
             mipmap_pipeline,
+            mip_sampler,
         }
     }
 
@@ -85,7 +94,7 @@ impl Compositor {
         let mipped = if material.features.contains(ui_glass::GlassFeatures::TINT_ADAPT) {
             Some(self.materialize_mipped_bg(bg_view, canvas_size))
         } else { None };
-        let effective_bg_view: &wgpu::TextureView = mipped
+        let effective_mipped_view: &wgpu::TextureView = mipped
             .as_ref()
             .map(|(_, view)| view)
             .unwrap_or(bg_view);
@@ -97,9 +106,10 @@ impl Compositor {
         uniforms.rect = rect_px;
         uniforms.canvas_size = canvas_size;
         render_glass_to_texture(
-            &self.device, &self.queue, effective_bg_view, output_view, &uniforms,
+            &self.device, &self.queue, bg_view, output_view, &uniforms,
             blur_h, blur_v, compose,
             &self.noise_view, &self.noise_sampler,
+            effective_mipped_view, &self.mip_sampler,
         );
     }
 
@@ -241,7 +251,7 @@ impl Compositor {
             let mipped = if region.material.features.contains(ui_glass::GlassFeatures::TINT_ADAPT) {
                 Some(self.materialize_mipped_bg(bg_view, canvas_size))
             } else { None };
-            let effective_bg_view: &wgpu::TextureView = mipped
+            let effective_mipped_view: &wgpu::TextureView = mipped
                 .as_ref()
                 .map(|(_, view)| view)
                 .unwrap_or(bg_view);
@@ -253,7 +263,7 @@ impl Compositor {
             render_glass_to_texture(
                 &self.device,
                 &self.queue,
-                effective_bg_view,
+                bg_view,
                 output_view,
                 &uniforms,
                 blur_h,
@@ -261,6 +271,8 @@ impl Compositor {
                 compose,
                 &self.noise_view,
                 &self.noise_sampler,
+                effective_mipped_view,
+                &self.mip_sampler,
             );
         }
     }

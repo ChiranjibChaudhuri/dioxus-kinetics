@@ -1,4 +1,4 @@
-use ui_glass::{GlassFeatures, LiquidMaterial};
+use ui_glass::LiquidMaterial;
 use ui_glass_engine::headless::TestHarness;
 use ui_glass_engine::{Compositor, GlassRegion};
 

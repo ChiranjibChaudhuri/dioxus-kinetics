@@ -2046,3 +2046,17 @@ Plan 3 will:
 - Subscribe `Compositor` to `ui-motion`'s pointer spring, scroll decay, and time clock — replacing the test-only `with_pointer` / `with_scroll_velocity` / `with_time` helpers with a real frame-loop bridge.
 - Add the `<LiquidSurface>` Dioxus component: canvas mount, z-index/pointer-events wiring, per-route compositor instance, mount/unmount lifecycle.
 - Multi-region overlap (lifts the `debug_assert!(regions.len() <= 1)`).
+
+---
+
+## Status
+
+Plan 2 complete. Tier 1 visual fidelity is feature-complete; tests inject
+pointer/scroll/time uniforms directly. Next: Plan 3 — Scene contract +
+ui-motion bridge + LiquidSurface Dioxus component.
+
+Known follow-up: the SPECULAR shader uses `pow(n_dot_l, 16.0)` which produces
+a very narrow highlight that's visually subtle. The behavior test had to use
+`edge_falloff(60.0)` (larger than the glass rect itself) to spread the
+highlight enough to register. Consider tuning the exponent in Plan 3 if the
+"Apple feel" needs broader specular reflections.

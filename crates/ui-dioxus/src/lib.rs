@@ -13,6 +13,24 @@ mod overlays;
 use dioxus::prelude::*;
 use ui_glass::{GlassDensity, GlassLevel, GlassTone};
 
+// ---------------------------------------------------------------------------
+// Public component surface.
+//
+// Components are exported under TWO names per `docs/component-naming.md`:
+//
+//   1. Standard-library names (`Button`, `TextField`, `Checkbox`, `Dialog`, …)
+//      — match the vocabulary every Dioxus/React developer already knows.
+//   2. Functional / SaaS-role names (`ActionControl`, `TextEntry`,
+//      `ChoiceMark`, `ModalLayer`, …) — describe the user-facing role
+//      rather than the widget shape; preferred in product docs.
+//
+// Both surfaces are stable for the 0.1.x line. The `crates/kinetics`
+// prelude re-exports the union; the gallery and SSR tests use the
+// standard names. Do not collapse one set into the other without
+// updating `docs/component-naming.md` and the `prelude.rs` integration
+// test in `crates/kinetics/tests/prelude.rs`, which pins both surfaces.
+// ---------------------------------------------------------------------------
+
 pub use buttons::{IconButton, IconButtonSize, IconButtonTone};
 pub use capture::CaptureStage;
 pub use composition::{FrameClip, FrameLayer, FrameStage};

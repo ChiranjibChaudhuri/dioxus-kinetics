@@ -12,6 +12,7 @@ headless = []
 [dependencies]
 ui-glass.workspace = true
 ui-tokens.workspace = true
+ui-motion.workspace = true
 wgpu.workspace = true
 bytemuck.workspace = true
 

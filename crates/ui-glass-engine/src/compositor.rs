@@ -8,6 +8,7 @@ use std::sync::Arc;
 use ui_glass::LiquidMaterial;
 
 use crate::background::{BackgroundScene, BackgroundSource, render::BackgroundRenderer};
+use crate::motion::MotionInputs;
 use crate::pipeline::{
     build_blur_pipeline, build_compose_pipeline, BlurDirection, BlurKey, ComposeKey,
 };
@@ -46,6 +47,7 @@ pub struct Compositor {
     mip_sampler: wgpu::Sampler,
     background_renderer: BackgroundRenderer,
     background_scene: Option<BackgroundScene>,
+    inputs: MotionInputs,
 }
 
 impl Compositor {
@@ -71,6 +73,7 @@ impl Compositor {
             mip_sampler,
             background_renderer,
             background_scene: None,
+            inputs: MotionInputs::default(),
         }
     }
 
@@ -87,6 +90,13 @@ impl Compositor {
 
     pub fn background_renderer_mut(&mut self) -> &mut BackgroundRenderer {
         &mut self.background_renderer
+    }
+
+    /// Update the per-frame motion inputs. The host calls this once per rAF
+    /// tick BEFORE `render`. Plan 4's Dioxus integration drives this from
+    /// ui-motion springs.
+    pub fn update_inputs(&mut self, inputs: MotionInputs) {
+        self.inputs = inputs;
     }
 
     fn ensure_compose(&mut self, key: ComposeKey) -> &wgpu::RenderPipeline {
@@ -303,11 +313,26 @@ impl Compositor {
             .map(|t| t.create_view(&Default::default()));
 
         for region in regions {
-            let uniforms = GlassUniforms::from_material(
+            let mut uniforms = GlassUniforms::from_material(
                 &region.material,
                 region.rect_px,
                 canvas_size,
             );
+            if !self.inputs.reduced_motion {
+                let rect = region.rect_px;
+                let px = self.inputs.pointer_px[0] - (rect[0] + rect[2] * 0.5);
+                let py = self.inputs.pointer_px[1] - (rect[1] + rect[3] * 0.5);
+                let half_w = (rect[2] * 0.5).max(1e-3);
+                let half_h = (rect[3] * 0.5).max(1e-3);
+                let pn = [
+                    (px / half_w).clamp(-1.0, 1.0),
+                    (py / half_h).clamp(-1.0, 1.0),
+                ];
+                uniforms = uniforms
+                    .with_pointer(pn)
+                    .with_scroll_velocity(self.inputs.scroll_velocity_px)
+                    .with_time(self.inputs.time_seconds);
+            }
             let compose_key = ComposeKey { features: region.material.features };
             let blur_h_key = BlurKey { direction: BlurDirection::Horizontal, taps: 13 };
             let blur_v_key = BlurKey { direction: BlurDirection::Vertical, taps: 13 };

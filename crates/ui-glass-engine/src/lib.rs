@@ -8,6 +8,7 @@
 
 pub mod background;
 pub mod compositor;
+pub mod motion;
 pub mod noise;
 pub mod pipeline;
 pub mod render_graph;
@@ -17,5 +18,6 @@ pub mod uniforms;
 pub mod headless;
 
 pub use compositor::{Compositor, GlassRegion};
+pub use motion::MotionInputs;
 pub use uniforms::{BlurUniforms, GlassUniforms};
 pub use render_graph::render_glass_to_texture;

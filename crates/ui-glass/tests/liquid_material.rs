@@ -255,3 +255,35 @@ fn material_request_compact_density_reduces_radius() {
     let ms: LiquidMaterial = spac.into();
     assert!(mc.radius_px < ms.radius_px);
 }
+
+#[test]
+fn quality_profile_high_includes_all_features() {
+    assert_eq!(ui_glass::QualityProfile::High.feature_mask(), ui_glass::GlassFeatures::all());
+    assert_eq!(ui_glass::QualityProfile::High.blur_taps(), 13);
+}
+
+#[test]
+fn quality_profile_off_clears_all_features() {
+    assert_eq!(ui_glass::QualityProfile::Off.feature_mask(), ui_glass::GlassFeatures::empty());
+    assert_eq!(ui_glass::QualityProfile::Off.blur_taps(), 1);
+}
+
+#[test]
+fn quality_profile_balanced_drops_ambient_mesh() {
+    let mask = ui_glass::QualityProfile::Balanced.feature_mask();
+    assert!(mask.contains(ui_glass::GlassFeatures::BLUR));
+    assert!(!mask.contains(ui_glass::GlassFeatures::AMBIENT_MESH));
+    assert_eq!(ui_glass::QualityProfile::Balanced.blur_taps(), 9);
+}
+
+#[test]
+fn quality_profile_power_keeps_only_essentials() {
+    let mask = ui_glass::QualityProfile::Power.feature_mask();
+    assert!(mask.contains(ui_glass::GlassFeatures::BLUR));
+    assert!(mask.contains(ui_glass::GlassFeatures::SPECULAR));
+    assert!(mask.contains(ui_glass::GlassFeatures::INNER_SHADOW));
+    assert!(!mask.contains(ui_glass::GlassFeatures::REFRACT));
+    assert!(!mask.contains(ui_glass::GlassFeatures::DISPERSE));
+    assert!(!mask.contains(ui_glass::GlassFeatures::AMBIENT_MESH));
+    assert!(!mask.contains(ui_glass::GlassFeatures::TINT_ADAPT));
+}

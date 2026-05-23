@@ -114,6 +114,46 @@ pub enum MaterialPolicy {
     HighContrast,
 }
 
+/// Pre-baked quality preset. Maps to feature mask + blur tap count + scroll/
+/// pointer reactivity gates. Used by the runtime to scale visual cost
+/// against device class and user preferences.
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
+pub enum QualityProfile {
+    /// All 9 traits, 13-tap blur, full mip chain.
+    #[default]
+    High,
+    /// Tier 1 minus AMBIENT_MESH, 9-tap blur.
+    Balanced,
+    /// Tier 2 forced (battery-saving): drops REFRACT, DISPERSE, AMBIENT_MESH, TINT_ADAPT.
+    Power,
+    /// Engine off — Solid CSS surface only.
+    Off,
+}
+
+impl QualityProfile {
+    /// Mask out features that this profile suppresses. Combine with the
+    /// material's existing features via `material.features &= profile.feature_mask()`.
+    pub fn feature_mask(self) -> GlassFeatures {
+        use GlassFeatures as F;
+        match self {
+            QualityProfile::High => F::all(),
+            QualityProfile::Balanced => F::all().difference(F::AMBIENT_MESH),
+            QualityProfile::Power => F::BLUR | F::SPECULAR | F::INNER_SHADOW,
+            QualityProfile::Off => F::empty(),
+        }
+    }
+
+    /// Blur taps to use under this profile.
+    pub fn blur_taps(self) -> u32 {
+        match self {
+            QualityProfile::High => 13,
+            QualityProfile::Balanced => 9,
+            QualityProfile::Power => 5,
+            QualityProfile::Off => 1,
+        }
+    }
+}
+
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub struct GlassRequest {
     pub level: GlassLevel,

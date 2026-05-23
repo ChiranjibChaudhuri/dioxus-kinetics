@@ -36,6 +36,46 @@ fn two_regions_both_render_without_overwriting() {
     assert_eq!(pixels[corner_idx + 3], 0, "corner alpha should be 0");
 }
 
+#[test]
+fn overlapping_regions_follow_last_wins() {
+    let h = pollster::block_on(TestHarness::new()).unwrap();
+    let mut comp = Compositor::new(h.device().clone(), h.queue().clone());
+
+    let bg = make_solid(h.device(), h.queue(), 128, 128, [0, 0, 200, 255]);
+    let out = make_output(h.device(), 128, 128);
+
+    // Two rects with strong overlap in the center.
+    let lower = GlassRegion::new(
+        [16.0, 16.0, 96.0, 96.0],
+        LiquidMaterial::floating().tint(Color::rgba(255, 0, 0, 1.0), 0.8),
+    );
+    let upper = GlassRegion::new(
+        [32.0, 32.0, 64.0, 64.0],
+        LiquidMaterial::floating().tint(Color::rgba(0, 255, 0, 1.0), 0.8),
+    );
+
+    comp.render(
+        &bg.create_view(&Default::default()),
+        &out.create_view(&Default::default()),
+        [128.0, 128.0],
+        &[lower, upper],
+    );
+
+    let pixels = read_back(h.device(), h.queue(), &out, 128, 128);
+
+    // Overlap zone (canvas 64,64): upper (green) wins.
+    let overlap_idx = ((64 * 128 + 64) * 4) as usize;
+    let g_overlap = pixels[overlap_idx + 1];
+    let r_overlap = pixels[overlap_idx];
+    assert!(g_overlap > r_overlap, "overlap should be green-dominant (upper wins): G={g_overlap}, R={r_overlap}");
+
+    // Lower-only zone (canvas 24,24): lower (red) is the only contribution.
+    let lower_only_idx = ((24 * 128 + 24) * 4) as usize;
+    let r_lower = pixels[lower_only_idx];
+    let g_lower = pixels[lower_only_idx + 1];
+    assert!(r_lower > g_lower, "lower-only zone should be red-dominant: R={r_lower}, G={g_lower}");
+}
+
 fn make_solid(device: &std::sync::Arc<wgpu::Device>, queue: &std::sync::Arc<wgpu::Queue>, w: u32, h: u32, rgba: [u8; 4]) -> wgpu::Texture {
     let t = device.create_texture(&wgpu::TextureDescriptor {
         label: Some("bg"),

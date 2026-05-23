@@ -1,6 +1,15 @@
 //! Texture cache for `Image::Static(path)` and `Image::Dynamic(handle)` background
 //! sources. Static images are loaded once and cached by URL/path; dynamic images
 //! are uploaded by the host and tracked via integer handles.
+//!
+//! ## Color space
+//!
+//! `upload_rgba` interprets the input buffer as **sRGB-encoded RGBA** — the
+//! same format produced by the `image` crate's `to_rgba8()` on a typical PNG.
+//! The wgpu texture is allocated as `Rgba8UnormSrgb`, which means the GPU
+//! applies sRGB→linear conversion automatically when the shader samples it.
+//! If you have linear RGBA, encode to sRGB first (or use a future
+//! `upload_rgba_linear` overload — not implemented in Plan 3).
 
 use std::collections::HashMap;
 use std::sync::Arc;

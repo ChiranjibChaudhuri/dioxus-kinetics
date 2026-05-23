@@ -9,7 +9,7 @@ fn update_inputs_propagates_to_render() {
     let mut comp = Compositor::new(h.device().clone(), h.queue().clone());
     comp.update_inputs(MotionInputs::new()
         .with_pointer([32.0, 32.0])
-        .with_scroll([8.0, 0.0])
+        .with_scroll_velocity([8.0, 0.0])
         .with_time(0.5));
 
     let bg = make_solid(h.device(), h.queue(), 64, 64, [40, 40, 40, 255]);

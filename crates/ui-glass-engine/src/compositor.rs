@@ -302,6 +302,16 @@ impl Compositor {
         (scratch, full_view)
     }
 
+    /// Render a frame of glass surfaces over `bg_view` into `output_view`.
+    ///
+    /// Multi-region semantics: regions composite back-to-front (slice order
+    /// = z-order, last is on top). The output is cleared once before the
+    /// loop; each region's compose pass writes opaque alpha and blends via
+    /// PREMULTIPLIED_ALPHA_BLENDING — overlapping pixels are LAST-WINS, not
+    /// alpha-stacked. This matches Apple Liquid Glass's behavior: each
+    /// surface samples the *original* background (not the composited stack
+    /// below it), so a modal over a chrome bar correctly occludes the bar
+    /// inside its rect while exposing the bar outside.
     pub fn render(
         &mut self,
         bg_view: &wgpu::TextureView,
@@ -358,21 +368,24 @@ impl Compositor {
                 region.rect_px,
                 canvas_size,
             );
-            if !self.inputs.reduced_motion {
-                let rect = region.rect_px;
+            let rect = region.rect_px;
+            let (pointer_norm, scroll_vel, time_s) = if self.inputs.reduced_motion {
+                ([0.0, 0.0], [0.0, 0.0], 0.0)
+            } else {
                 let px = self.inputs.pointer_px[0] - (rect[0] + rect[2] * 0.5);
                 let py = self.inputs.pointer_px[1] - (rect[1] + rect[3] * 0.5);
                 let half_w = (rect[2] * 0.5).max(1e-3);
                 let half_h = (rect[3] * 0.5).max(1e-3);
-                let pn = [
-                    (px / half_w).clamp(-1.0, 1.0),
-                    (py / half_h).clamp(-1.0, 1.0),
-                ];
-                uniforms = uniforms
-                    .with_pointer(pn)
-                    .with_scroll_velocity(self.inputs.scroll_velocity_px)
-                    .with_time(self.inputs.time_seconds);
-            }
+                (
+                    [(px / half_w).clamp(-1.0, 1.0), (py / half_h).clamp(-1.0, 1.0)],
+                    self.inputs.scroll_velocity_px,
+                    self.inputs.time_seconds,
+                )
+            };
+            uniforms = uniforms
+                .with_pointer(pointer_norm)
+                .with_scroll_velocity(scroll_vel)
+                .with_time(time_s);
             let compose_key = ComposeKey { features: region.material.features };
             let blur_h_key = BlurKey { direction: BlurDirection::Horizontal, taps: 13 };
             let blur_v_key = BlurKey { direction: BlurDirection::Vertical, taps: 13 };

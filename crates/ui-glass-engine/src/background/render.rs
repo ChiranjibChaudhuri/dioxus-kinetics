@@ -43,6 +43,8 @@ pub struct BackgroundRenderer {
     image_blit_bgl: wgpu::BindGroupLayout,
     image_blit_pipeline: wgpu::RenderPipeline,
     image_cache: Option<crate::background::image_cache::ImageCache>,
+    gradient_cache: std::collections::HashMap<(u32, u32), wgpu::RenderPipeline>,
+    mesh_cache: std::collections::HashMap<u32, wgpu::RenderPipeline>,
 }
 
 impl BackgroundRenderer {
@@ -60,9 +62,40 @@ impl BackgroundRenderer {
                 count: None,
             }],
         });
-        let image_blit_bgl = crate::pipeline::mipmap_bind_group_layout(&device);
+        // Build image-blit BGL with the correct label (structurally identical
+        // to the mipmap BGL so the mipmap pipeline still works with it).
+        let image_blit_bgl = device.create_bind_group_layout(&wgpu::BindGroupLayoutDescriptor {
+            label: Some("image-blit-bgl"),
+            entries: &[
+                wgpu::BindGroupLayoutEntry {
+                    binding: 0,
+                    visibility: wgpu::ShaderStages::FRAGMENT,
+                    ty: wgpu::BindingType::Texture {
+                        sample_type: wgpu::TextureSampleType::Float { filterable: true },
+                        view_dimension: wgpu::TextureViewDimension::D2,
+                        multisampled: false,
+                    },
+                    count: None,
+                },
+                wgpu::BindGroupLayoutEntry {
+                    binding: 1,
+                    visibility: wgpu::ShaderStages::FRAGMENT,
+                    ty: wgpu::BindingType::Sampler(wgpu::SamplerBindingType::Filtering),
+                    count: None,
+                },
+            ],
+        });
         let image_blit_pipeline = crate::pipeline::build_mipmap_pipeline(&device);
-        Self { device, queue, bgl, image_blit_bgl, image_blit_pipeline, image_cache: None }
+        Self {
+            device,
+            queue,
+            bgl,
+            image_blit_bgl,
+            image_blit_pipeline,
+            image_cache: None,
+            gradient_cache: std::collections::HashMap::new(),
+            mesh_cache: std::collections::HashMap::new(),
+        }
     }
 
     pub fn set_image_cache(&mut self, cache: crate::background::image_cache::ImageCache) {
@@ -88,9 +121,26 @@ impl BackgroundRenderer {
         });
         let view = tex.create_view(&wgpu::TextureViewDescriptor::default());
 
-        // Pre-borrow pipelines and layouts to avoid borrow conflicts inside the loop.
-        let image_blit_pipeline = &self.image_blit_pipeline;
-        let image_blit_bgl = &self.image_blit_bgl;
+        // Pre-pass: warm the pipeline caches for all sources that need them.
+        // This must happen before we create the encoder and start borrowing self
+        // immutably through &self.xxx fields.
+        for src in sources {
+            match src {
+                BackgroundSource::Mesh(kind) => {
+                    let mesh_kind = match kind {
+                        crate::background::MeshKind::Aurora => 0u32,
+                        crate::background::MeshKind::Orbs   => 1,
+                        crate::background::MeshKind::Grain  => 2,
+                    };
+                    self.ensure_mesh_pipeline(mesh_kind);
+                }
+                BackgroundSource::Color(_) | BackgroundSource::Gradient(_) => {
+                    let (_, kind, stop_count) = self.uniforms_for(src, [w as f32, h as f32]);
+                    self.ensure_gradient_pipeline(kind, stop_count);
+                }
+                _ => {}
+            }
+        }
 
         let mut encoder = self.device.create_command_encoder(&Default::default());
 
@@ -127,13 +177,13 @@ impl BackgroundRenderer {
                         });
                         let bg = self.device.create_bind_group(&wgpu::BindGroupDescriptor {
                             label: Some("image-bg"),
-                            layout: image_blit_bgl,
+                            layout: &self.image_blit_bgl,
                             entries: &[
                                 wgpu::BindGroupEntry { binding: 0, resource: wgpu::BindingResource::TextureView(&img_view) },
                                 wgpu::BindGroupEntry { binding: 1, resource: wgpu::BindingResource::Sampler(&sampler) },
                             ],
                         });
-                        run_pass(&mut encoder, &view, image_blit_pipeline, &bg, first);
+                        run_pass(&mut encoder, &view, &self.image_blit_pipeline, &bg, first);
                     }
                 }
                 BackgroundSource::Image(crate::background::ImageSource::Static(key)) => {
@@ -147,13 +197,13 @@ impl BackgroundRenderer {
                         });
                         let bg = self.device.create_bind_group(&wgpu::BindGroupDescriptor {
                             label: Some("image-bg"),
-                            layout: image_blit_bgl,
+                            layout: &self.image_blit_bgl,
                             entries: &[
                                 wgpu::BindGroupEntry { binding: 0, resource: wgpu::BindingResource::TextureView(&img_view) },
                                 wgpu::BindGroupEntry { binding: 1, resource: wgpu::BindingResource::Sampler(&sampler) },
                             ],
                         });
-                        run_pass(&mut encoder, &view, image_blit_pipeline, &bg, first);
+                        run_pass(&mut encoder, &view, &self.image_blit_pipeline, &bg, first);
                     }
                 }
                 BackgroundSource::Mesh(kind) => {
@@ -162,7 +212,6 @@ impl BackgroundRenderer {
                         crate::background::MeshKind::Orbs   => 1,
                         crate::background::MeshKind::Grain  => 2,
                     };
-                    let pipeline = self.build_mesh_pipeline(mesh_kind);
                     let u = MeshUniforms { canvas_size: [w as f32, h as f32], time_seconds: 0.0, _pad: 0.0 };
                     let buf = self.device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
                         label: Some("mesh-uniforms"),
@@ -174,11 +223,12 @@ impl BackgroundRenderer {
                         layout: &self.bgl,
                         entries: &[wgpu::BindGroupEntry { binding: 0, resource: buf.as_entire_binding() }],
                     });
-                    run_pass(&mut encoder, &view, &pipeline, &bg, first);
+                    let pipeline = self.mesh_cache.get(&mesh_kind).unwrap();
+                    run_pass(&mut encoder, &view, pipeline, &bg, first);
                 }
                 _ => {
                     let (uniforms, kind, stop_count) = self.uniforms_for(src, [w as f32, h as f32]);
-                    let pipeline = self.build_pipeline(kind, stop_count);
+                    let grad_key = (kind, stop_count.max(1));
                     let buf = self.device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
                         label: Some("bg-uniforms"),
                         contents: bytemuck::bytes_of(&uniforms),
@@ -189,7 +239,8 @@ impl BackgroundRenderer {
                         layout: &self.bgl,
                         entries: &[wgpu::BindGroupEntry { binding: 0, resource: buf.as_entire_binding() }],
                     });
-                    run_pass(&mut encoder, &view, &pipeline, &bg, first);
+                    let pipeline = self.gradient_cache.get(&grad_key).unwrap();
+                    run_pass(&mut encoder, &view, pipeline, &bg, first);
                 }
             }
             first = false;
@@ -265,85 +316,94 @@ impl BackgroundRenderer {
         }
     }
 
-    fn build_mesh_pipeline(&self, mesh_kind: u32) -> wgpu::RenderPipeline {
-        let module = self.device.create_shader_module(wgpu::ShaderModuleDescriptor {
-            label: Some("bg_mesh.wgsl"),
-            source: wgpu::ShaderSource::Wgsl(MESH_SHADER.into()),
-        });
-        let layout = self.device.create_pipeline_layout(&wgpu::PipelineLayoutDescriptor {
-            label: Some("bg-mesh-layout"),
-            bind_group_layouts: &[&self.bgl],
-            push_constant_ranges: &[],
-        });
-        let constants: &[(&str, f64)] = &[("MESH_KIND", mesh_kind as f64)];
-        self.device.create_render_pipeline(&wgpu::RenderPipelineDescriptor {
-            label: Some("bg-mesh-pipeline"),
-            layout: Some(&layout),
-            vertex: wgpu::VertexState {
-                module: &module, entry_point: Some("vs_main"),
-                buffers: &[], compilation_options: wgpu::PipelineCompilationOptions {
-                    constants, zero_initialize_workgroup_memory: false,
+    /// Ensure a mesh pipeline for `mesh_kind` is in the cache and return a key
+    /// so the caller can look it up via `self.mesh_cache.get(&mesh_kind)`.
+    fn ensure_mesh_pipeline(&mut self, mesh_kind: u32) {
+        self.mesh_cache.entry(mesh_kind).or_insert_with(|| {
+            let module = self.device.create_shader_module(wgpu::ShaderModuleDescriptor {
+                label: Some("bg_mesh.wgsl"),
+                source: wgpu::ShaderSource::Wgsl(MESH_SHADER.into()),
+            });
+            let layout = self.device.create_pipeline_layout(&wgpu::PipelineLayoutDescriptor {
+                label: Some("bg-mesh-layout"),
+                bind_group_layouts: &[&self.bgl],
+                push_constant_ranges: &[],
+            });
+            let constants: &[(&str, f64)] = &[("MESH_KIND", mesh_kind as f64)];
+            self.device.create_render_pipeline(&wgpu::RenderPipelineDescriptor {
+                label: Some("bg-mesh-pipeline"),
+                layout: Some(&layout),
+                vertex: wgpu::VertexState {
+                    module: &module, entry_point: Some("vs_main"),
+                    buffers: &[], compilation_options: wgpu::PipelineCompilationOptions {
+                        constants, zero_initialize_workgroup_memory: false,
+                    },
                 },
-            },
-            fragment: Some(wgpu::FragmentState {
-                module: &module, entry_point: Some("fs_main"),
-                targets: &[Some(wgpu::ColorTargetState {
-                    format: wgpu::TextureFormat::Rgba8UnormSrgb,
-                    blend: Some(wgpu::BlendState::ALPHA_BLENDING),
-                    write_mask: wgpu::ColorWrites::ALL,
-                })],
-                compilation_options: wgpu::PipelineCompilationOptions {
-                    constants, zero_initialize_workgroup_memory: false,
-                },
-            }),
-            primitive: wgpu::PrimitiveState::default(),
-            depth_stencil: None,
-            multisample: wgpu::MultisampleState::default(),
-            multiview: None,
-            cache: None,
-        })
+                fragment: Some(wgpu::FragmentState {
+                    module: &module, entry_point: Some("fs_main"),
+                    targets: &[Some(wgpu::ColorTargetState {
+                        format: wgpu::TextureFormat::Rgba8UnormSrgb,
+                        blend: Some(wgpu::BlendState::ALPHA_BLENDING),
+                        write_mask: wgpu::ColorWrites::ALL,
+                    })],
+                    compilation_options: wgpu::PipelineCompilationOptions {
+                        constants, zero_initialize_workgroup_memory: false,
+                    },
+                }),
+                primitive: wgpu::PrimitiveState::default(),
+                depth_stencil: None,
+                multisample: wgpu::MultisampleState::default(),
+                multiview: None,
+                cache: None,
+            })
+        });
     }
 
-    fn build_pipeline(&self, kind: u32, stop_count: u32) -> wgpu::RenderPipeline {
-        let module = self.device.create_shader_module(wgpu::ShaderModuleDescriptor {
-            label: Some("bg_gradient.wgsl"),
-            source: wgpu::ShaderSource::Wgsl(SHADER.into()),
-        });
-        let layout = self.device.create_pipeline_layout(&wgpu::PipelineLayoutDescriptor {
-            label: Some("bg-layout"),
-            bind_group_layouts: &[&self.bgl],
-            push_constant_ranges: &[],
-        });
-        let constants: &[(&str, f64)] = &[
-            ("KIND", kind as f64),
-            ("STOP_COUNT", stop_count.max(1) as f64),
-        ];
-        self.device.create_render_pipeline(&wgpu::RenderPipelineDescriptor {
-            label: Some("bg-pipeline"),
-            layout: Some(&layout),
-            vertex: wgpu::VertexState {
-                module: &module, entry_point: Some("vs_main"),
-                buffers: &[], compilation_options: wgpu::PipelineCompilationOptions {
-                    constants, zero_initialize_workgroup_memory: false,
+    /// Ensure a gradient pipeline for `(kind, stop_count)` is in the cache.
+    fn ensure_gradient_pipeline(&mut self, kind: u32, stop_count: u32) {
+        let key = (kind, stop_count.max(1));
+        self.gradient_cache.entry(key).or_insert_with(|| {
+            let module = self.device.create_shader_module(wgpu::ShaderModuleDescriptor {
+                label: Some("bg_gradient.wgsl"),
+                source: wgpu::ShaderSource::Wgsl(SHADER.into()),
+            });
+            let layout = self.device.create_pipeline_layout(&wgpu::PipelineLayoutDescriptor {
+                label: Some("bg-layout"),
+                bind_group_layouts: &[&self.bgl],
+                push_constant_ranges: &[],
+            });
+            let stop_count_clamped = stop_count.max(1);
+            let constants: &[(&str, f64)] = &[
+                ("KIND", kind as f64),
+                ("STOP_COUNT", stop_count_clamped as f64),
+            ];
+            self.device.create_render_pipeline(&wgpu::RenderPipelineDescriptor {
+                label: Some("bg-pipeline"),
+                layout: Some(&layout),
+                vertex: wgpu::VertexState {
+                    module: &module, entry_point: Some("vs_main"),
+                    buffers: &[], compilation_options: wgpu::PipelineCompilationOptions {
+                        constants, zero_initialize_workgroup_memory: false,
+                    },
                 },
-            },
-            fragment: Some(wgpu::FragmentState {
-                module: &module, entry_point: Some("fs_main"),
-                targets: &[Some(wgpu::ColorTargetState {
-                    format: wgpu::TextureFormat::Rgba8UnormSrgb,
-                    blend: Some(wgpu::BlendState::ALPHA_BLENDING),
-                    write_mask: wgpu::ColorWrites::ALL,
-                })],
-                compilation_options: wgpu::PipelineCompilationOptions {
-                    constants, zero_initialize_workgroup_memory: false,
-                },
-            }),
-            primitive: wgpu::PrimitiveState::default(),
-            depth_stencil: None,
-            multisample: wgpu::MultisampleState::default(),
-            multiview: None,
-            cache: None,
-        })
+                fragment: Some(wgpu::FragmentState {
+                    module: &module, entry_point: Some("fs_main"),
+                    targets: &[Some(wgpu::ColorTargetState {
+                        format: wgpu::TextureFormat::Rgba8UnormSrgb,
+                        blend: Some(wgpu::BlendState::ALPHA_BLENDING),
+                        write_mask: wgpu::ColorWrites::ALL,
+                    })],
+                    compilation_options: wgpu::PipelineCompilationOptions {
+                        constants, zero_initialize_workgroup_memory: false,
+                    },
+                }),
+                primitive: wgpu::PrimitiveState::default(),
+                depth_stencil: None,
+                multisample: wgpu::MultisampleState::default(),
+                multiview: None,
+                cache: None,
+            })
+        });
     }
 }
 

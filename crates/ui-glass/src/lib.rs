@@ -526,3 +526,86 @@ impl Default for LiquidMaterial {
         Self::new()
     }
 }
+
+impl From<MaterialRequest> for LiquidMaterial {
+    fn from(req: MaterialRequest) -> Self {
+        let mut m = match req.depth {
+            GlassDepth::Inline | GlassDepth::Raised => LiquidMaterial::floating().blur(12.0),
+            GlassDepth::Floating => LiquidMaterial::floating(),
+            GlassDepth::Chrome => LiquidMaterial::chrome(),
+            GlassDepth::Overlay | GlassDepth::Modal => LiquidMaterial::overlay(),
+        };
+
+        // Tone → tint (alpha applied below from depth)
+        m.tint = match req.tone {
+            MaterialTone::Neutral => Color::rgba(255, 255, 255, 1.0),
+            MaterialTone::Primary => Color::rgba(0, 102, 204, 1.0),
+            MaterialTone::Success => Color::rgba(36, 138, 61, 1.0),
+            MaterialTone::Warning => Color::rgba(176, 105, 0, 1.0),
+            MaterialTone::Danger => Color::rgba(196, 43, 43, 1.0),
+            MaterialTone::Info => Color::rgba(20, 118, 191, 1.0),
+        };
+        m.tint_alpha = match req.depth {
+            GlassDepth::Inline => 0.58,
+            GlassDepth::Raised => 0.64,
+            GlassDepth::Floating => 0.72,
+            GlassDepth::Chrome => 0.68,
+            GlassDepth::Overlay => 0.80,
+            GlassDepth::Modal => 0.84,
+        };
+
+        // Vibrancy → saturation + dispersion
+        let (sat, disp) = match req.vibrancy {
+            MaterialVibrancy::Muted => (1.3, 0.0),
+            MaterialVibrancy::Standard => (1.6, 1.0),
+            MaterialVibrancy::Vivid => (1.8, 2.0),
+        };
+        m.saturation = sat;
+        if m.features.contains(GlassFeatures::DISPERSE) || disp > 0.0 {
+            m = m.disperse(disp);
+        }
+
+        // Edge → falloff + thickness
+        let (fall, thick) = match req.edge {
+            MaterialEdge::None => (0.0, 1.0),
+            MaterialEdge::Hairline => (1.0, 1.0),
+            MaterialEdge::Standard => (1.5, 1.5),
+            MaterialEdge::Emphasized => (2.5, 2.5),
+        };
+        m.edge_falloff_px = fall;
+        m.thickness_px = thick;
+
+        // Density → radius scaling against current radius_px
+        let scale = match req.density {
+            MaterialDensity::Compact => 0.75,
+            MaterialDensity::Comfortable => 1.0,
+            MaterialDensity::Spacious => 1.4,
+        };
+        m.radius_px *= scale;
+
+        // Policy → feature masking
+        if matches!(
+            req.policy,
+            MaterialPolicy::HighContrast
+                | MaterialPolicy::ReducedTransparency
+                | MaterialPolicy::SolidFallback
+        ) {
+            m.features.remove(
+                GlassFeatures::REFRACT
+                    | GlassFeatures::DISPERSE
+                    | GlassFeatures::SPECULAR
+                    | GlassFeatures::POINTER
+                    | GlassFeatures::SCROLL
+                    | GlassFeatures::AMBIENT_MESH,
+            );
+            m.refraction_strength = 0.0;
+            m.dispersion_px = 0.0;
+            m.light_intensity = 0.0;
+            m.pointer_reactive = false;
+            m.scroll_reactive = false;
+            m.ambient_mesh = None;
+        }
+
+        m
+    }
+}

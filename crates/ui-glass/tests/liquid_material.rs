@@ -186,3 +186,72 @@ fn preset_button_is_pointer_reactive() {
     let m = LiquidMaterial::button();
     assert!(m.features.contains(F::POINTER));
 }
+
+use ui_glass::{
+    GlassDepth, MaterialDensity, MaterialEdge, MaterialPolicy, MaterialRequest, MaterialTone,
+    MaterialVibrancy,
+};
+
+#[test]
+fn material_request_floating_neutral_maps_to_floating_preset_baseline() {
+    let req = MaterialRequest::new(GlassDepth::Floating, MaterialTone::Neutral);
+    let m: LiquidMaterial = req.into();
+    assert!(m.features.contains(F::BLUR));
+    assert!(m.blur_radius_px >= 16.0 && m.blur_radius_px <= 20.0);
+}
+
+#[test]
+fn material_request_modal_maps_to_overlay_preset_strength() {
+    let req = MaterialRequest::new(GlassDepth::Modal, MaterialTone::Primary);
+    let m: LiquidMaterial = req.into();
+    assert!(m.features.contains(F::REFRACT));
+    assert!(m.refraction_strength >= 0.3);
+}
+
+#[test]
+fn material_request_high_contrast_clears_reactive_and_visual_features() {
+    let req = MaterialRequest::new(GlassDepth::Floating, MaterialTone::Neutral)
+        .with_policy(MaterialPolicy::HighContrast);
+    let m: LiquidMaterial = req.into();
+    assert!(!m.features.contains(F::REFRACT));
+    assert!(!m.features.contains(F::DISPERSE));
+    assert!(!m.features.contains(F::SPECULAR));
+    assert!(!m.features.contains(F::POINTER));
+    assert!(!m.features.contains(F::SCROLL));
+    assert!(!m.features.contains(F::AMBIENT_MESH));
+}
+
+#[test]
+fn material_request_vivid_vibrancy_increases_saturation_and_dispersion() {
+    let std = MaterialRequest::new(GlassDepth::Floating, MaterialTone::Neutral)
+        .with_vibrancy(MaterialVibrancy::Standard);
+    let vivid = MaterialRequest::new(GlassDepth::Floating, MaterialTone::Neutral)
+        .with_vibrancy(MaterialVibrancy::Vivid);
+    let ms: LiquidMaterial = std.into();
+    let mv: LiquidMaterial = vivid.into();
+    assert!(mv.saturation > ms.saturation);
+    assert!(mv.dispersion_px >= ms.dispersion_px);
+}
+
+#[test]
+fn material_request_emphasized_edge_increases_falloff_and_thickness() {
+    let hair = MaterialRequest::new(GlassDepth::Floating, MaterialTone::Neutral)
+        .with_edge(MaterialEdge::Hairline);
+    let emph = MaterialRequest::new(GlassDepth::Floating, MaterialTone::Neutral)
+        .with_edge(MaterialEdge::Emphasized);
+    let mh: LiquidMaterial = hair.into();
+    let me: LiquidMaterial = emph.into();
+    assert!(me.edge_falloff_px > mh.edge_falloff_px);
+    assert!(me.thickness_px > mh.thickness_px);
+}
+
+#[test]
+fn material_request_compact_density_reduces_radius() {
+    let comp = MaterialRequest::new(GlassDepth::Floating, MaterialTone::Neutral)
+        .with_density(MaterialDensity::Compact);
+    let spac = MaterialRequest::new(GlassDepth::Floating, MaterialTone::Neutral)
+        .with_density(MaterialDensity::Spacious);
+    let mc: LiquidMaterial = comp.into();
+    let ms: LiquidMaterial = spac.into();
+    assert!(mc.radius_px < ms.radius_px);
+}

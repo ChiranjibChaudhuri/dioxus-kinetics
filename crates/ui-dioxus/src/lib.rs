@@ -10,6 +10,7 @@ mod kinetics;
 mod layout;
 mod navigation;
 mod overlays;
+mod popover;
 
 use dioxus::prelude::*;
 use ui_glass::{GlassDensity, GlassLevel, GlassTone};
@@ -56,6 +57,7 @@ pub use overlays::{
     CommandGroup, CommandItem, CommandMenu, Dialog, DialogAction, DialogActionTone, Toast,
     ToastTone, Tooltip,
 };
+pub use popover::{Popover, PopoverSide};
 pub use overlays::{
     CommandMenu as CommandFinder, Dialog as ModalLayer, Toast as NoticeStack,
     Tooltip as ContextHint,

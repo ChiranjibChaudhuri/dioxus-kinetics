@@ -48,6 +48,7 @@ export const COMPONENT_MANIFEST: ManifestEntry[] = [
   { name: "Dialog", slug: "dialog", status: "ready", layers: { smoke: true, motion: true, visual: true } },
   { name: "Toast", slug: "toast", status: "ready", layers: { smoke: true, motion: true, visual: true } },
   { name: "Tooltip", slug: "tooltip", status: "ready", layers: { smoke: true, motion: true, visual: true } },
+  { name: "Popover", slug: "popover", status: "ready", layers: { smoke: true, motion: false, visual: true } },
   { name: "Alert", slug: "alert", status: "ready", layers: { smoke: true, motion: false, visual: true } },
   { name: "Progress", slug: "progress", status: "ready", layers: { smoke: true, motion: false, visual: true } },
   { name: "Skeleton", slug: "skeleton", status: "ready", layers: { smoke: true, motion: false, visual: true } },

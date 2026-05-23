@@ -206,6 +206,33 @@ pub fn progress_preview() -> Element {
     }
 }
 
+pub fn popover_preview() -> Element {
+    rsx! { PopoverPreviewBody {} }
+}
+
+#[component]
+fn PopoverPreviewBody() -> Element {
+    let mut open = use_signal(|| false);
+    rsx! {
+        Popover {
+            id: "filters-popover",
+            open: *open.read(),
+            side: PopoverSide::Bottom,
+            on_open_change: move |next: bool| open.set(next),
+            trigger: rsx! {
+                Button { variant: ButtonVariant::Secondary, "Filters · 2 active" }
+            },
+            div { style: "display: grid; gap: 8px; min-width: 220px;",
+                strong { "Filter by" }
+                p { style: "margin: 0; color: var(--ui-muted-fg);",
+                    "Replace this content with the consumer's filter form. The popover handles open/close + Escape; you supply the body."
+                }
+                Button { variant: ButtonVariant::Primary, "Apply" }
+            }
+        }
+    }
+}
+
 pub fn skeleton_preview() -> Element {
     rsx! {
         div { class: "gallery-variant-grid gallery-variant-grid--stack",

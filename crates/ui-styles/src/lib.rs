@@ -795,6 +795,31 @@ pub const COMPONENT_CSS: &str = r#"
     font-size: 12px;
 }
 
+.ui-popover-root {
+    position: relative;
+    display: inline-block;
+}
+
+.ui-popover {
+    position: absolute;
+    z-index: 50;
+    min-width: 220px;
+    padding: var(--ui-space-3);
+    background: var(--ui-surface);
+    border: 1px solid var(--ui-border);
+    border-radius: var(--ui-radius-md);
+    box-shadow: var(--ui-elevation-3);
+}
+
+.ui-popover--bottom { top: calc(100% + 6px); left: 0; }
+.ui-popover--top    { bottom: calc(100% + 6px); left: 0; }
+.ui-popover--end    { left: calc(100% + 6px); top: 0; }
+.ui-popover--start  { right: calc(100% + 6px); top: 0; }
+
+.ui-popover-trigger {
+    display: inline-flex;
+}
+
 .ui-command-menu {
     display: grid;
     gap: var(--ui-space-3);

@@ -5,8 +5,8 @@ use crate::previews::{
     capture::capture_stage_preview,
     composition::frame_stage_preview,
     feedback::{
-        alert_preview, dialog_preview, empty_state_preview, progress_preview, skeleton_preview,
-        toast_preview, tooltip_preview,
+        alert_preview, dialog_preview, empty_state_preview, popover_preview, progress_preview,
+        skeleton_preview, toast_preview, tooltip_preview,
     },
     foundations::glass_layer_preview,
     inputs::{checkbox_preview, slider_preview, switch_preview, text_field_preview},
@@ -441,11 +441,11 @@ const COMPONENT_DOCS: [ComponentDoc; 42] = [
     ComponentDoc {
         name: "Popover",
         category: ComponentCategory::Feedback,
-        status: ComponentStatus::ComingSoon,
-        summary: "Stateful overlay anchored to an element, with auto-flip on viewport edges. Foundation for Select, DatePicker, and refined Tooltip.",
-        snippet: "// Spec 6 — Popover + Floating UI positioning",
-        accessibility: "Focus is moved into the popover on open and returned to the trigger on close.",
-        render: None,
+        status: ComponentStatus::Ready,
+        summary: "Anchored overlay panel — minimal viable version with controlled open state, four anchor sides, and Escape-to-dismiss. Foundation for the upcoming Select / DatePicker / Menu overlays; a future spec layers viewport-flip + collision detection.",
+        snippet: POPOVER_SNIPPET,
+        accessibility: "Trigger carries `aria-haspopup=\"dialog\"` + `aria-expanded` + `aria-controls`; the panel is `role=\"dialog\"`.",
+        render: Some(popover_preview),
     },
     ComponentDoc {
         name: "Alert",
@@ -750,6 +750,15 @@ const SKELETON_SNIPPET: &str = r#"Skeleton {
     height: "20px",
     width: "60%",
     radius: "6px",
+}"#;
+
+const POPOVER_SNIPPET: &str = r#"Popover {
+    id: "filters-popover",
+    open: is_open,
+    side: PopoverSide::Bottom,
+    trigger: rsx! { Button { "Filters" } },
+    on_open_change: move |next| set_open(next),
+    div { /* body content */ }
 }"#;
 
 const SLIDER_SNIPPET: &str = r#"Slider {

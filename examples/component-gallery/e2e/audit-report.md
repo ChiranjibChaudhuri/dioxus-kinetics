@@ -1,7 +1,7 @@
 # Component Gallery Audit Report
 
-- Started: 2026-05-23T19:24:30.496Z
-- Finished: 2026-05-23T19:28:35.030Z
+- Started: 2026-05-23T20:10:56.914Z
+- Finished: 2026-05-23T20:15:37.275Z
 
 ## Summary
 
@@ -25,7 +25,7 @@
 | EmptyState | pass | n/a | pass | ready |  |
 | Dialog | pass | pass | pass | ready |  |
 | Toast | pass | pass | pass | ready |  |
-| Tooltip | pass | fail | pass | regression | motion@default: Error: [2mexpect([22m[31mlocator[39m[2m).[22mtoBeVisible[2m([22m[2m)[22m failed |
+| Tooltip | pass | pass | pass | ready |  |
 | Presence | pass | pass | pass | ready |  |
 | PresenceGate | pass | pass | pass | ready |  |
 | KineticBox | pass | pass | pass | ready |  |

@@ -32,6 +32,7 @@ pub use overlays::{
     CommandMenu as CommandFinder, Dialog as ModalLayer, Toast as NoticeStack,
     Tooltip as ContextHint,
 };
+pub use ui_glass_dioxus::{LiquidSurface, LiquidSurfaceProps};
 
 pub use Button as ActionControl;
 pub use GlassSurface as GlassLayer;

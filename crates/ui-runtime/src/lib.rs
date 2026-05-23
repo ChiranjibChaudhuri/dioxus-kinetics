@@ -29,7 +29,9 @@ pub mod waapi;
 #[path = "waapi_stub.rs"]
 pub mod waapi;
 
-pub use animation::{use_animation_value, use_animation_value_from};
+pub use animation::{
+    use_animation_target, use_animation_value, use_animation_value_from, UseAnimationTarget,
+};
 pub use measurement::{use_element_computed_style, use_element_rect, MountedRectCallback};
 pub use presence::{use_presence_animation, use_presence_state};
 pub use reduced_motion::{

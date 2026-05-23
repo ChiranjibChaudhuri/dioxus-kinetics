@@ -1,7 +1,7 @@
 # Component Gallery Audit Report
 
-- Started: 2026-05-23T15:33:55.290Z
-- Finished: 2026-05-23T15:37:51.166Z
+- Started: 2026-05-23T16:47:17.740Z
+- Finished: 2026-05-23T16:52:13.418Z
 
 ## Summary
 
@@ -23,15 +23,15 @@
 | Sidebar | pass | pass | pass | ready |  |
 | MetricCard | pass | n/a | pass | ready |  |
 | EmptyState | pass | n/a | pass | ready |  |
-| Dialog | pass | pass | pass | ready |  |
-| Toast | pass | pass | pass | ready |  |
-| Tooltip | pass | pass | pass | ready |  |
+| Dialog | pass | fail | pass | regression | motion@default: TimeoutError: locator.click: Timeout 10000ms exceeded. |
+| Toast | pass | fail | pass | regression | motion@default: Error: [2mexpect([22m[31mlocator[39m[2m).[22mtoHaveCount[2m([22m[32mexpected[39m[2m)[22m failed |
+| Tooltip | pass | fail | pass | regression | motion@default: Error: [2mexpect([22m[31mlocator[39m[2m).[22mtoBeVisible[2m([22m[2m)[22m failed |
 | Presence | pass | pass | pass | ready |  |
 | PresenceGate | pass | pass | pass | ready |  |
-| KineticBox | pass | pass | pass | ready |  |
-| Sequence | pass | fail | pass | regression | motion@default: Error: [2mexpect([22m[31mreceived[39m[2m).[22mtoBeGreaterThan[2m([22m[32mexpected[39m[2m)[22m |
-| TimelineScope | pass | pass | pass | ready |  |
-| FrameStage | pass | fail | pass | regression | motion@default: Error: [2mexpect([22m[31mlocator[39m[2m).[22mtoBeVisible[2m([22m[2m)[22m failed |
+| KineticBox | pass | fail | pass | regression | motion@default: Error: [2mexpect([22m[31mreceived[39m[2m).[22mtoBeTruthy[2m()[22m |
+| Sequence | pass | fail | pass | regression | motion@default: Error: [2mexpect([22m[31mreceived[39m[2m).[22mtoMatch[2m([22m[32mexpected[39m[2m)[22m |
+| TimelineScope | pass | fail | pass | regression | motion@default: Error: [2mexpect([22m[31mreceived[39m[2m).[22mtoBeLessThanOrEqual[2m([22m[32mexpected[39m[2m)[22m |
+| FrameStage | pass | pass | pass | ready |  |
 | SharedElement | pass | pass | pass | ready |  |
 | SharedLayout | pass | pass | pass | ready |  |
 | CaptureStage | pass | n/a | pass | ready |  |

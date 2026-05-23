@@ -85,7 +85,25 @@ fn fs_main(in: VsOut) -> @location(0) vec4<f32> {
     let sdf = rounded_rect_sdf(local, u.rect.zw * 0.5, u.radius);
     if (sdf > 0.0) { discard; }
 
-    var bg = textureSample(bg_tex, bg_samp, in.uv);
+    // Surface normal approximation from rounded-rect SDF.
+    let half_size = u.rect.zw * 0.5;
+    let edge_dist = half_size - abs(local);
+    let normal = normalize(vec2<f32>(
+        sign(local.x) * (1.0 - smoothstep(0.0, half_size.x * 0.5, edge_dist.x)),
+        sign(local.y) * (1.0 - smoothstep(0.0, half_size.y * 0.5, edge_dist.y))
+    ) + vec2<f32>(1e-5));
+
+    // Refraction-displaced UV.
+    var sample_uv = in.uv;
+    if (FEAT_REFRACT) {
+        let noise = textureSample(noise_tex, noise_samp,
+            in.uv * u.noise_frequency + vec2<f32>(u.noise_seed, 0.0)
+        ).xy * 2.0 - 1.0;
+        let disp = (normal * u.surface_curvature + noise) * u.refract_strength * u.thickness;
+        sample_uv = in.uv + disp * 0.01;
+    }
+
+    var bg = textureSample(bg_tex, bg_samp, sample_uv);
 
     // Saturation + tint mix
     var color = apply_saturation(bg.rgb, u.saturation);

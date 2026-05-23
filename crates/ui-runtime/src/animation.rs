@@ -167,6 +167,7 @@ pub fn use_animation_target(
 }
 
 #[cfg(target_arch = "wasm32")]
+#[derive(Clone)]
 pub struct UseAnimationTarget {
     handle: Rc<RefCell<Option<WaapiAnimation>>>,
     last_target: Rc<RefCell<f32>>,
@@ -178,6 +179,7 @@ pub struct UseAnimationTarget {
 }
 
 #[cfg(not(target_arch = "wasm32"))]
+#[derive(Clone)]
 pub struct UseAnimationTarget;
 
 #[cfg(target_arch = "wasm32")]

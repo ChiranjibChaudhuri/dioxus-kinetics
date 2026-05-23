@@ -1,0 +1,86 @@
+name: Workspace CI
+
+on:
+  pull_request:
+    paths:
+      - "crates/**"
+      - "examples/**"
+      - "Cargo.toml"
+      - "Cargo.lock"
+      - ".github/workflows/ci.yml"
+      - "deny.toml"
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  fmt:
+    name: cargo fmt
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: rustfmt
+      - run: cargo fmt --all -- --check
+
+  clippy:
+    name: cargo clippy
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: clippy
+          targets: wasm32-unknown-unknown
+      - name: Cache Cargo registry + target
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            target
+          key: ${{ runner.os }}-clippy-${{ hashFiles('**/Cargo.lock') }}
+      - name: Clippy (native)
+        run: cargo clippy --workspace --all-targets --no-deps -- -D warnings
+      - name: Clippy (wasm32)
+        run: cargo clippy --workspace --all-targets --no-deps --target wasm32-unknown-unknown -- -D warnings
+
+  test:
+    name: cargo test
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Cache Cargo registry + target
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            target
+          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+      - name: Test (workspace, exclude gpu-headless tests)
+        # ui-glass-engine integration tests require the headless feature
+        # and a GPU. Run the workspace minus those targets.
+        run: |
+          cargo test --workspace --tests \
+            --exclude ui-glass-engine \
+            -- --quiet
+      - name: Test ui-glass-engine (lib only)
+        run: cargo test -p ui-glass-engine --lib -- --quiet
+
+  deny:
+    name: cargo deny
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Install cargo-deny
+        run: cargo install cargo-deny --locked --version 0.16.4
+      - name: cargo deny check
+        run: cargo deny --all-features check advisories bans licenses sources

@@ -1,5 +1,6 @@
-use ui_glass_engine::background::{BackgroundSource, Gradient, GradientStop, MeshKind};
+use ui_glass_engine::background::{BackgroundSource, Gradient, GradientStop, ImageSource, MeshKind};
 use ui_glass_engine::background::render::BackgroundRenderer;
+use ui_glass_engine::background::ImageCache;
 use ui_glass_engine::headless::TestHarness;
 use ui_tokens::Color;
 
@@ -63,4 +64,22 @@ fn orbs_and_grain_produce_distinct_outputs() {
     let orbs = r.render_to_pixels(&[BackgroundSource::Mesh(MeshKind::Orbs)], 32, 32);
     let grain = r.render_to_pixels(&[BackgroundSource::Mesh(MeshKind::Grain)], 32, 32);
     assert_ne!(orbs, grain, "orbs and grain should render differently");
+}
+
+#[test]
+fn dynamic_image_can_be_uploaded_and_sampled() {
+    let h = pollster::block_on(TestHarness::new()).unwrap();
+    let mut cache = ImageCache::new(h.device().clone(), h.queue().clone());
+    let pixels = vec![255u8, 0, 0, 255, 0, 255, 0, 255, 0, 0, 255, 255, 255, 255, 0, 255];
+    let handle = cache.upload_rgba(&pixels, 2, 2);
+    assert!(cache.get(&handle).is_some());
+
+    let mut r = BackgroundRenderer::new(h.device().clone(), h.queue().clone());
+    r.set_image_cache(cache);
+    let out = r.render_to_pixels(
+        &[BackgroundSource::Image(ImageSource::Dynamic(handle))],
+        4, 4,
+    );
+    let nonzero = out.iter().filter(|&&b| b > 16).count();
+    assert!(nonzero > 0, "expected non-black pixels from uploaded image");
 }

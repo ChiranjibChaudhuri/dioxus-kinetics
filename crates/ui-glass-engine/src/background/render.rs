@@ -40,6 +40,9 @@ pub struct BackgroundRenderer {
     device: Arc<wgpu::Device>,
     queue: Arc<wgpu::Queue>,
     bgl: wgpu::BindGroupLayout,
+    image_blit_bgl: wgpu::BindGroupLayout,
+    image_blit_pipeline: wgpu::RenderPipeline,
+    image_cache: Option<crate::background::image_cache::ImageCache>,
 }
 
 impl BackgroundRenderer {
@@ -57,7 +60,13 @@ impl BackgroundRenderer {
                 count: None,
             }],
         });
-        Self { device, queue, bgl }
+        let image_blit_bgl = crate::pipeline::mipmap_bind_group_layout(&device);
+        let image_blit_pipeline = crate::pipeline::build_mipmap_pipeline(&device);
+        Self { device, queue, bgl, image_blit_bgl, image_blit_pipeline, image_cache: None }
+    }
+
+    pub fn set_image_cache(&mut self, cache: crate::background::image_cache::ImageCache) {
+        self.image_cache = Some(cache);
     }
 
     pub fn render_to_texture(
@@ -79,10 +88,54 @@ impl BackgroundRenderer {
         });
         let view = tex.create_view(&wgpu::TextureViewDescriptor::default());
 
+        // Pre-borrow pipelines and layouts to avoid borrow conflicts inside the loop.
+        let image_blit_pipeline = &self.image_blit_pipeline;
+        let image_blit_bgl = &self.image_blit_bgl;
+
         let mut encoder = self.device.create_command_encoder(&Default::default());
         let mut first = true;
         for src in sources {
             match src {
+                BackgroundSource::Image(crate::background::ImageSource::Dynamic(handle)) => {
+                    if let Some(tex_arc) = self.image_cache.as_ref().and_then(|c| c.get(handle)) {
+                        let img_view = tex_arc.create_view(&Default::default());
+                        let sampler = self.device.create_sampler(&wgpu::SamplerDescriptor {
+                            label: Some("image-bg-sampler"),
+                            mag_filter: wgpu::FilterMode::Linear,
+                            min_filter: wgpu::FilterMode::Linear,
+                            ..Default::default()
+                        });
+                        let bg = self.device.create_bind_group(&wgpu::BindGroupDescriptor {
+                            label: Some("image-bg"),
+                            layout: image_blit_bgl,
+                            entries: &[
+                                wgpu::BindGroupEntry { binding: 0, resource: wgpu::BindingResource::TextureView(&img_view) },
+                                wgpu::BindGroupEntry { binding: 1, resource: wgpu::BindingResource::Sampler(&sampler) },
+                            ],
+                        });
+                        run_pass(&mut encoder, &view, image_blit_pipeline, &bg, first);
+                    }
+                }
+                BackgroundSource::Image(crate::background::ImageSource::Static(key)) => {
+                    if let Some(tex_arc) = self.image_cache.as_ref().and_then(|c| c.get_static(key)) {
+                        let img_view = tex_arc.create_view(&Default::default());
+                        let sampler = self.device.create_sampler(&wgpu::SamplerDescriptor {
+                            label: Some("image-bg-sampler"),
+                            mag_filter: wgpu::FilterMode::Linear,
+                            min_filter: wgpu::FilterMode::Linear,
+                            ..Default::default()
+                        });
+                        let bg = self.device.create_bind_group(&wgpu::BindGroupDescriptor {
+                            label: Some("image-bg"),
+                            layout: image_blit_bgl,
+                            entries: &[
+                                wgpu::BindGroupEntry { binding: 0, resource: wgpu::BindingResource::TextureView(&img_view) },
+                                wgpu::BindGroupEntry { binding: 1, resource: wgpu::BindingResource::Sampler(&sampler) },
+                            ],
+                        });
+                        run_pass(&mut encoder, &view, image_blit_pipeline, &bg, first);
+                    }
+                }
                 BackgroundSource::Mesh(kind) => {
                     let mesh_kind = match kind {
                         crate::background::MeshKind::Aurora => 0u32,
@@ -101,7 +154,7 @@ impl BackgroundRenderer {
                         layout: &self.bgl,
                         entries: &[wgpu::BindGroupEntry { binding: 0, resource: buf.as_entire_binding() }],
                     });
-                    self.run_pass(&mut encoder, &view, &pipeline, &bg, first);
+                    run_pass(&mut encoder, &view, &pipeline, &bg, first);
                 }
                 _ => {
                     let (uniforms, kind, stop_count) = self.uniforms_for(src, [w as f32, h as f32]);
@@ -116,7 +169,7 @@ impl BackgroundRenderer {
                         layout: &self.bgl,
                         entries: &[wgpu::BindGroupEntry { binding: 0, resource: buf.as_entire_binding() }],
                     });
-                    self.run_pass(&mut encoder, &view, &pipeline, &bg, first);
+                    run_pass(&mut encoder, &view, &pipeline, &bg, first);
                 }
             }
             first = false;
@@ -272,33 +325,32 @@ impl BackgroundRenderer {
             cache: None,
         })
     }
+}
 
-    fn run_pass(
-        &self,
-        encoder: &mut wgpu::CommandEncoder,
-        view: &wgpu::TextureView,
-        pipeline: &wgpu::RenderPipeline,
-        bind: &wgpu::BindGroup,
-        clear: bool,
-    ) {
-        let mut pass = encoder.begin_render_pass(&wgpu::RenderPassDescriptor {
-            label: Some("bg-source-pass"),
-            color_attachments: &[Some(wgpu::RenderPassColorAttachment {
-                view,
-                resolve_target: None,
-                ops: wgpu::Operations {
-                    load: if clear { wgpu::LoadOp::Clear(wgpu::Color::BLACK) } else { wgpu::LoadOp::Load },
-                    store: wgpu::StoreOp::Store,
-                },
-                depth_slice: None,
-            })],
-            depth_stencil_attachment: None,
-            timestamp_writes: None, occlusion_query_set: None,
-        });
-        pass.set_pipeline(pipeline);
-        pass.set_bind_group(0, bind, &[]);
-        pass.draw(0..3, 0..1);
-    }
+fn run_pass(
+    encoder: &mut wgpu::CommandEncoder,
+    view: &wgpu::TextureView,
+    pipeline: &wgpu::RenderPipeline,
+    bind: &wgpu::BindGroup,
+    clear: bool,
+) {
+    let mut pass = encoder.begin_render_pass(&wgpu::RenderPassDescriptor {
+        label: Some("bg-source-pass"),
+        color_attachments: &[Some(wgpu::RenderPassColorAttachment {
+            view,
+            resolve_target: None,
+            ops: wgpu::Operations {
+                load: if clear { wgpu::LoadOp::Clear(wgpu::Color::BLACK) } else { wgpu::LoadOp::Load },
+                store: wgpu::StoreOp::Store,
+            },
+            depth_slice: None,
+        })],
+        depth_stencil_attachment: None,
+        timestamp_writes: None, occlusion_query_set: None,
+    });
+    pass.set_pipeline(pipeline);
+    pass.set_bind_group(0, bind, &[]);
+    pass.draw(0..3, 0..1);
 }
 
 #[cfg(any(test, feature = "headless"))]

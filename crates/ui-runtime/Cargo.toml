@@ -27,6 +27,10 @@ web-sys = { version = "0.3", features = [
     "Performance",
     "MediaQueryList",
     "console",
+    "Animation",
+    "AnimationEffect",
+    "AnimationPlaybackEvent",
+    "KeyframeEffect",
 ] }
 wasm-bindgen-futures = "0.4"
 

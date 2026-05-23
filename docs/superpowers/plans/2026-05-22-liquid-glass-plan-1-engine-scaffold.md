@@ -2666,3 +2666,10 @@ graph, and feature-toggle plumbing are wired in but Plan 1 only exercises
   in `compose.wgsl` with golden tests per feature.
 - Extend `LiquidMaterial::from(MaterialRequest)` regression tests to cover the
   new visual paths.
+
+---
+
+## Status
+
+Plan 1 complete. Next: Plan 2 — Full Tier 1 shader (refraction, dispersion,
+specular, inner shadow, ambient mesh, tint adapt).

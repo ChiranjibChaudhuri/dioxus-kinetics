@@ -15,7 +15,7 @@ use crate::pipeline::{
 use crate::render_graph::render_glass_to_texture;
 use crate::uniforms::GlassUniforms;
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, PartialEq)]
 pub struct GlassRegion {
     pub rect_px: [f32; 4], // x, y, w, h
     pub material: LiquidMaterial,

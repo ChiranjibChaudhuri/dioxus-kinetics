@@ -69,6 +69,37 @@ pub fn LiquidSurface(props: LiquidSurfaceProps) -> Element {
     // MotionListenersGuard (removes gloo-events listeners).
     let live: Rc<RefCell<Option<LiveResources>>> = use_hook(|| Rc::new(RefCell::new(None)));
 
+    // Step 1: Signal holding the current GlassRegion, built from props.
+    // GlassRegion derives Clone + PartialEq so Signal<GlassRegion> is valid.
+    let region: Signal<ui_glass_engine::GlassRegion> = use_signal(|| {
+        let r = props.rect.unwrap_or([0.0, 0.0, props.width as f32, props.height as f32]);
+        let mut gr = ui_glass_engine::GlassRegion::new(r, props.material);
+        if let Some(bg) = props.background.clone() {
+            gr = gr.with_background(bg);
+        }
+        gr
+    });
+
+    // Step 2: Re-build and update the region signal whenever props change.
+    let material = props.material;
+    let background = props.background.clone();
+    let rect = props.rect;
+    let width = props.width;
+    let height = props.height;
+
+    {
+        let mut region = region;
+        let background = background.clone();
+        use_effect(move || {
+            let r = rect.unwrap_or([0.0, 0.0, width as f32, height as f32]);
+            let mut gr = ui_glass_engine::GlassRegion::new(r, material);
+            if let Some(bg) = background.clone() {
+                gr = gr.with_background(bg);
+            }
+            region.set(gr);
+        });
+    }
+
     let inline_style = format!(
         "position: relative; display: inline-block; width: {}px; height: {}px;",
         props.width, props.height,
@@ -76,12 +107,6 @@ pub fn LiquidSurface(props: LiquidSurfaceProps) -> Element {
     let canvas_style = "position: absolute; inset: 0; width: 100%; height: 100%; \
                         z-index: 0; pointer-events: none; display: block;";
     let foreground_style = "position: absolute; inset: 0; z-index: 1; pointer-events: auto;";
-
-    let material = props.material;
-    let background = props.background.clone();
-    let rect = props.rect;
-    let width = props.width;
-    let height = props.height;
 
     rsx! {
         div {
@@ -99,9 +124,7 @@ pub fn LiquidSurface(props: LiquidSurfaceProps) -> Element {
                         surface_state,
                         motion_state,
                         live.clone(),
-                        material,
-                        background.clone(),
-                        rect,
+                        region,
                         width,
                         height,
                     );
@@ -121,9 +144,7 @@ fn handle_canvas_mounted(
     mut surface_state: Signal<Option<SurfaceState>>,
     motion_state: Signal<MotionState>,
     live: Rc<RefCell<Option<LiveResources>>>,
-    material: LiquidMaterial,
-    background: Option<BackgroundSource>,
-    rect: Option<[f32; 4]>,
+    region: Signal<ui_glass_engine::GlassRegion>,
     width: u32,
     height: u32,
 ) {
@@ -146,7 +167,7 @@ fn handle_canvas_mounted(
         if let Some(state) = SurfaceState::from_canvas(canvas, physical_size).await {
             surface_state.set(Some(state));
             let listeners = crate::motion_bridge::attach_listeners(&canvas_for_listeners, motion_state);
-            let frame = start_frame_loop(surface_state, motion_state, material, background, rect, width, height);
+            let frame = start_frame_loop(surface_state, motion_state, region, width, height);
             live.borrow_mut().replace(LiveResources { _frame: frame, _listeners: listeners });
         }
     });
@@ -158,37 +179,25 @@ fn handle_canvas_mounted(
     _surface_state: Signal<Option<SurfaceState>>,
     _motion_state: Signal<MotionState>,
     _live: Rc<RefCell<Option<LiveResources>>>,
-    _material: LiquidMaterial,
-    _background: Option<BackgroundSource>,
-    _rect: Option<[f32; 4]>,
+    _region: Signal<ui_glass_engine::GlassRegion>,
     _width: u32,
     _height: u32,
 ) {
     // No-op on non-web (Blitz/native canvas integration deferred).
 }
 
+// Step 3: start_frame_loop now accepts Signal<GlassRegion> instead of individual
+// material/background/rect props. Each frame it reads the current region from the
+// signal, so prop changes are reflected immediately without restarting the loop.
 #[cfg(target_arch = "wasm32")]
 fn start_frame_loop(
     surface_state: Signal<Option<SurfaceState>>,
     mut motion_state: Signal<MotionState>,
-    material: LiquidMaterial,
-    background: Option<BackgroundSource>,
-    rect: Option<[f32; 4]>,
+    region: Signal<ui_glass_engine::GlassRegion>,
     width: u32,
     height: u32,
 ) -> ui_runtime::scheduler::FrameHandle {
     use ui_runtime::scheduler::{spawn_frame_loop, ControlFlow};
-    use ui_glass_engine::GlassRegion;
-
-    // Build the region once.
-    let region_template = {
-        let r = rect.unwrap_or([0.0, 0.0, width as f32, height as f32]);
-        let mut gr = GlassRegion::new(r, material);
-        if let Some(bg) = background.clone() {
-            gr = gr.with_background(bg);
-        }
-        gr
-    };
 
     let start_time = web_sys::window()
         .and_then(|w| w.performance())
@@ -198,7 +207,10 @@ fn start_frame_loop(
     let mut surface_state = surface_state;
 
     let handle = spawn_frame_loop(move |_dt_ms| {
-        let region = region_template.clone();
+        // Clone region each frame (shallow: LiquidMaterial is Copy,
+        // Option<BackgroundSource> has a small Vec for gradient stops).
+        let region_owned: ui_glass_engine::GlassRegion = region.read().clone();
+
         let mut state_opt = surface_state.write();
         let Some(state) = state_opt.as_mut() else {
             return ControlFlow::Continue;
@@ -243,7 +255,7 @@ fn start_frame_loop(
             &bg_view,
             &output_view,
             [width as f32, height as f32],
-            &[region],
+            std::slice::from_ref(&region_owned),
         );
 
         // 4. Present

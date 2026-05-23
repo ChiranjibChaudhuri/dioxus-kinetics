@@ -6,6 +6,7 @@
 //! the design that drives this crate. Plan 1 covers the engine scaffold,
 //! pipeline cache, and minimal shader (blur + SDF + tint).
 
+pub mod background;
 pub mod compositor;
 pub mod noise;
 pub mod pipeline;

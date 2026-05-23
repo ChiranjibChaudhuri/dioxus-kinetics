@@ -485,6 +485,28 @@ the active production runtime.
 - Animation worklet integration.
 - New cue families (color-interpolate, path-along, etc.).
 
+## Errata (recorded in Spec 3)
+
+The following spec-vs-implementation drift was discovered during the
+Spec 2 audit and resolved either at implementation time or carried
+forward to Spec 3:
+
+- The gallery's preference-bar toggles are `<button role="radio" onclick>`,
+  NOT `<input type="radio" onchange>`. The plan's `selectRadio` snippet
+  prescribed `dispatchEvent("input"/"change")`, which doesn't fire the
+  onclick handler. The actual fix used `.click({ force: true })` to
+  bypass Playwright's actionability check while keeping a real click
+  event. Future versions of this spec should describe the actual DOM.
+- The "Architecture Overview" promised that `use_animation_value_from`'s
+  RAF loop would be replaced by WAAPI; Spec 2 in fact retained the RAF
+  loop as a fallback path and let WAAPI run in parallel. Spec 3 makes
+  the parallelism conditional on WAAPI-unsupported environments only.
+- `ReducedMotionProvider`'s reactive listener was deferred to Spec 3.
+  Spec 2 shipped the static probe + provider component.
+- `kinetics_waapi::play_cue_on_mount` (in `crates/ui-dioxus/src/kinetics.rs`)
+  ended up as a second WAAPI play site, parallel to
+  `use_animation_target`. Spec 3 consolidates them.
+
 The connection between this spec and a future Spec 3 (View Transitions)
 is the `MountedHandle` lookup added here — Spec 3 will reuse it to
 snapshot bounding boxes before the layout swap and animate the deltas

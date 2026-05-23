@@ -58,17 +58,60 @@ fn body_attr_reduced() -> bool {
 
 /// Provides a `ReducedMotion` context to children, sourced from
 /// `prefers-reduced-motion` + the nearest `[data-ui-motion]` attribute.
-/// Listens for media-query changes and updates the signal reactively.
+/// Listens for media-query changes and for `data-ui-motion` mutations
+/// on the body element so the context updates reactively.
 #[component]
 pub fn ReducedMotionProvider(children: Element) -> Element {
-    let reduced = use_signal(detect_reduced_motion_at_root);
+    #[allow(unused_mut)]
+    let mut reduced = use_signal(detect_reduced_motion_at_root);
     use_context_provider(|| ReducedMotion(*reduced.read()));
 
-    // The media-query listener for reactive change is out of scope for
-    // this task (Spec 2 ships the static probe; reactive updates land
-    // when use_animation_value is migrated). Hooks still see the latest
-    // value on each re-render.
-    let _ = reduced;
+    #[cfg(target_arch = "wasm32")]
+    use_effect(move || {
+        use wasm_bindgen::prelude::Closure;
+        use wasm_bindgen::JsCast;
+
+        let Some(window) = web_sys::window() else { return };
+
+        // 1. MediaQueryList listener for prefers-reduced-motion changes.
+        let mql = window
+            .match_media("(prefers-reduced-motion: reduce)")
+            .ok()
+            .flatten();
+        if let Some(mql) = mql {
+            let mut signal = reduced;
+            let closure = Closure::wrap(Box::new(move |_evt: web_sys::Event| {
+                signal.set(detect_reduced_motion_at_root());
+            }) as Box<dyn FnMut(_)>);
+            let _ = mql.add_event_listener_with_callback(
+                "change",
+                closure.as_ref().unchecked_ref(),
+            );
+            closure.forget();
+        }
+
+        // 2. MutationObserver on body for data-ui-motion attribute changes.
+        if let Some(document) = window.document() {
+            if let Some(body) = document.body() {
+                let mut signal = reduced;
+                let cb = Closure::wrap(Box::new(move |_records: js_sys::Array,
+                                                     _obs: web_sys::MutationObserver| {
+                    signal.set(detect_reduced_motion_at_root());
+                })
+                    as Box<dyn FnMut(_, _)>);
+                if let Ok(observer) = web_sys::MutationObserver::new(cb.as_ref().unchecked_ref()) {
+                    let init = js_sys::Object::new();
+                    js_sys::Reflect::set(&init, &"attributes".into(), &true.into()).ok();
+                    js_sys::Reflect::set(&init, &"subtree".into(), &true.into()).ok();
+                    let filter = js_sys::Array::new();
+                    filter.push(&"data-ui-motion".into());
+                    js_sys::Reflect::set(&init, &"attributeFilter".into(), &filter).ok();
+                    let _ = observer.observe_with_options(&body, init.unchecked_ref());
+                }
+                cb.forget();
+            }
+        }
+    });
 
     rsx! { {children} }
 }

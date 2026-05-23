@@ -56,6 +56,20 @@ pub fn use_animation_value_from(
             return;
         }
 
+        #[cfg(target_arch = "wasm32")]
+        if crate::waapi::is_supported() {
+            // WAAPI owns in-flight interpolation; the Rust-side signal
+            // jumps to the target value synchronously. The visible motion
+            // is driven by the consumer's `UseAnimationTarget::play_on(element)`
+            // call from its `onmounted` handler. We do NOT spawn a RAF
+            // loop here; doing so would race against the compositor's
+            // keyframe interpolation and produce the pointer-events
+            // flakiness Spec 2's audit surfaced on Dialog/Toast/Tooltip.
+            *context.handle.borrow_mut() = None;
+            value.set(current_target);
+            return;
+        }
+
         let start = value();
         *context.elapsed_ms.borrow_mut() = 0.0;
         *context.start_value.borrow_mut() = start;
@@ -135,6 +149,7 @@ pub fn use_animation_target(
         transition,
         reduced,
         property,
+        delay_ms: 0.0,
     };
 
     (attach, value)
@@ -152,6 +167,7 @@ pub fn use_animation_target(
 }
 
 #[cfg(target_arch = "wasm32")]
+#[derive(Clone)]
 pub struct UseAnimationTarget {
     handle: Rc<RefCell<Option<WaapiAnimation>>>,
     last_target: Rc<RefCell<f32>>,
@@ -159,9 +175,11 @@ pub struct UseAnimationTarget {
     transition: Transition,
     reduced: bool,
     property: AnimatedProperty,
+    delay_ms: f32,
 }
 
 #[cfg(not(target_arch = "wasm32"))]
+#[derive(Clone)]
 pub struct UseAnimationTarget;
 
 #[cfg(target_arch = "wasm32")]
@@ -183,7 +201,7 @@ impl UseAnimationTarget {
         *self.last_target.borrow_mut() = self.target;
         let keyframes = keyframes_for_transition(current_value, self.target, self.transition);
         let js_keyframes = keyframes_to_js(self.property, &keyframes);
-        let js_options = options_object(keyframes.duration_ms);
+        let js_options = options_object(keyframes.duration_ms, self.delay_ms);
         // keyframes_to_js returns JsValue directly per T6 — no .into() needed.
         if let Some(animation) = WaapiAnimation::play(element, &js_keyframes, &js_options) {
             *self.handle.borrow_mut() = Some(animation);
@@ -194,6 +212,21 @@ impl UseAnimationTarget {
         if let Some(handle) = self.handle.borrow_mut().take() {
             handle.cancel();
         }
+    }
+
+    /// Sets the WAAPI `delay` option (ms) for the next `play_on` call.
+    /// Used by stagger consumers (e.g. `Sequence` cues with non-zero
+    /// `start_ms`). Negative values are clamped to 0.
+    pub fn with_delay(mut self, delay_ms: f32) -> Self {
+        self.delay_ms = delay_ms.max(0.0);
+        self
+    }
+}
+
+#[cfg(not(target_arch = "wasm32"))]
+impl UseAnimationTarget {
+    pub fn with_delay(self, _delay_ms: f32) -> Self {
+        self
     }
 }
 

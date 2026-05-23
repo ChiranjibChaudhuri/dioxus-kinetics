@@ -32,4 +32,4 @@ impl WaapiAnimation {
 pub fn keyframes_to_js(_prop: AnimatedProperty, _keyframes: &Keyframes) {}
 
 #[allow(dead_code)]
-pub fn options_object(_duration_ms: f32) {}
+pub fn options_object(_duration_ms: f32, _delay_ms: f32) {}

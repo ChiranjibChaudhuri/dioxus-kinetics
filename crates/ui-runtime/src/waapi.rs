@@ -63,7 +63,8 @@ fn property_kv(prop: AnimatedProperty, frame: &Keyframe) -> (String, String) {
 }
 
 /// Construct the `options` object: `{ duration, easing: "linear", fill: "forwards" }`.
-pub fn options_object(duration_ms: f32) -> JsValue {
+/// If `delay_ms > 0`, a `delay` key is also set.
+pub fn options_object(duration_ms: f32, delay_ms: f32) -> JsValue {
     let obj = js_sys::Object::new();
     js_sys::Reflect::set(
         &obj,
@@ -71,6 +72,14 @@ pub fn options_object(duration_ms: f32) -> JsValue {
         &JsValue::from_f64(duration_ms as f64),
     )
     .ok();
+    if delay_ms > 0.0 {
+        js_sys::Reflect::set(
+            &obj,
+            &JsValue::from_str("delay"),
+            &JsValue::from_f64(delay_ms as f64),
+        )
+        .ok();
+    }
     js_sys::Reflect::set(&obj, &JsValue::from_str("easing"), &JsValue::from_str("linear")).ok();
     js_sys::Reflect::set(&obj, &JsValue::from_str("fill"), &JsValue::from_str("forwards")).ok();
     obj.into()

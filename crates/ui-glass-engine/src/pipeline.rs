@@ -103,6 +103,108 @@ pub fn build_blur_pipeline(
     })
 }
 
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
+pub struct ComposeKey {
+    pub features: ui_glass::GlassFeatures,
+}
+
+pub fn compose_bind_group_layout(device: &Arc<wgpu::Device>) -> wgpu::BindGroupLayout {
+    device.create_bind_group_layout(&wgpu::BindGroupLayoutDescriptor {
+        label: Some("compose-bgl"),
+        entries: &[
+            wgpu::BindGroupLayoutEntry {
+                binding: 0,
+                visibility: wgpu::ShaderStages::FRAGMENT,
+                ty: wgpu::BindingType::Buffer {
+                    ty: wgpu::BufferBindingType::Uniform,
+                    has_dynamic_offset: false,
+                    min_binding_size: None,
+                },
+                count: None,
+            },
+            wgpu::BindGroupLayoutEntry {
+                binding: 1,
+                visibility: wgpu::ShaderStages::FRAGMENT,
+                ty: wgpu::BindingType::Texture {
+                    sample_type: wgpu::TextureSampleType::Float { filterable: true },
+                    view_dimension: wgpu::TextureViewDimension::D2,
+                    multisampled: false,
+                },
+                count: None,
+            },
+            wgpu::BindGroupLayoutEntry {
+                binding: 2,
+                visibility: wgpu::ShaderStages::FRAGMENT,
+                ty: wgpu::BindingType::Sampler(wgpu::SamplerBindingType::Filtering),
+                count: None,
+            },
+        ],
+    })
+}
+
+pub fn build_compose_pipeline(
+    device: &Arc<wgpu::Device>,
+    key: ComposeKey,
+) -> wgpu::RenderPipeline {
+    use ui_glass::GlassFeatures as F;
+    let module = device.create_shader_module(wgpu::ShaderModuleDescriptor {
+        label: Some("compose.wgsl"),
+        source: wgpu::ShaderSource::Wgsl(COMPOSE_SRC.into()),
+    });
+
+    let bgl = compose_bind_group_layout(device);
+    let layout = device.create_pipeline_layout(&wgpu::PipelineLayoutDescriptor {
+        label: Some("compose-layout"),
+        bind_group_layouts: &[&bgl],
+        push_constant_ranges: &[],
+    });
+
+    let f = key.features;
+    let constants: &[(&str, f64)] = &[
+        ("FEAT_BLUR",         if f.contains(F::BLUR)         { 1.0 } else { 0.0 }),
+        ("FEAT_REFRACT",      if f.contains(F::REFRACT)      { 1.0 } else { 0.0 }),
+        ("FEAT_DISPERSE",     if f.contains(F::DISPERSE)     { 1.0 } else { 0.0 }),
+        ("FEAT_SPECULAR",     if f.contains(F::SPECULAR)     { 1.0 } else { 0.0 }),
+        ("FEAT_INNER_SHADOW", if f.contains(F::INNER_SHADOW) { 1.0 } else { 0.0 }),
+        ("FEAT_AMBIENT_MESH", if f.contains(F::AMBIENT_MESH) { 1.0 } else { 0.0 }),
+        ("FEAT_POINTER",      if f.contains(F::POINTER)      { 1.0 } else { 0.0 }),
+        ("FEAT_SCROLL",       if f.contains(F::SCROLL)       { 1.0 } else { 0.0 }),
+        ("FEAT_TINT_ADAPT",   if f.contains(F::TINT_ADAPT)   { 1.0 } else { 0.0 }),
+    ];
+
+    device.create_render_pipeline(&wgpu::RenderPipelineDescriptor {
+        label: Some("compose-pipeline"),
+        layout: Some(&layout),
+        vertex: wgpu::VertexState {
+            module: &module,
+            entry_point: Some("vs_main"),
+            buffers: &[],
+            compilation_options: wgpu::PipelineCompilationOptions {
+                constants,
+                zero_initialize_workgroup_memory: false,
+            },
+        },
+        fragment: Some(wgpu::FragmentState {
+            module: &module,
+            entry_point: Some("fs_main"),
+            targets: &[Some(wgpu::ColorTargetState {
+                format: wgpu::TextureFormat::Rgba8UnormSrgb,
+                blend: Some(wgpu::BlendState::PREMULTIPLIED_ALPHA_BLENDING),
+                write_mask: wgpu::ColorWrites::ALL,
+            })],
+            compilation_options: wgpu::PipelineCompilationOptions {
+                constants,
+                zero_initialize_workgroup_memory: false,
+            },
+        }),
+        primitive: wgpu::PrimitiveState::default(),
+        depth_stencil: None,
+        multisample: wgpu::MultisampleState::default(),
+        multiview: None,
+        cache: None,
+    })
+}
+
 pub fn blur_bind_group_layout(device: &Arc<wgpu::Device>) -> wgpu::BindGroupLayout {
     device.create_bind_group_layout(&wgpu::BindGroupLayoutDescriptor {
         label: Some("blur-bgl"),

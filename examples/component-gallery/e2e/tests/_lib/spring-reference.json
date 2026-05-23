@@ -1,0 +1,11 @@
+{
+  "presets": {
+    "snappy": {
+      "damping": 34.0,
+      "mass": 1.0,
+      "settling_ms": 311.6657409667969,
+      "stiffness": 420.0
+    }
+  },
+  "tolerance": 0.004999999888241291
+}

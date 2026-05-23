@@ -18,6 +18,8 @@ pub mod uniforms;
 #[cfg(feature = "headless")]
 pub mod headless;
 
+pub mod svg_fallback;
+
 pub use capabilities::{detect, Capabilities, Tier};
 pub use compositor::{Compositor, GlassRegion};
 pub use motion::MotionInputs;

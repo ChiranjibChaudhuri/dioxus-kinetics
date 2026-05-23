@@ -205,6 +205,12 @@ pub fn build_compose_pipeline(
     })
 }
 
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
+pub struct BlurKey {
+    pub direction: BlurDirection,
+    pub taps: u32,
+}
+
 pub fn blur_bind_group_layout(device: &Arc<wgpu::Device>) -> wgpu::BindGroupLayout {
     device.create_bind_group_layout(&wgpu::BindGroupLayoutDescriptor {
         label: Some("blur-bgl"),

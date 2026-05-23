@@ -1,13 +1,15 @@
-//! Public render entry point. Holds device/queue and exposes a single
-//! `render()` call that does an end-to-end frame. Plan 1 creates pipelines
-//! per render call; Plan 2 introduces the pipeline cache keyed by
-//! `(GlassFeatures, BLUR_TAPS)`.
+//! Public render entry point. Owns the wgpu device/queue and two pipeline
+//! caches: one keyed by `ComposeKey` (compose pipelines), one keyed by
+//! `BlurKey` (blur pipelines per direction × tap count).
 
+use std::collections::HashMap;
 use std::sync::Arc;
 
 use ui_glass::LiquidMaterial;
 
-use crate::pipeline::ComposeKey;
+use crate::pipeline::{
+    build_blur_pipeline, build_compose_pipeline, BlurDirection, BlurKey, ComposeKey,
+};
 use crate::render_graph::render_glass_to_texture;
 use crate::uniforms::GlassUniforms;
 
@@ -20,17 +22,36 @@ pub struct GlassRegion {
 pub struct Compositor {
     device: Arc<wgpu::Device>,
     queue: Arc<wgpu::Queue>,
+    compose_cache: HashMap<ComposeKey, wgpu::RenderPipeline>,
+    blur_cache: HashMap<BlurKey, wgpu::RenderPipeline>,
 }
 
 impl Compositor {
     pub fn new(device: Arc<wgpu::Device>, queue: Arc<wgpu::Queue>) -> Self {
-        Self { device, queue }
+        Self {
+            device,
+            queue,
+            compose_cache: HashMap::new(),
+            blur_cache: HashMap::new(),
+        }
     }
 
-    /// End-to-end render: bg → blur → compose → output.
-    /// Plan 1 supports any number of regions; each is rendered in order with a
-    /// fresh pipeline (no cache yet). Multi-region overlap with correct
-    /// compositing lands in Plan 4 (background scene contract).
+    pub fn pipeline_cache_len(&self) -> usize {
+        self.compose_cache.len() + self.blur_cache.len()
+    }
+
+    fn ensure_compose(&mut self, key: ComposeKey) -> &wgpu::RenderPipeline {
+        self.compose_cache
+            .entry(key)
+            .or_insert_with(|| build_compose_pipeline(&self.device, key))
+    }
+
+    fn ensure_blur(&mut self, key: BlurKey) -> &wgpu::RenderPipeline {
+        self.blur_cache
+            .entry(key)
+            .or_insert_with(|| build_blur_pipeline(&self.device, key.direction, key.taps))
+    }
+
     pub fn render(
         &mut self,
         bg_view: &wgpu::TextureView,
@@ -40,8 +61,8 @@ impl Compositor {
     ) {
         debug_assert!(
             regions.len() <= 1,
-            "Plan 1 multi-region renders overwrite each other; correct \
-             overlap compositing lands in Plan 4",
+            "Plan 1/2 multi-region renders overwrite each other; correct \
+             overlap compositing lands in Plan 3",
         );
         for region in regions {
             let uniforms = GlassUniforms::from_material(
@@ -49,14 +70,29 @@ impl Compositor {
                 region.rect_px,
                 canvas_size,
             );
-            let key = ComposeKey { features: region.material.features };
+            let compose_key = ComposeKey { features: region.material.features };
+            let blur_h_key = BlurKey { direction: BlurDirection::Horizontal, taps: 13 };
+            let blur_v_key = BlurKey { direction: BlurDirection::Vertical, taps: 13 };
+
+            // Materialize pipelines up front so the immutable borrow in
+            // render_glass_to_texture doesn't conflict with the mutable cache.
+            let _ = self.ensure_compose(compose_key);
+            let _ = self.ensure_blur(blur_h_key);
+            let _ = self.ensure_blur(blur_v_key);
+
+            let compose = self.compose_cache.get(&compose_key).unwrap();
+            let blur_h = self.blur_cache.get(&blur_h_key).unwrap();
+            let blur_v = self.blur_cache.get(&blur_v_key).unwrap();
+
             render_glass_to_texture(
                 &self.device,
                 &self.queue,
                 bg_view,
                 output_view,
                 &uniforms,
-                key,
+                blur_h,
+                blur_v,
+                compose,
             );
         }
     }

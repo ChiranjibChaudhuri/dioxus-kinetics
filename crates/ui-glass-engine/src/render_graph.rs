@@ -4,10 +4,7 @@
 use std::sync::Arc;
 use wgpu::util::DeviceExt;
 
-use crate::pipeline::{
-    blur_bind_group_layout, build_blur_pipeline, build_compose_pipeline, compose_bind_group_layout,
-    BlurDirection, ComposeKey,
-};
+use crate::pipeline::{blur_bind_group_layout, compose_bind_group_layout};
 use crate::uniforms::{BlurUniforms, GlassUniforms};
 
 /// One end-to-end pass: input bg texture → output RGBA8 texture, with the
@@ -19,7 +16,9 @@ pub fn render_glass_to_texture(
     bg_view: &wgpu::TextureView,
     output_view: &wgpu::TextureView,
     uniforms: &GlassUniforms,
-    compose_key: ComposeKey,
+    blur_h_pipeline: &wgpu::RenderPipeline,
+    blur_v_pipeline: &wgpu::RenderPipeline,
+    compose_pipeline: &wgpu::RenderPipeline,
 ) {
     let (w, h) = (uniforms.canvas_size[0] as u32, uniforms.canvas_size[1] as u32);
 
@@ -79,9 +78,6 @@ pub fn render_glass_to_texture(
         ],
     });
 
-    let blur_h_pipeline = build_blur_pipeline(device, BlurDirection::Horizontal, 13);
-    let blur_v_pipeline = build_blur_pipeline(device, BlurDirection::Vertical, 13);
-
     // Compose uniform + bind
     let compose_buf = device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
         label: Some("compose-uniforms"),
@@ -98,8 +94,6 @@ pub fn render_glass_to_texture(
             wgpu::BindGroupEntry { binding: 2, resource: wgpu::BindingResource::Sampler(&sampler) },
         ],
     });
-
-    let compose_pipeline = build_compose_pipeline(device, compose_key);
 
     let mut encoder = device.create_command_encoder(&wgpu::CommandEncoderDescriptor {
         label: Some("glass-frame"),
@@ -137,9 +131,9 @@ pub fn render_glass_to_texture(
         pass.draw(0..3, 0..1);
     }
 
-    run_pass(&mut encoder, &scratch_h_view, &blur_h_pipeline, &bg_h, "blur-h", true);
-    run_pass(&mut encoder, &scratch_v_view, &blur_v_pipeline, &bg_v, "blur-v", true);
-    run_pass(&mut encoder, output_view, &compose_pipeline, &compose_bg, "compose", true);
+    run_pass(&mut encoder, &scratch_h_view, blur_h_pipeline, &bg_h, "blur-h", true);
+    run_pass(&mut encoder, &scratch_v_view, blur_v_pipeline, &bg_v, "blur-v", true);
+    run_pass(&mut encoder, output_view, compose_pipeline, &compose_bg, "compose", true);
 
     queue.submit(Some(encoder.finish()));
 }

@@ -29,7 +29,8 @@ pub use presence::{use_presence_animation, use_presence_state};
 pub use reduced_motion::{use_reduced_motion, ReducedMotion};
 pub use scheduler::{spawn_frame_loop, ControlFlow, FrameHandle};
 pub use shared::{
-    use_shared_element_registry, ElementSnapshot, SharedElementRegistry, SharedTransition,
+    now_ms, use_shared_element_registry, ElementSnapshot, SharedElementRegistry, SharedTransition,
+    SHARED_SNAPSHOT_STALENESS_MS,
 };
 pub use state::{advance_presence, PresenceInputs, PresenceState, PresenceTransition};
 pub use timeline::use_timeline_sample;

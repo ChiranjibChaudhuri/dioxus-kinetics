@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 use ui_layout::Rect;
-use ui_runtime::shared::{ElementSnapshot, SharedElementRegistry};
+use ui_runtime::shared::{now_ms, ElementSnapshot, SharedElementRegistry};
 
 fn snapshot(x: f32, y: f32) -> ElementSnapshot {
     ElementSnapshot {
@@ -8,6 +8,14 @@ fn snapshot(x: f32, y: f32) -> ElementSnapshot {
         computed: HashMap::new(),
         timestamp_ms: 0.0,
     }
+}
+
+#[test]
+fn now_ms_returns_positive_increasing_value() {
+    let a = now_ms();
+    let b = now_ms();
+    assert!(a > 0.0, "now_ms should return a non-zero clock reading");
+    assert!(b >= a, "now_ms should be monotonic non-decreasing on a single thread");
 }
 
 #[test]

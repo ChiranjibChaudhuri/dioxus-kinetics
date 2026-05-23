@@ -9,10 +9,37 @@ use dioxus::prelude::*;
 use ui_layout::Rect;
 use ui_motion::{Ease, Transition};
 
+/// Snapshots older than this are treated as cold and do not seed a FLIP
+/// animation. Matches the design spec for SharedElement cross-tree matching.
+pub const SHARED_SNAPSHOT_STALENESS_MS: f64 = 500.0;
+
+/// Monotonic-ish millisecond clock. On web this is `performance.now()`; on
+/// native it is the wall clock since the unix epoch. Callers should treat
+/// values as opaque and only compare deltas.
+#[cfg(target_arch = "wasm32")]
+pub fn now_ms() -> f64 {
+    web_sys::window()
+        .and_then(|w| w.performance())
+        .map(|p| p.now())
+        .unwrap_or(0.0)
+}
+
+#[cfg(not(target_arch = "wasm32"))]
+pub fn now_ms() -> f64 {
+    use std::time::{SystemTime, UNIX_EPOCH};
+    SystemTime::now()
+        .duration_since(UNIX_EPOCH)
+        .map(|d| d.as_secs_f64() * 1000.0)
+        .unwrap_or(0.0)
+}
+
 #[derive(Clone, Debug, PartialEq)]
 pub struct ElementSnapshot {
     pub rect: Rect,
     pub computed: HashMap<&'static str, String>,
+    /// `now_ms()` value at the moment the snapshot was recorded. Consumers
+    /// compare against `now_ms()` to detect stale snapshots before seeding a
+    /// FLIP animation; see `SHARED_SNAPSHOT_STALENESS_MS`.
     pub timestamp_ms: f64,
 }
 

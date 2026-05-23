@@ -121,9 +121,18 @@ impl TestHarness {
 
         let slice = readback.slice(..);
         let (tx, rx) = std::sync::mpsc::channel();
-        slice.map_async(wgpu::MapMode::Read, move |r| { tx.send(r).unwrap(); });
+        slice.map_async(wgpu::MapMode::Read, move |r| {
+            // Receiver is on the same thread and outlives this closure, but if
+            // it has been dropped (harness teardown) we silently bail — wgpu's
+            // callback thread is the wrong place to panic.
+            let _ = tx.send(r);
+        });
         let _ = self.device.poll(wgpu::PollType::Wait);
-        rx.recv().unwrap().unwrap();
+        match rx.recv() {
+            Ok(Ok(())) => {}
+            Ok(Err(e)) => panic!("test harness map_async reported wgpu error: {e:?}"),
+            Err(e) => panic!("test harness channel closed before wgpu callback fired: {e:?}"),
+        }
         let data = slice.get_mapped_range();
 
         let mut out = Vec::with_capacity((w * h * 4) as usize);

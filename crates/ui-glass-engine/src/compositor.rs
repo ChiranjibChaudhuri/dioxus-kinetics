@@ -213,9 +213,18 @@ impl Compositor {
         }
         self.queue.submit(Some(clear_enc.finish()));
 
-        let compose = self.compose_cache.get(&compose_key).unwrap();
-        let blur_h = self.blur_cache.get(&blur_h_key).unwrap();
-        let blur_v = self.blur_cache.get(&blur_v_key).unwrap();
+        let compose = self
+            .compose_cache
+            .get(&compose_key)
+            .expect("compose pipeline just inserted via ensure_compose");
+        let blur_h = self
+            .blur_cache
+            .get(&blur_h_key)
+            .expect("horizontal blur pipeline just inserted via ensure_blur");
+        let blur_v = self
+            .blur_cache
+            .get(&blur_v_key)
+            .expect("vertical blur pipeline just inserted via ensure_blur");
         let mut uniforms = uniforms_override;
         uniforms.rect = rect_px;
         uniforms.canvas_size = canvas_size;
@@ -454,9 +463,18 @@ impl Compositor {
                 .map(|(_, view)| view)
                 .unwrap_or(resolved_bg_view);
 
-            let compose = self.compose_cache.get(&compose_key).unwrap();
-            let blur_h = self.blur_cache.get(&blur_h_key).unwrap();
-            let blur_v = self.blur_cache.get(&blur_v_key).unwrap();
+            let compose = self
+                .compose_cache
+                .get(&compose_key)
+                .expect("compose pipeline just inserted via ensure_compose");
+            let blur_h = self
+                .blur_cache
+                .get(&blur_h_key)
+                .expect("horizontal blur pipeline just inserted via ensure_blur");
+            let blur_v = self
+                .blur_cache
+                .get(&blur_v_key)
+                .expect("vertical blur pipeline just inserted via ensure_blur");
 
             render_glass_to_texture(
                 &self.device,

@@ -463,9 +463,18 @@ fn read_back(
     queue.submit(Some(enc.finish()));
     let slice = buf.slice(..);
     let (tx, rx) = std::sync::mpsc::channel();
-    slice.map_async(wgpu::MapMode::Read, move |r| { tx.send(r).unwrap(); });
+    slice.map_async(wgpu::MapMode::Read, move |r| {
+        // If the receiver side has been dropped the harness is being torn down;
+        // there is nothing useful to do here, so swallow the send error rather
+        // than panicking inside wgpu's callback thread.
+        let _ = tx.send(r);
+    });
     let _ = device.poll(wgpu::PollType::Wait);
-    rx.recv().unwrap().unwrap();
+    match rx.recv() {
+        Ok(Ok(())) => {}
+        Ok(Err(e)) => panic!("bg readback map_async reported wgpu error: {e:?}"),
+        Err(e) => panic!("bg readback channel closed before wgpu callback fired: {e:?}"),
+    }
     let data = slice.get_mapped_range();
     let mut out = Vec::with_capacity((w * h * 4) as usize);
     for row in 0..h {

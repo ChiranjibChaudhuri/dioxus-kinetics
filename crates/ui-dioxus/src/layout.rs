@@ -5,8 +5,9 @@ use dioxus::prelude::*;
 use ui_layout::{compute_flip, FlipDelta};
 use ui_motion::{apply_ease, Ease, Transition};
 use ui_runtime::{
-    spawn_frame_loop, use_element_computed_style, use_element_rect, use_shared_element_registry,
-    ControlFlow, ElementSnapshot, FrameHandle, SharedElementRegistry, SharedTransition,
+    now_ms, spawn_frame_loop, use_element_computed_style, use_element_rect,
+    use_shared_element_registry, ControlFlow, ElementSnapshot, FrameHandle, SharedElementRegistry,
+    SharedTransition, SHARED_SNAPSHOT_STALENESS_MS,
 };
 
 const TRACKED_PROPERTIES: &[&str] = &["border-radius", "background-color", "color", "opacity"];
@@ -55,6 +56,7 @@ pub fn SharedElement(
         let reg = registry.read().clone();
         let prev_snapshot = reg.snapshot(&id_for_effect);
         let computed_snapshot = computed.read().clone();
+        let now = now_ms();
 
         // Always record the latest snapshot so future remounts can FLIP from
         // this position.
@@ -63,13 +65,20 @@ pub fn SharedElement(
             ElementSnapshot {
                 rect: current_rect,
                 computed: computed_snapshot,
-                timestamp_ms: 0.0,
+                timestamp_ms: now,
             },
         );
 
         let Some(prev) = prev_snapshot else {
             return;
         };
+        // Cold snapshots (e.g. left over from a much earlier page state) must
+        // not seed a FLIP — animating from a position the user hasn't seen in
+        // seconds looks like a teleport, not a transition.
+        if (now - prev.timestamp_ms) > SHARED_SNAPSHOT_STALENESS_MS {
+            style_signal.set(String::new());
+            return;
+        }
         let delta = compute_flip(prev.rect, current_rect);
         if delta_is_identity(&delta) {
             style_signal.set(String::new());

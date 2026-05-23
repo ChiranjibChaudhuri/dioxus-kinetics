@@ -593,6 +593,180 @@ pub const COMPONENT_CSS: &str = r#"
 
 [data-ui-motion="reduced"] .ui-skeleton { animation: none; }
 
+.ui-breadcrumb-list,
+.ui-pagination-list {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--ui-space-2);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.ui-breadcrumb-link {
+    color: var(--ui-muted-fg);
+    text-decoration: none;
+}
+
+.ui-breadcrumb-link:hover { color: var(--ui-fg); text-decoration: underline; }
+
+.ui-breadcrumb-sep {
+    color: var(--ui-muted-fg);
+    margin: 0 var(--ui-space-1);
+}
+
+.ui-breadcrumb-current {
+    color: var(--ui-fg);
+    font-weight: 600;
+}
+
+.ui-pagination-button {
+    min-width: 32px;
+    padding: 4px 10px;
+    border: 1px solid var(--ui-border);
+    border-radius: var(--ui-radius-md);
+    background: var(--ui-surface);
+    color: var(--ui-fg);
+    cursor: pointer;
+    font: inherit;
+}
+
+.ui-pagination-button[disabled] { opacity: 0.45; cursor: not-allowed; }
+
+.ui-pagination-button--current {
+    background: var(--ui-accent);
+    color: var(--ui-on-accent, #fff);
+    border-color: var(--ui-accent);
+}
+
+.ui-pagination-item--ellipsis {
+    color: var(--ui-muted-fg);
+    padding: 0 var(--ui-space-1);
+}
+
+.ui-stepper-list {
+    display: flex;
+    flex-direction: row;
+    gap: var(--ui-space-3);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.ui-stepper--vertical .ui-stepper-list { flex-direction: column; }
+
+.ui-stepper-trigger {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--ui-space-2);
+    background: none;
+    border: none;
+    padding: 4px 8px;
+    cursor: pointer;
+    color: var(--ui-muted-fg);
+    font: inherit;
+    text-align: left;
+}
+
+.ui-stepper-marker {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: var(--ui-surface-muted);
+    color: var(--ui-fg);
+    font-weight: 700;
+}
+
+.ui-stepper-step--active .ui-stepper-trigger { color: var(--ui-fg); }
+.ui-stepper-step--active .ui-stepper-marker {
+    background: var(--ui-accent);
+    color: var(--ui-on-accent, #fff);
+}
+.ui-stepper-step--complete .ui-stepper-marker {
+    background: color-mix(in srgb, var(--ui-success), transparent 70%);
+    color: var(--ui-success);
+}
+
+.ui-stepper-body { display: grid; gap: 2px; }
+.ui-stepper-label { font-weight: 600; }
+.ui-stepper-description { color: var(--ui-muted-fg); font-size: 12px; }
+
+.ui-segmented {
+    display: inline-flex;
+    padding: 2px;
+    background: var(--ui-surface-muted);
+    border: 1px solid var(--ui-border);
+    border-radius: var(--ui-radius-md);
+}
+
+.ui-segmented-option {
+    background: transparent;
+    border: none;
+    color: var(--ui-muted-fg);
+    padding: 4px 12px;
+    border-radius: calc(var(--ui-radius-md) - 2px);
+    cursor: pointer;
+    font: inherit;
+}
+
+.ui-segmented-option--selected {
+    background: var(--ui-surface);
+    color: var(--ui-fg);
+    box-shadow: var(--ui-elevation-1);
+    font-weight: 600;
+}
+
+.ui-accordion {
+    display: grid;
+    gap: var(--ui-space-2);
+}
+
+.ui-accordion-section {
+    border: 1px solid var(--ui-border);
+    border-radius: var(--ui-radius-md);
+    background: var(--ui-surface);
+    overflow: hidden;
+}
+
+.ui-accordion-heading { margin: 0; }
+
+.ui-accordion-trigger {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: var(--ui-space-2);
+    padding: var(--ui-space-3) var(--ui-space-4);
+    background: none;
+    border: none;
+    color: var(--ui-fg);
+    font: inherit;
+    font-weight: 600;
+    text-align: left;
+    cursor: pointer;
+}
+
+.ui-accordion-trigger[disabled] { opacity: 0.45; cursor: not-allowed; }
+
+.ui-accordion-marker {
+    width: 18px;
+    height: 18px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--ui-muted-fg);
+    font-weight: 800;
+}
+
+.ui-accordion-region {
+    padding: 0 var(--ui-space-4) var(--ui-space-3);
+    color: var(--ui-muted-fg);
+    line-height: 1.45;
+}
+
 .ui-command-menu {
     display: grid;
     gap: var(--ui-space-3);

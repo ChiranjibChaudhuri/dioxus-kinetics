@@ -3,6 +3,8 @@
 /dist/
 /node_modules/
 /.worktrees/
+/.claude/
+/Reading_material/
 Cargo.lock
 *.pdb
 *.log

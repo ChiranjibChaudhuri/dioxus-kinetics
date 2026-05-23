@@ -11,12 +11,15 @@ use crate::previews::{
     foundations::glass_layer_preview,
     inputs::{checkbox_preview, switch_preview, text_field_preview},
     liquid_glass::liquid_surface_preview,
-    layout::{stack_preview, tabs_preview},
+    layout::{accordion_preview, stack_preview, tabs_preview},
     motion::{
         kinetic_box_preview, kinetic_text_preview, presence_gate_preview, presence_preview,
         sequence_preview, timeline_scope_preview,
     },
-    navigation::sidebar_preview,
+    navigation::{
+        breadcrumb_preview, pagination_preview, segmented_control_preview, sidebar_preview,
+        stepper_preview,
+    },
     shared::{shared_element_preview, shared_layout_preview},
     surfaces::{glass_surface_preview, metric_card_preview, surface_preview},
 };
@@ -429,11 +432,11 @@ const COMPONENT_DOCS: [ComponentDoc; 42] = [
     ComponentDoc {
         name: "SegmentedControl",
         category: ComponentCategory::Inputs,
-        status: ComponentStatus::ComingSoon,
-        summary: "Mutually-exclusive choice picker rendered as a button group, complementing radio inputs for short option sets.",
-        snippet: "// Spec 11 — SegmentedControl",
-        accessibility: "WAI-ARIA radiogroup with visible group label.",
-        render: None,
+        status: ComponentStatus::Ready,
+        summary: "Mutually-exclusive choice picker rendered as a button group, complementing radio inputs for short option sets like view-mode switchers.",
+        snippet: SEGMENTED_CONTROL_SNIPPET,
+        accessibility: "`role=\"radiogroup\"` with `aria-label`; each option carries `role=\"radio\"` + `aria-checked`.",
+        render: Some(segmented_control_preview),
     },
     ComponentDoc {
         name: "Popover",
@@ -483,38 +486,38 @@ const COMPONENT_DOCS: [ComponentDoc; 42] = [
     ComponentDoc {
         name: "Pagination",
         category: ComponentCategory::DataWorkflows,
-        status: ComponentStatus::ComingSoon,
-        summary: "Page-jump control for data-heavy lists. Cursor and offset modes; integrates with DataTable.",
-        snippet: "// Spec 8 — Pagination (sibling to DataTable)",
-        accessibility: "Navigation landmark with current-page `aria-current=\"page\"`.",
-        render: None,
+        status: ComponentStatus::Ready,
+        summary: "Offset-style page-jump control for data-heavy lists. Renders first/current±1/last with ellipsis fills; prev/next buttons disabled at boundaries.",
+        snippet: PAGINATION_SNIPPET,
+        accessibility: "`<nav aria-label>` landmark; current page emits `aria-current=\"page\"`; per-button `aria-label` reads each page number.",
+        render: Some(pagination_preview),
     },
     ComponentDoc {
         name: "Breadcrumb",
         category: ComponentCategory::Navigation,
-        status: ComponentStatus::ComingSoon,
-        summary: "Hierarchical wayfinding trail with collapse-on-overflow for deep navigation contexts.",
-        snippet: "// Spec 14 — Breadcrumb",
-        accessibility: "Navigation landmark; last item announces as the current location.",
-        render: None,
+        status: ComponentStatus::Ready,
+        summary: "Hierarchical wayfinding trail. The last item renders as the current location (no link, `aria-current=\"page\"`); earlier items are anchor links separated by a visual divider.",
+        snippet: BREADCRUMB_SNIPPET,
+        accessibility: "`<nav aria-label>` landmark with ordered list; the divider character is `aria-hidden`.",
+        render: Some(breadcrumb_preview),
     },
     ComponentDoc {
         name: "Stepper",
         category: ComponentCategory::Navigation,
-        status: ComponentStatus::ComingSoon,
-        summary: "Multi-step workflow tracker with completed/active/upcoming states. Horizontal and vertical orientations.",
-        snippet: "// Spec 14 — Stepper / Wizard",
-        accessibility: "Ordered list with per-step status announced via `aria-current` and visually-hidden text.",
-        render: None,
+        status: ComponentStatus::Ready,
+        summary: "Multi-step workflow tracker with completed / active / upcoming states. Horizontal and vertical orientations; each step is clickable.",
+        snippet: STEPPER_SNIPPET,
+        accessibility: "Ordered list with per-step status announced via `aria-current=\"step\"` on the active step and visually-hidden state text on every step.",
+        render: Some(stepper_preview),
     },
     ComponentDoc {
         name: "Accordion",
         category: ComponentCategory::Layout,
-        status: ComponentStatus::ComingSoon,
-        summary: "Collapsible content sections with single- and multi-expand modes. Pairs with `Presence` for entrance motion.",
-        snippet: "// Spec 15 — Accordion",
-        accessibility: "WAI-ARIA disclosure pattern (button + region with `aria-expanded`).",
-        render: None,
+        status: ComponentStatus::Ready,
+        summary: "Collapsible content sections with single- or multi-expand behaviour (controlled by the consumer). Disabled-section support; renders a `+`/`−` marker per section.",
+        snippet: ACCORDION_SNIPPET,
+        accessibility: "WAI-ARIA disclosure pattern: each header is a `<button>` with `aria-expanded` + `aria-controls`; the region carries `role=\"region\"` + `aria-labelledby`.",
+        render: Some(accordion_preview),
     },
 ];
 
@@ -747,4 +750,45 @@ const SKELETON_SNIPPET: &str = r#"Skeleton {
     height: "20px",
     width: "60%",
     radius: "6px",
+}"#;
+
+const SEGMENTED_CONTROL_SNIPPET: &str = r#"SegmentedControl {
+    options: vec![
+        SegmentItem::new("grid", "Grid"),
+        SegmentItem::new("list", "List"),
+    ],
+    selected: "grid",
+    group_label: "View mode",
+}"#;
+
+const PAGINATION_SNIPPET: &str = r#"Pagination {
+    page: 3,
+    total_pages: 12,
+    on_select: move |p: u32| /* navigate */ {},
+}"#;
+
+const BREADCRUMB_SNIPPET: &str = r##"Breadcrumb {
+    items: vec![
+        BreadcrumbItem::link("Workspaces", "#"),
+        BreadcrumbItem::link("Acme Ops", "#"),
+        BreadcrumbItem::current("Reports"),
+    ],
+}"##;
+
+const STEPPER_SNIPPET: &str = r#"Stepper {
+    steps: vec![
+        StepperStep::new("plan", "Plan"),
+        StepperStep::new("checkout", "Checkout"),
+        StepperStep::new("review", "Review"),
+    ],
+    current: "checkout",
+}"#;
+
+const ACCORDION_SNIPPET: &str = r#"Accordion {
+    sections: vec![
+        AccordionSection::new("billing", "Billing", "Payment + invoices"),
+        AccordionSection::new("members", "Team", "Invite teammates"),
+    ],
+    expanded: vec!["billing"],
+    on_toggle: move |id: String| { /* update */ },
 }"#;

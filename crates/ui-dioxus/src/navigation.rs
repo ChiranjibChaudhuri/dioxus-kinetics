@@ -1,5 +1,339 @@
 use dioxus::prelude::*;
 
+/// One crumb in a `Breadcrumb` trail.
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct BreadcrumbItem {
+    pub label: String,
+    /// Optional anchor target. When empty, the crumb renders as a
+    /// non-link span (typically the current page).
+    pub href: String,
+}
+
+impl BreadcrumbItem {
+    pub fn link(label: impl Into<String>, href: impl Into<String>) -> Self {
+        Self {
+            label: label.into(),
+            href: href.into(),
+        }
+    }
+
+    pub fn current(label: impl Into<String>) -> Self {
+        Self {
+            label: label.into(),
+            href: String::new(),
+        }
+    }
+}
+
+/// Hierarchical wayfinding trail. The last item is rendered as the
+/// current location (no link, `aria-current="page"`); earlier items are
+/// anchor links separated by a `›` divider.
+#[component]
+pub fn Breadcrumb(
+    items: Vec<BreadcrumbItem>,
+    #[props(default = "Breadcrumb".to_string())] aria_label: String,
+) -> Element {
+    if items.is_empty() {
+        return rsx! {};
+    }
+    let last_idx = items.len() - 1;
+    rsx! {
+        nav { class: "ui-breadcrumb", "aria-label": "{aria_label}",
+            ol { class: "ui-breadcrumb-list",
+                for (idx, item) in items.iter().cloned().enumerate() {
+                    li { class: "ui-breadcrumb-item",
+                        if idx == last_idx || item.href.is_empty() {
+                            span { class: "ui-breadcrumb-current", "aria-current": "page", "{item.label}" }
+                        } else {
+                            a { class: "ui-breadcrumb-link", href: "{item.href}", "{item.label}" }
+                            span { class: "ui-breadcrumb-sep", "aria-hidden": "true", "›" }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+/// One step in a `Stepper`. `id` is returned via `on_select`; `label` is
+/// the visible text; `description` (optional) adds a small subtitle.
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct StepperStep {
+    pub id: String,
+    pub label: String,
+    pub description: String,
+}
+
+impl StepperStep {
+    pub fn new(id: impl Into<String>, label: impl Into<String>) -> Self {
+        Self {
+            id: id.into(),
+            label: label.into(),
+            description: String::new(),
+        }
+    }
+
+    pub fn with_description(mut self, description: impl Into<String>) -> Self {
+        self.description = description.into();
+        self
+    }
+}
+
+/// Multi-step workflow indicator. Marks each step `completed`, `active`,
+/// or `upcoming` based on its index relative to the `current` id.
+#[component]
+pub fn Stepper(
+    steps: Vec<StepperStep>,
+    current: String,
+    #[props(default = false)] vertical: bool,
+    on_select: Option<EventHandler<String>>,
+) -> Element {
+    let active_idx = steps
+        .iter()
+        .position(|s| s.id == current)
+        .unwrap_or(0);
+    let direction_class = if vertical {
+        "ui-stepper ui-stepper--vertical"
+    } else {
+        "ui-stepper ui-stepper--horizontal"
+    };
+    rsx! {
+        nav { class: "{direction_class}", "aria-label": "Progress",
+            ol { class: "ui-stepper-list",
+                for (idx, step) in steps.iter().cloned().enumerate() {
+                    {
+                        let step_id = step.id.clone();
+                        let is_active = idx == active_idx;
+                        let is_complete = idx < active_idx;
+                        let state_class = if is_active {
+                            "ui-stepper-step ui-stepper-step--active"
+                        } else if is_complete {
+                            "ui-stepper-step ui-stepper-step--complete"
+                        } else {
+                            "ui-stepper-step ui-stepper-step--upcoming"
+                        };
+                        let state_text = if is_active {
+                            "current step"
+                        } else if is_complete {
+                            "completed"
+                        } else {
+                            "upcoming"
+                        };
+                        rsx! {
+                            li { class: "{state_class}",
+                                button {
+                                    class: "ui-stepper-trigger",
+                                    r#type: "button",
+                                    "aria-current": if is_active { "step" } else { "" },
+                                    onclick: move |_| {
+                                        if let Some(handler) = &on_select {
+                                            handler.call(step_id.clone());
+                                        }
+                                    },
+                                    span { class: "ui-stepper-marker", "aria-hidden": "true", "{idx + 1}" }
+                                    span { class: "ui-stepper-body",
+                                        strong { class: "ui-stepper-label", "{step.label}" }
+                                        if !step.description.is_empty() {
+                                            span { class: "ui-stepper-description", "{step.description}" }
+                                        }
+                                    }
+                                    span { class: "visually-hidden", " — {state_text}" }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+/// One page button in a `Pagination` control.
+fn pagination_button(
+    page: u32,
+    current: u32,
+    on_select: &Option<EventHandler<u32>>,
+) -> Element {
+    let is_current = page == current;
+    let class = if is_current {
+        "ui-pagination-button ui-pagination-button--current"
+    } else {
+        "ui-pagination-button"
+    };
+    let on_select = on_select.clone();
+    rsx! {
+        li { class: "ui-pagination-item",
+            button {
+                class: "{class}",
+                r#type: "button",
+                "aria-current": if is_current { "page" } else { "" },
+                "aria-label": "Page {page}",
+                onclick: move |_| {
+                    if let Some(handler) = &on_select {
+                        handler.call(page);
+                    }
+                },
+                "{page}"
+            }
+        }
+    }
+}
+
+/// Offset-style pagination for data-heavy lists. Shows first, current
+/// (with one neighbour on each side), and last pages; ellipses fill in
+/// any gaps. Prev/Next buttons are always rendered (disabled at
+/// boundaries).
+#[component]
+pub fn Pagination(
+    page: u32,
+    total_pages: u32,
+    on_select: Option<EventHandler<u32>>,
+    #[props(default = "Pagination".to_string())] aria_label: String,
+) -> Element {
+    if total_pages <= 1 {
+        return rsx! {};
+    }
+    let current = page.clamp(1, total_pages);
+
+    // Build the visible page set: 1, current-1, current, current+1, total
+    let mut visible: Vec<u32> = vec![1, total_pages];
+    for delta in -1i32..=1 {
+        let p = current as i32 + delta;
+        if (1..=total_pages as i32).contains(&p) {
+            visible.push(p as u32);
+        }
+    }
+    visible.sort();
+    visible.dedup();
+
+    rsx! {
+        nav { class: "ui-pagination", "aria-label": "{aria_label}",
+            ul { class: "ui-pagination-list",
+                li { class: "ui-pagination-item",
+                    button {
+                        class: "ui-pagination-button ui-pagination-prev",
+                        r#type: "button",
+                        disabled: current == 1,
+                        "aria-label": "Previous page",
+                        onclick: {
+                            let on_select = on_select.clone();
+                            move |_| {
+                                if current > 1 {
+                                    if let Some(handler) = &on_select {
+                                        handler.call(current - 1);
+                                    }
+                                }
+                            }
+                        },
+                        "‹"
+                    }
+                }
+                {
+                    let mut last_emitted: Option<u32> = None;
+                    rsx! {
+                        for p in visible.iter().copied() {
+                            if let Some(prev) = last_emitted {
+                                if p > prev + 1 {
+                                    li { class: "ui-pagination-item ui-pagination-item--ellipsis",
+                                        span { "aria-hidden": "true", "…" }
+                                        span { class: "visually-hidden", "More pages" }
+                                    }
+                                }
+                            }
+                            {
+                                last_emitted = Some(p);
+                                pagination_button(p, current, &on_select)
+                            }
+                        }
+                    }
+                }
+                li { class: "ui-pagination-item",
+                    button {
+                        class: "ui-pagination-button ui-pagination-next",
+                        r#type: "button",
+                        disabled: current == total_pages,
+                        "aria-label": "Next page",
+                        onclick: {
+                            let on_select = on_select.clone();
+                            move |_| {
+                                if current < total_pages {
+                                    if let Some(handler) = &on_select {
+                                        handler.call(current + 1);
+                                    }
+                                }
+                            }
+                        },
+                        "›"
+                    }
+                }
+            }
+        }
+    }
+}
+
+/// One option in a `SegmentedControl`. The `value` is returned via
+/// `on_select` when clicked; `label` is the visible text.
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct SegmentItem {
+    pub value: String,
+    pub label: String,
+}
+
+impl SegmentItem {
+    pub fn new(value: impl Into<String>, label: impl Into<String>) -> Self {
+        Self {
+            value: value.into(),
+            label: label.into(),
+        }
+    }
+}
+
+/// Mutually-exclusive choice picker rendered as a button group.
+/// Functionally equivalent to a radio group but laid out as a single
+/// connected control — useful for short, related options (e.g.,
+/// view-mode switchers). Carries `role="radiogroup"` + per-item
+/// `role="radio"` so assistive tech announces the pattern correctly.
+#[component]
+pub fn SegmentedControl(
+    options: Vec<SegmentItem>,
+    selected: String,
+    #[props(default = String::new())] group_label: String,
+    on_select: Option<EventHandler<String>>,
+) -> Element {
+    rsx! {
+        div {
+            class: "ui-segmented",
+            role: "radiogroup",
+            "aria-label": "{group_label}",
+            for option in options {
+                {
+                    let is_selected = option.value == selected;
+                    let class = if is_selected {
+                        "ui-segmented-option ui-segmented-option--selected"
+                    } else {
+                        "ui-segmented-option"
+                    };
+                    let value = option.value.clone();
+                    rsx! {
+                        button {
+                            class: "{class}",
+                            role: "radio",
+                            r#type: "button",
+                            "aria-checked": if is_selected { "true" } else { "false" },
+                            onclick: move |_| {
+                                if let Some(handler) = &on_select {
+                                    handler.call(value.clone());
+                                }
+                            },
+                            "{option.label}"
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct TabItem {
     pub value: String,

@@ -32,10 +32,15 @@ export const COMPONENT_MANIFEST: ManifestEntry[] = [
   { name: "TextField", slug: "text-field", status: "ready", layers: { smoke: true, motion: false, visual: true } },
   { name: "Checkbox", slug: "checkbox", status: "ready", layers: { smoke: true, motion: false, visual: true } },
   { name: "Switch", slug: "switch", status: "ready", layers: { smoke: true, motion: true, visual: true } },
+  { name: "SegmentedControl", slug: "segmented-control", status: "ready", layers: { smoke: true, motion: false, visual: true } },
   // Layout
   { name: "Stack", slug: "stack", status: "ready", layers: { smoke: true, motion: false, visual: true } },
   { name: "Tabs", slug: "tabs", status: "ready", layers: { smoke: true, motion: true, visual: true } },
   { name: "Sidebar", slug: "sidebar", status: "ready", layers: { smoke: true, motion: true, visual: true } },
+  { name: "Breadcrumb", slug: "breadcrumb", status: "ready", layers: { smoke: true, motion: false, visual: true } },
+  { name: "Pagination", slug: "pagination", status: "ready", layers: { smoke: true, motion: false, visual: true } },
+  { name: "Stepper", slug: "stepper", status: "ready", layers: { smoke: true, motion: false, visual: true } },
+  { name: "Accordion", slug: "accordion", status: "ready", layers: { smoke: true, motion: false, visual: true } },
   // Surfaces / Feedback / Misc
   { name: "MetricCard", slug: "metric-card", status: "ready", layers: { smoke: true, motion: false, visual: true } },
   { name: "EmptyState", slug: "empty-state", status: "ready", layers: { smoke: true, motion: false, visual: true } },

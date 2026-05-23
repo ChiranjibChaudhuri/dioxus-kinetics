@@ -1,5 +1,6 @@
 #![forbid(unsafe_code)]
 
+mod accordion;
 mod buttons;
 mod capture;
 mod composition;
@@ -31,6 +32,7 @@ use ui_glass::{GlassDensity, GlassLevel, GlassTone};
 // test in `crates/kinetics/tests/prelude.rs`, which pins both surfaces.
 // ---------------------------------------------------------------------------
 
+pub use accordion::{Accordion, AccordionSection};
 pub use buttons::{IconButton, IconButtonSize, IconButtonTone};
 pub use capture::CaptureStage;
 pub use composition::{FrameClip, FrameLayer, FrameStage};
@@ -45,7 +47,10 @@ pub use kinetics::{
     TimelineScope,
 };
 pub use layout::{SharedElement, SharedLayout};
-pub use navigation::{Sidebar, SidebarItem, SidebarSection, TabItem, TabPanel, Tabs, Toolbar};
+pub use navigation::{
+    Breadcrumb, BreadcrumbItem, Pagination, SegmentItem, SegmentedControl, Sidebar, SidebarItem,
+    SidebarSection, Stepper, StepperStep, TabItem, TabPanel, Tabs, Toolbar,
+};
 pub use navigation::{Sidebar as NavigationRail, Tabs as ViewSwitcher, Toolbar as ActionBar};
 pub use overlays::{
     CommandGroup, CommandItem, CommandMenu, Dialog, DialogAction, DialogActionTone, Toast,

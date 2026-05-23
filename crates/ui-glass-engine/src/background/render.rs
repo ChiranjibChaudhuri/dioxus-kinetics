@@ -93,6 +93,26 @@ impl BackgroundRenderer {
         let image_blit_bgl = &self.image_blit_bgl;
 
         let mut encoder = self.device.create_command_encoder(&Default::default());
+
+        // Empty source list: issue a clear pass so the texture is defined (black).
+        if sources.is_empty() {
+            let _pass = encoder.begin_render_pass(&wgpu::RenderPassDescriptor {
+                label: Some("bg-empty-clear"),
+                color_attachments: &[Some(wgpu::RenderPassColorAttachment {
+                    view: &view,
+                    resolve_target: None,
+                    ops: wgpu::Operations {
+                        load: wgpu::LoadOp::Clear(wgpu::Color::BLACK),
+                        store: wgpu::StoreOp::Store,
+                    },
+                    depth_slice: None,
+                })],
+                depth_stencil_attachment: None,
+                timestamp_writes: None,
+                occlusion_query_set: None,
+            });
+        }
+
         let mut first = true;
         for src in sources {
             match src {

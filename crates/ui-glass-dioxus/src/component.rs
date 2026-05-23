@@ -107,11 +107,13 @@ fn handle_canvas_mounted(
     use crate::web::{canvas_from_mounted, resize_canvas_to_css_size};
     let Some(canvas) = canvas_from_mounted(&evt) else { return; };
     let physical_size = resize_canvas_to_css_size(&canvas);
+    let canvas_for_listeners = canvas.clone();
 
     spawn(async move {
         if let Some(state) = SurfaceState::from_canvas(canvas, physical_size).await {
             surface_state.set(Some(state));
-            // Task 5 wires the frame loop here.
+            let guard = crate::motion_bridge::attach_listeners(&canvas_for_listeners, motion_state);
+            std::mem::forget(guard);
             start_frame_loop(surface_state, motion_state, material, background, rect, width, height);
         }
     });

@@ -31,6 +31,7 @@ web-sys = { version = "0.3", features = [
     "MediaQueryListEvent",
     "CssStyleDeclaration",
     "Performance",
+    "EventTarget",
 ] }
 wasm-bindgen-futures = "0.4"
 gloo-events.workspace = true

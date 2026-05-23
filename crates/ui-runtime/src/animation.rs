@@ -197,7 +197,7 @@ impl UseAnimationTarget {
         *self.last_target.borrow_mut() = self.target;
         let keyframes = keyframes_for_transition(current_value, self.target, self.transition);
         let js_keyframes = keyframes_to_js(self.property, &keyframes);
-        let js_options = options_object(keyframes.duration_ms);
+        let js_options = options_object(keyframes.duration_ms, 0.0);
         // keyframes_to_js returns JsValue directly per T6 — no .into() needed.
         if let Some(animation) = WaapiAnimation::play(element, &js_keyframes, &js_options) {
             *self.handle.borrow_mut() = Some(animation);

@@ -42,7 +42,7 @@ mod kinetics_waapi {
         };
         let keyframes = keyframes_for_transition(from, to, transition);
         let js_keyframes = keyframes_to_js(property, &keyframes);
-        let js_options = options_object(keyframes.duration_ms);
+        let js_options = options_object(keyframes.duration_ms, 0.0);
         // keyframes_to_js returns JsValue directly (T6 note) — pass as &js_keyframes.
         let _ = WaapiAnimation::play(element, &js_keyframes, &js_options);
     }

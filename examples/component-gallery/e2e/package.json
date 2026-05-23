@@ -1,0 +1,25 @@
+{
+  "name": "@dioxus-kinetics/component-gallery-e2e",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Playwright audit harness for the component gallery",
+  "scripts": {
+    "e2e": "playwright test --project=static",
+    "e2e:dev-loop": "playwright test --project=dev-loop",
+    "e2e:update": "playwright test --project=static --update-snapshots",
+    "e2e:ci": "playwright test --project=static --reporter=list,html,./reporters/audit-report.ts",
+    "test:unit": "vitest run",
+    "lint:tsc": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.49.0",
+    "@types/node": "^22.10.0",
+    "http-server": "^14.1.1",
+    "typescript": "^5.7.2",
+    "vitest": "^2.1.8"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

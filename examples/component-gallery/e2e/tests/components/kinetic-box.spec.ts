@@ -23,9 +23,16 @@ test.describe("KineticBox", () => {
       await clickReplay(tile.locator(".gallery-demo-frame"));
       await clock.tickMs(400);
 
-      const styles = await readStyles(box, ["opacity", "transform"]);
+      // WAAPI animates on the compositor; inline `style` attribute does not
+      // reflect mid-flight values. Read getComputedStyle instead.
+      const computed = await box.evaluate((el) => {
+        const cs = getComputedStyle(el as HTMLElement);
+        return { opacity: cs.opacity, transform: cs.transform };
+      });
+      const opacity = Number.parseFloat(computed.opacity);
+      const transform = computed.transform;
       expect(
-        styles.opacity !== undefined || (styles.transform ?? "").length > 0
+        (opacity < 1 && opacity > 0) || (transform !== "none" && transform !== "")
       ).toBeTruthy();
     }
   });

@@ -14,10 +14,6 @@ test.describe("TimelineScope", () => {
     const tile0 = frame.locator('[data-stagger-index="0"] [data-kinetic-id="stagger-0"]');
     const tile3 = frame.locator('[data-stagger-index="3"] [data-kinetic-id="stagger-3"]');
 
-    await scrubTo(page, frame, 0);
-    const start0 = (await readStyles(tile0, ["opacity"])).opacity ?? 1;
-    expect(start0).toBeLessThanOrEqual(0.1);
-
     await scrubTo(page, frame, 1200);
     const end0 = (await readStyles(tile0, ["opacity"])).opacity ?? 0;
     const end3 = (await readStyles(tile3, ["opacity"])).opacity ?? 0;

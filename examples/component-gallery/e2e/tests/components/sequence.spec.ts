@@ -28,7 +28,9 @@ test.describe("Sequence", () => {
     expect(titleEnd.opacity ?? 0).toBeGreaterThan(0.95);
 
     const bodyEnd = await readStyles(body, ["transform"]);
-    expect(bodyEnd.transform ?? "").toMatch(/translateY\(0(?:\.0+)?px\)|^$|none/);
+    expect(bodyEnd.transform ?? "").toMatch(
+      /translateY\(0(?:\.0+)?px\)|translate\(0(?:\.0+)?px,\s*0(?:\.0+)?px\)|^$|none/
+    );
 
     const ctaEnd = await readStyles(cta, ["transform"]);
     expect(ctaEnd.transform ?? "").toMatch(/scale\(1(?:\.0+)?\)|none|^$/);

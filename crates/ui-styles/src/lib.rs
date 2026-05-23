@@ -972,6 +972,62 @@ pub const COMPONENT_CSS: &str = r#"
     pointer-events: none;
 }
 
+.ui-data-table {
+    width: 100%;
+    border-collapse: collapse;
+    font: inherit;
+    color: var(--ui-fg);
+}
+
+.ui-data-table-caption {
+    text-align: left;
+    color: var(--ui-muted-fg);
+    font-size: 12px;
+    padding-bottom: var(--ui-space-2);
+}
+
+.ui-data-table-th {
+    text-align: left;
+    padding: 8px 10px;
+    border-bottom: 1px solid var(--ui-border);
+    font-weight: 700;
+    font-size: 13px;
+    color: var(--ui-fg);
+}
+
+.ui-data-table-th--sortable {
+    padding: 0;
+}
+
+.ui-data-table-sort-button {
+    width: 100%;
+    background: transparent;
+    border: none;
+    padding: 8px 10px;
+    color: inherit;
+    font: inherit;
+    font-weight: 700;
+    text-align: left;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--ui-space-2);
+}
+
+.ui-data-table-sort-button:hover { background: var(--ui-surface-muted); }
+.ui-data-table-sort-indicator { color: var(--ui-muted-fg); font-size: 12px; }
+
+.ui-data-table-cell {
+    padding: 8px 10px;
+    border-bottom: 1px solid var(--ui-border);
+    font-size: 14px;
+    vertical-align: top;
+}
+
+.ui-data-table-row:hover { background: var(--ui-surface-muted); }
+.ui-data-table-row:last-child .ui-data-table-cell { border-bottom: 0; }
+
 .ui-command-menu {
     display: grid;
     gap: var(--ui-space-3);

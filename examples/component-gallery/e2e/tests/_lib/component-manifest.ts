@@ -36,6 +36,7 @@ export const COMPONENT_MANIFEST: ManifestEntry[] = [
   { name: "Slider", slug: "slider", status: "ready", layers: { smoke: true, motion: false, visual: true } },
   { name: "Select", slug: "select", status: "ready", layers: { smoke: true, motion: false, visual: true } },
   { name: "DatePicker", slug: "date-picker", status: "ready", layers: { smoke: true, motion: false, visual: true } },
+  { name: "DataTable", slug: "data-table", status: "ready", layers: { smoke: true, motion: false, visual: true } },
   // Layout
   { name: "Stack", slug: "stack", status: "ready", layers: { smoke: true, motion: false, visual: true } },
   { name: "Tabs", slug: "tabs", status: "ready", layers: { smoke: true, motion: true, visual: true } },

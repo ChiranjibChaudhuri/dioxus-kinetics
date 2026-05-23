@@ -10,8 +10,8 @@ use crate::previews::{
     },
     foundations::glass_layer_preview,
     inputs::{
-        checkbox_preview, date_picker_preview, select_preview, slider_preview, switch_preview,
-        text_field_preview,
+        checkbox_preview, data_table_preview, date_picker_preview, select_preview, slider_preview,
+        switch_preview, text_field_preview,
     },
     layout::{accordion_preview, stack_preview, tabs_preview},
     liquid_glass::liquid_surface_preview,
@@ -480,11 +480,11 @@ const COMPONENT_DOCS: [ComponentDoc; 42] = [
     ComponentDoc {
         name: "DataTable",
         category: ComponentCategory::DataWorkflows,
-        status: ComponentStatus::ComingSoon,
-        summary: "Tabular data primitive with sortable columns, column resize, sticky headers, and a virtualization hook for large datasets.",
-        snippet: "// Spec 8 — DataTable + sorting + virtualization",
-        accessibility: "Native `<table>` semantics with `aria-sort` on column headers and keyboard cell navigation.",
-        render: None,
+        status: ComponentStatus::Ready,
+        summary: "Native `<table>` primitive with optional caption + sortable column headers. Sorting itself is the caller's responsibility — on click, the component emits `on_sort(column_key)` and the consumer re-sorts the row slice. Column resize, sticky headers, and virtualization are deferred.",
+        snippet: DATA_TABLE_SNIPPET,
+        accessibility: "Native `<table>` / `<thead>` / `<tbody>` semantics; sortable headers carry `aria-sort` (`none` / `ascending` / `descending`) and contain a `<button>` with an `aria-label` so screen readers announce the sort intent.",
+        render: Some(data_table_preview),
     },
     ComponentDoc {
         name: "Pagination",
@@ -771,6 +771,18 @@ const DATE_PICKER_SNIPPET: &str = r#"DatePicker {
     label: "Report cutoff",
     value: "2026-05-23",
     on_select: move |iso: String| /* update */ {},
+}"#;
+
+const DATA_TABLE_SNIPPET: &str = r#"DataTable {
+    columns: vec![
+        DataTableColumn::new("workspace", "Workspace"),
+        DataTableColumn::new("revenue", "Revenue").sortable(),
+        DataTableColumn::new("seats", "Seats").sortable(),
+    ],
+    rows,
+    sort_key: "revenue",
+    sort_direction: SortDirection::Descending,
+    on_sort: move |key: String| /* re-sort rows */ {},
 }"#;
 
 const POPOVER_SNIPPET: &str = r#"Popover {

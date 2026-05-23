@@ -57,6 +57,60 @@ pub fn date_picker_preview() -> Element {
     rsx! { DatePickerPreviewBody {} }
 }
 
+pub fn data_table_preview() -> Element {
+    rsx! { DataTablePreviewBody {} }
+}
+
+#[component]
+fn DataTablePreviewBody() -> Element {
+    let mut sort_key = use_signal(|| "revenue".to_string());
+    let mut sort_dir = use_signal(|| SortDirection::Descending);
+    let columns = vec![
+        DataTableColumn::new("workspace", "Workspace"),
+        DataTableColumn::new("revenue", "Revenue").sortable(),
+        DataTableColumn::new("seats", "Seats").sortable(),
+    ];
+    let rows = vec![
+        vec![
+            "Acme Ops".to_string(),
+            "$12,400".to_string(),
+            "48".to_string(),
+        ],
+        vec![
+            "Globex Retail".to_string(),
+            "$9,820".to_string(),
+            "32".to_string(),
+        ],
+        vec![
+            "Initech R&D".to_string(),
+            "$7,310".to_string(),
+            "21".to_string(),
+        ],
+    ];
+    rsx! {
+        DataTable {
+            columns,
+            rows,
+            caption: "Top 3 workspaces this month",
+            sort_key: sort_key.read().clone(),
+            sort_direction: *sort_dir.read(),
+            on_sort: move |key: String| {
+                let current = sort_key.read().clone();
+                let current_dir = *sort_dir.read();
+                if current == key {
+                    sort_dir.set(match current_dir {
+                        SortDirection::Ascending => SortDirection::Descending,
+                        _ => SortDirection::Ascending,
+                    });
+                } else {
+                    sort_key.set(key);
+                    sort_dir.set(SortDirection::Ascending);
+                }
+            },
+        }
+    }
+}
+
 #[component]
 fn DatePickerPreviewBody() -> Element {
     let mut value = use_signal(|| "2026-05-23".to_string());

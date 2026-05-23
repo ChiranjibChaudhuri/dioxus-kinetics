@@ -170,7 +170,7 @@ fn handle_canvas_mounted(
 #[cfg(target_arch = "wasm32")]
 fn start_frame_loop(
     surface_state: Signal<Option<SurfaceState>>,
-    motion_state: Signal<MotionState>,
+    mut motion_state: Signal<MotionState>,
     material: LiquidMaterial,
     background: Option<BackgroundSource>,
     rect: Option<[f32; 4]>,
@@ -234,6 +234,18 @@ fn start_frame_loop(
 
         // 3. Update motion + render
         let inputs = motion_state.read().to_motion_inputs(start_time);
+
+        // Decay scroll velocity each frame so the surface settles after the
+        // user stops scrolling. Applied AFTER reading the inputs so this
+        // frame's render uses the un-decayed value (smoother trail); next
+        // frame uses the decayed value.
+        motion_state.with_mut(|s| {
+            s.scroll_velocity_px[0] *= 0.85;
+            s.scroll_velocity_px[1] *= 0.85;
+            if s.scroll_velocity_px[0].abs() < 0.01 { s.scroll_velocity_px[0] = 0.0; }
+            if s.scroll_velocity_px[1].abs() < 0.01 { s.scroll_velocity_px[1] = 0.0; }
+        });
+
         state.compositor.update_inputs(inputs);
         state.compositor.render(
             &bg_view,

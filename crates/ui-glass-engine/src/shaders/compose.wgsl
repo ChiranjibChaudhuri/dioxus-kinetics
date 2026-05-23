@@ -130,6 +130,13 @@ fn fs_main(in: VsOut) -> @location(0) vec4<f32> {
     var color = apply_saturation(bg.rgb, u.saturation);
     color = mix(color, u.tint.rgb, u.tint.a);
 
+    if (FEAT_TINT_ADAPT) {
+        // mip 6 of a 256+ px source is roughly a 4×4 average — close to the
+        // dominant color of the region behind the surface.
+        let avg = textureSampleLevel(bg_tex, bg_samp, sample_uv, 6.0).rgb;
+        color = mix(color, color * avg, clamp(u.adapt_strength, 0.0, 1.0));
+    }
+
     // Virtual light specular along normal.
     if (FEAT_SPECULAR) {
         let n_dot_l = max(dot(normal, u.light_dir), 0.0);

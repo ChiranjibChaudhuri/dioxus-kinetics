@@ -26,11 +26,13 @@ pub struct Compositor {
     blur_cache: HashMap<BlurKey, wgpu::RenderPipeline>,
     noise_view: wgpu::TextureView,
     noise_sampler: wgpu::Sampler,
+    mipmap_pipeline: wgpu::RenderPipeline,
 }
 
 impl Compositor {
     pub fn new(device: Arc<wgpu::Device>, queue: Arc<wgpu::Queue>) -> Self {
         let (noise_view, noise_sampler) = create_noise_resources(&device, &queue);
+        let mipmap_pipeline = crate::pipeline::build_mipmap_pipeline(&device);
         Self {
             device,
             queue,
@@ -38,6 +40,7 @@ impl Compositor {
             blur_cache: HashMap::new(),
             noise_view,
             noise_sampler,
+            mipmap_pipeline,
         }
     }
 
@@ -79,6 +82,14 @@ impl Compositor {
         let _ = self.ensure_compose(compose_key);
         let _ = self.ensure_blur(blur_h_key);
         let _ = self.ensure_blur(blur_v_key);
+        let mipped = if material.features.contains(ui_glass::GlassFeatures::TINT_ADAPT) {
+            Some(self.materialize_mipped_bg(bg_view, canvas_size))
+        } else { None };
+        let effective_bg_view: &wgpu::TextureView = mipped
+            .as_ref()
+            .map(|(_, view)| view)
+            .unwrap_or(bg_view);
+
         let compose = self.compose_cache.get(&compose_key).unwrap();
         let blur_h = self.blur_cache.get(&blur_h_key).unwrap();
         let blur_v = self.blur_cache.get(&blur_v_key).unwrap();
@@ -86,10 +97,117 @@ impl Compositor {
         uniforms.rect = rect_px;
         uniforms.canvas_size = canvas_size;
         render_glass_to_texture(
-            &self.device, &self.queue, bg_view, output_view, &uniforms,
+            &self.device, &self.queue, effective_bg_view, output_view, &uniforms,
             blur_h, blur_v, compose,
             &self.noise_view, &self.noise_sampler,
         );
+    }
+
+    /// Build a mipmapped copy of `src_view` and return owners + a view of all
+    /// levels. Caller must keep the returned `Texture` alive for the duration
+    /// of any pass that samples the view.
+    fn materialize_mipped_bg(
+        &self,
+        src_view: &wgpu::TextureView,
+        canvas_size: [f32; 2],
+    ) -> (wgpu::Texture, wgpu::TextureView) {
+        let w = canvas_size[0] as u32;
+        let h = canvas_size[1] as u32;
+        let levels = ((w.max(h) as f32).log2().floor() as u32 + 1).max(1);
+        let scratch = self.device.create_texture(&wgpu::TextureDescriptor {
+            label: Some("mipped-bg-scratch"),
+            size: wgpu::Extent3d { width: w, height: h, depth_or_array_layers: 1 },
+            mip_level_count: levels,
+            sample_count: 1,
+            dimension: wgpu::TextureDimension::D2,
+            format: wgpu::TextureFormat::Rgba8UnormSrgb,
+            usage: wgpu::TextureUsages::RENDER_ATTACHMENT
+                | wgpu::TextureUsages::TEXTURE_BINDING,
+            view_formats: &[],
+        });
+
+        let sampler = self.device.create_sampler(&wgpu::SamplerDescriptor {
+            label: Some("mip-sampler"),
+            mag_filter: wgpu::FilterMode::Linear,
+            min_filter: wgpu::FilterMode::Linear,
+            mipmap_filter: wgpu::FilterMode::Linear,
+            ..Default::default()
+        });
+
+        let mipmap_bgl = crate::pipeline::mipmap_bind_group_layout(&self.device);
+        let mut encoder = self.device.create_command_encoder(&Default::default());
+
+        // Pass 0: blit src_view → scratch level 0.
+        let level0_view = scratch.create_view(&wgpu::TextureViewDescriptor {
+            base_mip_level: 0, mip_level_count: Some(1),
+            ..Default::default()
+        });
+        let blit_bg = self.device.create_bind_group(&wgpu::BindGroupDescriptor {
+            label: Some("mip-blit-bg"),
+            layout: &mipmap_bgl,
+            entries: &[
+                wgpu::BindGroupEntry { binding: 0, resource: wgpu::BindingResource::TextureView(src_view) },
+                wgpu::BindGroupEntry { binding: 1, resource: wgpu::BindingResource::Sampler(&sampler) },
+            ],
+        });
+        {
+            let mut pass = encoder.begin_render_pass(&wgpu::RenderPassDescriptor {
+                label: Some("mip-blit"),
+                color_attachments: &[Some(wgpu::RenderPassColorAttachment {
+                    view: &level0_view, resolve_target: None,
+                    ops: wgpu::Operations {
+                        load: wgpu::LoadOp::Clear(wgpu::Color::TRANSPARENT),
+                        store: wgpu::StoreOp::Store,
+                    },
+                    depth_slice: None,
+                })],
+                depth_stencil_attachment: None,
+                timestamp_writes: None, occlusion_query_set: None,
+            });
+            pass.set_pipeline(&self.mipmap_pipeline);
+            pass.set_bind_group(0, &blit_bg, &[]);
+            pass.draw(0..3, 0..1);
+        }
+
+        // Passes 1..levels: each samples mip n-1 and writes mip n.
+        for level in 1..levels {
+            let src_level_view = scratch.create_view(&wgpu::TextureViewDescriptor {
+                base_mip_level: level - 1, mip_level_count: Some(1),
+                ..Default::default()
+            });
+            let dst_level_view = scratch.create_view(&wgpu::TextureViewDescriptor {
+                base_mip_level: level, mip_level_count: Some(1),
+                ..Default::default()
+            });
+            let bg = self.device.create_bind_group(&wgpu::BindGroupDescriptor {
+                label: Some("mip-bg"),
+                layout: &mipmap_bgl,
+                entries: &[
+                    wgpu::BindGroupEntry { binding: 0, resource: wgpu::BindingResource::TextureView(&src_level_view) },
+                    wgpu::BindGroupEntry { binding: 1, resource: wgpu::BindingResource::Sampler(&sampler) },
+                ],
+            });
+            let mut pass = encoder.begin_render_pass(&wgpu::RenderPassDescriptor {
+                label: Some("mip-gen"),
+                color_attachments: &[Some(wgpu::RenderPassColorAttachment {
+                    view: &dst_level_view, resolve_target: None,
+                    ops: wgpu::Operations {
+                        load: wgpu::LoadOp::Clear(wgpu::Color::TRANSPARENT),
+                        store: wgpu::StoreOp::Store,
+                    },
+                    depth_slice: None,
+                })],
+                depth_stencil_attachment: None,
+                timestamp_writes: None, occlusion_query_set: None,
+            });
+            pass.set_pipeline(&self.mipmap_pipeline);
+            pass.set_bind_group(0, &bg, &[]);
+            pass.draw(0..3, 0..1);
+        }
+        self.queue.submit(Some(encoder.finish()));
+
+        let full_view = scratch.create_view(&Default::default());
+        (scratch, full_view)
     }
 
     pub fn render(
@@ -120,6 +238,14 @@ impl Compositor {
             let _ = self.ensure_blur(blur_h_key);
             let _ = self.ensure_blur(blur_v_key);
 
+            let mipped = if region.material.features.contains(ui_glass::GlassFeatures::TINT_ADAPT) {
+                Some(self.materialize_mipped_bg(bg_view, canvas_size))
+            } else { None };
+            let effective_bg_view: &wgpu::TextureView = mipped
+                .as_ref()
+                .map(|(_, view)| view)
+                .unwrap_or(bg_view);
+
             let compose = self.compose_cache.get(&compose_key).unwrap();
             let blur_h = self.blur_cache.get(&blur_h_key).unwrap();
             let blur_v = self.blur_cache.get(&blur_v_key).unwrap();
@@ -127,7 +253,7 @@ impl Compositor {
             render_glass_to_texture(
                 &self.device,
                 &self.queue,
-                bg_view,
+                effective_bg_view,
                 output_view,
                 &uniforms,
                 blur_h,

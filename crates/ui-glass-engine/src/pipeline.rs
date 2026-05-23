@@ -260,3 +260,65 @@ pub fn blur_bind_group_layout(device: &Arc<wgpu::Device>) -> wgpu::BindGroupLayo
         ],
     })
 }
+
+const MIPMAP_SRC: &str = include_str!("shaders/mipmap.wgsl");
+
+pub fn mipmap_bind_group_layout(device: &Arc<wgpu::Device>) -> wgpu::BindGroupLayout {
+    device.create_bind_group_layout(&wgpu::BindGroupLayoutDescriptor {
+        label: Some("mipmap-bgl"),
+        entries: &[
+            wgpu::BindGroupLayoutEntry {
+                binding: 0,
+                visibility: wgpu::ShaderStages::FRAGMENT,
+                ty: wgpu::BindingType::Texture {
+                    sample_type: wgpu::TextureSampleType::Float { filterable: true },
+                    view_dimension: wgpu::TextureViewDimension::D2,
+                    multisampled: false,
+                },
+                count: None,
+            },
+            wgpu::BindGroupLayoutEntry {
+                binding: 1,
+                visibility: wgpu::ShaderStages::FRAGMENT,
+                ty: wgpu::BindingType::Sampler(wgpu::SamplerBindingType::Filtering),
+                count: None,
+            },
+        ],
+    })
+}
+
+pub fn build_mipmap_pipeline(device: &Arc<wgpu::Device>) -> wgpu::RenderPipeline {
+    let module = device.create_shader_module(wgpu::ShaderModuleDescriptor {
+        label: Some("mipmap.wgsl"),
+        source: wgpu::ShaderSource::Wgsl(MIPMAP_SRC.into()),
+    });
+
+    let bgl = mipmap_bind_group_layout(device);
+    let layout = device.create_pipeline_layout(&wgpu::PipelineLayoutDescriptor {
+        label: Some("mipmap-layout"),
+        bind_group_layouts: &[&bgl],
+        push_constant_ranges: &[],
+    });
+    device.create_render_pipeline(&wgpu::RenderPipelineDescriptor {
+        label: Some("mipmap-pipeline"),
+        layout: Some(&layout),
+        vertex: wgpu::VertexState {
+            module: &module, entry_point: Some("vs_main"),
+            buffers: &[], compilation_options: Default::default(),
+        },
+        fragment: Some(wgpu::FragmentState {
+            module: &module, entry_point: Some("fs_main"),
+            targets: &[Some(wgpu::ColorTargetState {
+                format: wgpu::TextureFormat::Rgba8UnormSrgb,
+                blend: Some(wgpu::BlendState::REPLACE),
+                write_mask: wgpu::ColorWrites::ALL,
+            })],
+            compilation_options: Default::default(),
+        }),
+        primitive: wgpu::PrimitiveState::default(),
+        depth_stencil: None,
+        multisample: wgpu::MultisampleState::default(),
+        multiview: None,
+        cache: None,
+    })
+}

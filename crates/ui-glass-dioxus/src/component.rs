@@ -215,22 +215,14 @@ fn start_frame_loop(
         };
         let output_view = frame.texture.create_view(&Default::default());
 
-        // 2. Transparent fallback bg (allocated every frame — Plan 5 caches).
-        let bg_tex = state.device.create_texture(&wgpu::TextureDescriptor {
-            label: Some("liquid-surface-bg-fallback"),
-            size: wgpu::Extent3d {
-                width: state.physical_size.0,
-                height: state.physical_size.1,
-                depth_or_array_layers: 1,
-            },
-            mip_level_count: 1,
-            sample_count: 1,
-            dimension: wgpu::TextureDimension::D2,
-            format: wgpu::TextureFormat::Rgba8UnormSrgb,
-            usage: wgpu::TextureUsages::TEXTURE_BINDING | wgpu::TextureUsages::RENDER_ATTACHMENT,
-            view_formats: &[],
-        });
-        let bg_view = bg_tex.create_view(&Default::default());
+        // 2. Cached transparent fallback bg.
+        state.compositor.ensure_transparent_bg([state.physical_size.0, state.physical_size.1]);
+        // Re-create the view each frame — it's free (just a wrapper around the
+        // texture handle); allocates no GPU memory. The texture itself is the
+        // cached one from ensure_transparent_bg.
+        let bg_view = state.compositor.transparent_bg_texture()
+            .expect("ensure_transparent_bg was called above")
+            .create_view(&Default::default());
 
         // 3. Update motion + render
         let inputs = motion_state.read().to_motion_inputs(start_time);

@@ -48,6 +48,7 @@ pub struct Compositor {
     background_renderer: BackgroundRenderer,
     background_scene: Option<BackgroundScene>,
     inputs: MotionInputs,
+    transparent_bg: Option<(wgpu::Texture, wgpu::TextureView, [u32; 2])>,
 }
 
 impl Compositor {
@@ -74,6 +75,7 @@ impl Compositor {
             background_renderer,
             background_scene: None,
             inputs: MotionInputs::default(),
+            transparent_bg: None,
         }
     }
 
@@ -97,6 +99,36 @@ impl Compositor {
     /// ui-motion springs.
     pub fn update_inputs(&mut self, inputs: MotionInputs) {
         self.inputs = inputs;
+    }
+
+    /// Ensure a cached transparent fallback bg texture exists matching `size`.
+    /// Used by callers that don't have a per-region BackgroundSource or scene
+    /// graph and need a no-op bg for the shader to sample. Reuses the texture
+    /// across frames when size is stable.
+    pub fn ensure_transparent_bg(&mut self, size: [u32; 2]) {
+        let needs_rebuild = match &self.transparent_bg {
+            Some((_, _, cached_size)) => *cached_size != size,
+            None => true,
+        };
+        if needs_rebuild {
+            let tex = self.device.create_texture(&wgpu::TextureDescriptor {
+                label: Some("liquid-glass-transparent-bg"),
+                size: wgpu::Extent3d { width: size[0], height: size[1], depth_or_array_layers: 1 },
+                mip_level_count: 1, sample_count: 1,
+                dimension: wgpu::TextureDimension::D2,
+                format: wgpu::TextureFormat::Rgba8UnormSrgb,
+                usage: wgpu::TextureUsages::TEXTURE_BINDING | wgpu::TextureUsages::RENDER_ATTACHMENT,
+                view_formats: &[],
+            });
+            let view = tex.create_view(&Default::default());
+            self.transparent_bg = Some((tex, view, size));
+        }
+    }
+
+    /// Get a reference to the cached transparent bg texture, if it exists. Call
+    /// `ensure_transparent_bg` first.
+    pub fn transparent_bg_texture(&self) -> Option<&wgpu::Texture> {
+        self.transparent_bg.as_ref().map(|(t, _, _)| t)
     }
 
     fn ensure_compose(&mut self, key: ComposeKey) -> &wgpu::RenderPipeline {

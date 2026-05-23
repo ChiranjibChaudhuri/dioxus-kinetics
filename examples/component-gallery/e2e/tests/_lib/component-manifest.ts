@@ -33,6 +33,7 @@ export const COMPONENT_MANIFEST: ManifestEntry[] = [
   { name: "Checkbox", slug: "checkbox", status: "ready", layers: { smoke: true, motion: false, visual: true } },
   { name: "Switch", slug: "switch", status: "ready", layers: { smoke: true, motion: true, visual: true } },
   { name: "SegmentedControl", slug: "segmented-control", status: "ready", layers: { smoke: true, motion: false, visual: true } },
+  { name: "Slider", slug: "slider", status: "ready", layers: { smoke: true, motion: false, visual: true } },
   // Layout
   { name: "Stack", slug: "stack", status: "ready", layers: { smoke: true, motion: false, visual: true } },
   { name: "Tabs", slug: "tabs", status: "ready", layers: { smoke: true, motion: true, visual: true } },

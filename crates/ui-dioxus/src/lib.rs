@@ -41,7 +41,7 @@ pub use display::{
     Alert, AlertTone, EmptyState, MetricCard, MetricTone, Progress, Skeleton,
 };
 pub use forms::{Checkbox as ChoiceMark, Switch as StateSwitch, TextField as TextEntry};
-pub use forms::{Checkbox, Switch, TextField, TextFieldType};
+pub use forms::{Checkbox, Slider, Switch, TextField, TextFieldType};
 pub use kinetics::{
     Cue, KineticBox, KineticText, Presence, PresenceCue, PresenceGate, Sequence, SequenceContext,
     TimelineScope,

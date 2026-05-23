@@ -767,6 +767,34 @@ pub const COMPONENT_CSS: &str = r#"
     line-height: 1.45;
 }
 
+.ui-slider {
+    display: grid;
+    gap: var(--ui-space-1);
+}
+
+.ui-slider-label {
+    color: var(--ui-fg);
+    font-weight: 600;
+    font-size: 13px;
+}
+
+.ui-slider-input {
+    width: 100%;
+    accent-color: var(--ui-accent);
+    cursor: pointer;
+}
+
+.ui-slider-input[disabled] {
+    cursor: not-allowed;
+    opacity: 0.45;
+}
+
+.ui-slider-description {
+    margin: 0;
+    color: var(--ui-muted-fg);
+    font-size: 12px;
+}
+
 .ui-command-menu {
     display: grid;
     gap: var(--ui-space-3);

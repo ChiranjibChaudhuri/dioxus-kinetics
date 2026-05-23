@@ -9,7 +9,7 @@ use crate::previews::{
         toast_preview, tooltip_preview,
     },
     foundations::glass_layer_preview,
-    inputs::{checkbox_preview, switch_preview, text_field_preview},
+    inputs::{checkbox_preview, slider_preview, switch_preview, text_field_preview},
     liquid_glass::liquid_surface_preview,
     layout::{accordion_preview, stack_preview, tabs_preview},
     motion::{
@@ -423,11 +423,11 @@ const COMPONENT_DOCS: [ComponentDoc; 42] = [
     ComponentDoc {
         name: "Slider",
         category: ComponentCategory::Inputs,
-        status: ComponentStatus::ComingSoon,
-        summary: "Continuous numeric input with optional dual thumbs for range selection. Keyboard step + page increments.",
-        snippet: "// Spec 11 — Slider + Range",
-        accessibility: "WAI-ARIA slider pattern; `aria-valuetext` for human-readable announcement.",
-        render: None,
+        status: ComponentStatus::Ready,
+        summary: "Continuous numeric input rendered as a native `<input type=\"range\">`. Keyboard support (Arrows, Page Up/Down, Home/End) and touch/pointer drag both work out of the box.",
+        snippet: SLIDER_SNIPPET,
+        accessibility: "Native `<input type=\"range\">` semantics; `aria-valuetext` for human-readable announcement (e.g. \"60%\" instead of \"60\").",
+        render: Some(slider_preview),
     },
     ComponentDoc {
         name: "SegmentedControl",
@@ -750,6 +750,16 @@ const SKELETON_SNIPPET: &str = r#"Skeleton {
     height: "20px",
     width: "60%",
     radius: "6px",
+}"#;
+
+const SLIDER_SNIPPET: &str = r#"Slider {
+    id: "media-volume",
+    label: "Volume",
+    value: 60.0,
+    min: 0.0,
+    max: 100.0,
+    step: 1.0,
+    value_text: "60%",
 }"#;
 
 const SEGMENTED_CONTROL_SNIPPET: &str = r#"SegmentedControl {

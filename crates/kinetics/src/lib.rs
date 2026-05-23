@@ -14,9 +14,9 @@ pub mod prelude {
         KineticText, MetricCard, MetricReadout, MetricTone, ModalLayer, NavigationRail,
         NoticeStack, Pagination, Presence, PresenceCue, PresenceGate, Progress, SegmentItem,
         SegmentedControl, Sequence, SequenceContext, SharedElement, SharedLayout, Sidebar,
-        SidebarItem, SidebarSection, Skeleton, Stack, StateSwitch, Stepper, StepperStep, Surface,
-        Switch, TabItem, TabPanel, Tabs, TextEntry, TextField, TimelineScope, Toast, ToastTone,
-        Toolbar, Tooltip, ViewSwitcher,
+        SidebarItem, SidebarSection, Skeleton, Slider, Stack, StateSwitch, Stepper, StepperStep,
+        Surface, Switch, TabItem, TabPanel, Tabs, TextEntry, TextField, TimelineScope, Toast,
+        ToastTone, Toolbar, Tooltip, ViewSwitcher,
     };
     pub use ui_glass::{
         resolve_glass, GlassDensity, GlassLevel, GlassPolicy, GlassRecipe, GlassRequest, GlassTone,

@@ -45,6 +45,28 @@ pub fn switch_preview() -> Element {
     rsx! { SwitchPreviewBody {} }
 }
 
+pub fn slider_preview() -> Element {
+    rsx! { SliderPreviewBody {} }
+}
+
+#[component]
+fn SliderPreviewBody() -> Element {
+    let mut volume = use_signal(|| 60.0_f32);
+    rsx! {
+        Slider {
+            id: "media-volume",
+            label: "Volume",
+            value: *volume.read(),
+            min: 0.0,
+            max: 100.0,
+            step: 1.0,
+            description: "Live preview volume",
+            value_text: format!("{}%", (*volume.read()).round() as i32),
+            onchange: move |v: f32| volume.set(v),
+        }
+    }
+}
+
 #[component]
 fn SwitchPreviewBody() -> Element {
     let mut checked = use_signal(|| true);

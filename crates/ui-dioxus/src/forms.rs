@@ -269,3 +269,70 @@ fn described_by(id: &str, has_help: bool, has_error: bool) -> String {
         (false, false) => String::new(),
     }
 }
+
+/// Continuous numeric input rendered as a native `<input type="range">`
+/// so keyboard support (arrow keys, Page Up/Down, Home/End) and
+/// touch/pointer drag both work out of the box. The native control is
+/// styled via `.ui-slider`; the host stylesheet draws the track and
+/// thumb tokens.
+///
+/// Provide `min`, `max`, and `step` (defaults: 0, 100, 1) to size the
+/// range; `value` is the current numeric value; `value_text` is the
+/// optional human-readable value announced to assistive tech via
+/// `aria-valuetext` (use for non-numeric domains like "Small", "Medium",
+/// "Large").
+#[component]
+pub fn Slider(
+    id: String,
+    label: String,
+    value: f32,
+    #[props(default = 0.0)] min: f32,
+    #[props(default = 100.0)] max: f32,
+    #[props(default = 1.0)] step: f32,
+    #[props(default)] description: String,
+    #[props(default)] value_text: String,
+    #[props(default)] disabled: bool,
+    onchange: Option<EventHandler<f32>>,
+) -> Element {
+    let described_by = if description.is_empty() {
+        String::new()
+    } else {
+        format!("{id}-description")
+    };
+    let display_value_text = if value_text.is_empty() {
+        format!("{value}")
+    } else {
+        value_text.clone()
+    };
+
+    rsx! {
+        div { class: "ui-slider",
+            label { class: "ui-slider-label", r#for: "{id}", "{label}" }
+            input {
+                id: "{id}",
+                class: "ui-slider-input",
+                r#type: "range",
+                min: "{min}",
+                max: "{max}",
+                step: "{step}",
+                value: "{value}",
+                disabled,
+                "aria-describedby": "{described_by}",
+                "aria-valuetext": "{display_value_text}",
+                oninput: move |evt| {
+                    if disabled {
+                        return;
+                    }
+                    if let Ok(parsed) = evt.value().parse::<f32>() {
+                        if let Some(handler) = &onchange {
+                            handler.call(parsed);
+                        }
+                    }
+                },
+            }
+            if !description.is_empty() {
+                p { id: "{id}-description", class: "ui-slider-description", "{description}" }
+            }
+        }
+    }
+}

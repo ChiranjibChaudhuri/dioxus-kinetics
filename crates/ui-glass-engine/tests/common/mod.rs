@@ -55,6 +55,31 @@ pub fn prepare_pointer_scene(
     read_back(harness.device(), harness.queue(), &out, w, h)
 }
 
+pub fn prepare_scroll_scene(
+    w: u32, h: u32,
+    material: LiquidMaterial,
+    scroll_vel: [f32; 2],
+) -> Vec<u8> {
+    let harness = pollster::block_on(TestHarness::new()).unwrap();
+    let bg = create_gradient(harness.device(), harness.queue(), w, h);
+    let out = create_output(harness.device(), w, h);
+    let inset = (w.min(h) / 5) as f32;
+    let rect = [inset, inset, w as f32 - inset * 2.0, h as f32 - inset * 2.0];
+
+    let mut comp = Compositor::new(harness.device().clone(), harness.queue().clone());
+    let uniforms = ui_glass_engine::GlassUniforms::from_material(&material, rect, [w as f32, h as f32])
+        .with_scroll_velocity(scroll_vel);
+    comp.render_with_uniforms(
+        &bg.create_view(&Default::default()),
+        &out.create_view(&Default::default()),
+        [w as f32, h as f32],
+        rect,
+        &material,
+        uniforms,
+    );
+    read_back(harness.device(), harness.queue(), &out, w, h)
+}
+
 pub fn golden_check(golden_rel_path: &str, pixels: &[u8], w: u32, h: u32) {
     let path = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join(golden_rel_path);
     if std::env::var("UPDATE_GOLDEN").is_ok() || !path.exists() {

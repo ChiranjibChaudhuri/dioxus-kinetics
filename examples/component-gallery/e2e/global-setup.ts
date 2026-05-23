@@ -7,7 +7,18 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = resolve(__filename, "..");
 
 const PROJECT_ROOT = resolve(__dirname, "..");
-const DIST_DIR = resolve(PROJECT_ROOT, "dist");
+// dx build --release outputs to target/dx/<package>/release/web/public at the
+// workspace root, not to examples/component-gallery/dist.
+const WORKSPACE_ROOT = resolve(PROJECT_ROOT, "..", "..");
+const DIST_DIR = resolve(
+  WORKSPACE_ROOT,
+  "target",
+  "dx",
+  "component-gallery",
+  "release",
+  "web",
+  "public"
+);
 const INDEX_HTML = resolve(DIST_DIR, "index.html");
 
 export default async function globalSetup() {

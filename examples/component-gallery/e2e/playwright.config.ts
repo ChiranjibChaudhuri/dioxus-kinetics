@@ -16,12 +16,25 @@ if (projectArg) {
 }
 
 const PROJECT_ROOT = resolve(__dirname, "..");
-const DIST_DIR = resolve(PROJECT_ROOT, "dist");
+// dx build --release outputs to target/dx/<package>/release/web/public at the
+// workspace root, not to examples/component-gallery/dist.
+const WORKSPACE_ROOT = resolve(PROJECT_ROOT, "..", "..");
+const DIST_DIR = resolve(
+  WORKSPACE_ROOT,
+  "target",
+  "dx",
+  "component-gallery",
+  "release",
+  "web",
+  "public"
+);
 const STATIC_PORT = 4173;
 const DEV_LOOP_URL = process.env.KINETICS_DEV_LOOP_URL ?? "http://localhost:9173";
 
 export default defineConfig({
   testDir: "./tests",
+  // Exclude the Vitest unit-test subtree — Playwright would crash on vitest imports.
+  testIgnore: ["**/_lib/**"],
   fullyParallel: false,
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 1 : 0,

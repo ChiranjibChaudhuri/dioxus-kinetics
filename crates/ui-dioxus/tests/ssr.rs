@@ -1,5 +1,8 @@
 use dioxus::prelude::*;
-use ui_dioxus::{Button, ButtonVariant, GlassSurface, Surface};
+use ui_dioxus::{Button, ButtonVariant, Surface};
+#[cfg(not(feature = "liquid-glass"))]
+use ui_dioxus::GlassSurface;
+#[cfg(not(feature = "liquid-glass"))]
 use ui_glass::{GlassLevel, GlassTone};
 
 #[test]
@@ -28,6 +31,7 @@ fn surface_renders_section_with_surface_class() {
     assert!(html.contains("ui-surface"));
 }
 
+#[cfg(not(feature = "liquid-glass"))]
 #[test]
 fn glass_surface_uses_semantic_glass_attributes() {
     let html = dioxus_ssr::render_element(rsx! {

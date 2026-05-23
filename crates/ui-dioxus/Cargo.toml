@@ -10,7 +10,8 @@ dioxus.workspace = true
 ui-composition.workspace = true
 ui-core.workspace = true
 ui-glass.workspace = true
-ui-glass-dioxus.workspace = true
+ui-glass-dioxus = { workspace = true, optional = true }
+ui-glass-engine = { workspace = true, optional = true }
 ui-icons.workspace = true
 ui-layout.workspace = true
 ui-motion.workspace = true
@@ -20,6 +21,10 @@ ui-tokens.workspace = true
 
 [dev-dependencies]
 dioxus-ssr.workspace = true
+
+[features]
+default = []
+liquid-glass = ["dep:ui-glass-dioxus", "dep:ui-glass-engine"]
 
 [lib]
 path = "src/lib.rs"

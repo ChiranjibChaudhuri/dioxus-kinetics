@@ -32,6 +32,7 @@ pub use overlays::{
     CommandMenu as CommandFinder, Dialog as ModalLayer, Toast as NoticeStack,
     Tooltip as ContextHint,
 };
+#[cfg(feature = "liquid-glass")]
 pub use ui_glass_dioxus::{LiquidSurface, LiquidSurfaceProps};
 
 pub use Button as ActionControl;
@@ -104,6 +105,66 @@ pub fn GlassSurface(
     #[props(default)] level: GlassLevel,
     #[props(default)] tone: GlassTone,
     #[props(default)] density: GlassDensity,
+    children: Element,
+) -> Element {
+    #[cfg(feature = "liquid-glass")]
+    {
+        use ui_glass::{
+            GlassDepth, MaterialDensity, MaterialEdge, MaterialRequest, MaterialTone,
+            MaterialVibrancy, LiquidMaterial,
+        };
+        use ui_glass_engine::capabilities::{detect, Tier};
+
+        let tier = detect().best_tier();
+        let material = LiquidMaterial::from(
+            MaterialRequest::new(
+                match level {
+                    GlassLevel::Subtle => GlassDepth::Raised,
+                    GlassLevel::Floating => GlassDepth::Floating,
+                    GlassLevel::Overlay => GlassDepth::Overlay,
+                    GlassLevel::Chrome => GlassDepth::Chrome,
+                },
+                match tone {
+                    GlassTone::Neutral => MaterialTone::Neutral,
+                    GlassTone::Primary => MaterialTone::Primary,
+                    GlassTone::Success => MaterialTone::Success,
+                    GlassTone::Warning => MaterialTone::Warning,
+                    GlassTone::Danger => MaterialTone::Danger,
+                    GlassTone::Info => MaterialTone::Info,
+                },
+            )
+            .with_density(match density {
+                GlassDensity::Compact => MaterialDensity::Compact,
+                GlassDensity::Comfortable => MaterialDensity::Comfortable,
+                GlassDensity::Spacious => MaterialDensity::Spacious,
+            })
+            .with_edge(MaterialEdge::Hairline)
+            .with_vibrancy(MaterialVibrancy::Standard),
+        );
+
+        return match tier {
+            Tier::WgpuWebGpu | Tier::WgpuWebGl2 => rsx! {
+                ui_glass_dioxus::LiquidSurface {
+                    material,
+                    {children}
+                }
+            },
+            Tier::SvgFilter | Tier::SolidCss | Tier::Off => {
+                glass_surface_css(level, tone, density, children)
+            }
+        };
+    }
+
+    #[cfg(not(feature = "liquid-glass"))]
+    {
+        glass_surface_css(level, tone, density, children)
+    }
+}
+
+fn glass_surface_css(
+    level: GlassLevel,
+    tone: GlassTone,
+    density: GlassDensity,
     children: Element,
 ) -> Element {
     rsx! {

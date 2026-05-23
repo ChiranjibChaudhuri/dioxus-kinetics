@@ -65,5 +65,11 @@ export async function mountGallery(
 
 async function selectRadio(page: Page, groupLabel: string, optionLabel: string) {
   const group = page.getByRole("radiogroup", { name: groupLabel });
-  await group.getByRole("radio", { name: optionLabel }).click();
+  const radio = group.getByRole("radio", { name: optionLabel });
+  await radio.evaluate((el) => {
+    const input = el as HTMLInputElement;
+    input.checked = true;
+    input.dispatchEvent(new Event("input", { bubbles: true }));
+    input.dispatchEvent(new Event("change", { bubbles: true }));
+  });
 }

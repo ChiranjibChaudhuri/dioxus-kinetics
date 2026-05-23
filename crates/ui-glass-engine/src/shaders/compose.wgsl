@@ -105,6 +105,14 @@ fn fs_main(in: VsOut) -> @location(0) vec4<f32> {
 
     var bg = textureSample(bg_tex, bg_samp, sample_uv);
 
+    // Chromatic dispersion: re-sample R and B with extra offset along normal.
+    if (FEAT_DISPERSE) {
+        let d = normal * (u.dispersion_px / u.canvas_size);
+        let r_sample = textureSample(bg_tex, bg_samp, sample_uv + d).r;
+        let b_sample = textureSample(bg_tex, bg_samp, sample_uv - d).b;
+        bg = vec4<f32>(r_sample, bg.g, b_sample, bg.a);
+    }
+
     // Saturation + tint mix
     var color = apply_saturation(bg.rgb, u.saturation);
     color = mix(color, u.tint.rgb, u.tint.a);

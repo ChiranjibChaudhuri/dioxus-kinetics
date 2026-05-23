@@ -7,6 +7,7 @@
 //! pipeline cache, and minimal shader (blur + SDF + tint).
 
 pub mod compositor;
+pub mod noise;
 pub mod pipeline;
 pub mod render_graph;
 pub mod uniforms;

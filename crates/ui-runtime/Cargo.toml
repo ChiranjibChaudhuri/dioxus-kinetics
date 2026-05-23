@@ -24,6 +24,8 @@ web-sys = { version = "0.3", features = [
     "HtmlElement",
     "DomRect",
     "CssStyleDeclaration",
+    "Performance",
+    "MediaQueryList",
     "console",
 ] }
 wasm-bindgen-futures = "0.4"
@@ -31,6 +33,9 @@ wasm-bindgen-futures = "0.4"
 [dev-dependencies]
 dioxus-ssr.workspace = true
 tokio = { version = "1", features = ["rt", "time", "macros", "test-util"] }
+
+[target.'cfg(target_arch = "wasm32")'.dev-dependencies]
+wasm-bindgen-test = "0.3"
 
 [lib]
 path = "src/lib.rs"

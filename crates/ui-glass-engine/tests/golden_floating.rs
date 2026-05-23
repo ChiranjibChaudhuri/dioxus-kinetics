@@ -58,13 +58,13 @@ fn render_test_scene() -> Vec<u8> {
         &bg.create_view(&Default::default()),
         &out.create_view(&Default::default()),
         [w as f32, hgt as f32],
-        &[GlassRegion {
-            rect_px: [24.0, 24.0, 80.0, 80.0],
-            material: LiquidMaterial::floating().tint(
+        &[GlassRegion::new(
+            [24.0, 24.0, 80.0, 80.0],
+            LiquidMaterial::floating().tint(
                 ui_tokens::Color::rgba(255, 255, 255, 1.0),
                 0.35,
             ),
-        }],
+        )],
     );
 
     read_back(h.device(), h.queue(), &out, w, hgt)

@@ -40,10 +40,10 @@ fn render_with_checkerboard(w: u32, h: u32, material: LiquidMaterial) -> Vec<u8>
         &bg.create_view(&Default::default()),
         &out.create_view(&Default::default()),
         [w as f32, h as f32],
-        &[GlassRegion {
-            rect_px: [inset, inset, w as f32 - inset * 2.0, h as f32 - inset * 2.0],
+        &[GlassRegion::new(
+            [inset, inset, w as f32 - inset * 2.0, h as f32 - inset * 2.0],
             material,
-        }],
+        )],
     );
     read_back(harness.device(), harness.queue(), &out, w, h)
 }

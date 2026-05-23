@@ -7,16 +7,32 @@ use std::sync::Arc;
 
 use ui_glass::LiquidMaterial;
 
+use crate::background::{BackgroundScene, BackgroundSource, render::BackgroundRenderer};
 use crate::pipeline::{
     build_blur_pipeline, build_compose_pipeline, BlurDirection, BlurKey, ComposeKey,
 };
 use crate::render_graph::render_glass_to_texture;
 use crate::uniforms::GlassUniforms;
 
-#[derive(Clone, Copy, Debug)]
+#[derive(Clone, Debug)]
 pub struct GlassRegion {
     pub rect_px: [f32; 4], // x, y, w, h
     pub material: LiquidMaterial,
+    /// Optional per-surface background. When `None`, the compositor's
+    /// scene-graph (if set via `set_background_scene`) provides the bg; if
+    /// neither is set, the `bg_view` passed to `render` is used.
+    pub background: Option<BackgroundSource>,
+}
+
+impl GlassRegion {
+    pub fn new(rect_px: [f32; 4], material: LiquidMaterial) -> Self {
+        Self { rect_px, material, background: None }
+    }
+
+    pub fn with_background(mut self, bg: BackgroundSource) -> Self {
+        self.background = Some(bg);
+        self
+    }
 }
 
 pub struct Compositor {
@@ -28,6 +44,8 @@ pub struct Compositor {
     noise_sampler: wgpu::Sampler,
     mipmap_pipeline: wgpu::RenderPipeline,
     mip_sampler: wgpu::Sampler,
+    background_renderer: BackgroundRenderer,
+    background_scene: Option<BackgroundScene>,
 }
 
 impl Compositor {
@@ -41,6 +59,7 @@ impl Compositor {
             mipmap_filter: wgpu::FilterMode::Linear,
             ..Default::default()
         });
+        let background_renderer = BackgroundRenderer::new(device.clone(), queue.clone());
         Self {
             device,
             queue,
@@ -50,6 +69,8 @@ impl Compositor {
             noise_sampler,
             mipmap_pipeline,
             mip_sampler,
+            background_renderer,
+            background_scene: None,
         }
     }
 
@@ -59,6 +80,14 @@ impl Compositor {
 
     pub fn noise_view(&self) -> &wgpu::TextureView { &self.noise_view }
     pub fn noise_sampler(&self) -> &wgpu::Sampler { &self.noise_sampler }
+
+    pub fn set_background_scene(&mut self, scene: BackgroundScene) {
+        self.background_scene = Some(scene);
+    }
+
+    pub fn background_renderer_mut(&mut self) -> &mut BackgroundRenderer {
+        &mut self.background_renderer
+    }
 
     fn ensure_compose(&mut self, key: ComposeKey) -> &wgpu::RenderPipeline {
         self.compose_cache
@@ -91,13 +120,35 @@ impl Compositor {
         let _ = self.ensure_compose(compose_key);
         let _ = self.ensure_blur(blur_h_key);
         let _ = self.ensure_blur(blur_v_key);
+
+        // Resolve scene-level bg if installed. Clone layers first to avoid
+        // simultaneous borrow of self.background_scene and self.background_renderer.
+        let scene_layers: Option<Vec<BackgroundSource>> = self
+            .background_scene
+            .as_ref()
+            .map(|s| s.layers.clone());
+        let scene_bg_tex: Option<wgpu::Texture> = scene_layers.as_deref().map(|layers| {
+            self.background_renderer.render_to_texture(
+                layers,
+                canvas_size[0] as u32,
+                canvas_size[1] as u32,
+            )
+        });
+        let scene_bg_view: Option<wgpu::TextureView> = scene_bg_tex
+            .as_ref()
+            .map(|t| t.create_view(&Default::default()));
+
+        let resolved_bg: &wgpu::TextureView = scene_bg_view
+            .as_ref()
+            .unwrap_or(bg_view);
+
         let mipped = if material.features.contains(ui_glass::GlassFeatures::TINT_ADAPT) {
-            Some(self.materialize_mipped_bg(bg_view, canvas_size))
+            Some(self.materialize_mipped_bg(resolved_bg, canvas_size))
         } else { None };
         let effective_mipped_view: &wgpu::TextureView = mipped
             .as_ref()
             .map(|(_, view)| view)
-            .unwrap_or(bg_view);
+            .unwrap_or(resolved_bg);
 
         let compose = self.compose_cache.get(&compose_key).unwrap();
         let blur_h = self.blur_cache.get(&blur_h_key).unwrap();
@@ -106,7 +157,7 @@ impl Compositor {
         uniforms.rect = rect_px;
         uniforms.canvas_size = canvas_size;
         render_glass_to_texture(
-            &self.device, &self.queue, bg_view, output_view, &uniforms,
+            &self.device, &self.queue, resolved_bg, output_view, &uniforms,
             blur_h, blur_v, compose,
             &self.noise_view, &self.noise_sampler,
             effective_mipped_view, &self.mip_sampler,
@@ -232,6 +283,25 @@ impl Compositor {
             "Plan 1/2 multi-region renders overwrite each other; correct \
              overlap compositing lands in Plan 3",
         );
+
+        // Materialize scene-graph bg once (if installed); all regions share it.
+        // Clone layers first to avoid simultaneous borrow of background_scene
+        // and background_renderer (both are fields of self).
+        let scene_layers: Option<Vec<BackgroundSource>> = self
+            .background_scene
+            .as_ref()
+            .map(|s| s.layers.clone());
+        let scene_bg_tex: Option<wgpu::Texture> = scene_layers.as_deref().map(|layers| {
+            self.background_renderer.render_to_texture(
+                layers,
+                canvas_size[0] as u32,
+                canvas_size[1] as u32,
+            )
+        });
+        let scene_bg_view: Option<wgpu::TextureView> = scene_bg_tex
+            .as_ref()
+            .map(|t| t.create_view(&Default::default()));
+
         for region in regions {
             let uniforms = GlassUniforms::from_material(
                 &region.material,
@@ -248,13 +318,31 @@ impl Compositor {
             let _ = self.ensure_blur(blur_h_key);
             let _ = self.ensure_blur(blur_v_key);
 
+            // Materialize a per-surface bg if the region has one.
+            let per_surface_bg_tex: Option<wgpu::Texture> = region.background.as_ref().map(|src| {
+                self.background_renderer.render_to_texture(
+                    &[src.clone()],
+                    canvas_size[0] as u32,
+                    canvas_size[1] as u32,
+                )
+            });
+            let per_surface_bg_view: Option<wgpu::TextureView> = per_surface_bg_tex
+                .as_ref()
+                .map(|t| t.create_view(&Default::default()));
+
+            // Priority: per-surface > scene-graph > caller-supplied bg_view.
+            let resolved_bg_view: &wgpu::TextureView = per_surface_bg_view
+                .as_ref()
+                .or(scene_bg_view.as_ref())
+                .unwrap_or(bg_view);
+
             let mipped = if region.material.features.contains(ui_glass::GlassFeatures::TINT_ADAPT) {
-                Some(self.materialize_mipped_bg(bg_view, canvas_size))
+                Some(self.materialize_mipped_bg(resolved_bg_view, canvas_size))
             } else { None };
             let effective_mipped_view: &wgpu::TextureView = mipped
                 .as_ref()
                 .map(|(_, view)| view)
-                .unwrap_or(bg_view);
+                .unwrap_or(resolved_bg_view);
 
             let compose = self.compose_cache.get(&compose_key).unwrap();
             let blur_h = self.blur_cache.get(&blur_h_key).unwrap();
@@ -263,7 +351,7 @@ impl Compositor {
             render_glass_to_texture(
                 &self.device,
                 &self.queue,
-                bg_view,
+                resolved_bg_view,
                 output_view,
                 &uniforms,
                 blur_h,

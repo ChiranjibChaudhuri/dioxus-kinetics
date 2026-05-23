@@ -1,33 +1,31 @@
 use ui_glass::LiquidMaterial;
+use ui_glass_engine::background::BackgroundSource;
 use ui_glass_engine::headless::TestHarness;
 use ui_glass_engine::{Compositor, GlassRegion};
+use ui_tokens::Color;
 
 #[test]
-fn compositor_renders_single_region_without_panic() {
+fn region_with_background_source_renders_without_external_bg() {
     let h = pollster::block_on(TestHarness::new()).unwrap();
     let mut comp = Compositor::new(h.device().clone(), h.queue().clone());
 
-    let bg = make_solid_bg(h.device(), h.queue(), 128, 128, [0, 0, 128, 255]);
-    let out = make_output(h.device(), 128, 128);
+    let bg = make_solid(h.device(), h.queue(), 64, 64, [0, 0, 0, 255]);
+    let out = make_output(h.device(), 64, 64);
 
     let region = GlassRegion::new(
-        [16.0, 16.0, 96.0, 96.0],
-        LiquidMaterial::floating().blur(8.0).radius(12.0),
-    );
+        [8.0, 8.0, 48.0, 48.0],
+        LiquidMaterial::floating(),
+    ).with_background(BackgroundSource::Color(Color::rgba(255, 200, 0, 1.0)));
 
     comp.render(
         &bg.create_view(&Default::default()),
         &out.create_view(&Default::default()),
-        [128.0, 128.0],
+        [64.0, 64.0],
         &[region],
     );
 }
 
-fn make_solid_bg(
-    device: &std::sync::Arc<wgpu::Device>,
-    queue: &std::sync::Arc<wgpu::Queue>,
-    w: u32, h: u32, rgba: [u8; 4],
-) -> wgpu::Texture {
+fn make_solid(device: &std::sync::Arc<wgpu::Device>, queue: &std::sync::Arc<wgpu::Queue>, w: u32, h: u32, rgba: [u8; 4]) -> wgpu::Texture {
     let t = device.create_texture(&wgpu::TextureDescriptor {
         label: Some("bg"),
         size: wgpu::Extent3d { width: w, height: h, depth_or_array_layers: 1 },
@@ -39,15 +37,9 @@ fn make_solid_bg(
     });
     let pixels: Vec<u8> = (0..(w * h)).flat_map(|_| rgba).collect();
     queue.write_texture(
-        wgpu::TexelCopyTextureInfo {
-            texture: &t, mip_level: 0,
-            origin: wgpu::Origin3d::ZERO,
-            aspect: wgpu::TextureAspect::All,
-        },
+        wgpu::TexelCopyTextureInfo { texture: &t, mip_level: 0, origin: wgpu::Origin3d::ZERO, aspect: wgpu::TextureAspect::All },
         &pixels,
-        wgpu::TexelCopyBufferLayout {
-            offset: 0, bytes_per_row: Some(w * 4), rows_per_image: Some(h),
-        },
+        wgpu::TexelCopyBufferLayout { offset: 0, bytes_per_row: Some(w * 4), rows_per_image: Some(h) },
         wgpu::Extent3d { width: w, height: h, depth_or_array_layers: 1 },
     );
     t

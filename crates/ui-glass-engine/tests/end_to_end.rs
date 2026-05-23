@@ -15,13 +15,13 @@ fn floating_preset_over_blue_bg_writes_corner_pixels_outside_rect() {
         &bg.create_view(&Default::default()),
         &out.create_view(&Default::default()),
         [w as f32, hgt as f32],
-        &[GlassRegion {
-            rect_px: [32.0, 32.0, 64.0, 64.0],
-            material: LiquidMaterial::floating().tint(
+        &[GlassRegion::new(
+            [32.0, 32.0, 64.0, 64.0],
+            LiquidMaterial::floating().tint(
                 ui_tokens::Color::rgba(255, 255, 255, 1.0),
                 0.4,
             ),
-        }],
+        )],
     );
 
     let pixels = read_back(h.device(), h.queue(), &out, w, hgt);

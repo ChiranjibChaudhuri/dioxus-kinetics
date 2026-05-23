@@ -12,12 +12,12 @@ fn compositor_reuses_pipeline_for_same_features() {
     let bg_view = bg.create_view(&Default::default());
     let out_view = out.create_view(&Default::default());
 
-    let region = GlassRegion {
-        rect_px: [8.0, 8.0, 48.0, 48.0],
-        material: LiquidMaterial::new().blur(6.0).radius(8.0),
-    };
+    let region = GlassRegion::new(
+        [8.0, 8.0, 48.0, 48.0],
+        LiquidMaterial::new().blur(6.0).radius(8.0),
+    );
 
-    comp.render(&bg_view, &out_view, [64.0, 64.0], &[region]);
+    comp.render(&bg_view, &out_view, [64.0, 64.0], &[region.clone()]);
     let after_first = comp.pipeline_cache_len();
     comp.render(&bg_view, &out_view, [64.0, 64.0], &[region]);
     let after_second = comp.pipeline_cache_len();
@@ -36,16 +36,16 @@ fn compositor_caches_distinct_pipelines_per_feature_mask() {
     let bg_view = bg.create_view(&Default::default());
     let out_view = out.create_view(&Default::default());
 
-    comp.render(&bg_view, &out_view, [64.0, 64.0], &[GlassRegion {
-        rect_px: [8.0, 8.0, 48.0, 48.0],
-        material: LiquidMaterial::new().blur(6.0),
-    }]);
+    comp.render(&bg_view, &out_view, [64.0, 64.0], &[GlassRegion::new(
+        [8.0, 8.0, 48.0, 48.0],
+        LiquidMaterial::new().blur(6.0),
+    )]);
     let after_blur_only = comp.pipeline_cache_len();
 
-    comp.render(&bg_view, &out_view, [64.0, 64.0], &[GlassRegion {
-        rect_px: [8.0, 8.0, 48.0, 48.0],
-        material: LiquidMaterial::new().blur(6.0).specular(0.78, 0.6),
-    }]);
+    comp.render(&bg_view, &out_view, [64.0, 64.0], &[GlassRegion::new(
+        [8.0, 8.0, 48.0, 48.0],
+        LiquidMaterial::new().blur(6.0).specular(0.78, 0.6),
+    )]);
     let after_blur_plus_specular = comp.pipeline_cache_len();
 
     assert!(

@@ -102,3 +102,37 @@ Commit the resulting JSON alongside the Rust change.
 - **dev-loop project**: requires a separately-running `dx serve`. With no
   server up, dev-loop tests fail with `ERR_CONNECTION_REFUSED`. This is
   expected; CI only runs `--project=static` / `--project=static-webkit`.
+- **Baselines are platform-keyed.** Playwright suffixes snapshots with
+  `process.platform` (e.g. `-win32`, `-linux`). The current branch ships
+  only the Windows-local baselines (`*-static-win32.png`,
+  `*-static-webkit-win32.png`). The first CI run on `ubuntu-24.04` will
+  auto-generate `-linux` baselines on its first invocation (Playwright
+  writes the actual screenshot when no baseline exists). Commit those
+  back via a follow-up PR for deterministic comparison on subsequent
+  CI runs. Local Windows runs continue to compare against the
+  committed `-win32` baselines.
+
+## Spec 2 hand-off
+
+The deliverable that connects this Spec 1 harness to Spec 2 (advanced
+motion + GPU acceleration) is `audit-report.md`, written next to this
+README by the custom Playwright reporter on every run. The file is
+**not** git-ignored — commit a freshly-generated report alongside the
+merge of this branch so Spec 2's author has a stable, reviewable
+catalog of which components currently pass each audit layer. CI also
+uploads it as a workflow artifact for any subsequent run.
+
+Known audit signals to triage in Spec 2 (from the current local run):
+- `Sequence`, `TimelineScope`, `FrameStage`, `KineticBox` motion specs
+  surface DOM-selector mismatches and missing per-frame inline-style
+  progression. Each needs case-by-case triage: test-expectation bug
+  (spec writer overstated the contract) vs. component bug (motion
+  engine does not progress the styles the gallery preview promises).
+- `Presence` clock-driven enter/exit passes on Chromium but flakes on
+  WebKit, where a sibling tile intercepts pointer events over the
+  Replay button. WebKit-specific layout issue worth a CSS pass.
+- WebKit preference-bar radio clicks do not register on non-default
+  variants; the `mountGallery` helper times out. Either fix
+  `controls.rs` to expose a more WebKit-compatible role tree, or
+  re-implement `selectRadio` to bypass the click and dispatch a
+  synthesized `change` event.

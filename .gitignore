@@ -11,4 +11,3 @@ Cargo.lock
 examples/component-gallery/e2e/node_modules/
 examples/component-gallery/e2e/test-results/
 examples/component-gallery/e2e/playwright-report/
-examples/component-gallery/e2e/audit-report.md

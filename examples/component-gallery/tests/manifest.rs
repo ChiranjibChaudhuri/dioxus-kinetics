@@ -34,6 +34,20 @@ fn ts_manifest_includes_every_ready_component() {
         "TS manifest parser found zero entries; format may have drifted"
     );
 
+    // Count guard: if a Prettier reformat (or similar) wraps any entry across
+    // multiple lines, the parser drops it silently. Require the parsed entry
+    // count to match the count of `{ name:` occurrences a naive grep would
+    // catch — if the two diverge, the format has drifted.
+    let raw_entry_marker_count = MANIFEST_TS.matches("{ name:").count();
+    assert_eq!(
+        ts_names.len(),
+        raw_entry_marker_count,
+        "TS manifest parser parsed {} names but raw `{{ name:` markers occur {} times; \
+         entries may have been reformatted across multiple lines",
+        ts_names.len(),
+        raw_entry_marker_count
+    );
+
     for doc in component_docs().iter().filter(|d| d.status == ComponentStatus::Ready) {
         assert!(
             ts_names.iter().any(|n| n == doc.name),

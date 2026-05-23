@@ -5,10 +5,10 @@
   "type": "module",
   "description": "Playwright audit harness for the component gallery",
   "scripts": {
-    "e2e": "playwright test --project=static",
+    "e2e": "playwright test --project=static --project=static-webkit",
     "e2e:dev-loop": "playwright test --project=dev-loop",
-    "e2e:update": "playwright test --project=static --update-snapshots",
-    "e2e:ci": "playwright test --project=static --reporter=list,html,./reporters/audit-report.ts",
+    "e2e:update": "playwright test --project=static --project=static-webkit --update-snapshots",
+    "e2e:ci": "playwright test --project=static --project=static-webkit --reporter=list,html,./reporters/audit-report.ts",
     "test:unit": "vitest run",
     "lint:tsc": "tsc --noEmit"
   },

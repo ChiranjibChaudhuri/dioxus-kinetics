@@ -362,6 +362,99 @@ impl LiquidMaterial {
             features: GlassFeatures::empty(),
         }
     }
+
+    pub fn blur(mut self, radius_px: f32) -> Self {
+        self.blur_radius_px = radius_px;
+        self.features |= GlassFeatures::BLUR;
+        self
+    }
+
+    pub fn tint(mut self, color: Color, alpha: f32) -> Self {
+        self.tint = color;
+        self.tint_alpha = alpha;
+        self
+    }
+
+    pub fn saturation(mut self, value: f32) -> Self {
+        self.saturation = value;
+        self
+    }
+
+    pub fn refract(mut self, strength: f32) -> Self {
+        self.refraction_strength = strength;
+        self.features |= GlassFeatures::REFRACT;
+        self
+    }
+
+    pub fn surface_curvature(mut self, value: f32) -> Self {
+        self.surface_curvature = value;
+        self
+    }
+
+    pub fn noise(mut self, frequency: f32, seed: f32) -> Self {
+        self.noise_frequency = frequency;
+        self.noise_seed = seed;
+        self
+    }
+
+    pub fn disperse(mut self, px: f32) -> Self {
+        self.dispersion_px = px;
+        self.features |= GlassFeatures::DISPERSE;
+        self
+    }
+
+    pub fn specular(mut self, angle_rad: f32, intensity: f32) -> Self {
+        self.light_angle_rad = angle_rad;
+        self.light_intensity = intensity;
+        self.features |= GlassFeatures::SPECULAR;
+        self
+    }
+
+    pub fn edge_falloff(mut self, px: f32) -> Self {
+        self.edge_falloff_px = px;
+        self
+    }
+
+    pub fn inner_shadow(mut self, px: f32, alpha: f32) -> Self {
+        self.inner_shadow_px = px;
+        self.inner_shadow_alpha = alpha;
+        self.features |= GlassFeatures::INNER_SHADOW;
+        self
+    }
+
+    pub fn pointer_reactive(mut self) -> Self {
+        self.pointer_reactive = true;
+        self.features |= GlassFeatures::POINTER;
+        self
+    }
+
+    pub fn scroll_reactive(mut self) -> Self {
+        self.scroll_reactive = true;
+        self.features |= GlassFeatures::SCROLL;
+        self
+    }
+
+    pub fn ambient_mesh(mut self, mesh: AmbientMesh) -> Self {
+        self.ambient_mesh = Some(mesh);
+        self.features |= GlassFeatures::AMBIENT_MESH;
+        self
+    }
+
+    pub fn adapt_to_background(mut self, strength: f32) -> Self {
+        self.adapt_to_background = strength;
+        self.features |= GlassFeatures::TINT_ADAPT;
+        self
+    }
+
+    pub fn radius(mut self, px: f32) -> Self {
+        self.radius_px = px;
+        self
+    }
+
+    pub fn thickness(mut self, px: f32) -> Self {
+        self.thickness_px = px;
+        self
+    }
 }
 
 impl Default for LiquidMaterial {

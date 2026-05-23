@@ -5,6 +5,7 @@ pub mod feedback;
 pub mod foundations;
 pub mod inputs;
 pub mod layout;
+pub mod liquid_glass;
 pub mod motion;
 pub mod navigation;
 pub mod shared;

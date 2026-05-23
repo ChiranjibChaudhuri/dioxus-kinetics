@@ -9,6 +9,10 @@ publish.workspace = true
 dioxus.workspace = true
 kinetics.workspace = true
 ui-styles.workspace = true
+ui-glass.workspace = true
+ui-glass-dioxus.workspace = true
+ui-glass-engine.workspace = true
+ui-tokens.workspace = true
 
 [dev-dependencies]
 dioxus-ssr.workspace = true

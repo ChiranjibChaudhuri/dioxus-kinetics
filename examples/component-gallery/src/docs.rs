@@ -7,6 +7,7 @@ use crate::previews::{
     feedback::{dialog_preview, empty_state_preview, toast_preview, tooltip_preview},
     foundations::glass_layer_preview,
     inputs::{checkbox_preview, switch_preview, text_field_preview},
+    liquid_glass::liquid_surface_preview,
     layout::{stack_preview, tabs_preview},
     motion::{
         kinetic_box_preview, presence_gate_preview, presence_preview, sequence_preview,
@@ -132,7 +133,7 @@ pub fn component_docs() -> &'static [ComponentDoc] {
 
 const BASIC_ACCESSIBILITY: &str = "Renders native semantic elements and stable focusable controls.";
 
-const COMPONENT_DOCS: [ComponentDoc; 27] = [
+const COMPONENT_DOCS: [ComponentDoc; 28] = [
     ComponentDoc {
         name: "Button",
         category: ComponentCategory::Actions,
@@ -376,6 +377,15 @@ const COMPONENT_DOCS: [ComponentDoc; 27] = [
         accessibility: "Text contrast is validated against solid fallback surfaces.",
         render: Some(glass_layer_preview),
     },
+    ComponentDoc {
+        name: "LiquidSurface",
+        category: ComponentCategory::Surfaces,
+        status: ComponentStatus::Ready,
+        summary: "Pointer-reactive frosted surface with refraction, dispersion, specular, ambient mesh, and tint adaptation. Runs on a wgpu-backed canvas via the ui-glass-dioxus engine.",
+        snippet: LIQUID_SURFACE_SNIPPET,
+        accessibility: "Canvas is decorative; foreground children are DOM elements with full pointer-events and accessible text.",
+        render: Some(liquid_surface_preview),
+    },
 ];
 
 const BUTTON_SNIPPET: &str = r#"Button {
@@ -561,4 +571,26 @@ const GLASS_LAYER_SNIPPET: &str = r#"GlassLayer {
     tone: GlassTone::Neutral,
     density: GlassDensity::Comfortable,
     "Revenue operations"
+}"#;
+
+const LIQUID_SURFACE_SNIPPET: &str = r#"LiquidSurface {
+    material: LiquidMaterial::floating()
+        .ambient_mesh(AmbientMesh::Aurora)
+        .pointer_reactive()
+        .radius(24.0)
+        .tint(Color::rgba(255, 255, 255, 1.0), 0.18),
+    background: Some(BackgroundSource::Gradient(Gradient::conic(
+        [0.5, 0.5], 0.0,
+        vec![
+            GradientStop { offset: 0.0, color: Color::rgba( 80, 100, 220, 1.0) },
+            GradientStop { offset: 0.5, color: Color::rgba(180,  80, 180, 1.0) },
+            GradientStop { offset: 1.0, color: Color::rgba( 80, 100, 220, 1.0) },
+        ],
+    ))),
+    width: 400,
+    height: 240,
+    div {
+        style: "padding: 16px; color: white; font-weight: 600;",
+        "Hover me"
+    }
 }"#;

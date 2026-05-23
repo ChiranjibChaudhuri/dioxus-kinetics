@@ -1210,3 +1210,10 @@ The work future-Claude can pick up:
 - Custom-path glass.
 
 But the spec is delivered.
+
+---
+
+## Status
+
+Plan 5 complete. Liquid Glass shipped end-to-end. See the spec's
+Implementation Status section for the production state.

@@ -384,3 +384,33 @@ Four phases.
 - Light source array (more than one virtual light per surface).
 - Per-surface noise customization beyond `noise_frequency` and `noise_seed`.
 - Procedural noise (uploaded texture is the chosen path).
+
+---
+
+## Implementation Status (2026-05-22)
+
+All five plans complete. Liquid Glass is the default rendering path for
+`<GlassSurface>` and the canonical descriptor surface for new components via
+`<LiquidSurface>`. The engine ships:
+
+- `ui-glass` — descriptors, builder DSL, presets, `QualityProfile`.
+- `ui-glass-engine` — wgpu compositor with all 9 shader features, background
+  source pipeline, motion bridge, multi-region compositing, capability
+  detection, SVG fallback generator.
+- `ui-glass-dioxus` — `<LiquidSurface>` Dioxus component with SSR fallback
+  and lifecycle-safe wgpu init.
+- `ui-styles` — narrowed to Solid + SVG fallback only.
+
+Tier ladder selection happens at GlassSurface render time:
+1. WebGPU available → engine via WebGPU.
+2. WebGL2 available → engine via wgpu's WebGL2 fallback.
+3. Backdrop-filter only → SVG filter chain via ui-styles.
+4. None of the above (or reduced-transparency/high-contrast) → Solid.
+5. Engine forced off via QualityProfile → Solid.
+
+Future work (out of scope of the original spec):
+- Native renderer integration (Blitz) — currently the non-wasm32 LiquidSurface
+  renders a placeholder.
+- Per-route compositor sharing across multiple LiquidSurface instances.
+- HDR specular and multi-light support.
+- Custom-path (non-rounded-rect) glass geometry.

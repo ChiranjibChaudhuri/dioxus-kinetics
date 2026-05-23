@@ -300,3 +300,72 @@ fn tone_color(theme: &Theme, tone: GlassTone) -> Color {
         GlassTone::Info => theme.semantic.info,
     }
 }
+
+/// Ambient mesh contribution variants. Plan 1 carries the descriptor; the
+/// shader binding lands in Plan 2.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum AmbientMesh {
+    Aurora,
+    Orbs,
+    Grain,
+}
+
+/// Full shader-parameter descriptor for a Liquid Glass surface.
+#[derive(Clone, Copy, Debug, PartialEq)]
+pub struct LiquidMaterial {
+    pub tint: Color,
+    pub tint_alpha: f32,
+    pub blur_radius_px: f32,
+    pub saturation: f32,
+    pub refraction_strength: f32,
+    pub surface_curvature: f32,
+    pub noise_frequency: f32,
+    pub noise_seed: f32,
+    pub dispersion_px: f32,
+    pub light_angle_rad: f32,
+    pub light_intensity: f32,
+    pub edge_falloff_px: f32,
+    pub inner_shadow_px: f32,
+    pub inner_shadow_alpha: f32,
+    pub pointer_reactive: bool,
+    pub scroll_reactive: bool,
+    pub ambient_mesh: Option<AmbientMesh>,
+    pub adapt_to_background: f32,
+    pub radius_px: f32,
+    pub thickness_px: f32,
+    pub features: GlassFeatures,
+}
+
+impl LiquidMaterial {
+    pub const fn new() -> Self {
+        Self {
+            tint: Color::rgba(255, 255, 255, 1.0),
+            tint_alpha: 0.0,
+            blur_radius_px: 0.0,
+            saturation: 1.0,
+            refraction_strength: 0.0,
+            surface_curvature: 0.0,
+            noise_frequency: 1.0,
+            noise_seed: 0.0,
+            dispersion_px: 0.0,
+            light_angle_rad: 0.0,
+            light_intensity: 0.0,
+            edge_falloff_px: 0.0,
+            inner_shadow_px: 0.0,
+            inner_shadow_alpha: 0.0,
+            pointer_reactive: false,
+            scroll_reactive: false,
+            ambient_mesh: None,
+            adapt_to_background: 0.0,
+            radius_px: 0.0,
+            thickness_px: 1.0,
+            features: GlassFeatures::empty(),
+        }
+    }
+}
+
+impl Default for LiquidMaterial {
+    fn default() -> Self {
+        Self::new()
+    }
+}

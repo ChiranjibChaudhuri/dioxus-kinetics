@@ -21,3 +21,26 @@ fn glass_features_compose_with_bitwise_or() {
     assert!(f.contains(GlassFeatures::SPECULAR));
     assert!(!f.contains(GlassFeatures::REFRACT));
 }
+
+use ui_glass::LiquidMaterial;
+use ui_tokens::Color;
+
+#[test]
+fn liquid_material_new_has_neutral_defaults() {
+    let m = LiquidMaterial::new();
+    assert_eq!(m.tint, Color::rgba(255, 255, 255, 1.0));
+    assert_eq!(m.tint_alpha, 0.0);
+    assert_eq!(m.blur_radius_px, 0.0);
+    assert_eq!(m.saturation, 1.0);
+    assert_eq!(m.refraction_strength, 0.0);
+    assert_eq!(m.dispersion_px, 0.0);
+    assert_eq!(m.light_intensity, 0.0);
+    assert_eq!(m.inner_shadow_alpha, 0.0);
+    assert_eq!(m.adapt_to_background, 0.0);
+    assert_eq!(m.radius_px, 0.0);
+    assert_eq!(m.thickness_px, 1.0);
+    assert!(!m.pointer_reactive);
+    assert!(!m.scroll_reactive);
+    assert!(m.ambient_mesh.is_none());
+    assert_eq!(m.features, ui_glass::GlassFeatures::empty());
+}

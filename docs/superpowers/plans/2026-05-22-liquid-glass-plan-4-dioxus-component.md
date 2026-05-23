@@ -1143,3 +1143,24 @@ Plan 5 will:
 - Phase 2: `liquid-glass` engine becomes default-on.
 - Phase 3: `ui-styles` reduced to fallback-only.
 - Optionally: cleanup the Plan 4 leaks (frame loop handle + listener guards tied to component unmount).
+
+---
+
+## Status
+
+Plan 4 complete. `<LiquidSurface>` mounts a wgpu-rendered glass canvas
+via Dioxus on web/desktop-WebView/mobile-WebView. Pointer, scroll, and
+reduced-motion flow into the compositor. SSR renders a hydration-safe
+div+canvas placeholder. Component-gallery has a live example. Native
+(non-wasm32) integration via Blitz is acknowledged as a future plan.
+
+Known limitations (deferred to Plan 5):
+- Frame loop handle and event listeners are leaked rather than tied to
+  component unmount lifecycle.
+- The transparent fallback bg texture is allocated every frame instead
+  of cached on the compositor.
+- Native target compiles but renders a div placeholder — Blitz/wgpu
+  direct integration is not yet wired.
+
+Next: Plan 5 — Degradation ladder (WebGL2/SVG/Solid fallback) + Phase
+1-3 migration of existing `<GlassSurface>` to route through the engine.

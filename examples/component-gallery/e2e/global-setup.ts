@@ -14,11 +14,11 @@ export default async function globalSetup() {
   // Only the `static` project needs a build. `dev-loop` runs against a
   // user-managed `dx serve`. Distinguish via env var set by the project
   // config below.
-  if (process.env.KINETICS_E2E_MODE !== "static") {
+  const mode = process.env.KINETICS_E2E_MODE ?? "static";
+  if (mode !== "static") {
     return;
   }
 
-  // eslint-disable-next-line no-console
   console.log("[e2e] running `dx build --release --package component-gallery`...");
   try {
     execSync("dx build --release --package component-gallery", {
@@ -40,6 +40,5 @@ export default async function globalSetup() {
     );
   }
 
-  // eslint-disable-next-line no-console
   console.log(`[e2e] static artifact ready at ${DIST_DIR}`);
 }

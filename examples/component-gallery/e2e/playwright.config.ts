@@ -1,9 +1,19 @@
 import { defineConfig, devices } from "@playwright/test";
-import { fileURLToPath } from "node:url";
 import { resolve } from "node:path";
+import { fileURLToPath } from "node:url";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = resolve(__filename, "..");
+
+// Resolve KINETICS_E2E_MODE from --project=... so defineConfig (below) and
+// global-setup.ts see a consistent value. Must run BEFORE defineConfig.
+const projectArg = process.argv.find((arg) => arg.startsWith("--project="));
+if (projectArg) {
+  const name = projectArg.slice("--project=".length);
+  process.env.KINETICS_E2E_MODE = name === "dev-loop" ? "dev-loop" : "static";
+} else if (!process.env.KINETICS_E2E_MODE) {
+  process.env.KINETICS_E2E_MODE = "static";
+}
 
 const PROJECT_ROOT = resolve(__dirname, "..");
 const DIST_DIR = resolve(PROJECT_ROOT, "dist");
@@ -70,10 +80,3 @@ export default defineConfig({
       },
 });
 
-// The CLI passes --project=NAME; we still need the env to gate globalSetup and
-// the webServer entry. We resolve it from process.argv.
-const projectArg = process.argv.find((arg) => arg.startsWith("--project="));
-if (projectArg) {
-  const name = projectArg.slice("--project=".length);
-  process.env.KINETICS_E2E_MODE = name === "dev-loop" ? "dev-loop" : "static";
-}

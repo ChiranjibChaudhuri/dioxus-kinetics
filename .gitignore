@@ -6,3 +6,8 @@
 Cargo.lock
 *.pdb
 *.log
+
+# Component gallery Playwright harness
+examples/component-gallery/e2e/node_modules/
+examples/component-gallery/e2e/test-results/
+examples/component-gallery/e2e/playwright-report/

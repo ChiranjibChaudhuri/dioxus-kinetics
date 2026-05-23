@@ -203,6 +203,29 @@ pub fn kinetic_box_preview() -> Element {
     }
 }
 
+pub fn kinetic_text_preview() -> Element {
+    let cues = ["text-flow", "fade-in", "rise-in"];
+
+    rsx! {
+        div { class: "gallery-variant-grid gallery-variant-grid--3col",
+            for cue in cues {
+                div { class: "gallery-variant-tile",
+                    ReplayFrame {
+                        label: cue,
+                        children: rsx! {
+                            KineticText {
+                                id: "kt-{cue}",
+                                text: format!("Kinetic typography · {cue}"),
+                                cue: cue.to_string(),
+                            }
+                        },
+                    }
+                }
+            }
+        }
+    }
+}
+
 pub fn presence_gate_preview() -> Element {
     rsx! {
         div { class: "gallery-variant-grid gallery-variant-grid--2col",

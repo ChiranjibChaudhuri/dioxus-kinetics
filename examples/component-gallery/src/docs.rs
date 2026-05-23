@@ -10,8 +10,8 @@ use crate::previews::{
     liquid_glass::liquid_surface_preview,
     layout::{stack_preview, tabs_preview},
     motion::{
-        kinetic_box_preview, presence_gate_preview, presence_preview, sequence_preview,
-        timeline_scope_preview,
+        kinetic_box_preview, kinetic_text_preview, presence_gate_preview, presence_preview,
+        sequence_preview, timeline_scope_preview,
     },
     navigation::sidebar_preview,
     shared::{shared_element_preview, shared_layout_preview},
@@ -133,7 +133,7 @@ pub fn component_docs() -> &'static [ComponentDoc] {
 
 const BASIC_ACCESSIBILITY: &str = "Renders native semantic elements and stable focusable controls.";
 
-const COMPONENT_DOCS: [ComponentDoc; 28] = [
+const COMPONENT_DOCS: [ComponentDoc; 41] = [
     ComponentDoc {
         name: "Button",
         category: ComponentCategory::Actions,
@@ -386,6 +386,124 @@ const COMPONENT_DOCS: [ComponentDoc; 28] = [
         accessibility: "Canvas is decorative; foreground children are DOM elements with full pointer-events and accessible text.",
         render: Some(liquid_surface_preview),
     },
+    ComponentDoc {
+        name: "KineticText",
+        category: ComponentCategory::Motion,
+        status: ComponentStatus::Ready,
+        summary: "Span-level text node tagged with a `data-motion-cue` for the kinetics runtime. The wrapping `Sequence` or `TimelineScope` drives the actual transition.",
+        snippet: KINETIC_TEXT_SNIPPET,
+        accessibility: "Carries an `aria-label` that mirrors the text content so motion never strips the readable string.",
+        render: Some(kinetic_text_preview),
+    },
+    // -------- Coming-soon backlog (Spec 5+ roadmap) --------
+    ComponentDoc {
+        name: "Select",
+        category: ComponentCategory::Inputs,
+        status: ComponentStatus::ComingSoon,
+        summary: "Single-select dropdown with optional async/searchable Combobox mode. Arrow-key navigation, typeahead filter, and `aria-activedescendant` plumbing.",
+        snippet: "// Spec 7 — Select + Combobox",
+        accessibility: "WAI-ARIA 1.2 listbox + combobox pattern.",
+        render: None,
+    },
+    ComponentDoc {
+        name: "DatePicker",
+        category: ComponentCategory::Inputs,
+        status: ComponentStatus::ComingSoon,
+        summary: "Calendar-grid temporal input with single-date and range modes. Integrates with TextField for typed entry.",
+        snippet: "// Spec 9 — DatePicker + DateRangePicker",
+        accessibility: "WAI-ARIA grid pattern; localised month/day names via the host application's locale.",
+        render: None,
+    },
+    ComponentDoc {
+        name: "Slider",
+        category: ComponentCategory::Inputs,
+        status: ComponentStatus::ComingSoon,
+        summary: "Continuous numeric input with optional dual thumbs for range selection. Keyboard step + page increments.",
+        snippet: "// Spec 11 — Slider + Range",
+        accessibility: "WAI-ARIA slider pattern; `aria-valuetext` for human-readable announcement.",
+        render: None,
+    },
+    ComponentDoc {
+        name: "SegmentedControl",
+        category: ComponentCategory::Inputs,
+        status: ComponentStatus::ComingSoon,
+        summary: "Mutually-exclusive choice picker rendered as a button group, complementing radio inputs for short option sets.",
+        snippet: "// Spec 11 — SegmentedControl",
+        accessibility: "WAI-ARIA radiogroup with visible group label.",
+        render: None,
+    },
+    ComponentDoc {
+        name: "Popover",
+        category: ComponentCategory::Feedback,
+        status: ComponentStatus::ComingSoon,
+        summary: "Stateful overlay anchored to an element, with auto-flip on viewport edges. Foundation for Select, DatePicker, and refined Tooltip.",
+        snippet: "// Spec 6 — Popover + Floating UI positioning",
+        accessibility: "Focus is moved into the popover on open and returned to the trigger on close.",
+        render: None,
+    },
+    ComponentDoc {
+        name: "Alert",
+        category: ComponentCategory::Feedback,
+        status: ComponentStatus::ComingSoon,
+        summary: "Non-dismissible page-level message banner with severity tones. Complements Toast for persistent context.",
+        snippet: "// Spec 12 — Alert banner + ARIA live regions",
+        accessibility: "`role=\"alert\"` for high-severity tones; polite live region otherwise.",
+        render: None,
+    },
+    ComponentDoc {
+        name: "Progress",
+        category: ComponentCategory::Feedback,
+        status: ComponentStatus::ComingSoon,
+        summary: "Determinate progress bar and indeterminate spinner variants. Pairs with `Skeleton` for content loading placeholders.",
+        snippet: "// Spec 13 — Progress + Skeleton",
+        accessibility: "WAI-ARIA progressbar pattern with `aria-valuenow`/`aria-valuetext`.",
+        render: None,
+    },
+    ComponentDoc {
+        name: "DataTable",
+        category: ComponentCategory::DataWorkflows,
+        status: ComponentStatus::ComingSoon,
+        summary: "Tabular data primitive with sortable columns, column resize, sticky headers, and a virtualization hook for large datasets.",
+        snippet: "// Spec 8 — DataTable + sorting + virtualization",
+        accessibility: "Native `<table>` semantics with `aria-sort` on column headers and keyboard cell navigation.",
+        render: None,
+    },
+    ComponentDoc {
+        name: "Pagination",
+        category: ComponentCategory::DataWorkflows,
+        status: ComponentStatus::ComingSoon,
+        summary: "Page-jump control for data-heavy lists. Cursor and offset modes; integrates with DataTable.",
+        snippet: "// Spec 8 — Pagination (sibling to DataTable)",
+        accessibility: "Navigation landmark with current-page `aria-current=\"page\"`.",
+        render: None,
+    },
+    ComponentDoc {
+        name: "Breadcrumb",
+        category: ComponentCategory::Navigation,
+        status: ComponentStatus::ComingSoon,
+        summary: "Hierarchical wayfinding trail with collapse-on-overflow for deep navigation contexts.",
+        snippet: "// Spec 14 — Breadcrumb",
+        accessibility: "Navigation landmark; last item announces as the current location.",
+        render: None,
+    },
+    ComponentDoc {
+        name: "Stepper",
+        category: ComponentCategory::Navigation,
+        status: ComponentStatus::ComingSoon,
+        summary: "Multi-step workflow tracker with completed/active/upcoming states. Horizontal and vertical orientations.",
+        snippet: "// Spec 14 — Stepper / Wizard",
+        accessibility: "Ordered list with per-step status announced via `aria-current` and visually-hidden text.",
+        render: None,
+    },
+    ComponentDoc {
+        name: "Accordion",
+        category: ComponentCategory::Layout,
+        status: ComponentStatus::ComingSoon,
+        summary: "Collapsible content sections with single- and multi-expand modes. Pairs with `Presence` for entrance motion.",
+        snippet: "// Spec 15 — Accordion",
+        accessibility: "WAI-ARIA disclosure pattern (button + region with `aria-expanded`).",
+        render: None,
+    },
 ];
 
 const BUTTON_SNIPPET: &str = r#"Button {
@@ -593,4 +711,10 @@ const LIQUID_SURFACE_SNIPPET: &str = r#"LiquidSurface {
         style: "padding: 16px; color: white; font-weight: 600;",
         "Hover me"
     }
+}"#;
+
+const KINETIC_TEXT_SNIPPET: &str = r#"KineticText {
+    id: "headline",
+    text: "Welcome aboard",
+    cue: "text-flow",
 }"#;

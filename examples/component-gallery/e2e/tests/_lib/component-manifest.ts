@@ -48,6 +48,7 @@ export const COMPONENT_MANIFEST: ManifestEntry[] = [
   { name: "KineticBox", slug: "kinetic-box", status: "ready", layers: { smoke: true, motion: true, visual: true } },
   { name: "Sequence", slug: "sequence", status: "ready", layers: { smoke: true, motion: true, visual: true } },
   { name: "TimelineScope", slug: "timeline-scope", status: "ready", layers: { smoke: true, motion: true, visual: true } },
+  { name: "KineticText", slug: "kinetic-text", status: "ready", layers: { smoke: true, motion: false, visual: true } },
   // Composition
   { name: "FrameStage", slug: "frame-stage", status: "ready", layers: { smoke: true, motion: true, visual: true } },
   { name: "SharedElement", slug: "shared-element", status: "ready", layers: { smoke: true, motion: true, visual: true } },

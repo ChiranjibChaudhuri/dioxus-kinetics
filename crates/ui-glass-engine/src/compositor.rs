@@ -160,6 +160,27 @@ impl Compositor {
             .map(|(_, view)| view)
             .unwrap_or(resolved_bg);
 
+        // Clear output target so the compose pass (LoadOp::Load) starts over transparent.
+        let mut clear_enc = self.device.create_command_encoder(&wgpu::CommandEncoderDescriptor {
+            label: Some("output-clear"),
+        });
+        {
+            let _pass = clear_enc.begin_render_pass(&wgpu::RenderPassDescriptor {
+                label: Some("output-clear-pass"),
+                color_attachments: &[Some(wgpu::RenderPassColorAttachment {
+                    view: output_view, resolve_target: None,
+                    ops: wgpu::Operations {
+                        load: wgpu::LoadOp::Clear(wgpu::Color::TRANSPARENT),
+                        store: wgpu::StoreOp::Store,
+                    },
+                    depth_slice: None,
+                })],
+                depth_stencil_attachment: None,
+                timestamp_writes: None, occlusion_query_set: None,
+            });
+        }
+        self.queue.submit(Some(clear_enc.finish()));
+
         let compose = self.compose_cache.get(&compose_key).unwrap();
         let blur_h = self.blur_cache.get(&blur_h_key).unwrap();
         let blur_v = self.blur_cache.get(&blur_v_key).unwrap();
@@ -288,11 +309,30 @@ impl Compositor {
         canvas_size: [f32; 2],
         regions: &[GlassRegion],
     ) {
-        debug_assert!(
-            regions.len() <= 1,
-            "Plan 1/2 multi-region renders overwrite each other; correct \
-             overlap compositing lands in Plan 3",
-        );
+        // Multi-region: regions composite back-to-front. The output_view is
+        // cleared once below; each region's compose pass uses LoadOp::Load so
+        // it preserves earlier regions and blends on top.
+
+        // Clear output target so the first region composes over transparent.
+        let mut clear_enc = self.device.create_command_encoder(&wgpu::CommandEncoderDescriptor {
+            label: Some("output-clear"),
+        });
+        {
+            let _pass = clear_enc.begin_render_pass(&wgpu::RenderPassDescriptor {
+                label: Some("output-clear-pass"),
+                color_attachments: &[Some(wgpu::RenderPassColorAttachment {
+                    view: output_view, resolve_target: None,
+                    ops: wgpu::Operations {
+                        load: wgpu::LoadOp::Clear(wgpu::Color::TRANSPARENT),
+                        store: wgpu::StoreOp::Store,
+                    },
+                    depth_slice: None,
+                })],
+                depth_stencil_attachment: None,
+                timestamp_writes: None, occlusion_query_set: None,
+            });
+        }
+        self.queue.submit(Some(clear_enc.finish()));
 
         // Materialize scene-graph bg once (if installed); all regions share it.
         // Clone layers first to avoid simultaneous borrow of background_scene

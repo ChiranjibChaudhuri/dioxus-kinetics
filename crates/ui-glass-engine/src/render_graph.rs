@@ -141,7 +141,7 @@ pub fn render_glass_to_texture(
 
     run_pass(&mut encoder, &scratch_h_view, blur_h_pipeline, &bg_h, "blur-h", true);
     run_pass(&mut encoder, &scratch_v_view, blur_v_pipeline, &bg_v, "blur-v", true);
-    run_pass(&mut encoder, output_view, compose_pipeline, &compose_bg, "compose", true);
+    run_pass(&mut encoder, output_view, compose_pipeline, &compose_bg, "compose", false);
 
     queue.submit(Some(encoder.finish()));
 }

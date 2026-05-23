@@ -138,7 +138,7 @@ pub fn timeline_scope_preview() -> Element {
                     fps: None,
                     label: "Stagger",
                     children: rsx! {
-                        TimelineScope { id: "stagger-demo", autoplay: false,
+                        TimelineScope { id: "stagger-demo", autoplay: true,
                             for index in 0u32..4 {
                                 div { "data-stagger-index": "{index}",
                                     KineticBox { id: "stagger-{index}", cue: "rise-in",

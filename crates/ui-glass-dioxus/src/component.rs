@@ -1,5 +1,8 @@
 //! `<LiquidSurface>` Dioxus component.
 
+use std::cell::RefCell;
+use std::rc::Rc;
+
 use dioxus::prelude::*;
 
 use ui_glass::LiquidMaterial;
@@ -7,6 +10,17 @@ use ui_glass_engine::background::BackgroundSource;
 
 use crate::motion_bridge::MotionState;
 use crate::surface_state::SurfaceState;
+
+/// Combined lifetime guard for everything spawned on canvas mount. Dropping
+/// this stops the frame loop and removes all event listeners.
+#[cfg(target_arch = "wasm32")]
+struct LiveResources {
+    _frame: ui_runtime::scheduler::FrameHandle,
+    _listeners: crate::motion_bridge::MotionListenersGuard,
+}
+
+#[cfg(not(target_arch = "wasm32"))]
+struct LiveResources;
 
 #[derive(Props, Clone, PartialEq)]
 pub struct LiquidSurfaceProps {
@@ -45,8 +59,15 @@ pub fn LiquidSurface(props: LiquidSurfaceProps) -> Element {
     let surface_state: Signal<Option<SurfaceState>> = use_signal(|| None::<SurfaceState>);
 
     // MotionState holds the latest pointer/scroll/time + reduced-motion flag.
-    // Task 6 will wire event listeners; for now it stays at default.
     let motion_state: Signal<MotionState> = use_signal(MotionState::default);
+
+    // LiveResources stored in a stable Rc<RefCell<...>> via use_hook so that
+    // non-Clone, non-PartialEq values (FrameHandle, MotionListenersGuard) can
+    // be held across async boundaries without Signal's PartialEq constraint.
+    // The Rc is dropped when the component unmounts, which drops LiveResources,
+    // which drops FrameHandle (sets cancelled=true, stops rAF) and
+    // MotionListenersGuard (removes gloo-events listeners).
+    let live: Rc<RefCell<Option<LiveResources>>> = use_hook(|| Rc::new(RefCell::new(None)));
 
     let inline_style = format!(
         "position: relative; display: inline-block; width: {}px; height: {}px;",
@@ -77,6 +98,7 @@ pub fn LiquidSurface(props: LiquidSurfaceProps) -> Element {
                         evt,
                         surface_state,
                         motion_state,
+                        live.clone(),
                         material,
                         background.clone(),
                         rect,
@@ -98,6 +120,7 @@ fn handle_canvas_mounted(
     evt: MountedEvent,
     mut surface_state: Signal<Option<SurfaceState>>,
     motion_state: Signal<MotionState>,
+    live: Rc<RefCell<Option<LiveResources>>>,
     material: LiquidMaterial,
     background: Option<BackgroundSource>,
     rect: Option<[f32; 4]>,
@@ -106,10 +129,12 @@ fn handle_canvas_mounted(
 ) {
     use crate::web::{canvas_from_mounted, resize_canvas_to_css_size};
 
-    // Idempotency guard: if a SurfaceState already exists for this component,
+    // Idempotency guard: if LiveResources is already set for this component,
     // don't re-spawn wgpu init + listeners + frame loop. Dioxus may re-fire
     // onmounted on the same element in some rehydration/route-change paths.
-    if surface_state.read().is_some() {
+    // Using `live` as the idempotency signal (rather than surface_state) is
+    // cleaner — it's only set after both surface_state and listeners are wired.
+    if live.borrow().is_some() {
         return;
     }
 
@@ -120,9 +145,9 @@ fn handle_canvas_mounted(
     spawn(async move {
         if let Some(state) = SurfaceState::from_canvas(canvas, physical_size).await {
             surface_state.set(Some(state));
-            let guard = crate::motion_bridge::attach_listeners(&canvas_for_listeners, motion_state);
-            std::mem::forget(guard);
-            start_frame_loop(surface_state, motion_state, material, background, rect, width, height);
+            let listeners = crate::motion_bridge::attach_listeners(&canvas_for_listeners, motion_state);
+            let frame = start_frame_loop(surface_state, motion_state, material, background, rect, width, height);
+            live.borrow_mut().replace(LiveResources { _frame: frame, _listeners: listeners });
         }
     });
 }
@@ -132,6 +157,7 @@ fn handle_canvas_mounted(
     _evt: MountedEvent,
     _surface_state: Signal<Option<SurfaceState>>,
     _motion_state: Signal<MotionState>,
+    _live: Rc<RefCell<Option<LiveResources>>>,
     _material: LiquidMaterial,
     _background: Option<BackgroundSource>,
     _rect: Option<[f32; 4]>,
@@ -150,7 +176,7 @@ fn start_frame_loop(
     rect: Option<[f32; 4]>,
     width: u32,
     height: u32,
-) {
+) -> ui_runtime::scheduler::FrameHandle {
     use ui_runtime::scheduler::{spawn_frame_loop, ControlFlow};
     use ui_glass_engine::GlassRegion;
 
@@ -222,7 +248,5 @@ fn start_frame_loop(
         ControlFlow::Continue
     });
 
-    // Plan 4 leaks the FrameHandle. Plan 5 will tie it to the component
-    // unmount lifecycle via a use_drop / use_effect cleanup.
-    std::mem::forget(handle);
+    handle
 }

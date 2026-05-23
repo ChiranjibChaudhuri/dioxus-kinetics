@@ -9,7 +9,16 @@ use wgpu::util::DeviceExt;
 use crate::background::{BackgroundSource, Gradient, GradientKind};
 
 const SHADER: &str = include_str!("../shaders/bg_gradient.wgsl");
+const MESH_SHADER: &str = include_str!("../shaders/bg_mesh.wgsl");
 const MAX_STOPS: usize = 8;
+
+#[repr(C)]
+#[derive(Clone, Copy, Debug, Pod, Zeroable)]
+struct MeshUniforms {
+    canvas_size: [f32; 2],
+    time_seconds: f32,
+    _pad: f32,
+}
 
 #[repr(C)]
 #[derive(Clone, Copy, Debug, Pod, Zeroable)]
@@ -73,19 +82,43 @@ impl BackgroundRenderer {
         let mut encoder = self.device.create_command_encoder(&Default::default());
         let mut first = true;
         for src in sources {
-            let (uniforms, kind, stop_count) = self.uniforms_for(src, [w as f32, h as f32]);
-            let pipeline = self.build_pipeline(kind, stop_count);
-            let buf = self.device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
-                label: Some("bg-uniforms"),
-                contents: bytemuck::bytes_of(&uniforms),
-                usage: wgpu::BufferUsages::UNIFORM | wgpu::BufferUsages::COPY_DST,
-            });
-            let bg = self.device.create_bind_group(&wgpu::BindGroupDescriptor {
-                label: Some("bg-bg"),
-                layout: &self.bgl,
-                entries: &[wgpu::BindGroupEntry { binding: 0, resource: buf.as_entire_binding() }],
-            });
-            self.run_pass(&mut encoder, &view, &pipeline, &bg, first);
+            match src {
+                BackgroundSource::Mesh(kind) => {
+                    let mesh_kind = match kind {
+                        crate::background::MeshKind::Aurora => 0u32,
+                        crate::background::MeshKind::Orbs   => 1,
+                        crate::background::MeshKind::Grain  => 2,
+                    };
+                    let pipeline = self.build_mesh_pipeline(mesh_kind);
+                    let u = MeshUniforms { canvas_size: [w as f32, h as f32], time_seconds: 0.0, _pad: 0.0 };
+                    let buf = self.device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
+                        label: Some("mesh-uniforms"),
+                        contents: bytemuck::bytes_of(&u),
+                        usage: wgpu::BufferUsages::UNIFORM | wgpu::BufferUsages::COPY_DST,
+                    });
+                    let bg = self.device.create_bind_group(&wgpu::BindGroupDescriptor {
+                        label: Some("mesh-bg"),
+                        layout: &self.bgl,
+                        entries: &[wgpu::BindGroupEntry { binding: 0, resource: buf.as_entire_binding() }],
+                    });
+                    self.run_pass(&mut encoder, &view, &pipeline, &bg, first);
+                }
+                _ => {
+                    let (uniforms, kind, stop_count) = self.uniforms_for(src, [w as f32, h as f32]);
+                    let pipeline = self.build_pipeline(kind, stop_count);
+                    let buf = self.device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
+                        label: Some("bg-uniforms"),
+                        contents: bytemuck::bytes_of(&uniforms),
+                        usage: wgpu::BufferUsages::UNIFORM | wgpu::BufferUsages::COPY_DST,
+                    });
+                    let bg = self.device.create_bind_group(&wgpu::BindGroupDescriptor {
+                        label: Some("bg-bg"),
+                        layout: &self.bgl,
+                        entries: &[wgpu::BindGroupEntry { binding: 0, resource: buf.as_entire_binding() }],
+                    });
+                    self.run_pass(&mut encoder, &view, &pipeline, &bg, first);
+                }
+            }
             first = false;
         }
         self.queue.submit(Some(encoder.finish()));
@@ -157,6 +190,45 @@ impl BackgroundRenderer {
                 (3, n as u32)
             }
         }
+    }
+
+    fn build_mesh_pipeline(&self, mesh_kind: u32) -> wgpu::RenderPipeline {
+        let module = self.device.create_shader_module(wgpu::ShaderModuleDescriptor {
+            label: Some("bg_mesh.wgsl"),
+            source: wgpu::ShaderSource::Wgsl(MESH_SHADER.into()),
+        });
+        let layout = self.device.create_pipeline_layout(&wgpu::PipelineLayoutDescriptor {
+            label: Some("bg-mesh-layout"),
+            bind_group_layouts: &[&self.bgl],
+            push_constant_ranges: &[],
+        });
+        let constants: &[(&str, f64)] = &[("MESH_KIND", mesh_kind as f64)];
+        self.device.create_render_pipeline(&wgpu::RenderPipelineDescriptor {
+            label: Some("bg-mesh-pipeline"),
+            layout: Some(&layout),
+            vertex: wgpu::VertexState {
+                module: &module, entry_point: Some("vs_main"),
+                buffers: &[], compilation_options: wgpu::PipelineCompilationOptions {
+                    constants, zero_initialize_workgroup_memory: false,
+                },
+            },
+            fragment: Some(wgpu::FragmentState {
+                module: &module, entry_point: Some("fs_main"),
+                targets: &[Some(wgpu::ColorTargetState {
+                    format: wgpu::TextureFormat::Rgba8UnormSrgb,
+                    blend: Some(wgpu::BlendState::ALPHA_BLENDING),
+                    write_mask: wgpu::ColorWrites::ALL,
+                })],
+                compilation_options: wgpu::PipelineCompilationOptions {
+                    constants, zero_initialize_workgroup_memory: false,
+                },
+            }),
+            primitive: wgpu::PrimitiveState::default(),
+            depth_stencil: None,
+            multisample: wgpu::MultisampleState::default(),
+            multiview: None,
+            cache: None,
+        })
     }
 
     fn build_pipeline(&self, kind: u32, stop_count: u32) -> wgpu::RenderPipeline {

@@ -1,4 +1,4 @@
-use ui_glass_engine::background::{BackgroundSource, Gradient, GradientStop};
+use ui_glass_engine::background::{BackgroundSource, Gradient, GradientStop, MeshKind};
 use ui_glass_engine::background::render::BackgroundRenderer;
 use ui_glass_engine::headless::TestHarness;
 use ui_tokens::Color;
@@ -38,4 +38,29 @@ fn solid_color_fills_whole_texture() {
     );
     let center_idx = ((16 * 32 + 16) * 4) as usize;
     assert!(pixels[center_idx + 1] > 50, "expected greenish center");
+}
+
+#[test]
+fn aurora_mesh_produces_non_uniform_output() {
+    let h = pollster::block_on(TestHarness::new()).unwrap();
+    let mut r = BackgroundRenderer::new(h.device().clone(), h.queue().clone());
+    let pixels = r.render_to_pixels(&[BackgroundSource::Mesh(MeshKind::Aurora)], 64, 64);
+    let mut min = 255u8;
+    let mut max = 0u8;
+    for chunk in pixels.chunks(4) {
+        for c in &chunk[..3] {
+            if *c < min { min = *c; }
+            if *c > max { max = *c; }
+        }
+    }
+    assert!(max - min > 40, "aurora should vary across the texture; got range {min}..{max}");
+}
+
+#[test]
+fn orbs_and_grain_produce_distinct_outputs() {
+    let h = pollster::block_on(TestHarness::new()).unwrap();
+    let mut r = BackgroundRenderer::new(h.device().clone(), h.queue().clone());
+    let orbs = r.render_to_pixels(&[BackgroundSource::Mesh(MeshKind::Orbs)], 32, 32);
+    let grain = r.render_to_pixels(&[BackgroundSource::Mesh(MeshKind::Grain)], 32, 32);
+    assert_ne!(orbs, grain, "orbs and grain should render differently");
 }

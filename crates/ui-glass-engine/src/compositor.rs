@@ -38,6 +38,11 @@ impl Compositor {
         canvas_size: [f32; 2],
         regions: &[GlassRegion],
     ) {
+        debug_assert!(
+            regions.len() <= 1,
+            "Plan 1 multi-region renders overwrite each other; correct \
+             overlap compositing lands in Plan 4",
+        );
         for region in regions {
             let uniforms = GlassUniforms::from_material(
                 &region.material,

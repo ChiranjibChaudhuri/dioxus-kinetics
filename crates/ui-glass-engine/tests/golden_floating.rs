@@ -48,7 +48,7 @@ fn floating_neutral_matches_golden() {
 }
 
 fn render_test_scene() -> Vec<u8> {
-    let mut h = pollster::block_on(TestHarness::new()).unwrap();
+    let h = pollster::block_on(TestHarness::new()).unwrap();
     let (w, hgt) = (128u32, 128u32);
     let bg = create_gradient(h.device(), h.queue(), w, hgt);
     let out = create_output(h.device(), w, hgt);

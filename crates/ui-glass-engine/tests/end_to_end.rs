@@ -4,7 +4,7 @@ use ui_glass_engine::{Compositor, GlassRegion};
 
 #[test]
 fn floating_preset_over_blue_bg_writes_corner_pixels_outside_rect() {
-    let mut h = pollster::block_on(TestHarness::new()).unwrap();
+    let h = pollster::block_on(TestHarness::new()).unwrap();
     let (w, hgt) = (128u32, 128u32);
 
     let bg = create_solid(h.device(), h.queue(), w, hgt, [0, 0, 200, 255]);

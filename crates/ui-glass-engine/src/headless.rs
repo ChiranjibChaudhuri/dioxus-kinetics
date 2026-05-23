@@ -3,11 +3,13 @@
 //! the raw bytes for golden-image comparison.
 
 use std::sync::Arc;
-use wgpu::util::DeviceExt;
 
 pub struct TestHarness {
-    instance: wgpu::Instance,
-    adapter: wgpu::Adapter,
+    // Held to keep wgpu alive for the lifetime of the device; some drivers
+    // emit warnings or panic if the Instance/Adapter is dropped before its
+    // Device. Not read directly.
+    _instance: wgpu::Instance,
+    _adapter: wgpu::Adapter,
     device: Arc<wgpu::Device>,
     queue: Arc<wgpu::Queue>,
     canvas_size: (u32, u32),
@@ -41,8 +43,8 @@ impl TestHarness {
             .map_err(|e| format!("no device: {e:?}"))?;
 
         Ok(Self {
-            instance,
-            adapter,
+            _instance: instance,
+            _adapter: adapter,
             device: Arc::new(device),
             queue: Arc::new(queue),
             canvas_size: (256, 256),

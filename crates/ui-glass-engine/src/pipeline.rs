@@ -5,7 +5,7 @@ use std::sync::Arc;
 const BLUR_SRC: &str = include_str!("shaders/blur.wgsl");
 const COMPOSE_SRC: &str = include_str!("shaders/compose.wgsl");
 
-#[derive(Clone, Copy, Debug)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
 pub enum BlurDirection {
     Horizontal,
     Vertical,

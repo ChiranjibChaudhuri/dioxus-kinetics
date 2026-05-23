@@ -8,6 +8,88 @@ use ui_timeline::{
     TimelineClock, TimelineId, TimelineTrack,
 };
 
+// ---------------------------------------------------------------------------
+// WAAPI integration — wasm32 only.
+//
+// `ResolvedMotionState` is sample-only (it stores the sampled scalar values,
+// not the original `MotionCue` with `from / to / transition`). To keep the
+// original cue data accessible at mount time, `SequenceContext` is extended
+// with a `cues` map (kinetic-id → `MotionCue`) that the `Sequence` parent
+// populates when it is given a `cues` list.  `KineticBox` reads that map on
+// mount and drives a WAAPI animation from the cue's own `from/to/transition`.
+//
+// Non-wasm builds compile a no-op stub so every call-site in `KineticBox`
+// below is unconditional.
+// ---------------------------------------------------------------------------
+#[cfg(target_arch = "wasm32")]
+mod kinetics_waapi {
+    use ui_motion::keyframes_for_transition;
+    use ui_runtime::waapi::{
+        is_supported, keyframes_to_js, options_object, AnimatedProperty, WaapiAnimation,
+    };
+    use ui_timeline::{Axis, MotionCue};
+    use web_sys::Element;
+
+    /// Called from the `onmounted` handler of a `KineticBox`.
+    /// Plays the WAAPI animation that matches the cue originally registered for
+    /// this kinetic id. Does nothing if WAAPI is unsupported or no cue is found.
+    pub(super) fn play_cue_on_mount(element: &Element, cue: &MotionCue) {
+        if !is_supported() {
+            return;
+        }
+        let Some((property, from, to, transition)) = axis_for_cue(cue) else {
+            return;
+        };
+        let keyframes = keyframes_for_transition(from, to, transition);
+        let js_keyframes = keyframes_to_js(property, &keyframes);
+        let js_options = options_object(keyframes.duration_ms);
+        // keyframes_to_js returns JsValue directly (T6 note) — pass as &js_keyframes.
+        let _ = WaapiAnimation::play(element, &js_keyframes, &js_options);
+    }
+
+    fn axis_for_cue(
+        cue: &MotionCue,
+    ) -> Option<(AnimatedProperty, f32, f32, ui_motion::Transition)> {
+        match *cue {
+            MotionCue::Opacity {
+                from,
+                to,
+                transition,
+            } => Some((AnimatedProperty::Opacity, from, to, transition)),
+            MotionCue::Translate {
+                axis: Axis::X,
+                from,
+                to,
+                transition,
+            } => Some((AnimatedProperty::TranslateX, from, to, transition)),
+            MotionCue::Translate {
+                axis: Axis::Y,
+                from,
+                to,
+                transition,
+            } => Some((AnimatedProperty::TranslateY, from, to, transition)),
+            MotionCue::Scale {
+                from,
+                to,
+                transition,
+            } => Some((AnimatedProperty::Scale, from, to, transition)),
+            MotionCue::Rotate {
+                from_deg,
+                to_deg,
+                transition,
+            } => Some((AnimatedProperty::Rotate, from_deg, to_deg, transition)),
+        }
+    }
+}
+
+#[cfg(not(target_arch = "wasm32"))]
+mod kinetics_waapi {
+    use ui_timeline::MotionCue;
+
+    /// No-op on non-wasm targets.
+    pub(super) fn play_cue_on_mount(_element: &(), _cue: &MotionCue) {}
+}
+
 #[derive(Clone, Debug, PartialEq)]
 pub struct Cue {
     pub target_id: String,
@@ -28,6 +110,10 @@ impl Cue {
 #[derive(Clone, Default)]
 pub struct SequenceContext {
     pub states: HashMap<String, ResolvedMotionState>,
+    /// Original `MotionCue` per kinetic-id, keyed the same way as `states`.
+    /// Populated by `Sequence` when it is given a `cues` list so that
+    /// `KineticBox` can reconstruct `(from, to, transition)` for WAAPI.
+    pub cues: HashMap<String, MotionCue>,
 }
 
 fn cue_duration_ms(motion: &MotionCue) -> f32 {
@@ -75,6 +161,18 @@ pub fn Sequence(
     #[props(default = TimelineClock::Playback { elapsed_ms: 0.0 })] clock: TimelineClock,
     children: Element,
 ) -> Element {
+    // Build a flat map of kinetic-id → original MotionCue from the `cues` list.
+    // This is stored in the context so that KineticBox can reconstruct the
+    // (from, to, transition) triplet needed to drive a WAAPI animation on mount.
+    let cue_map: HashMap<String, MotionCue> = cues
+        .as_deref()
+        .map(|list| {
+            list.iter()
+                .map(|c| (c.target_id.clone(), c.motion))
+                .collect()
+        })
+        .unwrap_or_default();
+
     let resolved_timeline = timeline
         .clone()
         .or_else(|| cues.clone().map(|cues| cues_to_timeline(&id, cues)));
@@ -102,7 +200,10 @@ pub fn Sequence(
                 states.insert(kinetic_id.0.clone(), state.clone());
             }
         }
-        Signal::new(SequenceContext { states })
+        Signal::new(SequenceContext {
+            states,
+            cues: cue_map.clone(),
+        })
     });
     use_context_provider(|| ctx_signal);
 
@@ -114,7 +215,10 @@ pub fn Sequence(
                 states.insert(kinetic_id.0.clone(), state.clone());
             }
         }
-        ctx_signal.set(SequenceContext { states });
+        ctx_signal.set(SequenceContext {
+            states,
+            cues: cue_map.clone(),
+        });
     });
 
     rsx! {
@@ -147,10 +251,45 @@ pub fn KineticBox(
     children: Element,
 ) -> Element {
     let kinetic_id = KineticId::new(id.clone());
-    let style = try_consume_context::<Signal<SequenceContext>>()
-        .and_then(|sig| sig.read().states.get(&kinetic_id.0).cloned())
+
+    // Snapshot from context: the sampled inline style (for SSR/hydration
+    // pre-paint) and the original MotionCue (for WAAPI playback on mount).
+    let ctx_snapshot = try_consume_context::<Signal<SequenceContext>>()
+        .map(|sig| sig.read().clone());
+
+    let style = ctx_snapshot
+        .as_ref()
+        .and_then(|ctx| ctx.states.get(&kinetic_id.0).cloned())
         .map(|state| state.inline_style())
         .unwrap_or_default();
+
+    // Capture the original MotionCue so the onmounted handler can drive WAAPI.
+    let motion_cue = ctx_snapshot
+        .as_ref()
+        .and_then(|ctx| ctx.cues.get(&kinetic_id.0).copied());
+
+    // On wasm32: when the element mounts, kick off a WAAPI animation for the
+    // cue registered in the parent Sequence. The inline style above provides
+    // the correct settled-state for SSR/hydration; WAAPI takes over from the
+    // `from` value and animates to the `to` value in the browser.
+    //
+    // On non-wasm: the handler is a no-op.
+    let onmounted = EventHandler::new(move |evt: MountedEvent| {
+        let Some(cue_data) = motion_cue else {
+            return;
+        };
+        #[cfg(target_arch = "wasm32")]
+        {
+            if let Some(element) = evt.downcast::<web_sys::Element>() {
+                kinetics_waapi::play_cue_on_mount(element, &cue_data);
+            }
+        }
+        #[cfg(not(target_arch = "wasm32"))]
+        {
+            let _ = evt;
+            kinetics_waapi::play_cue_on_mount(&(), &cue_data);
+        }
+    });
 
     rsx! {
         div {
@@ -158,6 +297,7 @@ pub fn KineticBox(
             "data-kinetic-id": "{kinetic_id.0}",
             "data-motion-cue": "{cue}",
             style: "{style}",
+            onmounted: onmounted,
             {children}
         }
     }

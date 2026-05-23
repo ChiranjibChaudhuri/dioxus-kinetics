@@ -870,6 +870,108 @@ pub const COMPONENT_CSS: &str = r#"
 .ui-select-option--selected { background: var(--ui-surface-muted); font-weight: 600; }
 .ui-select-option--disabled { color: var(--ui-muted-fg); cursor: not-allowed; }
 
+.ui-datepicker {
+    display: grid;
+    gap: var(--ui-space-1);
+}
+
+.ui-datepicker-label {
+    color: var(--ui-fg);
+    font-weight: 600;
+    font-size: 13px;
+}
+
+.ui-datepicker-trigger {
+    display: inline-flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--ui-space-2);
+    min-width: 200px;
+    padding: 6px 10px;
+    border: 1px solid var(--ui-border);
+    border-radius: var(--ui-radius-md);
+    background: var(--ui-surface);
+    color: var(--ui-fg);
+    cursor: pointer;
+    font: inherit;
+}
+
+.ui-datepicker-trigger[disabled] { opacity: 0.45; cursor: not-allowed; }
+.ui-datepicker-trigger--placeholder { color: var(--ui-muted-fg); }
+.ui-datepicker-icon { color: var(--ui-muted-fg); }
+
+.ui-datepicker-calendar {
+    display: grid;
+    gap: var(--ui-space-3);
+    min-width: 280px;
+    padding: var(--ui-space-2);
+}
+
+.ui-datepicker-nav {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--ui-space-2);
+}
+
+.ui-datepicker-nav-button {
+    border: 1px solid transparent;
+    background: transparent;
+    color: var(--ui-fg);
+    border-radius: var(--ui-radius-md);
+    padding: 4px 10px;
+    cursor: pointer;
+    font: inherit;
+    line-height: 1;
+}
+
+.ui-datepicker-nav-button:hover { background: var(--ui-surface-muted); }
+
+.ui-datepicker-title {
+    font-size: 14px;
+    color: var(--ui-fg);
+}
+
+.ui-datepicker-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 2px;
+}
+
+.ui-datepicker-weekday {
+    font-size: 11px;
+    text-align: center;
+    color: var(--ui-muted-fg);
+    padding: 4px 0;
+    font-weight: 700;
+    text-transform: uppercase;
+}
+
+.ui-datepicker-cell {
+    aspect-ratio: 1 / 1;
+    border: 1px solid transparent;
+    background: transparent;
+    color: var(--ui-fg);
+    border-radius: var(--ui-radius-md);
+    cursor: pointer;
+    font: inherit;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.ui-datepicker-cell:hover { background: var(--ui-surface-muted); }
+.ui-datepicker-cell--selected {
+    background: var(--ui-fg);
+    color: var(--ui-bg);
+    font-weight: 700;
+}
+.ui-datepicker-cell--empty {
+    background: transparent;
+    cursor: default;
+    pointer-events: none;
+}
+
 .ui-command-menu {
     display: grid;
     gap: var(--ui-space-3);

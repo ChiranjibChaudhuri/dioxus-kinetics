@@ -53,6 +53,23 @@ pub fn select_preview() -> Element {
     rsx! { SelectPreviewBody {} }
 }
 
+pub fn date_picker_preview() -> Element {
+    rsx! { DatePickerPreviewBody {} }
+}
+
+#[component]
+fn DatePickerPreviewBody() -> Element {
+    let mut value = use_signal(|| "2026-05-23".to_string());
+    rsx! {
+        DatePicker {
+            id: "report-cutoff",
+            label: "Report cutoff",
+            value: value.read().clone(),
+            on_select: move |iso: String| value.set(iso),
+        }
+    }
+}
+
 #[component]
 fn SelectPreviewBody() -> Element {
     let mut value = use_signal(|| "monthly".to_string());

@@ -88,10 +88,7 @@ pub fn Stepper(
     #[props(default = false)] vertical: bool,
     on_select: Option<EventHandler<String>>,
 ) -> Element {
-    let active_idx = steps
-        .iter()
-        .position(|s| s.id == current)
-        .unwrap_or(0);
+    let active_idx = steps.iter().position(|s| s.id == current).unwrap_or(0);
     let direction_class = if vertical {
         "ui-stepper ui-stepper--vertical"
     } else {
@@ -149,18 +146,14 @@ pub fn Stepper(
 }
 
 /// One page button in a `Pagination` control.
-fn pagination_button(
-    page: u32,
-    current: u32,
-    on_select: &Option<EventHandler<u32>>,
-) -> Element {
+fn pagination_button(page: u32, current: u32, on_select: &Option<EventHandler<u32>>) -> Element {
     let is_current = page == current;
     let class = if is_current {
         "ui-pagination-button ui-pagination-button--current"
     } else {
         "ui-pagination-button"
     };
-    let on_select = on_select.clone();
+    let on_select = *on_select;
     rsx! {
         li { class: "ui-pagination-item",
             button {
@@ -216,7 +209,7 @@ pub fn Pagination(
                         disabled: current == 1,
                         "aria-label": "Previous page",
                         onclick: {
-                            let on_select = on_select.clone();
+                            let on_select = on_select;
                             move |_| {
                                 if current > 1 {
                                     if let Some(handler) = &on_select {
@@ -254,7 +247,7 @@ pub fn Pagination(
                         disabled: current == total_pages,
                         "aria-label": "Next page",
                         onclick: {
-                            let on_select = on_select.clone();
+                            let on_select = on_select;
                             move |_| {
                                 if current < total_pages {
                                     if let Some(handler) = &on_select {

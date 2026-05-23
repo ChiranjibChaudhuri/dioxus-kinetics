@@ -10,10 +10,11 @@ use crate::previews::{
     },
     foundations::glass_layer_preview,
     inputs::{
-        checkbox_preview, select_preview, slider_preview, switch_preview, text_field_preview,
+        checkbox_preview, date_picker_preview, select_preview, slider_preview, switch_preview,
+        text_field_preview,
     },
-    liquid_glass::liquid_surface_preview,
     layout::{accordion_preview, stack_preview, tabs_preview},
+    liquid_glass::liquid_surface_preview,
     motion::{
         kinetic_box_preview, kinetic_text_preview, presence_gate_preview, presence_preview,
         sequence_preview, timeline_scope_preview,
@@ -416,11 +417,11 @@ const COMPONENT_DOCS: [ComponentDoc; 42] = [
     ComponentDoc {
         name: "DatePicker",
         category: ComponentCategory::Inputs,
-        status: ComponentStatus::ComingSoon,
-        summary: "Calendar-grid temporal input with single-date and range modes. Integrates with TextField for typed entry.",
-        snippet: "// Spec 9 — DatePicker + DateRangePicker",
-        accessibility: "WAI-ARIA grid pattern; localised month/day names via the host application's locale.",
-        render: None,
+        status: ComponentStatus::Ready,
+        summary: "Calendar-grid temporal input built on `Popover`. Renders a trigger that shows the selected ISO date, opens a month-navigable grid, emits `on_select(YYYY-MM-DD)` on click. Range mode + locale-aware month names are a future spec.",
+        snippet: DATE_PICKER_SNIPPET,
+        accessibility: "Trigger is `aria-haspopup=\"dialog\"` + `aria-expanded`; the grid is `role=\"grid\"` with `role=\"columnheader\"` weekday cells and `role=\"gridcell\"` day buttons exposing `aria-selected` + ISO `aria-label`.",
+        render: Some(date_picker_preview),
     },
     ComponentDoc {
         name: "Slider",
@@ -763,6 +764,13 @@ const SELECT_SNIPPET: &str = r#"Select {
         SelectOption::new("annual", "Annual"),
     ],
     on_select: move |v: String| /* update */ {},
+}"#;
+
+const DATE_PICKER_SNIPPET: &str = r#"DatePicker {
+    id: "report-cutoff",
+    label: "Report cutoff",
+    value: "2026-05-23",
+    on_select: move |iso: String| /* update */ {},
 }"#;
 
 const POPOVER_SNIPPET: &str = r#"Popover {

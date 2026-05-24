@@ -13,6 +13,12 @@ pub fn glass_layer_preview() -> Element {
         (GlassTone::Warning, "Warning"),
     ];
 
+    // 9 tiles → 9 GlassSurface instances. On the WgpuWebGl2 tier each would
+    // claim a WebGL context, exceeding webkit's per-page cap and forcing the
+    // older ones to be dropped (they then render as dark blanks). The
+    // design-token showcase here is the CSS path itself — the `data-glass-*`
+    // attributes carrying the level + tone tokens — so force the CSS render
+    // path regardless of tier detection.
     rsx! {
         div { class: "gallery-variant-grid gallery-variant-grid--3x3",
             for (level, level_label) in levels.iter() {
@@ -23,6 +29,7 @@ pub fn glass_layer_preview() -> Element {
                             level: *level,
                             tone: *tone,
                             density: GlassDensity::Comfortable,
+                            force_css: true,
                             "Material preview"
                         }
                     }

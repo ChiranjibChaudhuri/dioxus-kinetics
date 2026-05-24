@@ -147,10 +147,21 @@ pub fn GlassSurface(
     #[props(default)] level: GlassLevel,
     #[props(default)] tone: GlassTone,
     #[props(default)] density: GlassDensity,
+    /// Skip tier detection and always render the CSS fallback path. Use when
+    /// the host page already contains many GlassSurface instances and the
+    /// per-page WebGL-context cap (webkit: ~8) would force older canvases to
+    /// be dropped — e.g. design-token showcase grids where the
+    /// `data-glass-*` attributes are the contract being demonstrated.
+    #[props(default)]
+    force_css: bool,
     children: Element,
 ) -> Element {
     #[cfg(feature = "liquid-glass")]
     {
+        if force_css {
+            return glass_surface_css(level, tone, density, children);
+        }
+
         use ui_glass::{
             GlassDepth, LiquidMaterial, MaterialDensity, MaterialEdge, MaterialRequest,
             MaterialTone, MaterialVibrancy,

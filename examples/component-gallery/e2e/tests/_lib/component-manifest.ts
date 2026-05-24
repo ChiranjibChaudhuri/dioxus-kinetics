@@ -28,6 +28,7 @@ export const COMPONENT_MANIFEST: ManifestEntry[] = [
   { name: "IconButton", slug: "icon-button", status: "ready", layers: { smoke: true, motion: false, visual: true } },
   { name: "CommandMenu", slug: "command-menu", status: "ready", layers: { smoke: true, motion: true, visual: true } },
   { name: "Toolbar", slug: "toolbar", status: "ready", layers: { smoke: true, motion: false, visual: true } },
+  { name: "DropdownMenu", slug: "dropdown-menu", status: "ready", layers: { smoke: true, motion: false, visual: true } },
   // Inputs
   { name: "TextField", slug: "text-field", status: "ready", layers: { smoke: true, motion: false, visual: true } },
   { name: "Checkbox", slug: "checkbox", status: "ready", layers: { smoke: true, motion: false, visual: true } },
@@ -37,6 +38,8 @@ export const COMPONENT_MANIFEST: ManifestEntry[] = [
   { name: "Select", slug: "select", status: "ready", layers: { smoke: true, motion: false, visual: true } },
   { name: "DatePicker", slug: "date-picker", status: "ready", layers: { smoke: true, motion: false, visual: true } },
   { name: "DataTable", slug: "data-table", status: "ready", layers: { smoke: true, motion: false, visual: true } },
+  { name: "Combobox", slug: "combobox", status: "ready", layers: { smoke: true, motion: false, visual: true } },
+  { name: "RadioGroup", slug: "radio-group", status: "ready", layers: { smoke: true, motion: false, visual: true } },
   // Layout
   { name: "Stack", slug: "stack", status: "ready", layers: { smoke: true, motion: false, visual: true } },
   { name: "Tabs", slug: "tabs", status: "ready", layers: { smoke: true, motion: true, visual: true } },

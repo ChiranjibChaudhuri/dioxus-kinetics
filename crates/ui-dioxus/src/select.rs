@@ -45,9 +45,14 @@ pub fn Select(
     options: Vec<SelectOption>,
     #[props(default = "Choose…".to_string())] placeholder: String,
     #[props(default)] disabled: bool,
+    /// Seed the internal open-state signal so the listbox renders on
+    /// first paint. Lets gallery previews and SSR screenshots show the
+    /// open state without programmatic clicks.
+    #[props(default)]
+    default_open: bool,
     on_select: Option<EventHandler<String>>,
 ) -> Element {
-    let mut open = use_signal(|| false);
+    let mut open = use_signal(|| default_open);
 
     let selected_label = options
         .iter()

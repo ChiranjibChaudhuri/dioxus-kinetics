@@ -17,7 +17,12 @@ fn compositor_reuses_pipeline_for_same_features() {
         LiquidMaterial::new().blur(6.0).radius(8.0),
     );
 
-    comp.render(&bg_view, &out_view, [64.0, 64.0], &[region.clone()]);
+    comp.render(
+        &bg_view,
+        &out_view,
+        [64.0, 64.0],
+        std::slice::from_ref(&region),
+    );
     let after_first = comp.pipeline_cache_len();
     comp.render(&bg_view, &out_view, [64.0, 64.0], &[region]);
     let after_second = comp.pipeline_cache_len();

@@ -9,13 +9,40 @@ pub fn text_field_preview() -> Element {
 fn TextFieldPreviewBody() -> Element {
     let mut value = use_signal(|| "Acme Ops".to_string());
     rsx! {
-        TextField {
-            id: "workspace-name",
-            label: "Workspace name",
-            value: value.read().clone(),
-            help_text: "Visible to teammates",
-            leading_text: "Org",
-            oninput: move |evt: FormEvent| value.set(evt.value()),
+        div { class: "gallery-variant-grid gallery-variant-grid--stack",
+            div { class: "gallery-variant-tile",
+                span { class: "gallery-variant-label", "Default · with help" }
+                TextField {
+                    id: "workspace-name",
+                    label: "Workspace name",
+                    value: value.read().clone(),
+                    help_text: "Visible to teammates",
+                    leading_text: "Org",
+                    oninput: move |evt: FormEvent| value.set(evt.value()),
+                }
+            }
+            div { class: "gallery-variant-tile",
+                span { class: "gallery-variant-label", "Invalid · with error" }
+                TextField {
+                    id: "workspace-slug",
+                    label: "Workspace slug",
+                    value: "acme ops".to_string(),
+                    placeholder: "lowercase, no spaces",
+                    invalid: true,
+                    error_text: "Slugs cannot contain spaces.",
+                    leading_text: "/",
+                }
+            }
+            div { class: "gallery-variant-tile",
+                span { class: "gallery-variant-label", "Disabled" }
+                TextField {
+                    id: "workspace-region",
+                    label: "Region",
+                    value: "us-east-1".to_string(),
+                    disabled: true,
+                    help_text: "Region is fixed per workspace.",
+                }
+            }
         }
     }
 }
@@ -61,6 +88,61 @@ pub fn data_table_preview() -> Element {
     rsx! { DataTablePreviewBody {} }
 }
 
+pub fn combobox_preview() -> Element {
+    rsx! { ComboboxPreviewBody {} }
+}
+
+pub fn radio_group_preview() -> Element {
+    rsx! { RadioGroupPreviewBody {} }
+}
+
+#[component]
+fn ComboboxPreviewBody() -> Element {
+    let mut value = use_signal(|| "ord-2024-12-04".to_string());
+    let mut query = use_signal(|| "ord-2024".to_string());
+    let options = vec![
+        ComboboxOption::new("ord-2024-12-04", "ORD-2024-12-04 — Globex Retail"),
+        ComboboxOption::new("ord-2024-12-03", "ORD-2024-12-03 — Acme Ops"),
+        ComboboxOption::new("ord-2024-11-30", "ORD-2024-11-30 — Initech R&D"),
+        ComboboxOption::new("ord-2024-11-22", "ORD-2024-11-22 — Soylent Foods"),
+    ];
+    rsx! {
+        Combobox {
+            id: "ticket-finder",
+            label: "Find a ticket",
+            value: value.read().clone(),
+            query: query.read().clone(),
+            options,
+            placeholder: "Search by ID or workspace",
+            default_open: true,
+            on_query: move |next: String| query.set(next),
+            on_select: move |selected: String| value.set(selected),
+        }
+    }
+}
+
+#[component]
+fn RadioGroupPreviewBody() -> Element {
+    let mut value = use_signal(|| "monthly".to_string());
+    let options = vec![
+        RadioOption::new("monthly", "Monthly")
+            .with_description("Billed on the first of every month"),
+        RadioOption::new("quarterly", "Quarterly").with_description("Save 8% versus monthly"),
+        RadioOption::new("annual", "Annual").with_description("Save 18% versus monthly"),
+    ];
+    rsx! {
+        RadioGroup {
+            id: "billing-plan",
+            label: "Billing plan",
+            name: "billing-plan",
+            value: value.read().clone(),
+            options,
+            description: "Switch plans anytime — prorated automatically.",
+            on_change: move |next: String| value.set(next),
+        }
+    }
+}
+
 #[component]
 fn DataTablePreviewBody() -> Element {
     let mut sort_key = use_signal(|| "revenue".to_string());
@@ -71,21 +153,30 @@ fn DataTablePreviewBody() -> Element {
         DataTableColumn::new("seats", "Seats").sortable(),
     ];
     let rows = vec![
-        vec![
-            "Acme Ops".to_string(),
-            "$12,400".to_string(),
-            "48".to_string(),
-        ],
-        vec![
-            "Globex Retail".to_string(),
-            "$9,820".to_string(),
-            "32".to_string(),
-        ],
-        vec![
-            "Initech R&D".to_string(),
-            "$7,310".to_string(),
-            "21".to_string(),
-        ],
+        DataTableRow::new(
+            "acme",
+            vec![
+                "Acme Ops".to_string(),
+                "$12,400".to_string(),
+                "48".to_string(),
+            ],
+        ),
+        DataTableRow::new(
+            "globex",
+            vec![
+                "Globex Retail".to_string(),
+                "$9,820".to_string(),
+                "32".to_string(),
+            ],
+        ),
+        DataTableRow::new(
+            "initech",
+            vec![
+                "Initech R&D".to_string(),
+                "$7,310".to_string(),
+                "21".to_string(),
+            ],
+        ),
     ];
     rsx! {
         DataTable {
@@ -119,6 +210,7 @@ fn DatePickerPreviewBody() -> Element {
             id: "report-cutoff",
             label: "Report cutoff",
             value: value.read().clone(),
+            default_open: true,
             on_select: move |iso: String| value.set(iso),
         }
     }
@@ -139,6 +231,7 @@ fn SelectPreviewBody() -> Element {
             label: "Billing cadence",
             selected: value.read().clone(),
             options,
+            default_open: true,
             on_select: move |v: String| value.set(v),
         }
     }

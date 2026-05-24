@@ -65,17 +65,12 @@ pub fn ScrubFrame(
             "#,
         ));
         spawn(async move {
-            loop {
-                match eval.recv::<f64>().await {
-                    Ok(t) => {
-                        let t_f32 = t as f32;
-                        elapsed.set(t_f32);
-                        if t_f32 >= duration_ms {
-                            playing.set(false);
-                            break;
-                        }
-                    }
-                    Err(_) => break,
+            while let Ok(t) = eval.recv::<f64>().await {
+                let t_f32 = t as f32;
+                elapsed.set(t_f32);
+                if t_f32 >= duration_ms {
+                    playing.set(false);
+                    break;
                 }
             }
         });

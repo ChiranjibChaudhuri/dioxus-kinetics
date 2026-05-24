@@ -589,17 +589,16 @@ fn shared_layout_preview_uses_flip_frame_with_swap_control() {
 }
 
 #[test]
-fn dialog_preview_renders_open_trigger_and_starts_closed() {
+fn dialog_preview_renders_open_modal_with_reopen_trigger() {
     let html = dioxus_ssr::render_element(rsx! {
         component_gallery::App {}
     });
-    // Trigger button labelled "Show dialog" is present.
-    assert!(html.contains("Show dialog"));
-    // Default state is closed → no Dialog panel markup rendered.
-    // The id="ui-dialog-title" is emitted only by the Dialog component when open.
+    // Showcase exposes a "Reopen" trigger and starts the modal open so the
+    // markup is visible in static screenshots.
+    assert!(html.contains("Reopen"));
     assert!(
-        !html.contains(r#"id="ui-dialog-title""#),
-        "dialog should start closed in preview",
+        html.contains(r#"id="ui-dialog-title""#),
+        "dialog preview should start open so the modal showcases the feature",
     );
 }
 
@@ -622,10 +621,13 @@ fn toast_preview_renders_trigger_buttons_for_each_tone() {
 }
 
 #[test]
-fn tooltip_preview_renders_trigger_label() {
+fn tooltip_preview_renders_always_visible_showcase_and_hover_trigger() {
     let html = dioxus_ssr::render_element(rsx! {
         component_gallery::App {}
     });
+    // Always-visible showcase tile.
+    assert!(html.contains("Lift over baseline"));
+    assert!(html.contains("Compared to the 30-day rolling average."));
+    // Hover/focus tile alongside.
     assert!(html.contains("Net revenue"));
-    assert!(html.contains("Hover or focus the trigger"));
 }

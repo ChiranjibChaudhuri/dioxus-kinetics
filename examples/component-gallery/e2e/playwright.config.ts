@@ -86,7 +86,10 @@ export default defineConfig({
   webServer: process.env.KINETICS_E2E_MODE === "dev-loop"
     ? undefined
     : {
-        command: `npx http-server ${DIST_DIR} -p ${STATIC_PORT} --silent`,
+        // Quote DIST_DIR — on Windows the workspace path may contain spaces,
+        // and http-server otherwise reads only the first token as the root and
+        // serves 404s.
+        command: `npx http-server "${DIST_DIR}" -p ${STATIC_PORT} --silent`,
         port: STATIC_PORT,
         reuseExistingServer: !process.env.CI,
         timeout: 60_000,

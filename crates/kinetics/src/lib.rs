@@ -6,18 +6,20 @@ pub mod prelude {
         A11yContract, ComponentContract, ComponentId, ComponentRole, FocusPolicy, TargetSize,
     };
     pub use ui_dioxus::{
-        Accordion, AccordionSection, ActionBar, ActionControl, Alert, AlertTone, BlankState,
-        Breadcrumb, BreadcrumbItem, Button, ButtonVariant, CaptureStage, Checkbox, ChoiceMark,
-        CommandFinder, CommandGroup, CommandItem, CommandMenu, ContentPlane, ContextHint, Cue,
-        DataTable, DataTableColumn, DatePicker, Dialog, DialogAction, DialogActionTone, EmptyState,
-        FrameClip, FrameLayer, FrameStage, GlassLayer, GlassSurface, IconButton, IconButtonSize,
-        IconButtonTone, KineticBox, KineticText, MetricCard, MetricReadout, MetricTone, ModalLayer,
-        NavigationRail, NoticeStack, Pagination, Popover, PopoverSide, Presence, PresenceCue,
-        PresenceGate, Progress, SegmentItem, SegmentedControl, Select, SelectOption, Sequence,
-        SequenceContext, SharedElement, SharedLayout, Sidebar, SidebarItem, SidebarSection,
-        Skeleton, Slider, SortDirection, Stack, StateSwitch, Stepper, StepperStep, Surface, Switch,
-        TabItem, TabPanel, Tabs, TextEntry, TextField, TimelineScope, Toast, ToastTone, Toolbar,
-        Tooltip, ViewSwitcher,
+        Accordion, AccordionSection, ActionBar, ActionControl, ActionMenu, Alert, AlertTone,
+        BlankState, Breadcrumb, BreadcrumbItem, Button, ButtonVariant, CaptureStage, Checkbox,
+        ChoiceMark, Combobox, ComboboxOption, CommandFinder, CommandGroup, CommandItem,
+        CommandMenu, ContentPlane, ContextHint, Cue, DataTable, DataTableColumn, DataTableRow,
+        DatePicker, Dialog, DialogAction, DialogActionTone, DropdownMenu, DropdownMenuItem,
+        EmptyState, FrameClip, FrameLayer, FrameStage, GlassLayer, GlassSurface, IconButton,
+        IconButtonSize, IconButtonTone, KineticBox, KineticText, MetricCard, MetricReadout,
+        MetricTone, ModalLayer, NavigationRail, NoticeStack, OptionGroup, Pagination, Popover,
+        PopoverSide, Presence, PresenceCue, PresenceGate, Progress, RadioGroup, RadioOption,
+        SegmentItem, SegmentedControl, Select, SelectOption, Sequence, SequenceContext,
+        SharedElement, SharedLayout, Sidebar, SidebarItem, SidebarSection, Skeleton, Slider,
+        SortDirection, Stack, StateSwitch, Stepper, StepperStep, Surface, Switch, TabItem,
+        TabPanel, Tabs, TextEntry, TextField, TimelineScope, Toast, ToastTone, Toolbar, Tooltip,
+        ViewSwitcher,
     };
     pub use ui_glass::{
         resolve_glass, GlassDensity, GlassLevel, GlassPolicy, GlassRecipe, GlassRequest, GlassTone,
@@ -113,6 +115,11 @@ pub fn public_api_names() -> Vec<&'static str> {
         "FrameClip",
         "FrameLayer",
         "CaptureStage",
+        "Combobox",
+        "RadioGroup",
+        "DropdownMenu",
+        "OptionGroup",
+        "ActionMenu",
     ];
 
     #[cfg(feature = "icons")]

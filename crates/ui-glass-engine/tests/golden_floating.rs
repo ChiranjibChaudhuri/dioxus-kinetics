@@ -18,7 +18,7 @@ fn floating_neutral_matches_golden() {
     let path = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join(GOLDEN);
     if std::env::var("UPDATE_GOLDEN").is_ok() || !path.exists() {
         write_png(&path, &pixels, 128, 128);
-        if !std::env::var("UPDATE_GOLDEN").is_ok() {
+        if std::env::var("UPDATE_GOLDEN").is_err() {
             panic!(
                 "golden missing at {}; wrote new reference. Re-run to verify.",
                 path.display()
@@ -146,7 +146,7 @@ fn read_back(
     w: u32,
     h: u32,
 ) -> Vec<u8> {
-    let bpr = ((w * 4 + 255) / 256) * 256;
+    let bpr = (w * 4).div_ceil(256) * 256;
     let buf = device.create_buffer(&wgpu::BufferDescriptor {
         label: Some("readback"),
         size: (bpr * h) as u64,

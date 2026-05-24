@@ -32,6 +32,11 @@ const MONTH_NAMES: [&str; 12] = [
 
 const WEEKDAY_SHORT: [&str; 7] = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 
+/// Static anchor used when neither `value` nor `today` is a valid ISO
+/// date. Hosts that care should always pass `today` so the calendar
+/// opens on a sensible month.
+pub const DATEPICKER_DEFAULT_ANCHOR: (i32, u32) = (2026, 1);
+
 /// Parse an ISO 8601 `YYYY-MM-DD` date string. Returns `(year, month, day)`
 /// with `month` and `day` 1-indexed. Returns `None` for malformed input
 /// or out-of-range fields (no leap-year validation; February 30 round-trips).
@@ -102,21 +107,27 @@ pub fn DatePicker(
     /// Currently-selected date as ISO `YYYY-MM-DD`. Empty string means
     /// nothing is selected and the placeholder is shown.
     value: String,
+    /// Today's date in ISO `YYYY-MM-DD`, supplied by the host so this
+    /// crate stays free of `js_sys::Date` / `chrono`. Used as the
+    /// calendar anchor when `value` is empty. Empty string falls back
+    /// to the static epoch in [`DATEPICKER_DEFAULT_ANCHOR`].
+    #[props(default)]
+    today: String,
     #[props(default = "Select date".to_string())] placeholder: String,
     #[props(default)] disabled: bool,
+    /// Seed the internal open-state signal so the calendar grid renders
+    /// on first paint. Lets gallery previews and SSR screenshots show
+    /// the open state without programmatic clicks.
+    #[props(default)]
+    default_open: bool,
     on_select: Option<EventHandler<String>>,
 ) -> Element {
-    let mut open = use_signal(|| false);
+    let mut open = use_signal(|| default_open);
 
-    // Decide the calendar's anchor month. Defaults to today's month
-    // (which on wasm is approximate; we just default to value's month
-    // when set, otherwise to January of the current year-equivalent).
-    // For a fully accurate "today" we'd need js_sys::Date — out of
-    // scope for the crate's no-wasm-binding policy on this module.
-    let (anchor_year, anchor_month) = match parse_iso_date(&value) {
-        Some((y, m, _)) => (y, m),
-        None => (2026, 1),
-    };
+    let (anchor_year, anchor_month) = parse_iso_date(&value)
+        .or_else(|| parse_iso_date(&today))
+        .map(|(y, m, _)| (y, m))
+        .unwrap_or(DATEPICKER_DEFAULT_ANCHOR);
     let mut view_year = use_signal(|| anchor_year);
     let mut view_month = use_signal(|| anchor_month);
 

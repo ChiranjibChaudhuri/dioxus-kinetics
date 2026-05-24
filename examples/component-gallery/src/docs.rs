@@ -1,7 +1,10 @@
 use dioxus::prelude::*;
 
 use crate::previews::{
-    actions::{button_preview, command_menu_preview, icon_button_preview, toolbar_preview},
+    actions::{
+        button_preview, command_menu_preview, dropdown_menu_preview, icon_button_preview,
+        toolbar_preview,
+    },
     capture::capture_stage_preview,
     composition::frame_stage_preview,
     feedback::{
@@ -10,8 +13,8 @@ use crate::previews::{
     },
     foundations::glass_layer_preview,
     inputs::{
-        checkbox_preview, data_table_preview, date_picker_preview, select_preview, slider_preview,
-        switch_preview, text_field_preview,
+        checkbox_preview, combobox_preview, data_table_preview, date_picker_preview,
+        radio_group_preview, select_preview, slider_preview, switch_preview, text_field_preview,
     },
     layout::{accordion_preview, stack_preview, tabs_preview},
     liquid_glass::liquid_surface_preview,
@@ -142,7 +145,7 @@ pub fn component_docs() -> &'static [ComponentDoc] {
 
 const BASIC_ACCESSIBILITY: &str = "Renders native semantic elements and stable focusable controls.";
 
-const COMPONENT_DOCS: [ComponentDoc; 42] = [
+const COMPONENT_DOCS: [ComponentDoc; 45] = [
     ComponentDoc {
         name: "Button",
         category: ComponentCategory::Actions,
@@ -178,6 +181,15 @@ const COMPONENT_DOCS: [ComponentDoc; 42] = [
         snippet: TOOLBAR_SNIPPET,
         accessibility: "Uses role toolbar and grouped command regions.",
         render: Some(toolbar_preview),
+    },
+    ComponentDoc {
+        name: "DropdownMenu",
+        category: ComponentCategory::Actions,
+        status: ComponentStatus::Ready,
+        summary: "Anchored `role=\"menu\"` overlay for action lists — kebab menus, \"More actions\" buttons, overflow menus. Different from `CommandMenu` (no search, menu/menuitem semantics rather than listbox/option). Separators are first-class items.",
+        snippet: DROPDOWN_MENU_SNIPPET,
+        accessibility: "Panel is `role=\"menu\"`; rows are `role=\"menuitem\"` rendered as native `<button>` so disabled, focus, and click semantics come for free. Dividers carry `role=\"separator\"`.",
+        render: Some(dropdown_menu_preview),
     },
     ComponentDoc {
         name: "TextField",
@@ -422,6 +434,24 @@ const COMPONENT_DOCS: [ComponentDoc; 42] = [
         snippet: DATE_PICKER_SNIPPET,
         accessibility: "Trigger is `aria-haspopup=\"dialog\"` + `aria-expanded`; the grid is `role=\"grid\"` with `role=\"columnheader\"` weekday cells and `role=\"gridcell\"` day buttons exposing `aria-selected` + ISO `aria-label`.",
         render: Some(date_picker_preview),
+    },
+    ComponentDoc {
+        name: "Combobox",
+        category: ComponentCategory::Inputs,
+        status: ComponentStatus::Ready,
+        summary: "Typeahead-filtered single-select built on `Popover`. Trigger is a text input; the listbox is narrowed by `query` via the pure `filter_options` helper (case-insensitive substring match). Use over `Select` when the option list is long enough that scanning is faster than scrolling.",
+        snippet: COMBOBOX_SNIPPET,
+        accessibility: "Input is `role=\"combobox\"` with `aria-autocomplete=\"list\"`, `aria-haspopup=\"listbox\"`, and `aria-controls` pointing at the listbox; options carry `role=\"option\"` + `aria-selected`. Empty state is a polite live region (`role=\"status\"`).",
+        render: Some(combobox_preview),
+    },
+    ComponentDoc {
+        name: "RadioGroup",
+        category: ComponentCategory::Inputs,
+        status: ComponentStatus::Ready,
+        summary: "Mutually-exclusive choice picker rendered as native `<input type=\"radio\">` inputs sharing a `name`. Each option carries label + optional description copy. Different from `SegmentedControl`: that's a button group for short, equally-weighted choices; `RadioGroup` is for descriptive, form-submittable options.",
+        snippet: RADIO_GROUP_SNIPPET,
+        accessibility: "Native `<fieldset>` + `<legend>`; the option list carries `role=\"radiogroup\"`. Browsers handle arrow-key roving focus and form submission automatically.",
+        render: Some(radio_group_preview),
     },
     ComponentDoc {
         name: "Slider",
@@ -843,4 +873,43 @@ const ACCORDION_SNIPPET: &str = r#"Accordion {
     ],
     expanded: vec!["billing"],
     on_toggle: move |id: String| { /* update */ },
+}"#;
+
+const COMBOBOX_SNIPPET: &str = r#"Combobox {
+    id: "ticket-finder",
+    label: "Find a ticket",
+    value: "ord-2024-12-04",
+    query: "ord-2024",
+    options: vec![
+        ComboboxOption::new("ord-2024-12-04", "ORD-2024-12-04 — Globex"),
+        ComboboxOption::new("ord-2024-11-30", "ORD-2024-11-30 — Initech"),
+    ],
+    on_query: move |q: String| /* update */ {},
+    on_select: move |v: String| /* update */ {},
+}"#;
+
+const RADIO_GROUP_SNIPPET: &str = r#"RadioGroup {
+    id: "billing-plan",
+    label: "Billing plan",
+    name: "billing-plan",
+    value: "monthly",
+    options: vec![
+        RadioOption::new("monthly", "Monthly")
+            .with_description("Billed on the first of every month"),
+        RadioOption::new("annual", "Annual")
+            .with_description("Save 18% versus monthly"),
+    ],
+    on_change: move |v: String| /* update */ {},
+}"#;
+
+const DROPDOWN_MENU_SNIPPET: &str = r#"DropdownMenu {
+    id: "workspace-actions",
+    trigger: rsx! { Button { "More actions" } },
+    items: vec![
+        DropdownMenuItem::new("rename", "Rename"),
+        DropdownMenuItem::new("duplicate", "Duplicate"),
+        DropdownMenuItem::separator("div-1"),
+        DropdownMenuItem::new("delete", "Delete"),
+    ],
+    on_select: move |id: String| /* dispatch */ {},
 }"#;

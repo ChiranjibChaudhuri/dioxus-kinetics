@@ -10,6 +10,10 @@ use wasm_bindgen::JsCast;
 
 use super::scheduler::ControlFlow;
 
+/// Self-referential RAF closure slot: held inside the closure body so the
+/// callback can re-schedule itself, and emptied on drop or cancellation.
+type RafSlot = Rc<RefCell<Option<Closure<dyn FnMut(f64)>>>>;
+
 pub struct FrameHandle {
     cancelled: Rc<RefCell<bool>>,
 }
@@ -37,7 +41,7 @@ where
     let callback = Rc::new(RefCell::new(callback));
     let last_timestamp = Rc::new(RefCell::new(None::<f64>));
 
-    let raf_closure: Rc<RefCell<Option<Closure<dyn FnMut(f64)>>>> = Rc::new(RefCell::new(None));
+    let raf_closure: RafSlot = Rc::new(RefCell::new(None));
     let raf_closure_outer = raf_closure.clone();
 
     let window_clone = window.clone();

@@ -155,7 +155,7 @@ impl Drop for WaapiAnimation {
 /// function. Cached after first call.
 pub fn is_supported() -> bool {
     thread_local! {
-        static SUPPORTED: std::cell::OnceCell<bool> = std::cell::OnceCell::new();
+        static SUPPORTED: std::cell::OnceCell<bool> = const { std::cell::OnceCell::new() };
     }
     SUPPORTED.with(|cell| {
         *cell.get_or_init(|| {

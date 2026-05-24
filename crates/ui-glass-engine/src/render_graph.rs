@@ -10,6 +10,12 @@ use crate::uniforms::{BlurUniforms, GlassUniforms};
 /// One end-to-end pass: input bg texture → output RGBA8 texture, with the
 /// material's blur radius applied via two separable passes and the composite
 /// shader sampling the blurred result.
+///
+/// The argument count is intrinsic — every wgpu resource the graph touches
+/// has to be threaded through. Bundling them into a struct would just move
+/// the field count from arguments to fields without simplifying the call
+/// site, so the lint is allowed locally.
+#[allow(clippy::too_many_arguments)]
 pub fn render_glass_to_texture(
     device: &Arc<wgpu::Device>,
     queue: &Arc<wgpu::Queue>,

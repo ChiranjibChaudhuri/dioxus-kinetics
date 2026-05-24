@@ -3,6 +3,7 @@
 mod accordion;
 mod buttons;
 mod capture;
+mod combobox;
 mod composition;
 mod data_table;
 mod datepicker;
@@ -39,13 +40,20 @@ use ui_glass::{GlassDensity, GlassLevel, GlassTone};
 pub use accordion::{Accordion, AccordionSection};
 pub use buttons::{IconButton, IconButtonSize, IconButtonTone};
 pub use capture::CaptureStage;
+pub use combobox::{filter_options, Combobox, ComboboxOption};
 pub use composition::{FrameClip, FrameLayer, FrameStage};
-pub use data_table::{DataTable, DataTableColumn, SortDirection};
-pub use datepicker::{day_of_week, days_in_month, format_iso_date, parse_iso_date, DatePicker};
+pub use data_table::{DataTable, DataTableColumn, DataTableRow, SortDirection};
+pub use datepicker::{
+    day_of_week, days_in_month, format_iso_date, parse_iso_date, DatePicker,
+    DATEPICKER_DEFAULT_ANCHOR,
+};
 pub use display::{Alert, AlertTone, EmptyState, MetricCard, MetricTone, Progress, Skeleton};
 pub use display::{EmptyState as BlankState, MetricCard as MetricReadout};
-pub use forms::{Checkbox, Slider, Switch, TextField, TextFieldType};
-pub use forms::{Checkbox as ChoiceMark, Switch as StateSwitch, TextField as TextEntry};
+pub use forms::{Checkbox, RadioGroup, RadioOption, Slider, Switch, TextField, TextFieldType};
+pub use forms::{
+    Checkbox as ChoiceMark, RadioGroup as OptionGroup, Switch as StateSwitch,
+    TextField as TextEntry,
+};
 pub use kinetics::{
     Cue, KineticBox, KineticText, Presence, PresenceCue, PresenceGate, Sequence, SequenceContext,
     TimelineScope,
@@ -57,12 +65,12 @@ pub use navigation::{
 };
 pub use navigation::{Sidebar as NavigationRail, Tabs as ViewSwitcher, Toolbar as ActionBar};
 pub use overlays::{
-    CommandGroup, CommandItem, CommandMenu, Dialog, DialogAction, DialogActionTone, Toast,
-    ToastTone, Tooltip,
+    CommandGroup, CommandItem, CommandMenu, Dialog, DialogAction, DialogActionTone, DropdownMenu,
+    DropdownMenuItem, Toast, ToastTone, Tooltip,
 };
 pub use overlays::{
-    CommandMenu as CommandFinder, Dialog as ModalLayer, Toast as NoticeStack,
-    Tooltip as ContextHint,
+    CommandMenu as CommandFinder, Dialog as ModalLayer, DropdownMenu as ActionMenu,
+    Toast as NoticeStack, Tooltip as ContextHint,
 };
 pub use popover::{Popover, PopoverSide};
 pub use select::{Select, SelectOption};

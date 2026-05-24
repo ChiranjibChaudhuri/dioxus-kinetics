@@ -56,10 +56,29 @@ impl DataTableColumn {
     }
 }
 
+/// One body row. `id` is a stable key — Dioxus uses it for diff
+/// reordering when the host sorts rows. `cells` is the visible string
+/// for each column in declaration order; callers stringify their typed
+/// data at the call site.
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct DataTableRow {
+    pub id: String,
+    pub cells: Vec<String>,
+}
+
+impl DataTableRow {
+    pub fn new(id: impl Into<String>, cells: Vec<String>) -> Self {
+        Self {
+            id: id.into(),
+            cells,
+        }
+    }
+}
+
 #[component]
 pub fn DataTable(
     columns: Vec<DataTableColumn>,
-    rows: Vec<Vec<String>>,
+    rows: Vec<DataTableRow>,
     #[props(default)] caption: String,
     #[props(default)] sort_key: String,
     #[props(default)] sort_direction: SortDirection,
@@ -118,9 +137,9 @@ pub fn DataTable(
                 }
             }
             tbody { class: "ui-data-table-body",
-                for (row_idx, row) in rows.iter().enumerate() {
-                    tr { key: "{row_idx}", class: "ui-data-table-row",
-                        for cell in row.iter() {
+                for row in rows.iter() {
+                    tr { key: "{row.id}", class: "ui-data-table-row",
+                        for cell in row.cells.iter() {
                             td { class: "ui-data-table-cell", "{cell}" }
                         }
                     }
@@ -154,5 +173,12 @@ mod tests {
         assert_eq!(SortDirection::None.indicator(), "↕");
         assert_eq!(SortDirection::Ascending.indicator(), "↑");
         assert_eq!(SortDirection::Descending.indicator(), "↓");
+    }
+
+    #[test]
+    fn row_constructor_preserves_id_and_cells() {
+        let row = DataTableRow::new("acme", vec!["Acme".into(), "12".into()]);
+        assert_eq!(row.id, "acme");
+        assert_eq!(row.cells, vec!["Acme".to_string(), "12".to_string()]);
     }
 }

@@ -261,6 +261,149 @@ pub fn Switch(
     }
 }
 
+/// One choice in a `RadioGroup`. `value` round-trips through
+/// `on_change`; `label` is the visible text; `description` is an
+/// optional subtitle; `disabled` greys out the row.
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct RadioOption {
+    pub value: String,
+    pub label: String,
+    pub description: String,
+    pub disabled: bool,
+}
+
+impl RadioOption {
+    pub fn new(value: impl Into<String>, label: impl Into<String>) -> Self {
+        Self {
+            value: value.into(),
+            label: label.into(),
+            description: String::new(),
+            disabled: false,
+        }
+    }
+
+    pub fn with_description(mut self, description: impl Into<String>) -> Self {
+        self.description = description.into();
+        self
+    }
+
+    pub fn disabled(mut self) -> Self {
+        self.disabled = true;
+        self
+    }
+}
+
+/// Mutually-exclusive choice picker rendered as native
+/// `<input type="radio">` elements sharing a `name`. Browsers handle
+/// keyboard navigation and form submission; this component layers
+/// label + description copy and selection state on top.
+///
+/// Different from `SegmentedControl`, which is a button-group with
+/// `role="radiogroup"` — use that for short, equally-weighted choices,
+/// and `RadioGroup` when each choice has descriptive copy or when the
+/// host needs native radio semantics (e.g. `<form>` submission).
+#[component]
+pub fn RadioGroup(
+    /// Stable id for the fieldset; per-option inputs are `{id}-{value}`.
+    id: String,
+    /// Group label rendered as the fieldset legend.
+    label: String,
+    /// HTML `name` shared by every radio input — required for the
+    /// browser to enforce mutual exclusion.
+    name: String,
+    /// Currently-selected `value`. Empty string means nothing selected.
+    #[props(default)]
+    value: String,
+    options: Vec<RadioOption>,
+    #[props(default)] description: String,
+    #[props(default)] disabled: bool,
+    on_change: Option<EventHandler<String>>,
+) -> Element {
+    let description_id = format!("{id}-description");
+    let described_by = if description.is_empty() {
+        String::new()
+    } else {
+        description_id.clone()
+    };
+
+    rsx! {
+        fieldset {
+            class: "ui-radio-group",
+            "aria-describedby": "{described_by}",
+            disabled,
+            legend { class: "ui-radio-group-legend", "{label}" }
+            if !description.is_empty() {
+                p {
+                    id: "{description_id}",
+                    class: "ui-radio-group-description",
+                    "{description}"
+                }
+            }
+            div { class: "ui-radio-group-list", role: "radiogroup",
+                for option in options {
+                    {
+                        let option_value = option.value.clone();
+                        let option_id = format!("{id}-{}", option.value);
+                        let is_selected = option.value == value;
+                        let row_class = if option.disabled {
+                            "ui-radio ui-radio--disabled"
+                        } else if is_selected {
+                            "ui-radio ui-radio--selected"
+                        } else {
+                            "ui-radio"
+                        };
+                        let desc_id = format!("{option_id}-description");
+                        let desc_target = if option.description.is_empty() {
+                            String::new()
+                        } else {
+                            desc_id.clone()
+                        };
+                        let option_label = option.label.clone();
+                        let option_description = option.description.clone();
+                        let option_disabled = option.disabled;
+                        rsx! {
+                            div { class: "{row_class}",
+                                input {
+                                    id: "{option_id}",
+                                    class: "ui-radio-input",
+                                    r#type: "radio",
+                                    name: "{name}",
+                                    value: "{option_value}",
+                                    checked: is_selected,
+                                    disabled: option_disabled,
+                                    "aria-describedby": "{desc_target}",
+                                    onchange: move |_| {
+                                        if option_disabled {
+                                            return;
+                                        }
+                                        if let Some(handler) = &on_change {
+                                            handler.call(option_value.clone());
+                                        }
+                                    },
+                                }
+                                div { class: "ui-radio-copy",
+                                    label {
+                                        class: "ui-radio-label",
+                                        r#for: "{option_id}",
+                                        "{option_label}"
+                                    }
+                                    if !option_description.is_empty() {
+                                        p {
+                                            id: "{desc_id}",
+                                            class: "ui-radio-description",
+                                            "{option_description}"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
 fn described_by(id: &str, has_help: bool, has_error: bool) -> String {
     match (has_help, has_error) {
         (true, true) => format!("{id}-help {id}-error"),

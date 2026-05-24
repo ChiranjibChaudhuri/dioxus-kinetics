@@ -18,14 +18,18 @@ for (const variant of VARIANTS) {
         await preview.scrollIntoViewIfNeeded();
         await expect(preview).toBeVisible();
 
-        // Mask LiquidSurface canvas because WebGPU driver pixels are non-
-        // deterministic across machines.
-        const masks =
-          entry.name === "LiquidSurface" ? [preview.locator("canvas")] : [];
+        // Mask any canvas in the preview — WebGPU/WebGL driver pixels are
+        // non-deterministic across machines, and `GlassSurface` may also
+        // render via `LiquidSurface` internally on WgpuWebGl2 tiers.
+        // Locators that resolve to zero elements contribute nothing.
+        const masks = [preview.locator("canvas")];
 
+        // 15s timeout accommodates first-paint of canvas-backed previews
+        // (LiquidSurface, GlassSurface in WgpuWebGl2 tier) on webkit when
+        // wasm-opt failed at build time and the bundle is unoptimized.
         await expect(preview).toHaveScreenshot(
           `${entry.slug}/${variant}.png`,
-          { mask: masks }
+          { mask: masks, timeout: 15_000 }
         );
       });
     }

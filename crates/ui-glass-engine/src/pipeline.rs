@@ -65,8 +65,8 @@ pub fn build_blur_pipeline(
     });
 
     let constants: &[(&str, f64)] = &[
-        ("BLUR_DIRECTION_X", dx as f64),
-        ("BLUR_DIRECTION_Y", dy as f64),
+        ("BLUR_DIRECTION_X", dx),
+        ("BLUR_DIRECTION_Y", dy),
         ("BLUR_TAPS", taps as f64),
     ];
 

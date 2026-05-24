@@ -37,3 +37,93 @@ image.workspace = true
 
 [lib]
 path = "src/lib.rs"
+
+# Integration tests that drive the wgpu compositor through the headless
+# `TestHarness` are gated behind the `headless` feature. Without the feature
+# they would fail to compile because `ui_glass_engine::headless` is itself
+# `#[cfg(feature = "headless")]`. Listing each here as `required-features`
+# tells cargo to skip the target instead, so workspace-wide `cargo clippy`
+# / `cargo test` passes without flags.
+[[test]]
+name = "background_render"
+required-features = ["headless"]
+
+[[test]]
+name = "behavior"
+required-features = ["headless"]
+
+[[test]]
+name = "compositor_api"
+required-features = ["headless"]
+
+[[test]]
+name = "compositor_with_source"
+required-features = ["headless"]
+
+[[test]]
+name = "end_to_end"
+required-features = ["headless"]
+
+[[test]]
+name = "golden_ambient_mesh"
+required-features = ["headless"]
+
+[[test]]
+name = "golden_disperse"
+required-features = ["headless"]
+
+[[test]]
+name = "golden_floating"
+required-features = ["headless"]
+
+[[test]]
+name = "golden_full"
+required-features = ["headless"]
+
+[[test]]
+name = "golden_inner_shadow"
+required-features = ["headless"]
+
+[[test]]
+name = "golden_pointer"
+required-features = ["headless"]
+
+[[test]]
+name = "golden_refract"
+required-features = ["headless"]
+
+[[test]]
+name = "golden_scroll"
+required-features = ["headless"]
+
+[[test]]
+name = "golden_specular"
+required-features = ["headless"]
+
+[[test]]
+name = "golden_tint_adapt"
+required-features = ["headless"]
+
+[[test]]
+name = "headless_render"
+required-features = ["headless"]
+
+[[test]]
+name = "motion_bridge"
+required-features = ["headless"]
+
+[[test]]
+name = "multi_region"
+required-features = ["headless"]
+
+[[test]]
+name = "pipeline_cache"
+required-features = ["headless"]
+
+[[test]]
+name = "pipeline_compile"
+required-features = ["headless"]
+
+[[test]]
+name = "scene_graph"
+required-features = ["headless"]

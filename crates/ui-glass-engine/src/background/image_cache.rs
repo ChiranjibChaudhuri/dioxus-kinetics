@@ -11,6 +11,13 @@
 //! If you have linear RGBA, encode to sRGB first (or use a future
 //! `upload_rgba_linear` overload — not implemented in Plan 3).
 
+// `wgpu::Texture` is `Send + Sync` on native targets but not on wasm32
+// (single-threaded WebGL/WebGPU surfaces). The `Arc` wrappers below are
+// intentional — sharing happens across cache entries within a single
+// renderer, never across threads — so the wasm-only clippy warning is
+// allowed for this file.
+#![cfg_attr(target_arch = "wasm32", allow(clippy::arc_with_non_send_sync))]
+
 use std::collections::HashMap;
 use std::sync::Arc;
 

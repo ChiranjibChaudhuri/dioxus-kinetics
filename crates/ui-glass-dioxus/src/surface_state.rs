@@ -2,6 +2,12 @@
 //! asynchronously when the canvas mounts; lives in a `Signal<Option<...>>`
 //! on the component.
 
+// `wgpu::Device` / `wgpu::Queue` are `Send + Sync` on native targets but not
+// on wasm32. The `Arc` wrapping below lives on a single-threaded Dioxus
+// renderer task and is intentional — the wasm-only clippy warning is
+// allowed for this file.
+#![cfg_attr(target_arch = "wasm32", allow(clippy::arc_with_non_send_sync))]
+
 #[cfg(target_arch = "wasm32")]
 use std::sync::Arc;
 

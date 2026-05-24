@@ -18,16 +18,16 @@ pub fn dialog_preview() -> Element {
 
 #[component]
 fn DialogPreviewBody() -> Element {
-    let mut open = use_signal(|| false);
+    let mut open = use_signal(|| true);
     rsx! {
         div { class: "gallery-demo-frame",
             div { class: "gallery-demo-frame-header",
-                span { class: "gallery-variant-label", "Dialog" }
+                span { class: "gallery-variant-label", "Dialog · open by default" }
                 button {
-                    class: "ui-button ui-button--primary",
+                    class: "ui-button ui-button--secondary",
                     r#type: "button",
                     onclick: move |_| open.set(true),
-                    "Show dialog"
+                    "Reopen"
                 }
             }
             Dialog {
@@ -52,7 +52,37 @@ pub fn toast_preview() -> Element {
 
 #[component]
 fn ToastPreviewBody() -> Element {
-    let mut toasts: Signal<Vec<ToastInstance>> = use_signal(Vec::new);
+    let mut toasts: Signal<Vec<ToastInstance>> = use_signal(|| {
+        // Pre-seed one of each tone so the static showcase snapshot always
+        // contains the persistent surfaces, not an empty stage. Newly-triggered
+        // toasts append + auto-dismiss as before.
+        vec![
+            ToastInstance {
+                id: TOAST_ID.fetch_add(1, Ordering::Relaxed),
+                tone: ToastTone::Success,
+                title: "Report exported",
+                description: "The PDF is ready.",
+            },
+            ToastInstance {
+                id: TOAST_ID.fetch_add(1, Ordering::Relaxed),
+                tone: ToastTone::Info,
+                title: "Sync started",
+                description: "Pulling the latest data.",
+            },
+            ToastInstance {
+                id: TOAST_ID.fetch_add(1, Ordering::Relaxed),
+                tone: ToastTone::Warning,
+                title: "Quota close",
+                description: "You are at 92% of the plan.",
+            },
+            ToastInstance {
+                id: TOAST_ID.fetch_add(1, Ordering::Relaxed),
+                tone: ToastTone::Danger,
+                title: "Export failed",
+                description: "Retry or contact support.",
+            },
+        ]
+    });
 
     let mut push = move |tone: ToastTone, title: &'static str, description: &'static str| {
         let id = TOAST_ID.fetch_add(1, Ordering::Relaxed);
@@ -131,17 +161,23 @@ pub fn tooltip_preview() -> Element {
 fn TooltipPreviewBody() -> Element {
     let mut visible = use_signal(|| false);
     rsx! {
-        div { class: "gallery-demo-frame",
-            div { class: "gallery-demo-frame-header",
-                span { class: "gallery-variant-label", "Tooltip" }
-                span { class: "gallery-demo-frame-elapsed", "Hover or focus the trigger" }
+        div { class: "gallery-variant-grid gallery-variant-grid--stack",
+            div { class: "gallery-variant-tile",
+                span { class: "gallery-variant-label", "Always-visible · showcase" }
+                Tooltip {
+                    id: "lift-tip",
+                    visible: true,
+                    trigger_label: "Lift over baseline",
+                    content: "Compared to the 30-day rolling average.",
+                }
             }
             div {
-                class: "gallery-demo-frame-body",
+                class: "gallery-variant-tile",
                 onmouseenter: move |_| visible.set(true),
                 onmouseleave: move |_| visible.set(false),
                 onfocusin: move |_| visible.set(true),
                 onfocusout: move |_| visible.set(false),
+                span { class: "gallery-variant-label", "Hover / focus" }
                 Tooltip {
                     id: "net-revenue-tip",
                     visible: *visible.read(),
@@ -237,7 +273,7 @@ pub fn popover_preview() -> Element {
 
 #[component]
 fn PopoverPreviewBody() -> Element {
-    let mut open = use_signal(|| false);
+    let mut open = use_signal(|| true);
     rsx! {
         Popover {
             id: "filters-popover",

@@ -505,7 +505,7 @@ impl Compositor {
             // Materialize a per-surface bg if the region has one.
             let per_surface_bg_tex: Option<wgpu::Texture> = region.background.as_ref().map(|src| {
                 self.background_renderer.render_to_texture(
-                    &[src.clone()],
+                    std::slice::from_ref(src),
                     canvas_size[0] as u32,
                     canvas_size[1] as u32,
                 )

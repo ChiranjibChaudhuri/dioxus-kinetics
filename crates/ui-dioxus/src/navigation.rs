@@ -187,17 +187,7 @@ pub fn Pagination(
         return rsx! {};
     }
     let current = page.clamp(1, total_pages);
-
-    // Build the visible page set: 1, current-1, current, current+1, total
-    let mut visible: Vec<u32> = vec![1, total_pages];
-    for delta in -1i32..=1 {
-        let p = current as i32 + delta;
-        if (1..=total_pages as i32).contains(&p) {
-            visible.push(p as u32);
-        }
-    }
-    visible.sort();
-    visible.dedup();
+    let visible = visible_pages(current, total_pages);
 
     rsx! {
         nav { class: "ui-pagination", "aria-label": "{aria_label}",
@@ -262,6 +252,25 @@ pub fn Pagination(
             }
         }
     }
+}
+
+/// Pure helper: build the sorted, deduped set of pages the Pagination
+/// control should render directly (first, current ± 1, last). Gaps
+/// between adjacent entries become ellipses at render time.
+fn visible_pages(current: u32, total: u32) -> Vec<u32> {
+    if total == 0 {
+        return Vec::new();
+    }
+    let mut visible: Vec<u32> = vec![1, total];
+    for delta in -1i32..=1 {
+        let p = current as i32 + delta;
+        if (1..=total as i32).contains(&p) {
+            visible.push(p as u32);
+        }
+    }
+    visible.sort();
+    visible.dedup();
+    visible
 }
 
 /// One option in a `SegmentedControl`. The `value` is returned via
@@ -462,7 +471,33 @@ fn focus_tab(value: &str) {
 
 #[cfg(test)]
 mod tests {
-    use super::step_tab;
+    use super::{step_tab, visible_pages};
+
+    #[test]
+    fn visible_pages_short_run_returns_full_range() {
+        assert_eq!(visible_pages(1, 1), vec![1]);
+        assert_eq!(visible_pages(2, 3), vec![1, 2, 3]);
+    }
+
+    #[test]
+    fn visible_pages_middle_keeps_first_neighbours_last() {
+        assert_eq!(visible_pages(5, 10), vec![1, 4, 5, 6, 10]);
+    }
+
+    #[test]
+    fn visible_pages_at_start_dedupes_first_with_neighbour() {
+        assert_eq!(visible_pages(1, 10), vec![1, 2, 10]);
+    }
+
+    #[test]
+    fn visible_pages_at_end_dedupes_last_with_neighbour() {
+        assert_eq!(visible_pages(10, 10), vec![1, 9, 10]);
+    }
+
+    #[test]
+    fn visible_pages_zero_total_is_empty() {
+        assert!(visible_pages(0, 0).is_empty());
+    }
 
     fn ids() -> Vec<String> {
         vec!["one".into(), "two".into(), "three".into()]

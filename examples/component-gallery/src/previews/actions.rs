@@ -38,6 +38,34 @@ pub fn toolbar_preview() -> Element {
     }
 }
 
+pub fn dropdown_menu_preview() -> Element {
+    rsx! { DropdownMenuPreviewBody {} }
+}
+
+#[component]
+fn DropdownMenuPreviewBody() -> Element {
+    let items = vec![
+        DropdownMenuItem::new("rename", "Rename"),
+        DropdownMenuItem::new("duplicate", "Duplicate"),
+        DropdownMenuItem::separator("div-1"),
+        DropdownMenuItem::new("archive", "Archive").disabled(),
+        DropdownMenuItem::new("delete", "Delete"),
+    ];
+    rsx! {
+        DropdownMenu {
+            id: "workspace-actions",
+            trigger: rsx! {
+                button { id: "workspace-actions-trigger", class: "ui-button ui-button--secondary", r#type: "button", "More actions" }
+            },
+            items,
+            default_open: true,
+            on_select: move |id: String| {
+                let _ = id;
+            },
+        }
+    }
+}
+
 pub fn icon_button_preview() -> Element {
     let tones = [
         (IconButtonTone::Neutral, "Neutral"),

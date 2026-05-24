@@ -508,7 +508,7 @@ fn read_back(
     w: u32,
     h: u32,
 ) -> Vec<u8> {
-    let bpr = ((w * 4 + 255) / 256) * 256;
+    let bpr = (w * 4).div_ceil(256) * 256;
     let buf = device.create_buffer(&wgpu::BufferDescriptor {
         label: Some("bg-readback"),
         size: (bpr * h) as u64,

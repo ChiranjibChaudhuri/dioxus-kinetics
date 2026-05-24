@@ -218,7 +218,10 @@ pub const COMPONENT_CSS: &str = r#"
 
 /* Tone: sets the dominant color of the glass material. The SVG filter path
    reads --ui-glass-tint from computed style, so keep these rules even though
-   the engine path uses its own per-tone logic. */
+   the engine path uses its own per-tone logic. The CSS-only render path
+   (when GlassSurface skips the WebGL engine, e.g. `force_css: true`) also
+   uses the tint as a soft background wash so tones stay visually
+   distinguishable without backdrop-filter or a canvas. */
 .ui-glass-surface[data-glass-tone="neutral"] { --ui-glass-tint: #ffffff; }
 .ui-glass-surface[data-glass-tone="primary"] { --ui-glass-tint: var(--ui-primary); }
 .ui-glass-surface[data-glass-tone="info"]    { --ui-glass-tint: var(--ui-info); }
@@ -229,6 +232,47 @@ pub const COMPONENT_CSS: &str = r#"
 [data-ui-theme="dark"] .ui-glass-surface[data-glass-tone="neutral"] {
     --ui-glass-tint: #161c26;
 }
+
+/* Visible tone wash for the CSS-only render path. `color-mix` blends ~22%
+   of the tone tint into the solid base so each tone reads distinctly even
+   without the wgpu engine. The `[data-ui-glass-policy="solid"]` override
+   below still wins (its `background: var(--ui-glass-solid) !important`
+   forces uniform solid for the "solid" preference), so this only kicks in
+   on the default + dark + reduced-motion policies. */
+.ui-glass-surface[data-glass-tone="primary"] {
+    background: linear-gradient(180deg,
+        color-mix(in srgb, var(--ui-glass-tint) 22%, var(--ui-glass-solid)),
+        var(--ui-glass-solid));
+}
+.ui-glass-surface[data-glass-tone="info"] {
+    background: linear-gradient(180deg,
+        color-mix(in srgb, var(--ui-glass-tint) 22%, var(--ui-glass-solid)),
+        var(--ui-glass-solid));
+}
+.ui-glass-surface[data-glass-tone="success"] {
+    background: linear-gradient(180deg,
+        color-mix(in srgb, var(--ui-glass-tint) 22%, var(--ui-glass-solid)),
+        var(--ui-glass-solid));
+}
+.ui-glass-surface[data-glass-tone="warning"] {
+    background: linear-gradient(180deg,
+        color-mix(in srgb, var(--ui-glass-tint) 22%, var(--ui-glass-solid)),
+        var(--ui-glass-solid));
+}
+.ui-glass-surface[data-glass-tone="danger"] {
+    background: linear-gradient(180deg,
+        color-mix(in srgb, var(--ui-glass-tint) 22%, var(--ui-glass-solid)),
+        var(--ui-glass-solid));
+}
+
+/* Level: maps to elevation depth. Subtle sits close to the page;
+   Floating + Overlay + Chrome progressively lift off it. The wgpu engine
+   computes its own shadow; these rules give the CSS render path a parallel
+   visual contract so the 3-level showcase row is distinguishable. */
+.ui-glass-surface[data-glass-level="subtle"]   { box-shadow: var(--ui-elevation-1); }
+.ui-glass-surface[data-glass-level="floating"] { box-shadow: var(--ui-elevation-2); }
+.ui-glass-surface[data-glass-level="overlay"]  { box-shadow: var(--ui-elevation-3); }
+.ui-glass-surface[data-glass-level="chrome"]   { box-shadow: var(--ui-elevation-3); }
 
 /* Density: padding rhythm inside the glass surface. */
 .ui-glass-surface[data-glass-density="compact"] {

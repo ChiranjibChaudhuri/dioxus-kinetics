@@ -55,15 +55,16 @@ fn library_css_concatenates_base_and_component_css() {
 fn glass_surface_differentiates_tones_and_density() {
     let css = COMPONENT_CSS;
 
-    // Level-specific blur/tint rules have been retired (the engine renders the
-    // actual glass effect; CSS only handles Tier 5 solid fallback). Verify that
-    // the per-level selectors are gone so this test catches any accidental
-    // re-introduction.
+    // Level selectors now drive elevation only (the wgpu engine computes its
+    // own blur/tint, so blur/tint rules stay out of the CSS layer, but the
+    // CSS-only render path — used by GlassSurface { force_css: true } and the
+    // SVG filter fallback — still needs a per-level shadow contract so the
+    // four levels read distinctly in a showcase grid).
     for level in ["subtle", "floating", "overlay", "chrome"] {
         let selector = format!(r#".ui-glass-surface[data-glass-level="{level}"]"#);
         assert!(
-            !css.contains(&selector),
-            "engine-redundant glass level selector should be absent: {selector}"
+            css.contains(&selector),
+            "missing per-level shadow selector: {selector}"
         );
     }
 

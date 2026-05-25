@@ -82,8 +82,35 @@ test.describe("Animation motion — leaves update animation-delay over time", ()
           return match ? match[1].trim() : "";
         });
 
+      // Drive the clock deterministically via the transport scrubber
+      // rather than relying on wall-clock autoplay timing. Wall-clock
+      // sampling is fragile under WebKit's slower page-load — short-
+      // duration scenes (2500-3000ms) can settle entirely before the
+      // first sample, leaving both endpoint samples at the same
+      // settled value even though the animation IS working.
+      //
+      // Setting the scrubber to two known elapsed-ms values exercises
+      // the same reactivity path: clock changes → SceneContext signal
+      // fires → leaf re-renders with a new animation-delay. If the
+      // reactivity chain is broken, both samples are identical.
+      const scrubber = card.locator("input.ui-scene-scrubber").first();
+      await expect(scrubber).toBeVisible();
+
+      const seek = async (value: string) => {
+        await scrubber.evaluate(
+          (el: HTMLInputElement, v: string) => {
+            el.value = v;
+            el.dispatchEvent(new Event("input", { bubbles: true }));
+          },
+          value,
+        );
+        // Allow Dioxus to process the Signal change + re-render.
+        await page.waitForTimeout(50);
+      };
+
+      await seek("100");
       const first = await sample();
-      await page.waitForTimeout(250);
+      await seek("1000");
       const second = await sample();
 
       expect(first).not.toBe(second);

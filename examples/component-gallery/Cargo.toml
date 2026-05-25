@@ -15,11 +15,12 @@ ui-glass-engine.workspace = true
 ui-tokens.workspace = true
 ui-runtime.workspace = true
 ui-composition.workspace = true
+ui-motion.workspace = true
+ui-timeline.workspace = true
 
 [dev-dependencies]
 dioxus-ssr.workspace = true
 serde_json = "1"
-ui-motion.workspace = true
 
 [features]
 web = ["dioxus/web"]

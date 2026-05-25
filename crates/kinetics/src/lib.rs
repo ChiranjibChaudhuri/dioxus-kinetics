@@ -14,13 +14,13 @@ pub mod prelude {
         DatePicker, Dialog, DialogAction, DialogActionTone, DropdownMenu, DropdownMenuItem,
         EmptyState, FrameClip, FrameLayer, FrameStage, GlassLayer, GlassSurface, IconButton,
         IconButtonSize, IconButtonTone, KineticBox, KineticText, MetricCard, MetricReadout,
-        MetricTone, ModalLayer, NavigationRail, NoticeStack, OptionGroup, Pagination, Popover,
-        PopoverSide, Presence, PresenceCue, PresenceGate, Progress, RadioGroup, RadioOption, Scene,
-        SceneContext, SegmentItem, SegmentedControl, Select, SelectOption, Sequence,
-        SequenceContext, SharedElement, SharedLayout, Sidebar, SidebarItem, SidebarSection,
-        Skeleton, Slider, SortDirection, Stack, StateSwitch, Stepper, StepperStep, Surface, Switch,
-        TabItem, TabPanel, Tabs, TextEntry, TextField, TimelineScope, Toast, ToastTone, Toolbar,
-        Tooltip, ViewSwitcher,
+        MetricTone, ModalLayer, MotionPath, NavigationRail, NoticeStack, OptionGroup, Pagination,
+        Popover, PopoverSide, Presence, PresenceCue, PresenceGate, Progress, RadioGroup,
+        RadioOption, Scene, SceneContext, SegmentItem, SegmentedControl, Select, SelectOption,
+        Sequence, SequenceContext, SharedElement, SharedLayout, Sidebar, SidebarItem,
+        SidebarSection, Skeleton, Slider, SortDirection, SplitMode, SplitText, Stack, StateSwitch,
+        Stepper, StepperStep, Surface, Switch, TabItem, TabPanel, Tabs, TextEntry, TextField,
+        TimelineScope, Toast, ToastTone, Toolbar, Tooltip, ViewSwitcher,
     };
     pub use ui_glass::{
         resolve_glass, GlassDensity, GlassLevel, GlassPolicy, GlassRecipe, GlassRequest, GlassTone,
@@ -28,7 +28,7 @@ pub mod prelude {
     pub use ui_layout::{compute_flip, FlipDelta, Rect};
     pub use ui_styles::{base_css, library_css, COMPONENT_CSS};
     #[cfg(feature = "timeline")]
-    pub use ui_timeline::{Axis, MotionCue, ResolvedMotionState, TimelineClock};
+    pub use ui_timeline::{Axis, MotionCue, PathPoint, ResolvedMotionState, TimelineClock};
     pub use ui_tokens::{
         Color, Density, MotionPreference, MotionScale, RadiusScale, SemanticColors, SpacingScale,
         Theme, ThemeMode, TransparencyPreference,
@@ -54,8 +54,9 @@ pub mod prelude {
         use_animation_value, use_element_computed_style, use_element_rect, use_presence_animation,
         use_presence_state, use_reduced_motion, use_shared_element_registry, use_timeline_sample,
         CssKeyframesAdapter, ElementSnapshot, FrameAdapter, FrameAdapterHandle,
-        FrameAdapterRegistry, MountedRectCallback, ReducedMotion, SceneClock, SceneState,
-        SequenceAdapter, SharedElementRegistry, SharedTransition, WaapiAdapter,
+        FrameAdapterRegistry, MountedRectCallback, ReducedMotion, SceneClock, SceneDriver,
+        SceneState, ScrollObserverConfig, SequenceAdapter, SharedElementRegistry, SharedTransition,
+        WaapiAdapter,
     };
 
     #[cfg(feature = "icons")]
@@ -125,6 +126,10 @@ pub fn public_api_names() -> Vec<&'static str> {
         "Scene",
         "Clip",
         "SceneContext",
+        "MotionPath",
+        "PathPoint",
+        "SplitText",
+        "SplitMode",
     ];
 
     #[cfg(feature = "icons")]
@@ -150,6 +155,8 @@ pub fn public_api_names() -> Vec<&'static str> {
         "use_element_computed_style",
         "SceneState",
         "SceneClock",
+        "SceneDriver",
+        "ScrollObserverConfig",
         "FrameAdapter",
         "FrameAdapterRegistry",
         "SequenceAdapter",

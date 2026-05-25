@@ -41,7 +41,6 @@ pub fn Scene(
     controls: Option<bool>,
     children: Element,
 ) -> Element {
-    let _ = controls; // wired in Task 11
     let fps = fps.unwrap_or(60).max(1);
     let autoplay = autoplay.unwrap_or(true);
     let reduced = use_reduced_motion();
@@ -82,6 +81,26 @@ pub fn Scene(
     let reduced_attr = if *reduced_signal.read() { "true" } else { "false" };
     let aspect = format!("aspect-ratio: {} / {}", width, height);
 
+    let show_transport = controls.unwrap_or(false);
+    let duration_attr_for_input = duration_ms.max(0.0);
+    let reduced_now = *reduced_signal.read();
+
+    let play_label = if matches!(*state.read(), SceneState::Playing) {
+        "Pause"
+    } else {
+        "Play"
+    };
+
+    let scrubber_value = format!("{}", *elapsed.read() as i64);
+    let scrubber_max = format!("{}", duration_attr_for_input as i64);
+    let time_text = format!(
+        "{:.2}s / {:.2}s",
+        *elapsed.read() / 1000.0,
+        duration_ms / 1000.0
+    );
+
+    let scrubber_disabled = reduced_now;
+
     rsx! {
         section {
             class: "ui-scene-stage",
@@ -95,6 +114,46 @@ pub fn Scene(
             "data-state": "{state_attr}",
             "data-reduced": "{reduced_attr}",
             {children}
+            if show_transport {
+                div { class: "ui-scene-transport",
+                    button {
+                        class: "ui-scene-play",
+                        r#type: "button",
+                        disabled: reduced_now,
+                        onclick: move |_| {
+                            if matches!(*state.read(), SceneState::Playing) {
+                                clock.pause();
+                            } else {
+                                clock.play();
+                            }
+                        },
+                        "{play_label}"
+                    }
+                    input {
+                        class: "ui-scene-scrubber",
+                        r#type: "range",
+                        min: "0",
+                        max: "{scrubber_max}",
+                        step: "1",
+                        value: "{scrubber_value}",
+                        aria_disabled: if scrubber_disabled { "true" } else { "false" },
+                        oninput: move |evt| {
+                            if reduced_now {
+                                return;
+                            }
+                            if let Ok(ms) = evt.value().parse::<f32>() {
+                                clock.seek_ms(ms);
+                            }
+                        },
+                    }
+                    span { class: "ui-scene-time", "{time_text}" }
+                    if reduced_now {
+                        span { class: "ui-scene-reduced-tag",
+                            "Reduced motion · settled state"
+                        }
+                    }
+                }
+            }
         }
     }
 }

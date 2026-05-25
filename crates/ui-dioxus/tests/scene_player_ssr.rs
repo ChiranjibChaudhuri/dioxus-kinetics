@@ -96,3 +96,37 @@ fn clip_outside_scene_renders_with_orphan_flag() {
     });
     assert!(html.contains("data-clip-orphan=\"true\""), "{html}");
 }
+
+#[test]
+fn scene_with_controls_renders_transport_bar() {
+    let html = dioxus_ssr::render_element(rsx! {
+        Scene {
+            id: "intro", width: 100, height: 100, duration_ms: 5_000.0,
+            autoplay: Some(false),
+            controls: Some(true),
+            p { "body" }
+        }
+    });
+    assert!(html.contains("ui-scene-transport"), "{html}");
+    assert!(html.contains("ui-scene-play"), "{html}");
+    assert!(html.contains("type=\"range\""), "{html}");
+    assert!(html.contains("min=\"0\""), "{html}");
+    assert!(html.contains("max=\"5000\""), "{html}");
+    assert!(html.contains("ui-scene-time"), "{html}");
+}
+
+#[test]
+fn scene_transport_marks_scrubber_disabled_under_reduced_motion() {
+    let html = dioxus_ssr::render_element(rsx! {
+        ReducedMotionProvider { reduced: true,
+            Scene {
+                id: "intro", width: 100, height: 100, duration_ms: 1_000.0,
+                controls: Some(true),
+                p { "body" }
+            }
+        }
+    });
+    assert!(html.contains("aria-disabled=\"true\""), "{html}");
+    assert!(html.contains("ui-scene-reduced-tag"), "{html}");
+    assert!(html.contains("Reduced motion · settled state"), "{html}");
+}

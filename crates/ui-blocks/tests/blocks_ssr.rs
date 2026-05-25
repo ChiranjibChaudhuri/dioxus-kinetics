@@ -61,10 +61,8 @@ fn wipe_transition_emits_mask_image_kinetic_box() {
     assert!(html.contains("ui-block-wipe-transition"), "{html}");
     assert!(html.contains("data-block=\"wipe-transition\""), "{html}");
     assert!(html.contains("covered content"), "{html}");
-    assert!(
-        html.contains("mask-image") || html.contains("-webkit-mask-image"),
-        "{html}",
-    );
+    assert!(html.contains("animation-name: ui-block-wipe-linear"), "{html}");
+    assert!(html.contains("data-variant=\"linear\""), "{html}");
 }
 
 #[test]
@@ -123,4 +121,37 @@ fn social_overlay_twitter_variant() {
         }
     });
     assert!(html.contains("ui-block-social-overlay--twitter"), "{html}");
+}
+
+#[test]
+fn wipe_transition_inside_scene_emits_negative_animation_delay() {
+    use ui_dioxus::Scene;
+    use ui_runtime::reduced_motion::ReducedMotionProvider;
+    let html = dioxus_ssr::render_element(rsx! {
+        ReducedMotionProvider { reduced: Some(true),
+            Scene {
+                id: "outer", width: 100, height: 100, duration_ms: 1_500.0,
+                autoplay: Some(false),
+                WipeTransition { duration_ms: 1_500.0, p { "x" } }
+            }
+        }
+    });
+    // Reduced motion → Scene elapsed = 1500. Wipe inline style should
+    // use animation-delay = -1500ms.
+    assert!(html.contains("animation-delay: -1500ms"), "{html}");
+    // Default variant is Linear.
+    assert!(html.contains("animation-name: ui-block-wipe-linear"), "{html}");
+}
+
+#[test]
+fn wipe_transition_variant_conic_picks_correct_keyframe() {
+    use ui_blocks::{WipeTransition, WipeVariant};
+    let html = dioxus_ssr::render_element(rsx! {
+        WipeTransition {
+            duration_ms: 1_000.0,
+            variant: WipeVariant::Conic,
+            p { "x" }
+        }
+    });
+    assert!(html.contains("animation-name: ui-block-wipe-conic"), "{html}");
 }

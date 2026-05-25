@@ -1,5 +1,5 @@
 use dioxus::prelude::*;
-use ui_blocks::{Caption, LowerThird, LowerThirdAccent, WipeTransition};
+use ui_blocks::{Caption, LowerThird, LowerThirdAccent, MetricCounter, WipeTransition};
 
 #[test]
 fn lower_third_emits_aria_label_with_name_and_role() {
@@ -62,4 +62,33 @@ fn wipe_transition_emits_mask_image_kinetic_box() {
         html.contains("mask-image") || html.contains("-webkit-mask-image"),
         "{html}",
     );
+}
+
+#[test]
+fn metric_counter_renders_three_kinetic_text_lines() {
+    let html = dioxus_ssr::render_element(rsx! {
+        MetricCounter {
+            label: "Active users".to_string(),
+            value: "1,287".to_string(),
+            delta_text: Some("+24% w/w".to_string()),
+        }
+    });
+    assert!(html.contains("Active users"), "{html}");
+    assert!(html.contains("1,287"), "{html}");
+    assert!(html.contains("+24% w/w"), "{html}");
+    assert!(html.contains("ui-block-metric-counter"), "{html}");
+}
+
+#[test]
+fn metric_counter_without_delta_omits_third_line() {
+    let html = dioxus_ssr::render_element(rsx! {
+        MetricCounter {
+            label: "Loose".to_string(),
+            value: "42".to_string(),
+        }
+    });
+    assert!(html.contains("Loose"), "{html}");
+    assert!(html.contains("42"), "{html}");
+    // No delta -> no delta KineticText id reference.
+    assert!(!html.contains("metric-delta"), "{html}");
 }

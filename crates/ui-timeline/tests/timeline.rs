@@ -213,8 +213,8 @@ fn motion_cue_scale_interpolates_linearly() {
         to: 1.2,
         transition: linear_200(),
     };
-    assert_eq!(cue.sample(0.0).scale, Some(1.0));
-    assert!((cue.sample(0.5).scale.unwrap() - 1.1).abs() < 0.001);
+    assert_eq!(cue.clone().sample(0.0).scale, Some(1.0));
+    assert!((cue.clone().sample(0.5).scale.unwrap() - 1.1).abs() < 0.001);
     assert_eq!(cue.sample(1.0).scale, Some(1.2));
 }
 

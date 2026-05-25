@@ -326,11 +326,11 @@ impl MotionSegment {
         } else {
             (elapsed_ms - self.start_ms) / self.duration_ms
         };
-        Some(self.cue.sample(progress))
+        Some(self.cue.clone().sample(progress))
     }
 }
 
-#[derive(Clone, Copy, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq)]
 pub enum MotionCue {
     Opacity {
         from: f32,
@@ -353,6 +353,13 @@ pub enum MotionCue {
         to_deg: f32,
         transition: Transition,
     },
+    Path {
+        points: Vec<PathPoint>,
+        from_progress: f32,
+        to_progress: f32,
+        rotate_along_path: bool,
+        transition: Transition,
+    },
 }
 
 impl MotionCue {
@@ -364,7 +371,7 @@ impl MotionCue {
         }
     }
 
-    fn reduced_motion(self) -> Self {
+    pub fn reduced_motion(self) -> Self {
         match self {
             Self::Opacity {
                 from,
@@ -402,6 +409,19 @@ impl MotionCue {
             } => Self::Rotate {
                 from_deg,
                 to_deg,
+                transition: transition.reduced(),
+            },
+            Self::Path {
+                points,
+                from_progress: _,
+                to_progress,
+                rotate_along_path,
+                transition,
+            } => Self::Path {
+                points,
+                from_progress: to_progress,
+                to_progress,
+                rotate_along_path,
                 transition: transition.reduced(),
             },
         }
@@ -461,6 +481,28 @@ impl MotionCue {
                     rotate_deg: Some(interpolate(from_deg, to_deg, eased, Clamp::Yes)),
                     ..Default::default()
                 }
+            }
+            Self::Path {
+                points,
+                from_progress,
+                to_progress,
+                rotate_along_path,
+                transition,
+            } => {
+                let eased = apply_transition_progress(p, transition);
+                let local = (from_progress
+                    + (to_progress - from_progress) * eased)
+                    .clamp(0.0, 1.0);
+                let (x, y) = crate::path::sample_path(&points, local);
+                let mut sample = MotionCueSample {
+                    translate_x: Some(x),
+                    translate_y: Some(y),
+                    ..Default::default()
+                };
+                if rotate_along_path {
+                    sample.rotate_deg = Some(crate::path::sample_path_tangent(&points, local));
+                }
+                sample
             }
         }
     }

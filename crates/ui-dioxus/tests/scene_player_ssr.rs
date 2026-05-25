@@ -1,5 +1,6 @@
 use dioxus::prelude::*;
-use ui_dioxus::{Scene, SceneState};
+use ui_composition::ClipFill;
+use ui_dioxus::{Clip, Scene, SceneState};
 use ui_runtime::ReducedMotionProvider;
 
 #[test]
@@ -49,4 +50,49 @@ fn scene_state_enum_is_re_exported_via_kinetics_prelude() {
     // Sanity: SceneState surfaces correctly.
     let s: SceneState = SceneState::Settled;
     let _ = s;
+}
+
+#[test]
+fn clip_inside_scene_renders_active_at_settled() {
+    let html = dioxus_ssr::render_element(rsx! {
+        ReducedMotionProvider { reduced: true,
+            Scene {
+                id: "intro", width: 100, height: 100, duration_ms: 2_000.0,
+                Clip { start_ms: 0.0, duration_ms: 1_000.0, p { "first" } }
+                Clip { start_ms: 1_000.0, duration_ms: 1_000.0, p { "second" } }
+            }
+        }
+    });
+    // At elapsed = duration = 2000ms, second clip is in range; first is past
+    // its end and (default ClipFill::None) inactive.
+    assert!(html.contains("data-clip-active=\"false\"") && html.contains("first"), "{html}");
+    assert!(html.contains("data-clip-active=\"true\"") && html.contains("second"), "{html}");
+}
+
+#[test]
+fn clip_with_hold_end_remains_active_after_range() {
+    let html = dioxus_ssr::render_element(rsx! {
+        ReducedMotionProvider { reduced: true,
+            Scene {
+                id: "intro", width: 100, height: 100, duration_ms: 5_000.0,
+                Clip {
+                    start_ms: 0.0,
+                    duration_ms: 1_000.0,
+                    fill: Some(ClipFill::HoldEnd),
+                    p { "held" }
+                }
+            }
+        }
+    });
+    assert!(html.contains("data-clip-active=\"true\""), "{html}");
+}
+
+#[test]
+fn clip_outside_scene_renders_with_orphan_flag() {
+    // A Clip without a SceneContext renders the children as-is with
+    // data-clip-active="true" and a `data-clip-orphan="true"` flag.
+    let html = dioxus_ssr::render_element(rsx! {
+        Clip { start_ms: 0.0, duration_ms: 1.0, p { "orphan" } }
+    });
+    assert!(html.contains("data-clip-orphan=\"true\""), "{html}");
 }

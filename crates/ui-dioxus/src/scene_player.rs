@@ -6,6 +6,7 @@
 use std::rc::Rc;
 
 use dioxus::prelude::*;
+use ui_composition::{ClipFill, FrameClip};
 use ui_runtime::frame_adapter::FrameAdapterRegistry;
 use ui_runtime::reduced_motion::use_reduced_motion;
 use ui_runtime::scene_clock::{SceneClock, SceneState};
@@ -85,6 +86,72 @@ pub fn Scene(
             "data-elapsed-ms": "{elapsed_attr}",
             "data-state": "{state_attr}",
             "data-reduced": "{reduced_attr}",
+            {children}
+        }
+    }
+}
+
+#[component]
+pub fn Clip(
+    start_ms: f32,
+    duration_ms: f32,
+    fill: Option<ClipFill>,
+    children: Element,
+) -> Element {
+    let fill = fill.unwrap_or(ClipFill::None);
+    let ctx = try_consume_context::<SceneContext>();
+    let Some(ctx) = ctx else {
+        // Orphan clip (no Scene ancestor): render children, flag for diagnostics.
+        return rsx! {
+            div {
+                class: "ui-scene-clip ui-scene-clip--orphan",
+                "data-clip-orphan": "true",
+                "data-clip-active": "true",
+                {children}
+            }
+        };
+    };
+
+    let frame_clip = FrameClip::new(start_ms.max(0.0) as u32, duration_ms.max(0.0) as u32, fill);
+    let elapsed = ctx.clock.elapsed_ms;
+    let raw_ms = *elapsed.read();
+    // `FrameClip::active_at_ms` uses an exclusive end (`ms < end`). When
+    // the scene is at its terminal frame (settled, where
+    // `elapsed_ms == duration_ms`), the last clip — whose
+    // `start + duration == scene.duration_ms` — would otherwise be
+    // reported inactive. Nudge the query time back by a sub-millisecond
+    // epsilon at the terminal boundary so the final composed frame
+    // matches the final played frame.
+    let query_ms = if raw_ms >= ctx.duration_ms && ctx.duration_ms > 0.0 {
+        raw_ms - f32::EPSILON.max(0.001)
+    } else {
+        raw_ms
+    };
+    let active = frame_clip.active_at_ms(query_ms);
+
+    let style = if active {
+        "opacity: 1"
+    } else {
+        match fill {
+            ClipFill::None => "opacity: 0; visibility: hidden; pointer-events: none",
+            ClipFill::HoldStart | ClipFill::HoldEnd | ClipFill::HoldBoth => "opacity: 1",
+        }
+    };
+    let fill_attr = match fill {
+        ClipFill::None => "none",
+        ClipFill::HoldStart => "hold-start",
+        ClipFill::HoldEnd => "hold-end",
+        ClipFill::HoldBoth => "hold-both",
+    };
+
+    rsx! {
+        div {
+            class: "ui-scene-clip",
+            style: "{style}",
+            "data-start-ms": "{start_ms}",
+            "data-duration-ms": "{duration_ms}",
+            "data-fill": "{fill_attr}",
+            "data-clip-active": "{active}",
             {children}
         }
     }

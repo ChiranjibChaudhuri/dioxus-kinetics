@@ -74,7 +74,7 @@ pub use overlays::{
     Toast as NoticeStack, Tooltip as ContextHint,
 };
 pub use popover::{Popover, PopoverSide};
-pub use scene_player::{Scene, SceneContext};
+pub use scene_player::{Clip, Scene, SceneContext};
 pub use select::{Select, SelectOption};
 pub use ui_runtime::SceneState;
 #[cfg(feature = "liquid-glass")]

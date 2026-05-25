@@ -1,5 +1,5 @@
 use dioxus::prelude::*;
-use ui_dioxus::{KineticText, Scene};
+use ui_dioxus::{KineticBox, KineticText, Scene};
 use ui_runtime::reduced_motion::ReducedMotionProvider;
 
 #[test]
@@ -45,4 +45,31 @@ fn kinetic_text_inside_reduced_motion_scene_renders_at_settled_endpoint() {
     // is -5000ms which freezes the keyframe at its end state.
     assert!(html.contains("animation-name: ui-cue-fade-in"), "{html}");
     assert!(html.contains("animation-delay: -5000ms"), "{html}");
+}
+
+#[test]
+fn kinetic_box_inside_scene_emits_cue_animation_style() {
+    let html = dioxus_ssr::render_element(rsx! {
+        ReducedMotionProvider { reduced: Some(false),
+            Scene {
+                id: "test", width: 100, height: 100, duration_ms: 5_000.0,
+                autoplay: Some(false),
+                KineticBox { id: "block".to_string(), cue: "pop-in".to_string(),
+                    p { "child" }
+                }
+            }
+        }
+    });
+    assert!(html.contains("animation-name: ui-cue-pop-in"), "{html}");
+    assert!(html.contains("animation-delay: -0ms"), "{html}");
+}
+
+#[test]
+fn kinetic_box_outside_clock_renders_static_markup() {
+    let html = dioxus_ssr::render_element(rsx! {
+        KineticBox { id: "block".to_string(), cue: "fade-in".to_string(),
+            p { "child" }
+        }
+    });
+    assert!(!html.contains("animation-name"), "{html}");
 }

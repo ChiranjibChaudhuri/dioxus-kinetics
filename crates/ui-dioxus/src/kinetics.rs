@@ -242,7 +242,40 @@ pub fn KineticBox(
     let state = ctx
         .as_ref()
         .and_then(|sig| sig.read().states.get(&kinetic_id.0).cloned());
-    let style = state.as_ref().map(|s| s.inline_style()).unwrap_or_default();
+
+    // Existing Sequence path: if there's a SequenceContext sample, use
+    // its inline style (transform/opacity from the sample) AND drive
+    // WAAPI as before (handled further down via use_animation_target).
+    let sequence_inline = state.as_ref().map(|s| s.inline_style()).unwrap_or_default();
+
+    // New cue-keyframe path: only when Sequence didn't provide a sample.
+    // Priority: StaggerCursor + SceneContext → SceneContext only → none.
+    let cue_inline = if sequence_inline.is_empty() {
+        let stagger = try_consume_context::<crate::stagger::StaggerCursor>();
+        let scene = try_consume_context::<crate::scene_player::SceneContext>();
+        match (stagger, scene) {
+            (Some(cursor), Some(ctx_scene)) => {
+                let parent = *ctx_scene.clock.elapsed_ms.read();
+                let index = cursor.next_index();
+                let offset = index as f32 * cursor.step_ms;
+                let local = (parent - offset).max(0.0);
+                crate::cue_style::cue_inline_style(&cue, local)
+            }
+            (None, Some(ctx_scene)) => {
+                let elapsed = *ctx_scene.clock.elapsed_ms.read();
+                crate::cue_style::cue_inline_style(&cue, elapsed)
+            }
+            _ => String::new(),
+        }
+    } else {
+        String::new()
+    };
+
+    let style = if !sequence_inline.is_empty() {
+        sequence_inline
+    } else {
+        cue_inline
+    };
 
     // Pull the original (MotionCue, start_ms) from the SequenceContext.
     // KineticBox children outside a Sequence have no cue → no WAAPI.

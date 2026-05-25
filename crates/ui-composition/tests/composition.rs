@@ -81,3 +81,38 @@ fn frame_layers_sort_by_depth_then_id() {
     assert_eq!(layers[1].id, "a");
     assert_eq!(layers[2].id, "b");
 }
+
+#[test]
+fn frame_clip_active_at_ms_none_fill() {
+    let clip = FrameClip::new(1_000, 500, ClipFill::None);
+    assert!(!clip.active_at_ms(999.9));
+    assert!(clip.active_at_ms(1_000.0));
+    assert!(clip.active_at_ms(1_499.9));
+    assert!(!clip.active_at_ms(1_500.0));
+}
+
+#[test]
+fn frame_clip_active_at_ms_hold_start() {
+    let clip = FrameClip::new(1_000, 500, ClipFill::HoldStart);
+    assert!(clip.active_at_ms(0.0));
+    assert!(clip.active_at_ms(999.9));
+    assert!(clip.active_at_ms(1_200.0));
+    assert!(!clip.active_at_ms(1_600.0));
+}
+
+#[test]
+fn frame_clip_active_at_ms_hold_end() {
+    let clip = FrameClip::new(1_000, 500, ClipFill::HoldEnd);
+    assert!(!clip.active_at_ms(999.9));
+    assert!(clip.active_at_ms(1_000.0));
+    assert!(clip.active_at_ms(1_499.9));
+    assert!(clip.active_at_ms(10_000.0));
+}
+
+#[test]
+fn frame_clip_active_at_ms_hold_both() {
+    let clip = FrameClip::new(1_000, 500, ClipFill::HoldBoth);
+    assert!(clip.active_at_ms(0.0));
+    assert!(clip.active_at_ms(1_200.0));
+    assert!(clip.active_at_ms(10_000.0));
+}

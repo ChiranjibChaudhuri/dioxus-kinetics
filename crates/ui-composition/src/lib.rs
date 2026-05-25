@@ -102,6 +102,23 @@ impl FrameClip {
             ClipFill::HoldBoth => true,
         }
     }
+
+    /// Millisecond-space equivalent of [`Self::active_at`]. `ms` is the
+    /// elapsed time since the parent scene started. Compares against
+    /// `self.start` and `self.duration` interpreted as milliseconds, so
+    /// callers must construct the clip with ms values (not frames).
+    pub fn active_at_ms(&self, ms: f32) -> bool {
+        let ms = if ms.is_finite() { ms } else { 0.0 };
+        let start = self.start as f32;
+        let end = start + self.duration as f32;
+        let within = ms >= start && ms < end;
+        match self.fill {
+            ClipFill::None => within,
+            ClipFill::HoldStart => self.duration > 0 && (ms < start || within),
+            ClipFill::HoldEnd => self.duration > 0 && ms >= start,
+            ClipFill::HoldBoth => true,
+        }
+    }
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]

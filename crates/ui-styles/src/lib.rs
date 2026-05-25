@@ -1412,11 +1412,16 @@ pub const COMPONENT_CSS: &str = r#"
 }
 "#;
 
+pub const SCENE_PLAYER_CSS: &str = include_str!("scene_player.css");
+
 pub fn library_css() -> String {
     let base = base_css();
-    let mut css = String::with_capacity(base.len() + COMPONENT_CSS.len() + 1);
+    let mut css =
+        String::with_capacity(base.len() + COMPONENT_CSS.len() + SCENE_PLAYER_CSS.len() + 2);
     css.push_str(&base);
     css.push('\n');
     css.push_str(COMPONENT_CSS);
+    css.push('\n');
+    css.push_str(SCENE_PLAYER_CSS);
     css
 }

@@ -112,10 +112,22 @@ impl SceneClock {
         }
         // Drop any active frame loop (the native `FrameHandle::Drop`
         // aborts the underlying tokio task; on wasm it cancels rAF).
+        // tokio::task::JoinHandle::abort() is asynchronous. A tick already
+        // in flight will complete before the task observes cancellation,
+        // so elapsed_ms may advance by up to one FRAME_PERIOD_MS after
+        // pause() returns. The scrubber's subsequent seek_ms in response
+        // to user input absorbs this drift.
         self.handle_slot.peek().0.borrow_mut().take();
     }
 
+    /// Starts the autoplay loop. Idempotent: calling `play()` on an
+    /// already-Playing clock is a no-op. On a `Settled` clock,
+    /// `elapsed_ms` rewinds to 0 before the loop starts (replay).
+    /// On a `reduced` clock, `play()` synonyms `settle()`.
     pub fn play(&self) {
+        if matches!(*self.state.peek(), SceneState::Playing) {
+            return;
+        }
         if *self.reduced.peek() {
             // Reduced-motion clocks settle immediately and never spawn a
             // frame loop.

@@ -188,3 +188,27 @@ async fn reduced_clock_play_is_noop() {
     })
     .await;
 }
+
+#[tokio::test(flavor = "current_thread", start_paused = true)]
+async fn play_from_settled_rewinds_and_replays() {
+    with_runtime_async(|| async {
+        let local = tokio::task::LocalSet::new();
+        local
+            .run_until(async {
+                let clock = enter(|| SceneClock::new(80.0, 60, false));
+                clock.settle();
+                assert_eq!(clock.peek_state(), SceneState::Settled);
+                clock.play();
+                tokio::task::yield_now().await;
+                // After play() on a Settled clock, elapsed_ms must rewind to 0
+                // and state must transition to Playing before the first tick.
+                assert_eq!(clock.peek_elapsed_ms(), 0.0);
+                assert_eq!(clock.peek_state(), SceneState::Playing);
+                tokio::time::advance(Duration::from_millis(200)).await;
+                tokio::task::yield_now().await;
+                assert_eq!(clock.peek_state(), SceneState::Settled);
+            })
+            .await;
+    })
+    .await;
+}

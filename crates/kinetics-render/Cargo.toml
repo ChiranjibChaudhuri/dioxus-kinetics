@@ -1,0 +1,21 @@
+[package]
+name = "kinetics-render"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[dependencies]
+dioxus.workspace = true
+dioxus-ssr.workspace = true
+ui-runtime = { path = "../ui-runtime" }
+ui-composition = { path = "../ui-composition" }
+ui-capture = { path = "../ui-capture" }
+serde_json = "1"
+tokio = { version = "1", features = ["fs", "process", "rt", "macros"] }
+
+[dev-dependencies]
+tempfile = "3"
+
+[lib]
+path = "src/lib.rs"

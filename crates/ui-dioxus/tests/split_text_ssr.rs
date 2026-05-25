@@ -41,7 +41,10 @@ fn split_text_glyph_spans_are_aria_hidden() {
     });
 
     let count = html.matches("aria-hidden=\"true\"").count();
-    assert!(count >= 2, "expected at least 2 aria-hidden spans, got {count}: {html}");
+    assert!(
+        count >= 2,
+        "expected at least 2 aria-hidden spans, got {count}: {html}"
+    );
 }
 
 #[test]

@@ -23,12 +23,11 @@ pub fn CurvedTrajectoryScene() -> Element {
             ease: Ease::Standard,
         },
     };
-    let timeline = Timeline::new("curved-trajectory-timeline", 4_000.0).with_track(
-        TimelineTrack::new(
+    let timeline =
+        Timeline::new("curved-trajectory-timeline", 4_000.0).with_track(TimelineTrack::new(
             MotionTarget::node("trajectory-icon"),
             vec![MotionSegment::new(0.0, 4_000.0, cue)],
-        ),
-    );
+        ));
 
     rsx! {
         Scene {

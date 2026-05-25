@@ -73,10 +73,8 @@ pub fn install_scroll_driver(
         (on_progress_scroll.borrow_mut())(progress);
     }) as Box<dyn FnMut(_)>);
 
-    let _ = window.add_event_listener_with_callback(
-        "scroll",
-        scroll_closure.as_ref().unchecked_ref(),
-    );
+    let _ =
+        window.add_event_listener_with_callback("scroll", scroll_closure.as_ref().unchecked_ref());
 
     // IntersectionObserver fires once when the trigger enters/exits the
     // viewport — used to seed progress at mount and to coalesce events
@@ -86,12 +84,8 @@ pub fn install_scroll_driver(
     let trigger_for_io = trigger.clone();
     let intersection_closure = Closure::wrap(Box::new(
         move |_entries: js_sys::Array, _observer: IntersectionObserver| {
-            let progress = compute_progress(
-                &window_for_io,
-                &trigger_for_io,
-                start_offset,
-                end_offset,
-            );
+            let progress =
+                compute_progress(&window_for_io, &trigger_for_io, start_offset, end_offset);
             (on_progress_io.borrow_mut())(progress);
         },
     ) as Box<dyn FnMut(_, _)>);
@@ -126,7 +120,9 @@ fn compute_progress(
     let rect = trigger.get_bounding_client_rect();
     let trigger_top = rect.top() as f32;
     let trigger_height = rect.height() as f32;
-    let vp_height = window.inner_height().ok()
+    let vp_height = window
+        .inner_height()
+        .ok()
         .and_then(|v| v.as_f64())
         .unwrap_or(0.0) as f32;
 

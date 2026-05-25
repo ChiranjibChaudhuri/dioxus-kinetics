@@ -490,9 +490,7 @@ impl MotionCue {
                 transition,
             } => {
                 let eased = apply_transition_progress(p, transition);
-                let local = (from_progress
-                    + (to_progress - from_progress) * eased)
-                    .clamp(0.0, 1.0);
+                let local = (from_progress + (to_progress - from_progress) * eased).clamp(0.0, 1.0);
                 let (x, y) = crate::path::sample_path(&points, local);
                 let mut sample = MotionCueSample {
                     translate_x: Some(x),

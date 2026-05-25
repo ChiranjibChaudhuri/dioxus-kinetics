@@ -19,7 +19,11 @@ fn single_line_lerp() {
     ];
     assert!(approx(sample_path_parametric(&pts, 0.0), (0.0, 0.0), 1e-3));
     assert!(approx(sample_path_parametric(&pts, 0.5), (50.0, 0.0), 1e-3));
-    assert!(approx(sample_path_parametric(&pts, 1.0), (100.0, 0.0), 1e-3));
+    assert!(approx(
+        sample_path_parametric(&pts, 1.0),
+        (100.0, 0.0),
+        1e-3
+    ));
 }
 
 #[test]
@@ -27,13 +31,23 @@ fn two_segment_polyline() {
     let pts = vec![
         PathPoint::Line { end: (0.0, 0.0) },
         PathPoint::Line { end: (100.0, 0.0) },
-        PathPoint::Line { end: (100.0, 100.0) },
+        PathPoint::Line {
+            end: (100.0, 100.0),
+        },
     ];
     // t=0.25 is at the midpoint of the first half of the polyline
     // (parametrically, not by arc length).
-    assert!(approx(sample_path_parametric(&pts, 0.25), (50.0, 0.0), 1e-3));
+    assert!(approx(
+        sample_path_parametric(&pts, 0.25),
+        (50.0, 0.0),
+        1e-3
+    ));
     // t=0.75 is at the midpoint of the second segment.
-    assert!(approx(sample_path_parametric(&pts, 0.75), (100.0, 50.0), 1e-3));
+    assert!(approx(
+        sample_path_parametric(&pts, 0.75),
+        (100.0, 50.0),
+        1e-3
+    ));
 }
 
 #[test]
@@ -47,7 +61,11 @@ fn cubic_bezier_at_endpoints() {
         },
     ];
     assert!(approx(sample_path_parametric(&pts, 0.0), (0.0, 0.0), 1e-3));
-    assert!(approx(sample_path_parametric(&pts, 1.0), (100.0, 0.0), 1e-3));
+    assert!(approx(
+        sample_path_parametric(&pts, 1.0),
+        (100.0, 0.0),
+        1e-3
+    ));
 }
 
 #[test]
@@ -74,18 +92,30 @@ fn cubic_bezier_at_midpoint() {
 fn t_below_zero_clamps_to_origin() {
     let pts = vec![
         PathPoint::Line { end: (10.0, 20.0) },
-        PathPoint::Line { end: (100.0, 100.0) },
+        PathPoint::Line {
+            end: (100.0, 100.0),
+        },
     ];
-    assert!(approx(sample_path_parametric(&pts, -1.0), (10.0, 20.0), 1e-3));
+    assert!(approx(
+        sample_path_parametric(&pts, -1.0),
+        (10.0, 20.0),
+        1e-3
+    ));
 }
 
 #[test]
 fn t_above_one_clamps_to_endpoint() {
     let pts = vec![
         PathPoint::Line { end: (10.0, 20.0) },
-        PathPoint::Line { end: (100.0, 100.0) },
+        PathPoint::Line {
+            end: (100.0, 100.0),
+        },
     ];
-    assert!(approx(sample_path_parametric(&pts, 2.0), (100.0, 100.0), 1e-3));
+    assert!(approx(
+        sample_path_parametric(&pts, 2.0),
+        (100.0, 100.0),
+        1e-3
+    ));
 }
 
 #[test]
@@ -94,7 +124,11 @@ fn nan_t_returns_origin() {
         PathPoint::Line { end: (5.0, 5.0) },
         PathPoint::Line { end: (10.0, 10.0) },
     ];
-    assert!(approx(sample_path_parametric(&pts, f32::NAN), (5.0, 5.0), 1e-3));
+    assert!(approx(
+        sample_path_parametric(&pts, f32::NAN),
+        (5.0, 5.0),
+        1e-3
+    ));
 }
 
 use ui_timeline::{sample_path, sample_path_tangent};
@@ -107,7 +141,9 @@ fn arc_length_sampling_constant_speed_on_polyline() {
     let pts = vec![
         PathPoint::Line { end: (0.0, 0.0) },
         PathPoint::Line { end: (100.0, 0.0) },
-        PathPoint::Line { end: (100.0, 100.0) },
+        PathPoint::Line {
+            end: (100.0, 100.0),
+        },
     ];
     let half = sample_path(&pts, 0.5);
     assert!(approx(half, (100.0, 0.0), 1.0), "got {:?}", half);
@@ -118,7 +154,9 @@ fn arc_length_sampling_quarter_eighth_polyline() {
     let pts = vec![
         PathPoint::Line { end: (0.0, 0.0) },
         PathPoint::Line { end: (100.0, 0.0) },
-        PathPoint::Line { end: (100.0, 100.0) },
+        PathPoint::Line {
+            end: (100.0, 100.0),
+        },
     ];
     // Arc length = 200; t=0.25 → 50 units along, which is (50, 0).
     assert!(approx(sample_path(&pts, 0.25), (50.0, 0.0), 1.0));
@@ -153,14 +191,20 @@ fn tangent_on_vertical_segment_is_ninety_degrees() {
         PathPoint::Line { end: (0.0, 100.0) },
     ];
     let angle = sample_path_tangent(&pts, 0.5);
-    assert!((angle.abs() - 90.0).abs() < 1.0, "vertical tangent: {}", angle);
+    assert!(
+        (angle.abs() - 90.0).abs() < 1.0,
+        "vertical tangent: {}",
+        angle
+    );
 }
 
 #[test]
 fn tangent_on_diagonal_segment_is_forty_five_degrees() {
     let pts = vec![
         PathPoint::Line { end: (0.0, 0.0) },
-        PathPoint::Line { end: (100.0, 100.0) },
+        PathPoint::Line {
+            end: (100.0, 100.0),
+        },
     ];
     let angle = sample_path_tangent(&pts, 0.5);
     assert!((angle - 45.0).abs() < 1.0, "diagonal tangent: {}", angle);

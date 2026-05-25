@@ -1419,11 +1419,7 @@ pub const GSAP_PRIMITIVES_CSS: &str = include_str!("gsap_primitives.css");
 pub fn library_css() -> String {
     let base = base_css();
     let mut css = String::with_capacity(
-        base.len()
-            + COMPONENT_CSS.len()
-            + SCENE_PLAYER_CSS.len()
-            + GSAP_PRIMITIVES_CSS.len()
-            + 3,
+        base.len() + COMPONENT_CSS.len() + SCENE_PLAYER_CSS.len() + GSAP_PRIMITIVES_CSS.len() + 3,
     );
     css.push_str(&base);
     css.push('\n');

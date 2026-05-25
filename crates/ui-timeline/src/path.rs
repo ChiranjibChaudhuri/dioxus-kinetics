@@ -48,7 +48,11 @@ pub fn sample_path_parametric(points: &[PathPoint], t: f32) -> (f32, f32) {
     if points.len() == 1 {
         return points[0].end();
     }
-    let t = if t.is_finite() { t.clamp(0.0, 1.0) } else { 0.0 };
+    let t = if t.is_finite() {
+        t.clamp(0.0, 1.0)
+    } else {
+        0.0
+    };
 
     let segment_count = (points.len() - 1) as f32;
     let scaled = t * segment_count;
@@ -101,7 +105,11 @@ pub fn sample_path(points: &[PathPoint], t: f32) -> (f32, f32) {
     if points.len() == 1 {
         return points[0].end();
     }
-    let t = if t.is_finite() { t.clamp(0.0, 1.0) } else { 0.0 };
+    let t = if t.is_finite() {
+        t.clamp(0.0, 1.0)
+    } else {
+        0.0
+    };
 
     // Build a parameter->arc-length table by uniformly sampling the
     // parametric path at high resolution. Then invert the table to map
@@ -136,7 +144,11 @@ pub fn sample_path(points: &[PathPoint], t: f32) -> (f32, f32) {
         }
     }
     let span = hi.1 - lo.1;
-    let alpha = if span == 0.0 { 0.0 } else { (target - lo.1) / span };
+    let alpha = if span == 0.0 {
+        0.0
+    } else {
+        (target - lo.1) / span
+    };
     let u = lo.0 + (hi.0 - lo.0) * alpha;
     sample_path_parametric(points, u)
 }
@@ -149,7 +161,11 @@ pub fn sample_path_tangent(points: &[PathPoint], t: f32) -> f32 {
     if points.len() < 2 {
         return 0.0;
     }
-    let t = if t.is_finite() { t.clamp(0.0, 1.0) } else { 0.0 };
+    let t = if t.is_finite() {
+        t.clamp(0.0, 1.0)
+    } else {
+        0.0
+    };
     let eps = 1.0 / PATH_SAMPLE_RESOLUTION as f32;
     let lo = (t - eps).max(0.0);
     let hi = (t + eps).min(1.0);

@@ -50,7 +50,9 @@ fn path_cue_samples_translate_at_progress_one() {
 fn path_cue_with_rotate_along_path_emits_angle() {
     let pts = vec![
         PathPoint::Line { end: (0.0, 0.0) },
-        PathPoint::Line { end: (100.0, 100.0) },
+        PathPoint::Line {
+            end: (100.0, 100.0),
+        },
     ];
     let cue = MotionCue::Path {
         points: pts,

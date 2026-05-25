@@ -37,7 +37,9 @@ fn motion_path_data_attribute_is_json_serialized() {
 
     // Find the data-motion-path attribute value.
     let needle = "data-motion-path=\"";
-    let start = html.find(needle).expect("data-motion-path attribute present");
+    let start = html
+        .find(needle)
+        .expect("data-motion-path attribute present");
     let value_start = start + needle.len();
     let value = &html[value_start..];
     // The serialized JSON starts with `[`. Note: SSR may escape `"` as `&quot;`,

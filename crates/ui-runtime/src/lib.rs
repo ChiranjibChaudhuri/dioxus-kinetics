@@ -8,6 +8,7 @@ mod scheduler_native;
 #[cfg(target_arch = "wasm32")]
 mod scheduler_web;
 
+pub mod adapters;
 pub mod animation;
 pub mod frame_adapter;
 pub mod measurement;

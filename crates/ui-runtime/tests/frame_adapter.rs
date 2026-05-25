@@ -83,3 +83,54 @@ fn broadcast_seek_fans_out_to_every_adapter() {
     assert!((a_ms.get() - 123.5).abs() < f32::EPSILON);
     assert!(b_reduced.get());
 }
+
+#[test]
+fn broadcast_seek_tolerates_adapter_mutating_registry() {
+    use std::cell::RefCell;
+
+    // Adapter that, on its first seek, registers a sibling adapter via a
+    // captured registry clone. The snapshot-before-iterate strategy in
+    // broadcast_seek must keep this from panicking on a re-entrant borrow_mut.
+    struct ReentrantAdapter {
+        id: &'static str,
+        registry: FrameAdapterRegistry,
+        seen: Rc<Cell<u32>>,
+        spawned: RefCell<Option<ui_runtime::frame_adapter::FrameAdapterHandle>>,
+    }
+
+    impl FrameAdapter for ReentrantAdapter {
+        fn id(&self) -> &str {
+            self.id
+        }
+        fn duration_ms(&self) -> f32 {
+            1.0
+        }
+        fn seek(&self, _elapsed_ms: f32, _reduced: bool) {
+            self.seen.set(self.seen.get() + 1);
+            if self.spawned.borrow().is_none() {
+                let sibling = CountingAdapter::new("sibling", 1.0);
+                let handle = self.registry.register(sibling);
+                *self.spawned.borrow_mut() = Some(handle);
+            }
+        }
+    }
+
+    let registry = FrameAdapterRegistry::default();
+    let seen = Rc::new(Cell::new(0u32));
+    let parent = ReentrantAdapter {
+        id: "parent",
+        registry: registry.clone(),
+        seen: seen.clone(),
+        spawned: RefCell::new(None),
+    };
+    let _h = registry.register(parent);
+
+    // First broadcast: parent runs, mutates registry mid-iteration.
+    registry.broadcast_seek(10.0, false);
+    assert_eq!(seen.get(), 1);
+    assert_eq!(registry.len(), 2, "sibling should be registered by parent's seek");
+
+    // Second broadcast: both parent and sibling get the call.
+    registry.broadcast_seek(20.0, false);
+    assert_eq!(seen.get(), 2);
+}

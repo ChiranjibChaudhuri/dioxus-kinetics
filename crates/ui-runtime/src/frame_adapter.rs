@@ -29,9 +29,15 @@ pub struct FrameAdapterHandle {
 
 impl Drop for FrameAdapterHandle {
     fn drop(&mut self) {
-        self.inner
+        // Extract the removed Entry while holding the borrow, then drop the
+        // outer RefMut before letting the Entry itself drop. The removed
+        // Entry's Drop can cascade into another FrameAdapterHandle::Drop;
+        // that handle's borrow_mut must acquire on a released RefCell.
+        let removed: Option<Entry> = self
+            .inner
             .borrow_mut()
-            .remove_if_epoch_matches(&self.id, self.epoch);
+            .extract_if_epoch_matches(&self.id, self.epoch);
+        drop(removed);
     }
 }
 
@@ -58,9 +64,12 @@ impl RegistryInner {
         epoch
     }
 
-    fn remove_if_epoch_matches(&mut self, id: &str, epoch: u64) {
-        self.entries
-            .retain(|(k, e)| !(k == id && e.epoch == epoch));
+    fn extract_if_epoch_matches(&mut self, id: &str, epoch: u64) -> Option<Entry> {
+        let idx = self
+            .entries
+            .iter()
+            .position(|(k, e)| k == id && e.epoch == epoch)?;
+        Some(self.entries.remove(idx).1)
     }
 }
 
@@ -72,6 +81,7 @@ pub struct FrameAdapterRegistry {
 }
 
 impl FrameAdapterRegistry {
+    #[must_use = "FrameAdapterHandle is a drop guard; dropping it deregisters the adapter"]
     pub fn register<A: FrameAdapter + 'static>(&self, adapter: A) -> FrameAdapterHandle {
         let id = adapter.id().to_string();
         let epoch = self

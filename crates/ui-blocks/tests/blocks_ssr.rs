@@ -176,3 +176,25 @@ fn lower_third_inside_scene_choreographs_via_timeline_scope() {
     assert!(html.contains("animation-name: ui-cue-"), "{html}");
     assert!(html.contains("data-block=\"lower-third\""), "{html}");
 }
+
+#[test]
+fn social_overlay_inside_scene_choreographs_handle_and_message() {
+    use ui_dioxus::Scene;
+    use ui_runtime::reduced_motion::ReducedMotionProvider;
+    use ui_blocks::{SocialOverlay, SocialPlatform};
+    let html = dioxus_ssr::render_element(rsx! {
+        ReducedMotionProvider { reduced: Some(true),
+            Scene {
+                id: "outer", width: 100, height: 100, duration_ms: 2_000.0,
+                autoplay: Some(false),
+                SocialOverlay {
+                    platform: SocialPlatform::Instagram,
+                    handle: "@kineticsui".to_string(),
+                    message: "Hi".to_string(),
+                }
+            }
+        }
+    });
+    assert!(html.contains("animation-name: ui-cue-"), "{html}");
+    assert!(html.contains("ui-block-social-overlay--instagram"), "{html}");
+}

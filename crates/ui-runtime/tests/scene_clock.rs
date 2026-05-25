@@ -5,9 +5,15 @@ fn empty_app() -> Element {
     rsx! { div {} }
 }
 
-/// Run `body` inside a Dioxus runtime + root scope so `Signal::new` has
-/// a scope to own its values. The VirtualDom is dropped after `body`
-/// returns, which also cleans up the signal storage.
+/// Wraps a test body in a Dioxus runtime + root scope so `Signal::new`
+/// (which requires both) succeeds. We use `VirtualDom::new(...)` together
+/// with `in_runtime` and `in_scope(ScopeId::ROOT, ...)` instead of the
+/// SSR-probe pattern from `hooks_ssr.rs` because these tests call
+/// `SceneClock` methods directly; driving them through an SSR probe would
+/// require re-rendering after each mutation and asserting on DOM scrape,
+/// which is more brittle than direct method calls + signal peek. The
+/// VirtualDom is dropped after `body` returns, which also cleans up the
+/// signal storage.
 fn with_runtime<R>(body: impl FnOnce() -> R) -> R {
     let dom = VirtualDom::new(empty_app);
     dom.in_runtime(|| dom.in_scope(ScopeId::ROOT, body))

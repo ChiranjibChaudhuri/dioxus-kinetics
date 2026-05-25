@@ -48,12 +48,15 @@ impl SceneClock {
         let ms = if ms.is_finite() { ms } else { 0.0 };
         let duration = *self.duration_ms.peek();
         let clamped = ms.clamp(0.0, duration);
-        self.elapsed_ms.clone().set(clamped);
+        let mut s = self.elapsed_ms;
+        s.set(clamped);
         if clamped >= duration {
-            self.state.clone().set(SceneState::Settled);
+            let mut s = self.state;
+            s.set(SceneState::Settled);
         } else if *self.state.peek() == SceneState::Settled {
             // Scrubbing back from settled returns to paused.
-            self.state.clone().set(SceneState::Paused);
+            let mut s = self.state;
+            s.set(SceneState::Paused);
         }
     }
 
@@ -69,18 +72,17 @@ impl SceneClock {
 
     pub fn settle(&self) {
         let duration = *self.duration_ms.peek();
-        self.elapsed_ms.clone().set(duration);
-        self.state.clone().set(SceneState::Settled);
+        let mut s = self.elapsed_ms;
+        s.set(duration);
+        let mut s = self.state;
+        s.set(SceneState::Settled);
     }
 
     pub fn frame_clock(&self) -> FrameClock {
         let fps = *self.fps.peek();
+        debug_assert!(fps > 0, "SceneClock::new clamps fps to >= 1");
         let elapsed = *self.elapsed_ms.peek();
-        let frame = if fps == 0 {
-            0
-        } else {
-            (elapsed / 1000.0 * fps as f32).round() as u32
-        };
+        let frame = (elapsed / 1000.0 * fps as f32).round() as u32;
         FrameClock { frame, fps }
     }
 

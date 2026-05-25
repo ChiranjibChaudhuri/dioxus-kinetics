@@ -13,6 +13,10 @@ path = "src/main.rs"
 clap = { version = "4", features = ["derive"] }
 tokio = { version = "1", features = ["rt-multi-thread", "fs", "process", "macros"] }
 kinetics-render = { path = "../kinetics-render" }
+kinetics = { path = "../kinetics" }
+ui-composition = { path = "../ui-composition" }
+ui-runtime = { path = "../ui-runtime" }
+dioxus = { workspace = true }
 
 [dev-dependencies]
 assert_cmd = "2"

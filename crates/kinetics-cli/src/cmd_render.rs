@@ -1,11 +1,24 @@
 use std::path::Path;
+
+use crate::scene_registry;
+
 pub fn run(
-    _scene: &str,
-    _out: &Path,
-    _frames: u32,
-    _fps: u32,
-    _capture_png: bool,
-    _encode_mp4: bool,
+    scene: &str,
+    out: &Path,
+    frames: u32,
+    fps: u32,
+    capture_png: bool,
+    encode_mp4: bool,
 ) -> Result<(), String> {
-    Err("render not yet implemented".into())
+    let spec = scene_registry::lookup(scene).ok_or_else(|| {
+        format!(
+            "unknown scene `{scene}` — available: {}",
+            scene_registry::SCENES
+                .iter()
+                .map(|s| s.id)
+                .collect::<Vec<_>>()
+                .join(", ")
+        )
+    })?;
+    scene_registry::run_render(spec, out, frames, fps, capture_png, encode_mp4)
 }

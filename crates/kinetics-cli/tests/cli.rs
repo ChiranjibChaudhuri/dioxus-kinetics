@@ -77,3 +77,48 @@ fn preview_target_arg_parses() {
         .assert()
         .success();
 }
+
+#[test]
+fn render_with_unknown_scene_returns_nonzero() {
+    let dir = tempdir().unwrap();
+    kinetics()
+        .args([
+            "render",
+            "--scene",
+            "no-such-scene",
+            "--out",
+            dir.path().to_str().unwrap(),
+            "--frames",
+            "2",
+            "--fps",
+            "1",
+        ])
+        .assert()
+        .failure()
+        .stderr(contains("unknown scene"));
+}
+
+#[test]
+fn render_known_scene_writes_html_frames() {
+    let dir = tempdir().unwrap();
+    kinetics()
+        .args([
+            "render",
+            "--scene",
+            "hello",
+            "--out",
+            dir.path().to_str().unwrap(),
+            "--frames",
+            "3",
+            "--fps",
+            "1",
+        ])
+        .assert()
+        .success();
+
+    for frame in 0..3 {
+        let path = dir.path().join("frames").join(format!("{frame}.html"));
+        assert!(path.exists(), "frame {frame}: {} missing", path.display());
+    }
+    assert!(dir.path().join("manifest.json").exists());
+}

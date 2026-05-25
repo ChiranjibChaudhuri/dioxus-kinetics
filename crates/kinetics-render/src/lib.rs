@@ -3,6 +3,7 @@
 //! Frame-by-frame SSR exporter for kinetics Scene compositions.
 
 mod capture;
+mod encode;
 mod template;
 
 use std::io;
@@ -176,11 +177,18 @@ impl Renderer {
             report_warnings.extend(outcome.warnings);
         }
 
+        let mut mp4_path: Option<PathBuf> = None;
+        if self.config.encode_mp4 {
+            let outcome = encode::run_encode(&self.config.output_dir, self.config.fps);
+            mp4_path = outcome.mp4_path;
+            report_warnings.extend(outcome.warnings);
+        }
+
         Ok(RenderReport {
             frames_written: self.config.frames,
             html_dir,
             png_dir,
-            mp4_path: None,
+            mp4_path,
             warnings: report_warnings,
         })
     }

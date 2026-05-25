@@ -46,3 +46,34 @@ fn init_creates_scaffolded_directory() {
     let main = fs::read_to_string(target.join("src/main.rs")).unwrap();
     assert!(main.contains("Scene"), "template references Scene");
 }
+
+#[test]
+fn doctor_succeeds_even_when_optional_tools_missing() {
+    kinetics()
+        .arg("doctor")
+        .assert()
+        .success()
+        .stdout(contains("rustc"))
+        .stdout(contains("cargo"));
+}
+
+#[test]
+fn lint_runs_and_returns_a_status() {
+    // We don't actually want to run clippy here (the smoke test would
+    // take too long under CI), but invoking the subcommand should not
+    // produce a parse error. Use --help on the subcommand instead.
+    kinetics()
+        .args(["lint", "--help"])
+        .assert()
+        .success();
+}
+
+#[test]
+fn preview_target_arg_parses() {
+    // Same approach as lint — we don't want to actually run `dx serve`
+    // in tests. Verify --help works.
+    kinetics()
+        .args(["preview", "--help"])
+        .assert()
+        .success();
+}

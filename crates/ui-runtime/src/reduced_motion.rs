@@ -60,18 +60,25 @@ fn body_attr_reduced() -> bool {
     false
 }
 
-/// Provides a `ReducedMotion` context to children, sourced from
-/// `prefers-reduced-motion` + the nearest `[data-ui-motion]` attribute.
-/// Listens for media-query changes and for `data-ui-motion` mutations
-/// on the body element so the context updates reactively.
+/// Provides a `ReducedMotion` context to children. If `reduced` is set,
+/// the context uses that value verbatim and ignores DOM/media-query
+/// changes; otherwise the value is sourced from `prefers-reduced-motion`
+/// + the nearest `[data-ui-motion="reduced"]` attribute and stays
+/// reactive to media-query and attribute changes.
 #[component]
-pub fn ReducedMotionProvider(children: Element) -> Element {
+pub fn ReducedMotionProvider(reduced: Option<bool>, children: Element) -> Element {
     #[allow(unused_mut)]
-    let mut reduced = use_signal(detect_reduced_motion_at_root);
-    use_context_provider(|| ReducedMotion(*reduced.read()));
+    let mut detected = use_signal(detect_reduced_motion_at_root);
+    let effective = reduced.unwrap_or_else(|| *detected.read());
+    use_context_provider(|| ReducedMotion(effective));
 
     #[cfg(target_arch = "wasm32")]
     use_effect(move || {
+        if reduced.is_some() {
+            // Forced override; ignore DOM / media-query changes.
+            return;
+        }
+
         use wasm_bindgen::prelude::Closure;
         use wasm_bindgen::JsCast;
 
@@ -85,7 +92,7 @@ pub fn ReducedMotionProvider(children: Element) -> Element {
             .ok()
             .flatten();
         if let Some(mql) = mql {
-            let mut signal = reduced;
+            let mut signal = detected;
             let closure = Closure::wrap(Box::new(move |_evt: web_sys::Event| {
                 signal.set(detect_reduced_motion_at_root());
             }) as Box<dyn FnMut(_)>);
@@ -97,7 +104,7 @@ pub fn ReducedMotionProvider(children: Element) -> Element {
         // 2. MutationObserver on body for data-ui-motion attribute changes.
         if let Some(document) = window.document() {
             if let Some(body) = document.body() {
-                let mut signal = reduced;
+                let mut signal = detected;
                 let cb = Closure::wrap(Box::new(
                     move |_records: js_sys::Array, _obs: web_sys::MutationObserver| {
                         signal.set(detect_reduced_motion_at_root());

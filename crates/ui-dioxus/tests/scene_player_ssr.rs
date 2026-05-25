@@ -1,19 +1,6 @@
 use dioxus::prelude::*;
 use ui_dioxus::{Scene, SceneState};
-use ui_runtime::ReducedMotion;
-
-// `ReducedMotionProvider` in this workspace (see
-// `crates/ui-runtime/src/reduced_motion.rs`) auto-detects via
-// `prefers-reduced-motion` and is wasm-only for its reactive listener; it
-// does not accept a `reduced: bool` prop. To force the reduced-motion
-// branch deterministically under SSR we provide the `ReducedMotion`
-// context directly — same shape `use_reduced_motion()` consumes. This
-// mirrors the pattern in `crates/ui-runtime/tests/hooks_ssr.rs`.
-#[component]
-fn ReducedMotionContext(value: ReducedMotion, children: Element) -> Element {
-    use_context_provider(|| value);
-    rsx! { {children} }
-}
+use ui_runtime::ReducedMotionProvider;
 
 #[test]
 fn scene_renders_root_data_attributes() {
@@ -42,7 +29,7 @@ fn scene_renders_root_data_attributes() {
 #[test]
 fn scene_with_reduced_motion_renders_settled() {
     let html = dioxus_ssr::render_element(rsx! {
-        ReducedMotionContext { value: ReducedMotion(true),
+        ReducedMotionProvider { reduced: true,
             Scene {
                 id: "intro",
                 width: 100,

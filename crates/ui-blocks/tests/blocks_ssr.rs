@@ -155,3 +155,24 @@ fn wipe_transition_variant_conic_picks_correct_keyframe() {
     });
     assert!(html.contains("animation-name: ui-block-wipe-conic"), "{html}");
 }
+
+#[test]
+fn lower_third_inside_scene_choreographs_via_timeline_scope() {
+    use ui_dioxus::Scene;
+    use ui_runtime::reduced_motion::ReducedMotionProvider;
+    use ui_blocks::LowerThird;
+    let html = dioxus_ssr::render_element(rsx! {
+        ReducedMotionProvider { reduced: Some(true),
+            Scene {
+                id: "outer", width: 100, height: 100, duration_ms: 2_000.0,
+                autoplay: Some(false),
+                LowerThird {
+                    name: "Ada Lovelace".to_string(),
+                    role: "Mathematician".to_string(),
+                }
+            }
+        }
+    });
+    assert!(html.contains("animation-name: ui-cue-"), "{html}");
+    assert!(html.contains("data-block=\"lower-third\""), "{html}");
+}

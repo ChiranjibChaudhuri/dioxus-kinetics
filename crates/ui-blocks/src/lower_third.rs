@@ -1,4 +1,5 @@
 use dioxus::prelude::*;
+use ui_dioxus::{KineticBox, KineticText, TimelineScope};
 
 #[derive(Clone, Copy, Debug, PartialEq, Default)]
 pub enum LowerThirdAccent {
@@ -23,10 +24,29 @@ pub fn LowerThird(name: String, role: String, accent: Option<LowerThirdAccent>) 
             class: "ui-block-lower-third {accent_class}",
             "aria-label": "{aria}",
             "data-block": "lower-third",
-            div { class: "ui-block-lower-third__bar" }
-            div { class: "ui-block-lower-third__text",
-                div { class: "ui-block-lower-third__name", "{name}" }
-                div { class: "ui-block-lower-third__role", "{role}" }
+            TimelineScope {
+                id: "lower-third-stagger".to_string(),
+                autoplay: false,
+                stagger_step_ms: 120.0,
+                div { class: "ui-block-lower-third__bar",
+                    KineticBox {
+                        id: "lower-third-bar".to_string(),
+                        cue: "slide-up".to_string(),
+                        span { }
+                    }
+                }
+                div { class: "ui-block-lower-third__text",
+                    KineticText {
+                        id: "lower-third-name".to_string(),
+                        text: name.clone(),
+                        cue: "rise-in".to_string(),
+                    }
+                    KineticText {
+                        id: "lower-third-role".to_string(),
+                        text: role.clone(),
+                        cue: "fade-in".to_string(),
+                    }
+                }
             }
         }
     }

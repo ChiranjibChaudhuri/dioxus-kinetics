@@ -39,6 +39,21 @@ Ready rendered components:
 - `Sequence`
 - `SharedLayout`
 - `SharedElement`
+- `Scene`
+- `Clip`
+- `KineticBox`
+- `KineticText`
+- `Presence`
+- `PresenceGate`
+- `TimelineScope`
+- `SplitText`
+- `MotionPath`
+- `FrameStage` (legacy, kept as deprecation shim)
+- `LowerThird`
+- `Caption`
+- `WipeTransition`
+- `MetricCounter`
+- `SocialOverlay`
 
 ## Design Principles
 
@@ -70,7 +85,10 @@ crates/
   ui-capture/       native capture stages, viewport profiles, marks, and export manifests
   ui-runtime/       animation runtime: frame scheduler and dioxus hooks
   ui-icons/         curated inline-svg icon components
+  ui-blocks/        catalog of reusable cinematic Scene blocks
   kinetics/         public facade and prelude
+  kinetics-render/  frame-by-frame SSR exporter (HTML + optional PNG/MP4)
+  kinetics-cli/     kinetics CLI (init/preview/render/lint/doctor)
 examples/
   component-gallery/ runnable Dioxus documentation gallery
 docs/
@@ -142,6 +160,40 @@ dx serve --package component-gallery --port 9173
 ```
 
 The gallery is registry-driven. To add a future component to the docs, update the registry in `examples/component-gallery/src/docs.rs` with its category, status, summary, snippet, accessibility note, and renderer.
+
+## Render & CLI
+
+The workspace ships a Rust frame-by-frame SSR exporter and a CLI
+front-end.
+
+`kinetics-render` walks any `Scene` via `SceneClock { driver: Manual }`,
+serializes each frame via `dioxus-ssr`, and writes per-frame HTML +
+an `ExportManifest` JSON. Optional stages capture PNGs via a
+Playwright sidecar and encode MP4 via FFmpeg; both stages
+gracefully skip when their tools are not on PATH.
+
+The `kinetics` CLI wraps the renderer plus the dev-loop:
+
+```powershell
+cargo run --bin kinetics -- --help
+cargo run --bin kinetics -- doctor
+cargo run --bin kinetics -- render --scene product-intro --out ./out --frames 60 --fps 30
+```
+
+See `crates/kinetics-cli/src/main.rs` for the full subcommand
+surface.
+
+## AI Agent Integration
+
+A Claude Code skill ships at `.claude/skills/kinetics-scene/SKILL.md`.
+Agents loaded into this workspace can use it to author Scene
+compositions with the correct API surface: `Scene` / `Clip` /
+`SceneDriver`, `SplitText` / `MotionPath`, the `ui-blocks` catalog,
+reduced-motion + accessibility patterns, and the workspace's TDD
+conventions.
+
+To activate it in an external editor session that uses Claude Code,
+clone the workspace and let the agent auto-discover `.claude/skills/`.
 
 ## Quick Start
 
@@ -307,3 +359,9 @@ Future phases should add overlay managers, focus trapping, runtime theme/density
 - `docs/superpowers/plans/2026-05-20-unified-ui-library.md`
 - `docs/superpowers/plans/2026-05-20-component-gallery.md`
 - `docs/superpowers/plans/2026-05-21-advanced-ui-wave.md`
+- `docs/superpowers/specs/2026-05-24-scene-player-design.md` — SP-1 Scene player (Scene, Clip, SceneDriver)
+- `docs/superpowers/plans/2026-05-24-scene-player.md`
+- `docs/superpowers/specs/2026-05-25-gsap-tier-primitives-design.md` — SP-3 motion primitives (SplitText, MotionPath)
+- `docs/superpowers/plans/2026-05-25-gsap-tier-primitives.md`
+- `docs/superpowers/specs/2026-05-25-render-cli-catalog-design.md` — SP-4+5+6 render + CLI + ui-blocks catalog
+- `docs/superpowers/plans/2026-05-25-render-cli-catalog.md`

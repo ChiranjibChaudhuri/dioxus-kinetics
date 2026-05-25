@@ -152,7 +152,7 @@ pub fn component_docs() -> &'static [ComponentDoc] {
 
 const BASIC_ACCESSIBILITY: &str = "Renders native semantic elements and stable focusable controls.";
 
-const COMPONENT_DOCS: [ComponentDoc; 53] = [
+const COMPONENT_DOCS: [ComponentDoc; 54] = [
     ComponentDoc {
         name: "Button",
         category: ComponentCategory::Actions,
@@ -631,6 +631,15 @@ const COMPONENT_DOCS: [ComponentDoc; 53] = [
         accessibility: "Each line is independently readable. The delta line is optional and omitted entirely when delta_text is None.",
         render: Some(crate::previews::scene::metric_counter_demo_preview),
     },
+    ComponentDoc {
+        name: "Scene · Social Overlay Demo",
+        category: ComponentCategory::Scene,
+        status: ComponentStatus::Ready,
+        summary: "ui-blocks: SocialOverlay notification card with platform brand accent. SocialPlatform enum covers Instagram, Twitter, YouTube, TikTok.",
+        snippet: SCENE_SOCIAL_OVERLAY_SNIPPET,
+        accessibility: "Handle + message are independently labeled; the platform accent is decorative.",
+        render: Some(crate::previews::scene::social_overlay_demo_preview),
+    },
 ];
 
 const BUTTON_SNIPPET: &str = r#"Button {
@@ -1085,6 +1094,18 @@ const SCENE_METRIC_COUNTER_SNIPPET: &str = r##"Scene {
                 value: "1,287".to_string(),
                 delta_text: Some("+24% week over week".to_string()),
             }
+        }
+    }
+}"##;
+
+const SCENE_SOCIAL_OVERLAY_SNIPPET: &str = r##"Scene {
+    id: "social-overlay-demo",
+    duration_ms: 3_000.0,
+    Clip { start_ms: 200.0, duration_ms: 2_500.0, fill: ClipFill::HoldEnd,
+        SocialOverlay {
+            platform: SocialPlatform::Instagram,
+            handle: "@kineticsui".to_string(),
+            message: "Just followed you!".to_string(),
         }
     }
 }"##;

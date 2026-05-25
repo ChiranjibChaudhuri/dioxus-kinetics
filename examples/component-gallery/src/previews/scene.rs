@@ -6,6 +6,7 @@ use crate::previews::scenes::lower_third_demo::LowerThirdDemoScene;
 use crate::previews::scenes::metric_counter_demo::MetricCounterDemoScene;
 use crate::previews::scenes::product_intro::ProductIntroScene;
 use crate::previews::scenes::scroll_story::ScrollPinnedStoryScene;
+use crate::previews::scenes::social_overlay_demo::SocialOverlayDemoScene;
 use crate::previews::scenes::split_headline::SplitHeadlineScene;
 use crate::previews::scenes::wipe_demo::WipeDemoScene;
 
@@ -69,6 +70,14 @@ pub fn metric_counter_demo_preview() -> Element {
     rsx! {
         div { class: "gallery-variant-tile gallery-variant-tile--scene",
             MetricCounterDemoScene {}
+        }
+    }
+}
+
+pub fn social_overlay_demo_preview() -> Element {
+    rsx! {
+        div { class: "gallery-variant-tile gallery-variant-tile--scene",
+            SocialOverlayDemoScene {}
         }
     }
 }

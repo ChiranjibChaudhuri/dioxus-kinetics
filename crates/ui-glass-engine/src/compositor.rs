@@ -10,7 +10,7 @@ use ui_glass::LiquidMaterial;
 use crate::background::{render::BackgroundRenderer, BackgroundScene, BackgroundSource};
 use crate::motion::MotionInputs;
 use crate::pipeline::{
-    build_blur_pipeline, build_compose_pipeline, BlurDirection, BlurKey, ComposeKey,
+    build_blur_pipeline, build_compose_pipeline_with_format, BlurDirection, BlurKey, ComposeKey,
 };
 use crate::render_graph::render_glass_to_texture;
 use crate::uniforms::GlassUniforms;
@@ -43,6 +43,12 @@ impl GlassRegion {
 pub struct Compositor {
     device: Arc<wgpu::Device>,
     queue: Arc<wgpu::Queue>,
+    /// Target format for the compose pipeline's color attachment. Must match
+    /// the format of the `output_view` passed to `render`. For surface-backed
+    /// hosts this is the negotiated surface format
+    /// (see [`crate::pipeline::negotiate_surface_format`]); for headless
+    /// callers it defaults to `Rgba8UnormSrgb`.
+    output_format: wgpu::TextureFormat,
     compose_cache: HashMap<ComposeKey, wgpu::RenderPipeline>,
     blur_cache: HashMap<BlurKey, wgpu::RenderPipeline>,
     noise_view: wgpu::TextureView,
@@ -56,7 +62,25 @@ pub struct Compositor {
 }
 
 impl Compositor {
+    /// Construct a compositor whose compose pipeline targets the engine's
+    /// historical default format (`Rgba8UnormSrgb`). Headless / test callers
+    /// use this; the runtime path should use
+    /// [`Compositor::with_output_format`] with the surface's negotiated
+    /// format so the compose pipeline matches the surface texture.
     pub fn new(device: Arc<wgpu::Device>, queue: Arc<wgpu::Queue>) -> Self {
+        Self::with_output_format(device, queue, wgpu::TextureFormat::Rgba8UnormSrgb)
+    }
+
+    /// Construct a compositor whose compose pipeline targets `output_format`.
+    /// `output_format` must match the format of every `output_view` later
+    /// passed to `render` — typically the value returned by
+    /// [`crate::pipeline::negotiate_surface_format`] for the live
+    /// `wgpu::Surface`.
+    pub fn with_output_format(
+        device: Arc<wgpu::Device>,
+        queue: Arc<wgpu::Queue>,
+        output_format: wgpu::TextureFormat,
+    ) -> Self {
         let (noise_view, noise_sampler) = create_noise_resources(&device, &queue);
         let mipmap_pipeline = crate::pipeline::build_mipmap_pipeline(&device);
         let mip_sampler = device.create_sampler(&wgpu::SamplerDescriptor {
@@ -70,6 +94,7 @@ impl Compositor {
         Self {
             device,
             queue,
+            output_format,
             compose_cache: HashMap::new(),
             blur_cache: HashMap::new(),
             noise_view,
@@ -81,6 +106,13 @@ impl Compositor {
             inputs: MotionInputs::default(),
             transparent_bg: None,
         }
+    }
+
+    /// The compose pipeline's color attachment format. Callers can use this
+    /// to verify the format of the texture view they're about to pass to
+    /// `render` matches.
+    pub fn output_format(&self) -> wgpu::TextureFormat {
+        self.output_format
     }
 
     pub fn pipeline_cache_len(&self) -> usize {
@@ -146,9 +178,10 @@ impl Compositor {
     }
 
     fn ensure_compose(&mut self, key: ComposeKey) -> &wgpu::RenderPipeline {
+        let format = self.output_format;
         self.compose_cache
             .entry(key)
-            .or_insert_with(|| build_compose_pipeline(&self.device, key))
+            .or_insert_with(|| build_compose_pipeline_with_format(&self.device, key, format))
     }
 
     fn ensure_blur(&mut self, key: BlurKey) -> &wgpu::RenderPipeline {

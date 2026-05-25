@@ -23,5 +23,6 @@ pub mod svg_fallback;
 pub use capabilities::{detect, Capabilities, Tier};
 pub use compositor::{Compositor, GlassRegion};
 pub use motion::MotionInputs;
+pub use pipeline::negotiate_surface_format;
 pub use render_graph::render_glass_to_texture;
 pub use uniforms::{BlurUniforms, GlassUniforms};

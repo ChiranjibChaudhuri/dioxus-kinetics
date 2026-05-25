@@ -5,6 +5,41 @@ use std::sync::Arc;
 const BLUR_SRC: &str = include_str!("shaders/blur.wgsl");
 const COMPOSE_SRC: &str = include_str!("shaders/compose.wgsl");
 
+/// Negotiate a render-target texture format that's compatible with the
+/// surface's reported capabilities. Used by the host (`ui-glass-dioxus`) to
+/// pick a `TextureFormat` that the surface actually advertises, and then
+/// feed the same value into `Compositor::with_output_format` so the compose
+/// pipeline's `ColorTargetState` matches the surface's output view. Without
+/// this matching step Chromium emits a per-frame "Invalid CommandBuffer"
+/// warning when the surface's preferred format (e.g. `Bgra8UnormSrgb` on
+/// Windows) disagrees with the pipeline's hardcoded format.
+///
+/// Preference order:
+///   1. `Bgra8UnormSrgb` (Windows-friendly sRGB)
+///   2. `Rgba8UnormSrgb` (Chromium-friendly sRGB)
+///   3. `Bgra8Unorm` (legacy)
+///   4. `Rgba8Unorm` (legacy)
+///   5. Whatever the surface offers first
+///   6. Fallback to `Rgba8UnormSrgb` (engine's historical default)
+pub fn negotiate_surface_format(
+    surface: &wgpu::Surface<'_>,
+    adapter: &wgpu::Adapter,
+) -> wgpu::TextureFormat {
+    let caps = surface.get_capabilities(adapter);
+    let preferred = [
+        wgpu::TextureFormat::Bgra8UnormSrgb,
+        wgpu::TextureFormat::Rgba8UnormSrgb,
+        wgpu::TextureFormat::Bgra8Unorm,
+        wgpu::TextureFormat::Rgba8Unorm,
+    ];
+    preferred
+        .iter()
+        .copied()
+        .find(|f| caps.formats.contains(f))
+        .or_else(|| caps.formats.first().copied())
+        .unwrap_or(wgpu::TextureFormat::Rgba8UnormSrgb)
+}
+
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
 pub enum BlurDirection {
     Horizontal,
@@ -174,7 +209,24 @@ pub fn compose_bind_group_layout(device: &Arc<wgpu::Device>) -> wgpu::BindGroupL
     })
 }
 
+/// Build a compose pipeline targeting the engine's historical default format
+/// (`Rgba8UnormSrgb`). Tests and callers that don't care about surface
+/// negotiation use this; the runtime path goes through
+/// [`build_compose_pipeline_with_format`] so the compose pipeline matches the
+/// actual surface format reported by `wgpu::Surface::get_capabilities`.
 pub fn build_compose_pipeline(device: &Arc<wgpu::Device>, key: ComposeKey) -> wgpu::RenderPipeline {
+    build_compose_pipeline_with_format(device, key, wgpu::TextureFormat::Rgba8UnormSrgb)
+}
+
+/// Build a compose pipeline whose color target uses `target_format`. The
+/// caller must ensure the output texture view it later binds to this pipeline
+/// has the same format — typically the format returned by
+/// [`negotiate_surface_format`] for the live `wgpu::Surface`.
+pub fn build_compose_pipeline_with_format(
+    device: &Arc<wgpu::Device>,
+    key: ComposeKey,
+    target_format: wgpu::TextureFormat,
+) -> wgpu::RenderPipeline {
     use ui_glass::GlassFeatures as F;
     let module = device.create_shader_module(wgpu::ShaderModuleDescriptor {
         label: Some("compose.wgsl"),
@@ -245,7 +297,7 @@ pub fn build_compose_pipeline(device: &Arc<wgpu::Device>, key: ComposeKey) -> wg
             module: &module,
             entry_point: Some("fs_main"),
             targets: &[Some(wgpu::ColorTargetState {
-                format: wgpu::TextureFormat::Rgba8UnormSrgb,
+                format: target_format,
                 blend: Some(wgpu::BlendState::PREMULTIPLIED_ALPHA_BLENDING),
                 write_mask: wgpu::ColorWrites::ALL,
             })],

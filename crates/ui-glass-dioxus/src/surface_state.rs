@@ -12,7 +12,7 @@
 use std::sync::Arc;
 
 #[cfg(target_arch = "wasm32")]
-use ui_glass_engine::Compositor;
+use ui_glass_engine::{negotiate_surface_format, Compositor};
 
 #[cfg(target_arch = "wasm32")]
 pub struct SurfaceState {
@@ -66,13 +66,12 @@ impl SurfaceState {
         let device = Arc::new(device);
         let queue = Arc::new(queue);
 
+        // Negotiate a format the surface actually advertises. Without this
+        // the compose pipeline's hardcoded `Rgba8UnormSrgb` mismatched the
+        // surface's preferred format on Windows Chromium (`Bgra8UnormSrgb`),
+        // producing per-frame "Invalid CommandBuffer" warnings in DevTools.
+        let surface_format = negotiate_surface_format(&surface, &adapter);
         let caps = surface.get_capabilities(&adapter);
-        let surface_format = caps
-            .formats
-            .iter()
-            .copied()
-            .find(|f| f.is_srgb())
-            .unwrap_or(caps.formats[0]);
 
         let alpha_mode = caps
             .alpha_modes
@@ -95,7 +94,8 @@ impl SurfaceState {
             },
         );
 
-        let compositor = Compositor::new(device.clone(), queue.clone());
+        let compositor =
+            Compositor::with_output_format(device.clone(), queue.clone(), surface_format);
 
         Some(Self {
             device,

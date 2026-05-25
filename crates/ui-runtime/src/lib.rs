@@ -48,3 +48,7 @@ pub use shared::{
 pub use state::{advance_presence, PresenceInputs, PresenceState, PresenceTransition};
 pub use timeline::use_timeline_sample;
 pub use waapi::{is_supported as is_waapi_supported, AnimatedProperty, WaapiAnimation};
+
+pub use adapters::{CssKeyframesAdapter, SequenceAdapter, WaapiAdapter};
+pub use frame_adapter::{FrameAdapter, FrameAdapterHandle, FrameAdapterRegistry};
+pub use scene_clock::{SceneClock, SceneState};

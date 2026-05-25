@@ -11,6 +11,14 @@ use ui_runtime::frame_adapter::FrameAdapterRegistry;
 use ui_runtime::reduced_motion::use_reduced_motion;
 use ui_runtime::scene_clock::{SceneClock, SceneState};
 
+/// Sub-microsecond nudge applied to the Clip query time at the exact
+/// scene-duration boundary so a clip whose `start + duration` equals
+/// the parent scene's `duration_ms` remains visible at the settled
+/// terminal frame. The 1 µs value is far below any realistic frame
+/// quantum (16.67 ms at 60 fps), so it cannot flip the active flag
+/// between frames sampled at frame boundaries.
+const TERMINAL_BOUNDARY_EPSILON_MS: f32 = 0.001;
+
 #[derive(Clone, Copy)]
 pub struct SceneContext {
     pub clock: SceneClock,
@@ -123,7 +131,7 @@ pub fn Clip(
     // epsilon at the terminal boundary so the final composed frame
     // matches the final played frame.
     let query_ms = if raw_ms >= ctx.duration_ms && ctx.duration_ms > 0.0 {
-        raw_ms - f32::EPSILON.max(0.001)
+        raw_ms - TERMINAL_BOUNDARY_EPSILON_MS
     } else {
         raw_ms
     };

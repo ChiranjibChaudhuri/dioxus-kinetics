@@ -10,6 +10,7 @@ mod scheduler_web;
 
 pub mod adapters;
 pub mod animation;
+pub mod drivers;
 pub mod frame_adapter;
 pub mod measurement;
 pub mod presence;
@@ -51,6 +52,7 @@ pub use timeline::use_timeline_sample;
 pub use waapi::{is_supported as is_waapi_supported, AnimatedProperty, WaapiAnimation};
 
 pub use adapters::{CssKeyframesAdapter, SequenceAdapter, WaapiAdapter};
+pub use drivers::{install_scroll_driver, ScrollDriverHandle};
 pub use frame_adapter::{FrameAdapter, FrameAdapterHandle, FrameAdapterRegistry};
 pub use scene_clock::{SceneClock, SceneState};
 pub use scene_driver::{SceneDriver, ScrollObserverConfig};

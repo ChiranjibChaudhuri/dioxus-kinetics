@@ -150,7 +150,7 @@ pub fn component_docs() -> &'static [ComponentDoc] {
 
 const BASIC_ACCESSIBILITY: &str = "Renders native semantic elements and stable focusable controls.";
 
-const COMPONENT_DOCS: [ComponentDoc; 45] = [
+const COMPONENT_DOCS: [ComponentDoc; 46] = [
     ComponentDoc {
         name: "Button",
         category: ComponentCategory::Actions,
@@ -557,6 +557,15 @@ const COMPONENT_DOCS: [ComponentDoc; 45] = [
         accessibility: "WAI-ARIA disclosure pattern: each header is a `<button>` with `aria-expanded` + `aria-controls`; the region carries `role=\"region\"` + `aria-labelledby`.",
         render: Some(accordion_preview),
     },
+    ComponentDoc {
+        name: "Scene · Product Intro 10s",
+        category: ComponentCategory::Scene,
+        status: ComponentStatus::Ready,
+        summary: "Seekable 10-second cinematic composition: title, FLIP card deck, metric counter, CTA pulse — one paused clock for every runtime.",
+        snippet: SCENE_PRODUCT_INTRO_SNIPPET,
+        accessibility: "Scrubber is keyboard-operable; reduced-motion renders the settled state and disables the scrubber with an explicit tag.",
+        render: Some(crate::previews::scene::product_intro_preview),
+    },
 ];
 
 const BUTTON_SNIPPET: &str = r#"Button {
@@ -879,6 +888,20 @@ const ACCORDION_SNIPPET: &str = r#"Accordion {
     expanded: vec!["billing"],
     on_toggle: move |id: String| { /* update */ },
 }"#;
+
+const SCENE_PRODUCT_INTRO_SNIPPET: &str = r##"Scene {
+    id: "product-intro",
+    width: 1920,
+    height: 1080,
+    duration_ms: 10_000.0,
+    autoplay: true,
+    controls: true,
+    Clip { start_ms: 0.0,    duration_ms: 2_400.0, fill: ClipFill::HoldEnd, /* title */ }
+    Clip { start_ms: 800.0,  duration_ms: 2_400.0, fill: ClipFill::HoldEnd, /* body  */ }
+    Clip { start_ms: 3_000.0,duration_ms: 4_000.0,                          /* deck  */ }
+    Clip { start_ms: 4_800.0,duration_ms: 2_200.0,                          /* count */ }
+    Clip { start_ms: 6_800.0,duration_ms: 3_200.0, fill: ClipFill::HoldEnd, /* CTA   */ }
+}"##;
 
 const COMBOBOX_SNIPPET: &str = r#"Combobox {
     id: "ticket-finder",

@@ -71,6 +71,8 @@ export const COMPONENT_MANIFEST: ManifestEntry[] = [
   { name: "SharedLayout", slug: "shared-layout", status: "ready", layers: { smoke: true, motion: true, visual: true } },
   // Capture
   { name: "CaptureStage", slug: "capture-stage", status: "ready", layers: { smoke: true, motion: false, visual: true } },
+  // Scene
+  { name: "Scene · Product Intro 10s", slug: "scene-product-intro", status: "ready", layers: { smoke: true, motion: true, visual: true } },
 ];
 
 export function readyComponents(): ManifestEntry[] {

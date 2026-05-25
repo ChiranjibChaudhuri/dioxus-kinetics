@@ -8,5 +8,7 @@ pub mod layout;
 pub mod liquid_glass;
 pub mod motion;
 pub mod navigation;
+pub mod scene;
+pub mod scenes;
 pub mod shared;
 pub mod surfaces;

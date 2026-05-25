@@ -2,9 +2,9 @@
 
 #![cfg(not(target_arch = "wasm32"))]
 
-use std::time::{Duration, Instant};
+use std::time::Duration;
 use tokio::task::JoinHandle;
-use tokio::time::{interval, MissedTickBehavior};
+use tokio::time::{interval, Instant, MissedTickBehavior};
 
 use super::scheduler::ControlFlow;
 
@@ -29,6 +29,10 @@ where
     let join = tokio::task::spawn_local(async move {
         let mut ticker = interval(Duration::from_millis(FRAME_PERIOD_MS));
         ticker.set_missed_tick_behavior(MissedTickBehavior::Delay);
+        // Use `tokio::time::Instant` (rather than `std::time::Instant`)
+        // so `dt_ms` reflects virtualised time when tests opt in via
+        // `tokio::time::pause()` / `advance()`. In production both clocks
+        // are wall-clock backed.
         let mut last = Instant::now();
         loop {
             ticker.tick().await;

@@ -2,12 +2,18 @@
 //! purpose is to hold `elapsed_ms`, `state`, and `reduced` as Dioxus
 //! Signals so any subscriber re-renders on change.
 //!
-//! Autoplay (frame loop) is wired in a follow-up task; this module
-//! intentionally ships seek/settle first so unit tests of clamping and
-//! state transitions are independent of the scheduler.
+//! Autoplay is wired via `play()` / `pause()`, which spawn a platform
+//! frame loop through `crate::scheduler::spawn_frame_loop` and store
+//! the returned `FrameHandle` in a Signal-backed slot so the loop is
+//! aborted on pause (or drop).
+
+use std::cell::RefCell;
+use std::rc::Rc;
 
 use dioxus::prelude::*;
 use ui_composition::FrameClock;
+
+use crate::scheduler::{spawn_frame_loop, ControlFlow, FrameHandle};
 
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub enum SceneState {
@@ -25,7 +31,15 @@ pub struct SceneClock {
     pub state: Signal<SceneState>,
     pub fps: Signal<u32>,
     pub reduced: Signal<bool>,
+    handle_slot: Signal<HandleSlot>,
 }
+
+/// Holds the active `FrameHandle` (if any) for an autoplaying clock.
+/// Wrapped in `Rc<RefCell<…>>` so the value is `'static` (a requirement
+/// for `Signal<T>`) and so the autoplay closure can take a clone of the
+/// slot and stash its own handle without moving non-`'static` state.
+#[derive(Clone, Default)]
+pub(crate) struct HandleSlot(pub(crate) Rc<RefCell<Option<FrameHandle>>>);
 
 impl SceneClock {
     pub fn new(duration_ms: f32, fps: u32, reduced: bool) -> Self {
@@ -41,6 +55,7 @@ impl SceneClock {
             state: Signal::new(state),
             fps: Signal::new(fps.max(1)),
             reduced: Signal::new(reduced),
+            handle_slot: Signal::new(HandleSlot::default()),
         }
     }
 
@@ -84,6 +99,54 @@ impl SceneClock {
         let elapsed = *self.elapsed_ms.peek();
         let frame = (elapsed / 1000.0 * fps as f32).round() as u32;
         FrameClock { frame, fps }
+    }
+
+    pub fn is_playing(&self) -> bool {
+        matches!(*self.state.peek(), SceneState::Playing)
+    }
+
+    pub fn pause(&self) {
+        if matches!(*self.state.peek(), SceneState::Playing) {
+            let mut s = self.state;
+            s.set(SceneState::Paused);
+        }
+        // Drop any active frame loop (the native `FrameHandle::Drop`
+        // aborts the underlying tokio task; on wasm it cancels rAF).
+        self.handle_slot.peek().0.borrow_mut().take();
+    }
+
+    pub fn play(&self) {
+        if *self.reduced.peek() {
+            // Reduced-motion clocks settle immediately and never spawn a
+            // frame loop.
+            self.settle();
+            return;
+        }
+        if matches!(*self.state.peek(), SceneState::Settled) {
+            // Replay from start.
+            let mut s = self.elapsed_ms;
+            s.set(0.0);
+        }
+        let mut s = self.state;
+        s.set(SceneState::Playing);
+
+        let duration_signal = self.duration_ms;
+        let mut elapsed_signal = self.elapsed_ms;
+        let mut state_signal = self.state;
+        let slot = self.handle_slot.peek().0.clone();
+
+        let handle = spawn_frame_loop(move |dt_ms: f64| {
+            let duration = *duration_signal.peek();
+            let next = (*elapsed_signal.peek() + dt_ms as f32).min(duration);
+            elapsed_signal.set(next);
+            if next >= duration {
+                state_signal.set(SceneState::Settled);
+                ControlFlow::Stop
+            } else {
+                ControlFlow::Continue
+            }
+        });
+        *slot.borrow_mut() = Some(handle);
     }
 
     pub fn peek_elapsed_ms(&self) -> f32 {

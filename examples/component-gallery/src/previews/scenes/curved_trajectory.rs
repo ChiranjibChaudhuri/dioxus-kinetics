@@ -17,7 +17,7 @@ pub fn CurvedTrajectoryScene() -> Element {
         points: pts.clone(),
         from_progress: 0.0,
         to_progress: 1.0,
-        rotate_along_path: false,
+        rotate_along_path: true,
         transition: Transition::Tween {
             duration_ms: 4_000,
             ease: Ease::Standard,

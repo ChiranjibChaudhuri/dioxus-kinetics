@@ -5,6 +5,7 @@ mod buttons;
 mod capture;
 mod combobox;
 mod composition;
+pub mod cue_style;
 mod data_table;
 mod datepicker;
 mod display;
@@ -46,6 +47,7 @@ pub use capture::CaptureStage;
 pub use combobox::{filter_options, Combobox, ComboboxOption};
 #[allow(deprecated)]
 pub use composition::{FrameClip, FrameLayer, FrameStage};
+pub use cue_style::{cue_animation_duration_ms, cue_inline_style, cue_inline_style_with_duration};
 pub use data_table::{DataTable, DataTableColumn, DataTableRow, SortDirection};
 pub use datepicker::{
     day_of_week, days_in_month, format_iso_date, parse_iso_date, DatePicker,

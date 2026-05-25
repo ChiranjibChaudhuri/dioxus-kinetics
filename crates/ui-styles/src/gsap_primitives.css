@@ -1,0 +1,15 @@
+/* SplitText: per-glyph and per-word spans must be inline-block so
+   transforms applied by KineticBox parents (translate, scale, rotate)
+   actually render — inline elements ignore transform. */
+.ui-split-text-glyph,
+.ui-split-text-word {
+  display: inline-block;
+  will-change: transform, opacity;
+}
+
+/* MotionPath: provide a relative container so children's translate is
+   relative to the path's origin. */
+.ui-motion-path {
+  position: relative;
+  display: inline-block;
+}

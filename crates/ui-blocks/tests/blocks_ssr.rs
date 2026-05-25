@@ -105,7 +105,10 @@ fn social_overlay_renders_platform_accent_class() {
             message: "Just followed you!".to_string(),
         }
     });
-    assert!(html.contains("ui-block-social-overlay--instagram"), "{html}");
+    assert!(
+        html.contains("ui-block-social-overlay--instagram"),
+        "{html}"
+    );
     assert!(html.contains("@kineticsui"), "{html}");
     assert!(html.contains("Just followed you!"), "{html}");
 }

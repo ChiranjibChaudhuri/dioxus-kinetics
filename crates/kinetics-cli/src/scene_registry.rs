@@ -60,7 +60,10 @@ pub fn run_render(
     let report = renderer
         .render(spec.scene_fn)
         .map_err(|e| format!("render failed: {e}"))?;
-    println!("kinetics render: wrote {} frames to {:?}", report.frames_written, report.html_dir);
+    println!(
+        "kinetics render: wrote {} frames to {:?}",
+        report.frames_written, report.html_dir
+    );
     for w in &report.warnings {
         eprintln!("warning: {w}");
     }

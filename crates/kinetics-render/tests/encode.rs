@@ -47,10 +47,11 @@ fn encode_mp4_with_missing_ffmpeg_returns_warning() {
         report.mp4_path.is_none(),
         "expected mp4_path to be None when ffmpeg/png missing",
     );
-    let lower: Vec<String> =
-        report.warnings.iter().map(|w| w.to_lowercase()).collect();
+    let lower: Vec<String> = report.warnings.iter().map(|w| w.to_lowercase()).collect();
     assert!(
-        lower.iter().any(|w| w.contains("ffmpeg") || w.contains("png")),
+        lower
+            .iter()
+            .any(|w| w.contains("ffmpeg") || w.contains("png")),
         "expected a warning mentioning ffmpeg or png; got {:?}",
         report.warnings,
     );

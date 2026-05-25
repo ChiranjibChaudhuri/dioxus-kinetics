@@ -1,5 +1,5 @@
-use std::path::PathBuf;
 use kinetics_render::{RenderConfig, RenderError, Renderer};
+use std::path::PathBuf;
 
 fn base_config() -> RenderConfig {
     RenderConfig {
@@ -119,8 +119,7 @@ fn writes_export_manifest_alongside_frames() {
         .expect("render ok");
 
     let manifest_path = out.join("manifest.json");
-    let manifest_body =
-        std::fs::read_to_string(&manifest_path).expect("manifest exists");
+    let manifest_body = std::fs::read_to_string(&manifest_path).expect("manifest exists");
     assert!(
         manifest_body.contains("\"manifest-test\""),
         "manifest body: {manifest_body}",

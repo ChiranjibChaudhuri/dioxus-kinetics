@@ -4,11 +4,7 @@ use dioxus::prelude::*;
 /// region over `duration_ms`. Direction controlled by `angle_deg`
 /// (default 90.0 = left-to-right).
 #[component]
-pub fn WipeTransition(
-    duration_ms: f32,
-    angle_deg: Option<f32>,
-    children: Element,
-) -> Element {
+pub fn WipeTransition(duration_ms: f32, angle_deg: Option<f32>, children: Element) -> Element {
     let angle = angle_deg.unwrap_or(90.0);
     let inline_style = format!(
         "mask-image: linear-gradient({angle}deg, black, transparent); \

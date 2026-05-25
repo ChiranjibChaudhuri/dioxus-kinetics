@@ -10,7 +10,11 @@ mod cmd_render;
 mod scene_registry;
 
 #[derive(Parser)]
-#[command(name = "kinetics", version, about = "Author and render kinetics Scene compositions")]
+#[command(
+    name = "kinetics",
+    version,
+    about = "Author and render kinetics Scene compositions"
+)]
 struct Cli {
     #[command(subcommand)]
     command: Commands,

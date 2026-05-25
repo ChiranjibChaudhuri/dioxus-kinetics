@@ -25,7 +25,11 @@ pub fn run_encode(output_dir: &Path, fps: u32) -> EncodeOutcome {
 
     let mp4_path = output_dir.join("render.mp4");
     let pattern = png_dir.join("%d.png");
-    let cmd = if cfg!(windows) { "ffmpeg.exe" } else { "ffmpeg" };
+    let cmd = if cfg!(windows) {
+        "ffmpeg.exe"
+    } else {
+        "ffmpeg"
+    };
 
     let result = Command::new(cmd)
         .arg("-y")

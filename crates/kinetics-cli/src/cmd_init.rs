@@ -15,8 +15,7 @@ pub fn run(name: &str) -> Result<(), String> {
         ));
     }
 
-    fs::create_dir_all(target.join("src"))
-        .map_err(|e| format!("create_dir_all: {e}"))?;
+    fs::create_dir_all(target.join("src")).map_err(|e| format!("create_dir_all: {e}"))?;
 
     let cargo_toml = format!(
         r#"[package]

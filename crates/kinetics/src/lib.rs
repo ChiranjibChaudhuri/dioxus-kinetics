@@ -64,8 +64,8 @@ pub mod prelude {
 
     #[cfg(feature = "blocks")]
     pub use ui_blocks::{
-        Caption, LowerThird, LowerThirdAccent, MetricCounter, SocialOverlay,
-        SocialPlatform, WipeTransition,
+        Caption, LowerThird, LowerThirdAccent, MetricCounter, SocialOverlay, SocialPlatform,
+        WipeTransition,
     };
 }
 

@@ -24,9 +24,7 @@ pub struct RenderConfig {
 impl RenderConfig {
     pub fn validate(&self) -> Result<(), RenderError> {
         if self.frames == 0 {
-            return Err(RenderError::InvalidConfig(
-                "frames must be > 0".into(),
-            ));
+            return Err(RenderError::InvalidConfig("frames must be > 0".into()));
         }
         if self.fps == 0 {
             return Err(RenderError::InvalidConfig("fps must be > 0".into()));
@@ -133,8 +131,7 @@ impl Renderer {
         for frame in 0..self.config.frames {
             let elapsed_ms = (frame as f32 / self.config.fps as f32) * 1000.0;
             let scene_fn = scene_fn.clone();
-            let duration_ms =
-                (self.config.frames as f32 / self.config.fps as f32) * 1000.0;
+            let duration_ms = (self.config.frames as f32 / self.config.fps as f32) * 1000.0;
             let fps = self.config.fps;
 
             let body = dioxus_ssr::render_element(rsx! {
@@ -195,12 +192,7 @@ impl Renderer {
 }
 
 #[component]
-fn FrameProbe(
-    duration_ms: f32,
-    fps: u32,
-    elapsed_ms: f32,
-    scene_fn: SceneFn,
-) -> Element {
+fn FrameProbe(duration_ms: f32, fps: u32, elapsed_ms: f32, scene_fn: SceneFn) -> Element {
     let clock = use_hook(|| SceneClock::new(duration_ms, fps, false));
     // Seek to the target frame before invoking scene_fn.
     clock.seek_ms(elapsed_ms);

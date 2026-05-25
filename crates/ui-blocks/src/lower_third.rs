@@ -11,11 +11,7 @@ pub enum LowerThirdAccent {
 /// of the parent container; consumer is responsible for positioning
 /// (we apply no absolute positioning).
 #[component]
-pub fn LowerThird(
-    name: String,
-    role: String,
-    accent: Option<LowerThirdAccent>,
-) -> Element {
+pub fn LowerThird(name: String, role: String, accent: Option<LowerThirdAccent>) -> Element {
     let accent = accent.unwrap_or_default();
     let accent_class = match accent {
         LowerThirdAccent::Primary => "ui-block-lower-third--primary",

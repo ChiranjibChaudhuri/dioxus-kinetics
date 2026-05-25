@@ -57,8 +57,7 @@ fn capture_png_with_missing_npx_returns_warning_not_error() {
         report
             .warnings
             .iter()
-            .any(|w| w.to_lowercase().contains("playwright")
-                || w.to_lowercase().contains("npx")),
+            .any(|w| w.to_lowercase().contains("playwright") || w.to_lowercase().contains("npx")),
         "expected a warning about missing playwright/npx; got {:?}",
         report.warnings,
     );

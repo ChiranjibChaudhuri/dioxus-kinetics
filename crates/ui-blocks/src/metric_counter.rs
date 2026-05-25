@@ -2,11 +2,7 @@ use dioxus::prelude::*;
 use ui_dioxus::KineticText;
 
 #[component]
-pub fn MetricCounter(
-    label: String,
-    value: String,
-    delta_text: Option<String>,
-) -> Element {
+pub fn MetricCounter(label: String, value: String, delta_text: Option<String>) -> Element {
     rsx! {
         div { class: "ui-block-metric-counter", "data-block": "metric-counter",
             KineticText { id: "metric-label", text: label, cue: "fade-in" }

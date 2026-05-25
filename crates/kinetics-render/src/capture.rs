@@ -29,10 +29,7 @@ pub fn run_capture(output_dir: &Path) -> CaptureOutcome {
     }
 
     let cmd = if cfg!(windows) { "node.exe" } else { "node" };
-    let result = Command::new(cmd)
-        .arg(&script_path)
-        .arg(output_dir)
-        .output();
+    let result = Command::new(cmd).arg(&script_path).arg(output_dir).output();
 
     let output = match result {
         Ok(o) => o,

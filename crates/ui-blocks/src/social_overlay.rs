@@ -20,13 +20,8 @@ impl SocialPlatform {
 }
 
 #[component]
-pub fn SocialOverlay(
-    platform: SocialPlatform,
-    handle: String,
-    message: String,
-) -> Element {
-    let modifier_class =
-        format!("ui-block-social-overlay--{}", platform.modifier());
+pub fn SocialOverlay(platform: SocialPlatform, handle: String, message: String) -> Element {
+    let modifier_class = format!("ui-block-social-overlay--{}", platform.modifier());
     rsx! {
         div {
             class: "ui-block-social-overlay {modifier_class}",

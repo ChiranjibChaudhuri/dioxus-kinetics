@@ -62,20 +62,14 @@ fn lint_runs_and_returns_a_status() {
     // We don't actually want to run clippy here (the smoke test would
     // take too long under CI), but invoking the subcommand should not
     // produce a parse error. Use --help on the subcommand instead.
-    kinetics()
-        .args(["lint", "--help"])
-        .assert()
-        .success();
+    kinetics().args(["lint", "--help"]).assert().success();
 }
 
 #[test]
 fn preview_target_arg_parses() {
     // Same approach as lint — we don't want to actually run `dx serve`
     // in tests. Verify --help works.
-    kinetics()
-        .args(["preview", "--help"])
-        .assert()
-        .success();
+    kinetics().args(["preview", "--help"]).assert().success();
 }
 
 #[test]

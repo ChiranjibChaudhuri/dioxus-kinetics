@@ -1,3 +1,5 @@
+#![allow(deprecated)]
+
 use dioxus::prelude::*;
 use ui_composition::Composition;
 use ui_dioxus::{CaptureStage, FrameClip, FrameLayer, FrameStage};

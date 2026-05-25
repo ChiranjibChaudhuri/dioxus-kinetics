@@ -29,7 +29,14 @@ mod kinetic_animation {
 
     /// Maps a `MotionCue` to the `(property, from, to, transition)` tuple
     /// required by `use_animation_target`. Returns `None` for cue variants
-    /// that don't map to a single WAAPI property (currently all cues map).
+    /// that don't map to a single WAAPI property.
+    ///
+    /// `MotionCue::Path` fans out to translate_x + translate_y (and optionally
+    /// rotate_deg) simultaneously, which doesn't fit the single-axis
+    /// `AnimatedProperty` surface used by the WAAPI bridge. Path cues are
+    /// driven through the `SequenceAdapter` inline-style path instead, so we
+    /// return `None` here and let the sample-driven `style` attribute do the
+    /// work.
     pub(super) fn pick_for_cue(cue: MotionCue) -> Option<(AnimatedProperty, f32, f32, Transition)> {
         match cue {
             MotionCue::Opacity {
@@ -59,6 +66,10 @@ mod kinetic_animation {
                 to_deg,
                 transition,
             } => Some((AnimatedProperty::Rotate, from_deg, to_deg, transition)),
+            // Path cues emit multi-axis samples (translate_x + translate_y,
+            // optionally rotate_deg) and are handled via the inline-style
+            // sample path rather than WAAPI.
+            MotionCue::Path { .. } => None,
         }
     }
 }
@@ -96,6 +107,7 @@ fn cue_duration_ms(motion: &MotionCue) -> f32 {
         MotionCue::Translate { transition, .. } => transition,
         MotionCue::Scale { transition, .. } => transition,
         MotionCue::Rotate { transition, .. } => transition,
+        MotionCue::Path { transition, .. } => transition,
     };
     transition.estimated_duration_ms()
 }
@@ -142,7 +154,7 @@ pub fn Sequence(
         .as_deref()
         .map(|list| {
             list.iter()
-                .map(|c| (c.target_id.clone(), (c.motion, c.start_ms)))
+                .map(|c| (c.target_id.clone(), (c.motion.clone(), c.start_ms)))
                 .collect()
         })
         .unwrap_or_default();
@@ -234,9 +246,13 @@ pub fn KineticBox(
 
     // Pull the original (MotionCue, start_ms) from the SequenceContext.
     // KineticBox children outside a Sequence have no cue → no WAAPI.
+    // `MotionCue` is no longer `Copy` (since the `Path` variant holds a
+    // `Vec<PathPoint>`), so we clone out of the context map and keep a
+    // separate bool for the post-consume `has_cue` check below.
     let cue_data: Option<(MotionCue, f32)> = ctx
         .as_ref()
-        .and_then(|sig| sig.read().cues.get(&kinetic_id.0).copied());
+        .and_then(|sig| sig.read().cues.get(&kinetic_id.0).cloned());
+    let has_cue = cue_data.is_some();
 
     // Resolve the cue to (property, from, to, transition).  When there is no
     // cue (KineticBox outside a Sequence) we fall back to a no-op opacity
@@ -267,7 +283,6 @@ pub fn KineticBox(
     let onmounted = {
         #[cfg(target_arch = "wasm32")]
         {
-            let has_cue = cue_data.is_some();
             EventHandler::new(move |evt: MountedEvent| {
                 if !has_cue {
                     return;
@@ -279,7 +294,7 @@ pub fn KineticBox(
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
-            let _ = (target_handle, cue_data);
+            let _ = (target_handle, has_cue);
             EventHandler::new(|_: MountedEvent| {})
         }
     };

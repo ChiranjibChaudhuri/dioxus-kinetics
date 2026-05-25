@@ -152,7 +152,7 @@ pub fn component_docs() -> &'static [ComponentDoc] {
 
 const BASIC_ACCESSIBILITY: &str = "Renders native semantic elements and stable focusable controls.";
 
-const COMPONENT_DOCS: [ComponentDoc; 54] = [
+const COMPONENT_DOCS: [ComponentDoc; 55] = [
     ComponentDoc {
         name: "Button",
         category: ComponentCategory::Actions,
@@ -640,6 +640,15 @@ const COMPONENT_DOCS: [ComponentDoc; 54] = [
         accessibility: "Handle + message are independently labeled; the platform accent is decorative.",
         render: Some(crate::previews::scene::social_overlay_demo_preview),
     },
+    ComponentDoc {
+        name: "Scene · Manual Driver Demo",
+        category: ComponentCategory::Scene,
+        status: ComponentStatus::Ready,
+        summary: "SceneDriver::Manual disables autoplay. The transport scrubber is the only way to advance elapsed_ms — useful for export pipelines, frame-stepping, and scrubbable demos.",
+        snippet: SCENE_MANUAL_DRIVER_SNIPPET,
+        accessibility: "Scrubber is keyboard-operable; the underlying text remains in the natural reading order.",
+        render: Some(crate::previews::scene::manual_driver_demo_preview),
+    },
 ];
 
 const BUTTON_SNIPPET: &str = r#"Button {
@@ -1107,5 +1116,19 @@ const SCENE_SOCIAL_OVERLAY_SNIPPET: &str = r##"Scene {
             handle: "@kineticsui".to_string(),
             message: "Just followed you!".to_string(),
         }
+    }
+}"##;
+
+const SCENE_MANUAL_DRIVER_SNIPPET: &str = r##"Scene {
+    id: "manual-driver-demo",
+    duration_ms: 5_000.0,
+    autoplay: Some(false),
+    controls: Some(true),
+    driver: Some(SceneDriver::Manual),
+    Clip { start_ms: 0.0, duration_ms: 5_000.0, fill: ClipFill::HoldBoth,
+        KineticText { id: "manual-driver-headline", text: "Drag the scrubber. No autoplay.".into(), cue: "fade-in" }
+    }
+    Clip { start_ms: 1_500.0, duration_ms: 3_500.0, fill: ClipFill::HoldEnd,
+        KineticText { id: "manual-driver-body", text: "SceneDriver::Manual disables the rAF loop entirely.".into(), cue: "rise-in" }
     }
 }"##;

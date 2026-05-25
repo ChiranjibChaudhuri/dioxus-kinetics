@@ -81,6 +81,7 @@ export const COMPONENT_MANIFEST: ManifestEntry[] = [
   { name: "Scene · Wipe Transition Demo", slug: "scene-wipe-transition-demo", status: "ready", layers: { smoke: true, motion: true, visual: true } },
   { name: "Scene · Metric Counter Demo", slug: "scene-metric-counter-demo", status: "ready", layers: { smoke: true, motion: true, visual: true } },
   { name: "Scene · Social Overlay Demo", slug: "scene-social-overlay-demo", status: "ready", layers: { smoke: true, motion: true, visual: true } },
+  { name: "Scene · Manual Driver Demo", slug: "scene-manual-driver-demo", status: "ready", layers: { smoke: true, motion: true, visual: true } },
 ];
 
 export function readyComponents(): ManifestEntry[] {

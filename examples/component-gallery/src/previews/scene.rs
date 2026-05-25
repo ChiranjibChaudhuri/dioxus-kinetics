@@ -3,6 +3,7 @@ use dioxus::prelude::*;
 use crate::previews::scenes::caption_demo::CaptionDemoScene;
 use crate::previews::scenes::curved_trajectory::CurvedTrajectoryScene;
 use crate::previews::scenes::lower_third_demo::LowerThirdDemoScene;
+use crate::previews::scenes::manual_driver_demo::ManualDriverDemoScene;
 use crate::previews::scenes::metric_counter_demo::MetricCounterDemoScene;
 use crate::previews::scenes::product_intro::ProductIntroScene;
 use crate::previews::scenes::scroll_story::ScrollPinnedStoryScene;
@@ -78,6 +79,14 @@ pub fn social_overlay_demo_preview() -> Element {
     rsx! {
         div { class: "gallery-variant-tile gallery-variant-tile--scene",
             SocialOverlayDemoScene {}
+        }
+    }
+}
+
+pub fn manual_driver_demo_preview() -> Element {
+    rsx! {
+        div { class: "gallery-variant-tile gallery-variant-tile--scene",
+            ManualDriverDemoScene {}
         }
     }
 }

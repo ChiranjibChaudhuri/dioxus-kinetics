@@ -3,6 +3,7 @@ pub mod cta_pulse;
 pub mod curved_trajectory;
 pub mod flip_card_deck;
 pub mod lower_third_demo;
+pub mod manual_driver_demo;
 pub mod metric_counter;
 pub mod metric_counter_demo;
 pub mod product_intro;

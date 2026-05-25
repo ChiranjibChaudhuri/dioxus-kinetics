@@ -152,7 +152,7 @@ pub fn component_docs() -> &'static [ComponentDoc] {
 
 const BASIC_ACCESSIBILITY: &str = "Renders native semantic elements and stable focusable controls.";
 
-const COMPONENT_DOCS: [ComponentDoc; 46] = [
+const COMPONENT_DOCS: [ComponentDoc; 49] = [
     ComponentDoc {
         name: "Button",
         category: ComponentCategory::Actions,
@@ -568,6 +568,33 @@ const COMPONENT_DOCS: [ComponentDoc; 46] = [
         accessibility: "Scrubber is keyboard-operable; reduced-motion renders the settled state and disables the scrubber with an explicit tag.",
         render: Some(crate::previews::scene::product_intro_preview),
     },
+    ComponentDoc {
+        name: "Scene · Scroll-pinned Story",
+        category: ComponentCategory::Scene,
+        status: ComponentStatus::Ready,
+        summary: "ScrollTrigger-style: a 10-second narrative pinned to a 200vh region. Scroll drives elapsed_ms via IntersectionObserver + window scroll.",
+        snippet: SCENE_SCROLL_STORY_SNIPPET,
+        accessibility: "Reduced motion settles immediately and ignores scroll. Each beat's text is independently labeled.",
+        render: Some(crate::previews::scene::scroll_pinned_story_preview),
+    },
+    ComponentDoc {
+        name: "Scene · Split Headline",
+        category: ComponentCategory::Scene,
+        status: ComponentStatus::Ready,
+        summary: "SplitText: per-character spans with sequential data-stagger-index. Screen readers read the parent aria-label; the per-glyph spans are aria-hidden.",
+        snippet: SCENE_SPLIT_HEADLINE_SNIPPET,
+        accessibility: "Parent carries the full text via aria-label; glyph spans are aria-hidden so screen readers do not enumerate.",
+        render: Some(crate::previews::scene::split_headline_preview),
+    },
+    ComponentDoc {
+        name: "Scene · Curved Trajectory",
+        category: ComponentCategory::Scene,
+        status: ComponentStatus::Ready,
+        summary: "MotionPath: a KineticBox traces a parametric S-curve sampled by arc length. Optional rotate-along-path tangent.",
+        snippet: SCENE_CURVED_TRAJECTORY_SNIPPET,
+        accessibility: "Visual-only decoration; the icon glyph remains in the DOM and is not announced.",
+        render: Some(crate::previews::scene::curved_trajectory_preview),
+    },
 ];
 
 const BUTTON_SNIPPET: &str = r#"Button {
@@ -903,6 +930,43 @@ const SCENE_PRODUCT_INTRO_SNIPPET: &str = r##"Scene {
     Clip { start_ms: 3_000.0,duration_ms: 4_000.0,                          /* deck  */ }
     Clip { start_ms: 4_800.0,duration_ms: 2_200.0,                          /* count */ }
     Clip { start_ms: 6_800.0,duration_ms: 3_200.0, fill: ClipFill::HoldEnd, /* CTA   */ }
+}"##;
+
+const SCENE_SCROLL_STORY_SNIPPET: &str = r##"Scene {
+    id: "scroll-story",
+    duration_ms: 10_000.0,
+    driver: Some(SceneDriver::Scroll(
+        ScrollObserverConfig::new("#scroll-story-trigger"),
+    )),
+    Clip { start_ms: 0.0, duration_ms: 2_500.0, /* headline */ }
+    Clip { start_ms: 2_500.0, duration_ms: 2_500.0, /* body */ }
+    Clip { start_ms: 5_000.0, duration_ms: 2_500.0, /* feature */ }
+    Clip { start_ms: 7_500.0, duration_ms: 2_500.0, /* CTA */ }
+}"##;
+
+const SCENE_SPLIT_HEADLINE_SNIPPET: &str = r##"Scene {
+    id: "split-headline",
+    duration_ms: 2_500.0,
+    TimelineScope { id: "split-headline-timeline", autoplay: true,
+        SplitText {
+            text: "Kinetics typography, glyph by glyph.".to_string(),
+            split_by: Some(SplitMode::Character),
+        }
+    }
+}"##;
+
+const SCENE_CURVED_TRAJECTORY_SNIPPET: &str = r##"Scene {
+    id: "curved-trajectory",
+    duration_ms: 4_000.0,
+    Sequence {
+        timeline: Some(/* MotionCue::Path with PathPoint::Bezier ... */),
+        MotionPath {
+            id: "trajectory-icon",
+            path: vec![PathPoint::Line { end: (0.0, 0.0) }, PathPoint::Bezier { /* ... */ }],
+            duration_ms: 4_000.0,
+            KineticBox { id: "trajectory-icon", "•" }
+        }
+    }
 }"##;
 
 const COMBOBOX_SNIPPET: &str = r#"Combobox {

@@ -61,6 +61,16 @@ pub fn Scene(
         id_signal,
     });
 
+    // Fan seek out to every registered adapter whenever elapsed_ms or
+    // state changes. We read both signals so settle transitions emit
+    // one final broadcast even if elapsed_ms is unchanged.
+    use_effect(move || {
+        let ms = *clock.elapsed_ms.read();
+        let _ = *clock.state.read();
+        let reduced = *clock.reduced.read();
+        adapters_signal.read().broadcast_seek(ms, reduced);
+    });
+
     use_effect(move || {
         if autoplay && !reduced {
             clock.play();

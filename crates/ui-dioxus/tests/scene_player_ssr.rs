@@ -130,3 +130,22 @@ fn scene_transport_marks_scrubber_disabled_under_reduced_motion() {
     assert!(html.contains("ui-scene-reduced-tag"), "{html}");
     assert!(html.contains("Reduced motion · settled state"), "{html}");
 }
+
+#[test]
+fn scene_provides_adapter_registry_via_context() {
+    // Smoke test: SceneContext is accessible inside children.
+    #[component]
+    fn ContextProbe() -> Element {
+        let ctx = try_consume_context::<ui_dioxus::SceneContext>();
+        let has = ctx.is_some();
+        rsx! { span { "data-probe-has-context": "{has}", "ctx?" } }
+    }
+    let html = dioxus_ssr::render_element(rsx! {
+        Scene {
+            id: "intro", width: 1, height: 1, duration_ms: 10.0,
+            autoplay: Some(false),
+            ContextProbe {}
+        }
+    });
+    assert!(html.contains("data-probe-has-context=\"true\""), "{html}");
+}

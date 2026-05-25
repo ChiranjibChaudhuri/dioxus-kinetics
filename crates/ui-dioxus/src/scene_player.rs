@@ -77,6 +77,31 @@ pub fn Scene(
         }
     });
 
+    // Keep the clock's `reduced` flag in sync with the surrounding
+    // `ReducedMotion` context. The Scene's clock was constructed once at
+    // mount via `use_hook`, so without this sync the gallery's runtime
+    // motion toggle (which flips the `ReducedMotion` context) would never
+    // propagate to `clock.reduced` and the scene would keep playing.
+    //
+    // We read `use_reduced_motion()` inside the effect so the effect
+    // subscribes to the `ReducedMotion` context directly — when the
+    // context value flips, this effect re-runs and reconciles the clock.
+    use_effect(move || {
+        let now_reduced = use_reduced_motion();
+        let was_reduced = *clock.reduced.peek();
+        if now_reduced != was_reduced {
+            let mut s = clock.reduced;
+            s.set(now_reduced);
+            if now_reduced {
+                // Force-settle and drop any active autoplay handle so the
+                // scrubber disables and the scene snaps to its final
+                // frame immediately.
+                clock.pause();
+                clock.settle();
+            }
+        }
+    });
+
     let elapsed = clock.elapsed_ms;
     let state = clock.state;
     let reduced_signal = clock.reduced;

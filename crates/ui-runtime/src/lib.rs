@@ -15,6 +15,7 @@ pub mod measurement;
 pub mod presence;
 pub mod reduced_motion;
 pub mod scene_clock;
+pub mod scene_driver;
 pub mod scheduler;
 pub mod shared;
 pub mod state;
@@ -52,3 +53,4 @@ pub use waapi::{is_supported as is_waapi_supported, AnimatedProperty, WaapiAnima
 pub use adapters::{CssKeyframesAdapter, SequenceAdapter, WaapiAdapter};
 pub use frame_adapter::{FrameAdapter, FrameAdapterHandle, FrameAdapterRegistry};
 pub use scene_clock::{SceneClock, SceneState};
+pub use scene_driver::{SceneDriver, ScrollObserverConfig};

@@ -21,6 +21,7 @@ default = [
     "runtime",
     "icons",
     "liquid-glass",
+    "blocks",
 ]
 web = ["dep:ui-dom"]
 desktop = ["dep:ui-dom"]
@@ -38,6 +39,7 @@ composition = ["dep:ui-composition"]
 capture = ["dep:ui-capture"]
 runtime = ["dep:ui-runtime"]
 icons = ["dep:ui-icons"]
+blocks = ["dep:ui-blocks"]
 
 [dependencies]
 ui-core.workspace = true
@@ -54,6 +56,7 @@ ui-composition = { workspace = true, optional = true }
 ui-capture = { workspace = true, optional = true }
 ui-runtime = { workspace = true, optional = true }
 ui-icons = { workspace = true, optional = true }
+ui-blocks = { path = "../ui-blocks", optional = true }
 
 [dev-dependencies]
 dioxus.workspace = true

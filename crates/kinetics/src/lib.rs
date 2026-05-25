@@ -61,6 +61,12 @@ pub mod prelude {
 
     #[cfg(feature = "icons")]
     pub use ui_icons::*;
+
+    #[cfg(feature = "blocks")]
+    pub use ui_blocks::{
+        Caption, LowerThird, LowerThirdAccent, MetricCounter, SocialOverlay,
+        SocialPlatform, WipeTransition,
+    };
 }
 
 pub fn public_api_names() -> Vec<&'static str> {
@@ -162,6 +168,17 @@ pub fn public_api_names() -> Vec<&'static str> {
         "SequenceAdapter",
         "WaapiAdapter",
         "CssKeyframesAdapter",
+    ]);
+
+    #[cfg(feature = "blocks")]
+    names.extend_from_slice(&[
+        "LowerThird",
+        "LowerThirdAccent",
+        "Caption",
+        "WipeTransition",
+        "MetricCounter",
+        "SocialOverlay",
+        "SocialPlatform",
     ]);
 
     names

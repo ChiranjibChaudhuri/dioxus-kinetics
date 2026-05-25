@@ -1,0 +1,31 @@
+/* Keyframes for the kinetic motion cues consumed by KineticText,
+   KineticBox, and the SplitText / ui-blocks choreographies. Inline
+   style on each leaf sets animation-name + animation-delay derived
+   from the parent SceneContext.clock.elapsed_ms — the browser
+   handles interpolation. Identical end states across all keyframes
+   so freeze-at-endpoint (reduced-motion + settled state) is stable. */
+
+@keyframes ui-cue-fade-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes ui-cue-rise-in {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes ui-cue-slide-up {
+  from { transform: translateY(24px); }
+  to   { transform: translateY(0); }
+}
+
+@keyframes ui-cue-text-flow {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes ui-cue-pop-in {
+  from { opacity: 0; transform: scale(0.94); }
+  to   { opacity: 1; transform: scale(1); }
+}

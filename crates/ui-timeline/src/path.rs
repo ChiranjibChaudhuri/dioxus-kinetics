@@ -88,3 +88,77 @@ fn de_casteljau(
     let e = lerp(b, c, t);
     lerp(d, e, t)
 }
+
+const PATH_SAMPLE_RESOLUTION: usize = 64;
+
+/// Arc-length-uniform sampler. Parameterizes the path so equal `t`
+/// steps cover equal physical distance, producing visually constant
+/// motion speed (the property cinematic motion expects).
+pub fn sample_path(points: &[PathPoint], t: f32) -> (f32, f32) {
+    if points.is_empty() {
+        return (0.0, 0.0);
+    }
+    if points.len() == 1 {
+        return points[0].end();
+    }
+    let t = if t.is_finite() { t.clamp(0.0, 1.0) } else { 0.0 };
+
+    // Build a parameter->arc-length table by uniformly sampling the
+    // parametric path at high resolution. Then invert the table to map
+    // arc-length back to parameter for the requested t.
+    let n = PATH_SAMPLE_RESOLUTION;
+    let mut samples = Vec::with_capacity(n + 1);
+    let mut total = 0.0_f32;
+    let mut prev = sample_path_parametric(points, 0.0);
+    samples.push((0.0_f32, 0.0_f32, prev));
+    for i in 1..=n {
+        let u = i as f32 / n as f32;
+        let p = sample_path_parametric(points, u);
+        let d = ((p.0 - prev.0).powi(2) + (p.1 - prev.1).powi(2)).sqrt();
+        total += d;
+        samples.push((u, total, p));
+        prev = p;
+    }
+    if total == 0.0 {
+        return points[0].end();
+    }
+
+    let target = t * total;
+    // Linear scan; PATH_SAMPLE_RESOLUTION is small enough that this is
+    // cheaper than a binary search for SP-3 scenes.
+    let mut lo = &samples[0];
+    let mut hi = &samples[n];
+    for window in samples.windows(2) {
+        if window[1].1 >= target {
+            lo = &window[0];
+            hi = &window[1];
+            break;
+        }
+    }
+    let span = hi.1 - lo.1;
+    let alpha = if span == 0.0 { 0.0 } else { (target - lo.1) / span };
+    let u = lo.0 + (hi.0 - lo.0) * alpha;
+    sample_path_parametric(points, u)
+}
+
+/// Tangent angle (degrees) at arc-length-uniform `t`. Uses a small
+/// finite difference (epsilon = 1/PATH_SAMPLE_RESOLUTION) on the
+/// arc-length sampler so the angle is in the same parametrization as
+/// `sample_path` and visibly aligned with the cinematic position.
+pub fn sample_path_tangent(points: &[PathPoint], t: f32) -> f32 {
+    if points.len() < 2 {
+        return 0.0;
+    }
+    let t = if t.is_finite() { t.clamp(0.0, 1.0) } else { 0.0 };
+    let eps = 1.0 / PATH_SAMPLE_RESOLUTION as f32;
+    let lo = (t - eps).max(0.0);
+    let hi = (t + eps).min(1.0);
+    let a = sample_path(points, lo);
+    let b = sample_path(points, hi);
+    let dx = b.0 - a.0;
+    let dy = b.1 - a.1;
+    if dx == 0.0 && dy == 0.0 {
+        return 0.0;
+    }
+    dy.atan2(dx).to_degrees()
+}

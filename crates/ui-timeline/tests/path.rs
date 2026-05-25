@@ -96,3 +96,72 @@ fn nan_t_returns_origin() {
     ];
     assert!(approx(sample_path_parametric(&pts, f32::NAN), (5.0, 5.0), 1e-3));
 }
+
+use ui_timeline::{sample_path, sample_path_tangent};
+
+#[test]
+fn arc_length_sampling_constant_speed_on_polyline() {
+    // L-shaped polyline: 100 units across, then 100 units up.
+    // Total arc length = 200. At t=0.5 (half arc length) we should be
+    // at exactly (100, 0) — the corner.
+    let pts = vec![
+        PathPoint::Line { end: (0.0, 0.0) },
+        PathPoint::Line { end: (100.0, 0.0) },
+        PathPoint::Line { end: (100.0, 100.0) },
+    ];
+    let half = sample_path(&pts, 0.5);
+    assert!(approx(half, (100.0, 0.0), 1.0), "got {:?}", half);
+}
+
+#[test]
+fn arc_length_sampling_quarter_eighth_polyline() {
+    let pts = vec![
+        PathPoint::Line { end: (0.0, 0.0) },
+        PathPoint::Line { end: (100.0, 0.0) },
+        PathPoint::Line { end: (100.0, 100.0) },
+    ];
+    // Arc length = 200; t=0.25 → 50 units along, which is (50, 0).
+    assert!(approx(sample_path(&pts, 0.25), (50.0, 0.0), 1.0));
+    // t=0.75 → 150 units along: 100 units in segment 1 + 50 in segment 2 → (100, 50).
+    assert!(approx(sample_path(&pts, 0.75), (100.0, 50.0), 1.0));
+}
+
+#[test]
+fn arc_length_clamps_outside_range() {
+    let pts = vec![
+        PathPoint::Line { end: (0.0, 0.0) },
+        PathPoint::Line { end: (100.0, 0.0) },
+    ];
+    assert!(approx(sample_path(&pts, -0.5), (0.0, 0.0), 1e-3));
+    assert!(approx(sample_path(&pts, 1.5), (100.0, 0.0), 1e-3));
+}
+
+#[test]
+fn tangent_on_horizontal_line_is_zero_degrees() {
+    let pts = vec![
+        PathPoint::Line { end: (0.0, 0.0) },
+        PathPoint::Line { end: (100.0, 0.0) },
+    ];
+    let angle = sample_path_tangent(&pts, 0.5);
+    assert!(angle.abs() < 1.0, "horizontal tangent: {}", angle);
+}
+
+#[test]
+fn tangent_on_vertical_segment_is_ninety_degrees() {
+    let pts = vec![
+        PathPoint::Line { end: (0.0, 0.0) },
+        PathPoint::Line { end: (0.0, 100.0) },
+    ];
+    let angle = sample_path_tangent(&pts, 0.5);
+    assert!((angle.abs() - 90.0).abs() < 1.0, "vertical tangent: {}", angle);
+}
+
+#[test]
+fn tangent_on_diagonal_segment_is_forty_five_degrees() {
+    let pts = vec![
+        PathPoint::Line { end: (0.0, 0.0) },
+        PathPoint::Line { end: (100.0, 100.0) },
+    ];
+    let angle = sample_path_tangent(&pts, 0.5);
+    assert!((angle - 45.0).abs() < 1.0, "diagonal tangent: {}", angle);
+}

@@ -3,7 +3,7 @@
 use ui_motion::{apply_ease, interpolate, Clamp, Transition};
 
 pub mod path;
-pub use path::{sample_path_parametric, PathPoint};
+pub use path::{sample_path, sample_path_parametric, sample_path_tangent, PathPoint};
 
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct TimelineId(pub String);

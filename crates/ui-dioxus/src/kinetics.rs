@@ -244,6 +244,16 @@ pub fn TimelineScope(
         80.0
     };
 
+    // Subscribe to the outer Scene's elapsed_ms Signal so this scope
+    // re-renders whenever the Scene clock ticks. Without this, the
+    // StaggerCursor consumers (KineticText, KineticBox, SplitText) stay
+    // cached because Dioxus doesn't propagate the dirty bit through
+    // intermediate context-provider parents that don't themselves read
+    // the upstream Signal.
+    if let Some(scene) = try_consume_context::<crate::scene_player::SceneContext>() {
+        let _subscribe = *scene.clock.elapsed_ms.read();
+    }
+
     // Provide a fresh StaggerCursor per render so kinetic leaves
     // inside the scope each grab a sequential index. SSR is single-
     // threaded so the Rc<Cell<u32>> counter is safe.

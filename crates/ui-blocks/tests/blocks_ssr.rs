@@ -198,3 +198,25 @@ fn social_overlay_inside_scene_choreographs_handle_and_message() {
     assert!(html.contains("animation-name: ui-cue-"), "{html}");
     assert!(html.contains("ui-block-social-overlay--instagram"), "{html}");
 }
+
+#[test]
+fn metric_counter_inside_scene_choreographs_label_value_delta() {
+    use ui_dioxus::Scene;
+    use ui_runtime::reduced_motion::ReducedMotionProvider;
+    use ui_blocks::MetricCounter;
+    let html = dioxus_ssr::render_element(rsx! {
+        ReducedMotionProvider { reduced: Some(true),
+            Scene {
+                id: "outer", width: 100, height: 100, duration_ms: 2_000.0,
+                autoplay: Some(false),
+                MetricCounter {
+                    label: "Active".to_string(),
+                    value: "1,287".to_string(),
+                    delta_text: Some("+24%".to_string()),
+                }
+            }
+        }
+    });
+    assert!(html.contains("animation-name: ui-cue-fade-in"), "{html}");
+    assert!(html.contains("animation-name: ui-cue-rise-in"), "{html}");
+}

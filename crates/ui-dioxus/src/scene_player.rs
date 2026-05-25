@@ -113,7 +113,11 @@ pub fn Scene(
     };
     let elapsed_attr = format!("{}", *elapsed.read() as i64);
     let duration_attr = format!("{}", duration_ms as i64);
-    let reduced_attr = if *reduced_signal.read() { "true" } else { "false" };
+    let reduced_attr = if *reduced_signal.read() {
+        "true"
+    } else {
+        "false"
+    };
     let aspect = format!("aspect-ratio: {} / {}", width, height);
 
     let show_transport = controls.unwrap_or(false);
@@ -194,12 +198,7 @@ pub fn Scene(
 }
 
 #[component]
-pub fn Clip(
-    start_ms: f32,
-    duration_ms: f32,
-    fill: Option<ClipFill>,
-    children: Element,
-) -> Element {
+pub fn Clip(start_ms: f32, duration_ms: f32, fill: Option<ClipFill>, children: Element) -> Element {
     let fill = fill.unwrap_or(ClipFill::None);
     let ctx = try_consume_context::<SceneContext>();
     let Some(ctx) = ctx else {

@@ -79,7 +79,9 @@ impl ComponentCategory {
                 "Frame-addressable scenes for previews and export-safe compositions."
             }
             Self::Capture => "Viewport and frame targets for documentation and capture runners.",
-            Self::Scene => "Seekable cinematic compositions: one paused clock drives every animation runtime.",
+            Self::Scene => {
+                "Seekable cinematic compositions: one paused clock drives every animation runtime."
+            }
         }
     }
 

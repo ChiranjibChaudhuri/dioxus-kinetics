@@ -84,10 +84,7 @@ impl FrameAdapterRegistry {
     #[must_use = "FrameAdapterHandle is a drop guard; dropping it deregisters the adapter"]
     pub fn register<A: FrameAdapter + 'static>(&self, adapter: A) -> FrameAdapterHandle {
         let id = adapter.id().to_string();
-        let epoch = self
-            .inner
-            .borrow_mut()
-            .upsert(id.clone(), Rc::new(adapter));
+        let epoch = self.inner.borrow_mut().upsert(id.clone(), Rc::new(adapter));
         FrameAdapterHandle {
             id,
             epoch,

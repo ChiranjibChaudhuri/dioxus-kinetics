@@ -128,7 +128,11 @@ fn broadcast_seek_tolerates_adapter_mutating_registry() {
     // First broadcast: parent runs, mutates registry mid-iteration.
     registry.broadcast_seek(10.0, false);
     assert_eq!(seen.get(), 1);
-    assert_eq!(registry.len(), 2, "sibling should be registered by parent's seek");
+    assert_eq!(
+        registry.len(),
+        2,
+        "sibling should be registered by parent's seek"
+    );
 
     // Second broadcast: both parent and sibling get the call.
     registry.broadcast_seek(20.0, false);

@@ -65,8 +65,14 @@ fn clip_inside_scene_renders_active_at_settled() {
     });
     // At elapsed = duration = 2000ms, second clip is in range; first is past
     // its end and (default ClipFill::None) inactive.
-    assert!(html.contains("data-clip-active=\"false\"") && html.contains("first"), "{html}");
-    assert!(html.contains("data-clip-active=\"true\"") && html.contains("second"), "{html}");
+    assert!(
+        html.contains("data-clip-active=\"false\"") && html.contains("first"),
+        "{html}"
+    );
+    assert!(
+        html.contains("data-clip-active=\"true\"") && html.contains("second"),
+        "{html}"
+    );
 }
 
 #[test]

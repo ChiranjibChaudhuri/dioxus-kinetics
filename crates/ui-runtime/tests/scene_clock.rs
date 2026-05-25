@@ -156,7 +156,10 @@ async fn pause_stops_advance() {
                 tokio::time::advance(Duration::from_millis(40)).await;
                 tokio::task::yield_now().await;
                 let mid = clock.peek_elapsed_ms();
-                assert!(mid > 0.0, "play should have advanced before pause; got {mid}");
+                assert!(
+                    mid > 0.0,
+                    "play should have advanced before pause; got {mid}"
+                );
                 clock.pause();
                 tokio::time::advance(Duration::from_millis(200)).await;
                 tokio::task::yield_now().await;

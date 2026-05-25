@@ -5,21 +5,22 @@ pub mod prelude {
     pub use ui_core::{
         A11yContract, ComponentContract, ComponentId, ComponentRole, FocusPolicy, TargetSize,
     };
+    #[allow(deprecated)]
     pub use ui_dioxus::{
         Accordion, AccordionSection, ActionBar, ActionControl, ActionMenu, Alert, AlertTone,
         BlankState, Breadcrumb, BreadcrumbItem, Button, ButtonVariant, CaptureStage, Checkbox,
-        ChoiceMark, Combobox, ComboboxOption, CommandFinder, CommandGroup, CommandItem,
+        ChoiceMark, Clip, Combobox, ComboboxOption, CommandFinder, CommandGroup, CommandItem,
         CommandMenu, ContentPlane, ContextHint, Cue, DataTable, DataTableColumn, DataTableRow,
         DatePicker, Dialog, DialogAction, DialogActionTone, DropdownMenu, DropdownMenuItem,
         EmptyState, FrameClip, FrameLayer, FrameStage, GlassLayer, GlassSurface, IconButton,
         IconButtonSize, IconButtonTone, KineticBox, KineticText, MetricCard, MetricReadout,
         MetricTone, ModalLayer, NavigationRail, NoticeStack, OptionGroup, Pagination, Popover,
         PopoverSide, Presence, PresenceCue, PresenceGate, Progress, RadioGroup, RadioOption,
-        SegmentItem, SegmentedControl, Select, SelectOption, Sequence, SequenceContext,
-        SharedElement, SharedLayout, Sidebar, SidebarItem, SidebarSection, Skeleton, Slider,
-        SortDirection, Stack, StateSwitch, Stepper, StepperStep, Surface, Switch, TabItem,
-        TabPanel, Tabs, TextEntry, TextField, TimelineScope, Toast, ToastTone, Toolbar, Tooltip,
-        ViewSwitcher,
+        Scene, SceneContext, SegmentItem, SegmentedControl, Select, SelectOption, Sequence,
+        SequenceContext, SharedElement, SharedLayout, Sidebar, SidebarItem, SidebarSection,
+        Skeleton, Slider, SortDirection, Stack, StateSwitch, Stepper, StepperStep, Surface,
+        Switch, TabItem, TabPanel, Tabs, TextEntry, TextField, TimelineScope, Toast, ToastTone,
+        Toolbar, Tooltip, ViewSwitcher,
     };
     pub use ui_glass::{
         resolve_glass, GlassDensity, GlassLevel, GlassPolicy, GlassRecipe, GlassRequest, GlassTone,
@@ -52,8 +53,9 @@ pub mod prelude {
     pub use ui_runtime::{
         use_animation_value, use_element_computed_style, use_element_rect, use_presence_animation,
         use_presence_state, use_reduced_motion, use_shared_element_registry, use_timeline_sample,
-        ElementSnapshot, MountedRectCallback, ReducedMotion, SharedElementRegistry,
-        SharedTransition,
+        CssKeyframesAdapter, ElementSnapshot, FrameAdapter, FrameAdapterHandle,
+        FrameAdapterRegistry, MountedRectCallback, ReducedMotion, SceneClock, SceneState,
+        SequenceAdapter, SharedElementRegistry, SharedTransition, WaapiAdapter,
     };
 
     #[cfg(feature = "icons")]
@@ -120,6 +122,9 @@ pub fn public_api_names() -> Vec<&'static str> {
         "DropdownMenu",
         "OptionGroup",
         "ActionMenu",
+        "Scene",
+        "Clip",
+        "SceneContext",
     ];
 
     #[cfg(feature = "icons")]
@@ -143,6 +148,13 @@ pub fn public_api_names() -> Vec<&'static str> {
         "use_shared_element_registry",
         "use_element_rect",
         "use_element_computed_style",
+        "SceneState",
+        "SceneClock",
+        "FrameAdapter",
+        "FrameAdapterRegistry",
+        "SequenceAdapter",
+        "WaapiAdapter",
+        "CssKeyframesAdapter",
     ]);
 
     names

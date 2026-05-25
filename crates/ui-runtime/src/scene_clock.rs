@@ -13,6 +13,8 @@ use std::rc::Rc;
 use dioxus::prelude::*;
 use ui_composition::FrameClock;
 
+use crate::drivers::{install_scroll_driver, ScrollDriverHandle};
+use crate::scene_driver::SceneDriver;
 use crate::scheduler::{spawn_frame_loop, ControlFlow, FrameHandle};
 
 #[derive(Clone, Copy, Debug, PartialEq)]
@@ -32,6 +34,7 @@ pub struct SceneClock {
     pub fps: Signal<u32>,
     pub reduced: Signal<bool>,
     handle_slot: Signal<HandleSlot>,
+    scroll_slot: Signal<ScrollHandleSlot>,
 }
 
 /// Holds the active `FrameHandle` (if any) for an autoplaying clock.
@@ -40,6 +43,11 @@ pub struct SceneClock {
 /// slot and stash its own handle without moving non-`'static` state.
 #[derive(Clone, Default)]
 pub(crate) struct HandleSlot(pub(crate) Rc<RefCell<Option<FrameHandle>>>);
+
+/// Holds the active `ScrollDriverHandle` (if any) for a scroll-driven
+/// clock. Same Rc<RefCell<...>> wrapping rationale as `HandleSlot`.
+#[derive(Clone, Default)]
+pub(crate) struct ScrollHandleSlot(pub(crate) Rc<RefCell<Option<ScrollDriverHandle>>>);
 
 impl SceneClock {
     pub fn new(duration_ms: f32, fps: u32, reduced: bool) -> Self {
@@ -56,6 +64,7 @@ impl SceneClock {
             fps: Signal::new(fps.max(1)),
             reduced: Signal::new(reduced),
             handle_slot: Signal::new(HandleSlot::default()),
+            scroll_slot: Signal::new(ScrollHandleSlot::default()),
         }
     }
 
@@ -159,6 +168,34 @@ impl SceneClock {
             }
         });
         *slot.borrow_mut() = Some(handle);
+    }
+
+    /// Drives the clock using the chosen `SceneDriver`. Replaces the
+    /// argumentless `play()` for callers that want explicit control;
+    /// the existing `play()` is now equivalent to `play_with(SceneDriver::Autoplay)`.
+    pub fn play_with(&self, driver: SceneDriver) {
+        // Always stop any existing autoplay loop or scroll driver
+        // before installing a new one.
+        self.pause();
+        self.scroll_slot.peek().0.borrow_mut().take();
+
+        match driver {
+            SceneDriver::Autoplay => self.play(),
+            SceneDriver::Manual => {
+                // No-op: state stays Paused, no listener installed.
+            }
+            SceneDriver::Scroll(config) => {
+                if *self.reduced.peek() {
+                    self.settle();
+                    return;
+                }
+                let clock_handle = *self;
+                let handle = install_scroll_driver(&config, move |progress| {
+                    clock_handle.seek_progress(progress);
+                });
+                *self.scroll_slot.peek().0.borrow_mut() = Some(handle);
+            }
+        }
     }
 
     pub fn peek_elapsed_ms(&self) -> f32 {

@@ -1,3 +1,5 @@
+#![allow(deprecated)]
+
 use crate::demo_frame::{ScrubElapsedMs, ScrubFps, ScrubFrame};
 use dioxus::prelude::*;
 use kinetics::prelude::*;

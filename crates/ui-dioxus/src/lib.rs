@@ -42,6 +42,7 @@ pub use accordion::{Accordion, AccordionSection};
 pub use buttons::{IconButton, IconButtonSize, IconButtonTone};
 pub use capture::CaptureStage;
 pub use combobox::{filter_options, Combobox, ComboboxOption};
+#[allow(deprecated)]
 pub use composition::{FrameClip, FrameLayer, FrameStage};
 pub use data_table::{DataTable, DataTableColumn, DataTableRow, SortDirection};
 pub use datepicker::{

@@ -3,6 +3,7 @@ use ui_composition::{
     ClipFill, Composition, FrameClip as CompositionFrameClip, FrameLayer as CompositionFrameLayer,
 };
 
+#[deprecated(since = "0.7.0", note = "use kinetics::Scene / kinetics::Clip")]
 #[component]
 pub fn FrameStage(composition: Composition, frame: u32, children: Element) -> Element {
     rsx! {
@@ -18,6 +19,7 @@ pub fn FrameStage(composition: Composition, frame: u32, children: Element) -> El
     }
 }
 
+#[deprecated(since = "0.7.0", note = "use kinetics::Scene / kinetics::Clip")]
 #[component]
 pub fn FrameClip(start: u32, duration: u32, children: Element) -> Element {
     let clip = CompositionFrameClip::new(start, duration, ClipFill::None);
@@ -32,6 +34,7 @@ pub fn FrameClip(start: u32, duration: u32, children: Element) -> Element {
     }
 }
 
+#[deprecated(since = "0.7.0", note = "use kinetics::Scene / kinetics::Clip")]
 #[component]
 pub fn FrameLayer(id: String, depth: i32, children: Element) -> Element {
     let layer = CompositionFrameLayer::new(id, depth);

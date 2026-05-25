@@ -7,3 +7,4 @@ pub mod metric_counter;
 pub mod product_intro;
 pub mod scroll_story;
 pub mod split_headline;
+pub mod wipe_demo;

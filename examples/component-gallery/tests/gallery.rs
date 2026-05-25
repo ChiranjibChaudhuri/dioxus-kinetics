@@ -18,6 +18,7 @@ fn registry_groups_components_by_product_category() {
             ComponentCategory::Motion,
             ComponentCategory::Composition,
             ComponentCategory::Capture,
+            ComponentCategory::Scene,
         ]
     );
 }

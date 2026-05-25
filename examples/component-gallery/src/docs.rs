@@ -43,6 +43,7 @@ pub enum ComponentCategory {
     Motion,
     Composition,
     Capture,
+    Scene,
 }
 
 impl ComponentCategory {
@@ -59,6 +60,7 @@ impl ComponentCategory {
             Self::Motion => "Motion",
             Self::Composition => "Composition",
             Self::Capture => "Capture",
+            Self::Scene => "Scene",
         }
     }
 
@@ -77,6 +79,7 @@ impl ComponentCategory {
                 "Frame-addressable scenes for previews and export-safe compositions."
             }
             Self::Capture => "Viewport and frame targets for documentation and capture runners.",
+            Self::Scene => "Seekable cinematic compositions: one paused clock drives every animation runtime.",
         }
     }
 
@@ -93,6 +96,7 @@ impl ComponentCategory {
             Self::Motion => "motion",
             Self::Composition => "composition",
             Self::Capture => "capture",
+            Self::Scene => "scene",
         }
     }
 }
@@ -136,6 +140,7 @@ pub fn categories() -> &'static [ComponentCategory] {
         ComponentCategory::Motion,
         ComponentCategory::Composition,
         ComponentCategory::Capture,
+        ComponentCategory::Scene,
     ]
 }
 

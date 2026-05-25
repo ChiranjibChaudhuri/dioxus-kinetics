@@ -1,0 +1,35 @@
+use dioxus::prelude::*;
+use kinetics::prelude::*;
+use ui_composition::ClipFill;
+
+fn main() {
+    dioxus::launch(App);
+}
+
+#[component]
+fn App() -> Element {
+    rsx! {
+        Scene {
+            id: "hello-scene",
+            width: 1280,
+            height: 720,
+            duration_ms: 5_000.0,
+            autoplay: Some(true),
+            controls: Some(true),
+            Clip { start_ms: 0.0, duration_ms: 2_500.0, fill: ClipFill::HoldEnd,
+                KineticText {
+                    id: "hello-title",
+                    text: "Hello, kinetics.".to_string(),
+                    cue: "rise-in",
+                }
+            }
+            Clip { start_ms: 1_500.0, duration_ms: 3_000.0, fill: ClipFill::HoldEnd,
+                KineticText {
+                    id: "hello-body",
+                    text: "Composable cinematic motion.".to_string(),
+                    cue: "fade-in",
+                }
+            }
+        }
+    }
+}

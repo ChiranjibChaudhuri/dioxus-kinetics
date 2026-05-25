@@ -1,5 +1,8 @@
 use dioxus::prelude::*;
-use ui_blocks::{Caption, LowerThird, LowerThirdAccent, MetricCounter, WipeTransition};
+use ui_blocks::{
+    Caption, LowerThird, LowerThirdAccent, MetricCounter, SocialOverlay, SocialPlatform,
+    WipeTransition,
+};
 
 #[test]
 fn lower_third_emits_aria_label_with_name_and_role() {
@@ -91,4 +94,30 @@ fn metric_counter_without_delta_omits_third_line() {
     assert!(html.contains("42"), "{html}");
     // No delta -> no delta KineticText id reference.
     assert!(!html.contains("metric-delta"), "{html}");
+}
+
+#[test]
+fn social_overlay_renders_platform_accent_class() {
+    let html = dioxus_ssr::render_element(rsx! {
+        SocialOverlay {
+            platform: SocialPlatform::Instagram,
+            handle: "@kineticsui".to_string(),
+            message: "Just followed you!".to_string(),
+        }
+    });
+    assert!(html.contains("ui-block-social-overlay--instagram"), "{html}");
+    assert!(html.contains("@kineticsui"), "{html}");
+    assert!(html.contains("Just followed you!"), "{html}");
+}
+
+#[test]
+fn social_overlay_twitter_variant() {
+    let html = dioxus_ssr::render_element(rsx! {
+        SocialOverlay {
+            platform: SocialPlatform::Twitter,
+            handle: "@dx".to_string(),
+            message: "Replied to your post.".to_string(),
+        }
+    });
+    assert!(html.contains("ui-block-social-overlay--twitter"), "{html}");
 }

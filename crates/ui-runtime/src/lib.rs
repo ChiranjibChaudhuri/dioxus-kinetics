@@ -13,6 +13,7 @@ pub mod frame_adapter;
 pub mod measurement;
 pub mod presence;
 pub mod reduced_motion;
+pub mod scene_clock;
 pub mod scheduler;
 pub mod shared;
 pub mod state;

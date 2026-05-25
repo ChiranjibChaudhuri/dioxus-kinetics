@@ -10,6 +10,7 @@ dioxus.workspace = true
 ui-motion = { path = "../ui-motion" }
 ui-timeline = { path = "../ui-timeline" }
 ui-layout = { path = "../ui-layout" }
+ui-composition = { path = "../ui-composition" }
 
 [target.'cfg(not(target_arch = "wasm32"))'.dependencies]
 tokio = { version = "1", features = ["rt", "time", "macros"] }

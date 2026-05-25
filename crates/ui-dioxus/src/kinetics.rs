@@ -231,14 +231,30 @@ pub fn Sequence(
 }
 
 #[component]
-pub fn TimelineScope(id: String, #[props(default)] autoplay: bool, children: Element) -> Element {
+pub fn TimelineScope(
+    id: String,
+    #[props(default)] autoplay: bool,
+    #[props(default = 80.0)] stagger_step_ms: f32,
+    children: Element,
+) -> Element {
     let timeline_id = TimelineId::new(id);
+    let step_ms = if stagger_step_ms.is_finite() && stagger_step_ms > 0.0 {
+        stagger_step_ms
+    } else {
+        80.0
+    };
+
+    // Provide a fresh StaggerCursor per render so kinetic leaves
+    // inside the scope each grab a sequential index. SSR is single-
+    // threaded so the Rc<Cell<u32>> counter is safe.
+    use_context_provider(|| crate::stagger::StaggerCursor::new(step_ms));
 
     rsx! {
         section {
             class: "ui-timeline-scope",
             "data-timeline-id": "{timeline_id.0}",
             "data-autoplay": if autoplay { "true" } else { "false" },
+            "data-stagger-step-ms": "{step_ms}",
             {children}
         }
     }

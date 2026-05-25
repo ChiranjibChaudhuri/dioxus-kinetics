@@ -10,6 +10,7 @@ use ui_composition::{ClipFill, FrameClip};
 use ui_runtime::frame_adapter::FrameAdapterRegistry;
 use ui_runtime::reduced_motion::use_reduced_motion;
 use ui_runtime::scene_clock::{SceneClock, SceneState};
+use ui_runtime::scene_driver::SceneDriver;
 
 /// Sub-microsecond nudge applied to the Clip query time at the exact
 /// scene-duration boundary so a clip whose `start + duration` equals
@@ -39,6 +40,7 @@ pub fn Scene(
     fps: Option<u32>,
     autoplay: Option<bool>,
     controls: Option<bool>,
+    driver: Option<SceneDriver>,
     children: Element,
 ) -> Element {
     let fps = fps.unwrap_or(60).max(1);
@@ -71,8 +73,14 @@ pub fn Scene(
         adapters_signal.read().broadcast_seek(ms, reduced);
     });
 
+    let driver_for_effect = driver.clone();
     use_effect(move || {
-        if autoplay && !reduced {
+        if reduced {
+            return;
+        }
+        if let Some(d) = driver_for_effect.clone() {
+            clock.play_with(d);
+        } else if autoplay {
             clock.play();
         }
     });

@@ -189,3 +189,23 @@ fn scene_provides_adapter_registry_via_context() {
     });
     assert!(html.contains("data-probe-has-context=\"true\""), "{html}");
 }
+
+use ui_runtime::scene_driver::SceneDriver;
+
+#[test]
+fn scene_with_manual_driver_skips_autoplay_render() {
+    let html = dioxus_ssr::render_element(rsx! {
+        Scene {
+            id: "manual",
+            width: 100,
+            height: 100,
+            duration_ms: 5_000.0,
+            autoplay: Some(true),
+            driver: Some(SceneDriver::Manual),
+            controls: Some(false),
+            p { "body" }
+        }
+    });
+    assert!(html.contains("data-state=\"paused\""), "{html}");
+    assert!(html.contains("data-elapsed-ms=\"0\""), "{html}");
+}

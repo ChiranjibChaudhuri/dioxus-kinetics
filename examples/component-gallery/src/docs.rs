@@ -152,7 +152,7 @@ pub fn component_docs() -> &'static [ComponentDoc] {
 
 const BASIC_ACCESSIBILITY: &str = "Renders native semantic elements and stable focusable controls.";
 
-const COMPONENT_DOCS: [ComponentDoc; 52] = [
+const COMPONENT_DOCS: [ComponentDoc; 53] = [
     ComponentDoc {
         name: "Button",
         category: ComponentCategory::Actions,
@@ -622,6 +622,15 @@ const COMPONENT_DOCS: [ComponentDoc; 52] = [
         accessibility: "Decorative; underlying heading is in normal reading order.",
         render: Some(crate::previews::scene::wipe_demo_preview),
     },
+    ComponentDoc {
+        name: "Scene · Metric Counter Demo",
+        category: ComponentCategory::Scene,
+        status: ComponentStatus::Ready,
+        summary: "ui-blocks: MetricCounter with label + value + delta. Three sequential KineticText lines staggered via a parent TimelineScope.",
+        snippet: SCENE_METRIC_COUNTER_SNIPPET,
+        accessibility: "Each line is independently readable. The delta line is optional and omitted entirely when delta_text is None.",
+        render: Some(crate::previews::scene::metric_counter_demo_preview),
+    },
 ];
 
 const BUTTON_SNIPPET: &str = r#"Button {
@@ -1063,5 +1072,19 @@ const SCENE_WIPE_SNIPPET: &str = r##"Scene {
     duration_ms: 2_500.0,
     WipeTransition { duration_ms: 2_500.0, angle_deg: Some(120.0),
         /* gradient-filled backdrop */
+    }
+}"##;
+
+const SCENE_METRIC_COUNTER_SNIPPET: &str = r##"Scene {
+    id: "metric-counter-demo",
+    duration_ms: 4_000.0,
+    TimelineScope { id: "metric-counter-timeline", autoplay: true,
+        Clip { start_ms: 200.0, duration_ms: 3_500.0, fill: ClipFill::HoldEnd,
+            MetricCounter {
+                label: "Active users".to_string(),
+                value: "1,287".to_string(),
+                delta_text: Some("+24% week over week".to_string()),
+            }
+        }
     }
 }"##;

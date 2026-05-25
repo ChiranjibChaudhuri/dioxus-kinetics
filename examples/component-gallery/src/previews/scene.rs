@@ -3,6 +3,7 @@ use dioxus::prelude::*;
 use crate::previews::scenes::caption_demo::CaptionDemoScene;
 use crate::previews::scenes::curved_trajectory::CurvedTrajectoryScene;
 use crate::previews::scenes::lower_third_demo::LowerThirdDemoScene;
+use crate::previews::scenes::metric_counter_demo::MetricCounterDemoScene;
 use crate::previews::scenes::product_intro::ProductIntroScene;
 use crate::previews::scenes::scroll_story::ScrollPinnedStoryScene;
 use crate::previews::scenes::split_headline::SplitHeadlineScene;
@@ -60,6 +61,14 @@ pub fn wipe_demo_preview() -> Element {
     rsx! {
         div { class: "gallery-variant-tile gallery-variant-tile--scene",
             WipeDemoScene {}
+        }
+    }
+}
+
+pub fn metric_counter_demo_preview() -> Element {
+    rsx! {
+        div { class: "gallery-variant-tile gallery-variant-tile--scene",
+            MetricCounterDemoScene {}
         }
     }
 }

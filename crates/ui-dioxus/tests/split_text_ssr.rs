@@ -72,3 +72,43 @@ fn split_text_word_mode_preserves_whitespace_between_words() {
         "expected literal space between word spans: {html}"
     );
 }
+
+#[test]
+fn split_text_glyphs_emit_cue_animation_when_inside_scene() {
+    use ui_runtime::reduced_motion::ReducedMotionProvider;
+    use ui_dioxus::{Scene, TimelineScope};
+    let html = dioxus_ssr::render_element(rsx! {
+        ReducedMotionProvider { reduced: Some(true),
+            Scene {
+                id: "outer", width: 100, height: 100, duration_ms: 1_000.0,
+                autoplay: Some(false),
+                TimelineScope { id: "ts".to_string(), autoplay: true,
+                    SplitText { text: "Hi".to_string() }
+                }
+            }
+        }
+    });
+    // Reduced motion settles Scene to 1000ms. With default cue rise-in
+    // and stagger step 80ms:
+    //   glyph H: index 0 → 1000ms
+    //   glyph i: index 1 → 920ms
+    assert!(html.contains("animation-name: ui-cue-rise-in"), "{html}");
+    assert!(html.contains("animation-delay: -1000ms") || html.contains("animation-delay: -920ms"),
+            "{html}");
+}
+
+#[test]
+fn split_text_cue_prop_overrides_default() {
+    use ui_runtime::reduced_motion::ReducedMotionProvider;
+    use ui_dioxus::Scene;
+    let html = dioxus_ssr::render_element(rsx! {
+        ReducedMotionProvider { reduced: Some(true),
+            Scene {
+                id: "outer", width: 100, height: 100, duration_ms: 1_000.0,
+                autoplay: Some(false),
+                SplitText { text: "Hi".to_string(), cue: "fade-in".to_string() }
+            }
+        }
+    });
+    assert!(html.contains("animation-name: ui-cue-fade-in"), "{html}");
+}

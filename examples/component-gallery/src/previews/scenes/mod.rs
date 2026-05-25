@@ -10,4 +10,7 @@ pub mod product_intro;
 pub mod scroll_story;
 pub mod social_overlay_demo;
 pub mod split_headline;
+pub mod wipe_conic_demo;
 pub mod wipe_demo;
+pub mod wipe_iris_demo;
+pub mod wipe_mask_position_demo;

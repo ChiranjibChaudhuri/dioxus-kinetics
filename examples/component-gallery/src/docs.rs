@@ -152,7 +152,7 @@ pub fn component_docs() -> &'static [ComponentDoc] {
 
 const BASIC_ACCESSIBILITY: &str = "Renders native semantic elements and stable focusable controls.";
 
-const COMPONENT_DOCS: [ComponentDoc; 55] = [
+const COMPONENT_DOCS: [ComponentDoc; 58] = [
     ComponentDoc {
         name: "Button",
         category: ComponentCategory::Actions,
@@ -649,6 +649,33 @@ const COMPONENT_DOCS: [ComponentDoc; 55] = [
         accessibility: "Scrubber is keyboard-operable; the underlying text remains in the natural reading order.",
         render: Some(crate::previews::scene::manual_driver_demo_preview),
     },
+    ComponentDoc {
+        name: "Scene · Wipe Conic Demo",
+        category: ComponentCategory::Scene,
+        status: ComponentStatus::Ready,
+        summary: "ui-blocks: WipeTransition with WipeVariant::Conic — mask rotates around the centre over duration_ms.",
+        snippet: SCENE_WIPE_CONIC_SNIPPET,
+        accessibility: "Decorative; the underlying heading is in normal reading order.",
+        render: Some(crate::previews::scene::wipe_conic_demo_preview),
+    },
+    ComponentDoc {
+        name: "Scene · Wipe Iris Demo",
+        category: ComponentCategory::Scene,
+        status: ComponentStatus::Ready,
+        summary: "ui-blocks: WipeTransition with WipeVariant::Iris — radial-gradient mask expands from the centre.",
+        snippet: SCENE_WIPE_IRIS_SNIPPET,
+        accessibility: "Decorative; the underlying heading is in normal reading order.",
+        render: Some(crate::previews::scene::wipe_iris_demo_preview),
+    },
+    ComponentDoc {
+        name: "Scene · Wipe Mask-Position Demo",
+        category: ComponentCategory::Scene,
+        status: ComponentStatus::Ready,
+        summary: "ui-blocks: WipeTransition with WipeVariant::MaskPosition — linear-gradient sweeps horizontally via mask-position interpolation.",
+        snippet: SCENE_WIPE_MASK_POSITION_SNIPPET,
+        accessibility: "Decorative; the underlying heading is in normal reading order.",
+        render: Some(crate::previews::scene::wipe_mask_position_demo_preview),
+    },
 ];
 
 const BUTTON_SNIPPET: &str = r#"Button {
@@ -1131,4 +1158,22 @@ const SCENE_MANUAL_DRIVER_SNIPPET: &str = r##"Scene {
     Clip { start_ms: 1_500.0, duration_ms: 3_500.0, fill: ClipFill::HoldEnd,
         KineticText { id: "manual-driver-body", text: "SceneDriver::Manual disables the rAF loop entirely.".into(), cue: "rise-in" }
     }
+}"##;
+
+const SCENE_WIPE_CONIC_SNIPPET: &str = r##"WipeTransition {
+    duration_ms: 2_500.0,
+    variant: WipeVariant::Conic,
+    /* gradient-filled child */
+}"##;
+
+const SCENE_WIPE_IRIS_SNIPPET: &str = r##"WipeTransition {
+    duration_ms: 2_500.0,
+    variant: WipeVariant::Iris,
+    /* gradient-filled child */
+}"##;
+
+const SCENE_WIPE_MASK_POSITION_SNIPPET: &str = r##"WipeTransition {
+    duration_ms: 2_500.0,
+    variant: WipeVariant::MaskPosition,
+    /* gradient-filled child */
 }"##;

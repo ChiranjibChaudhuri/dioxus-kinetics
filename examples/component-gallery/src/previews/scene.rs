@@ -9,7 +9,10 @@ use crate::previews::scenes::product_intro::ProductIntroScene;
 use crate::previews::scenes::scroll_story::ScrollPinnedStoryScene;
 use crate::previews::scenes::social_overlay_demo::SocialOverlayDemoScene;
 use crate::previews::scenes::split_headline::SplitHeadlineScene;
+use crate::previews::scenes::wipe_conic_demo::WipeConicDemoScene;
 use crate::previews::scenes::wipe_demo::WipeDemoScene;
+use crate::previews::scenes::wipe_iris_demo::WipeIrisDemoScene;
+use crate::previews::scenes::wipe_mask_position_demo::WipeMaskPositionDemoScene;
 
 pub fn product_intro_preview() -> Element {
     rsx! {
@@ -87,6 +90,30 @@ pub fn manual_driver_demo_preview() -> Element {
     rsx! {
         div { class: "gallery-variant-tile gallery-variant-tile--scene",
             ManualDriverDemoScene {}
+        }
+    }
+}
+
+pub fn wipe_conic_demo_preview() -> Element {
+    rsx! {
+        div { class: "gallery-variant-tile gallery-variant-tile--scene",
+            WipeConicDemoScene {}
+        }
+    }
+}
+
+pub fn wipe_iris_demo_preview() -> Element {
+    rsx! {
+        div { class: "gallery-variant-tile gallery-variant-tile--scene",
+            WipeIrisDemoScene {}
+        }
+    }
+}
+
+pub fn wipe_mask_position_demo_preview() -> Element {
+    rsx! {
+        div { class: "gallery-variant-tile gallery-variant-tile--scene",
+            WipeMaskPositionDemoScene {}
         }
     }
 }

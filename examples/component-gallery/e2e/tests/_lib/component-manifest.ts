@@ -76,6 +76,9 @@ export const COMPONENT_MANIFEST: ManifestEntry[] = [
   { name: "Scene · Scroll-pinned Story", slug: "scene-scroll-pinned-story", status: "ready", layers: { smoke: true, motion: true, visual: true } },
   { name: "Scene · Split Headline", slug: "scene-split-headline", status: "ready", layers: { smoke: true, motion: true, visual: true } },
   { name: "Scene · Curved Trajectory", slug: "scene-curved-trajectory", status: "ready", layers: { smoke: true, motion: true, visual: true } },
+  { name: "Scene · Lower Third Demo", slug: "scene-lower-third-demo", status: "ready", layers: { smoke: true, motion: true, visual: true } },
+  { name: "Scene · Caption Reading-Pace Demo", slug: "scene-caption-reading-pace-demo", status: "ready", layers: { smoke: true, motion: true, visual: true } },
+  { name: "Scene · Wipe Transition Demo", slug: "scene-wipe-transition-demo", status: "ready", layers: { smoke: true, motion: true, visual: true } },
 ];
 
 export function readyComponents(): ManifestEntry[] {

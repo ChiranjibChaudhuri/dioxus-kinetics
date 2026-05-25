@@ -152,7 +152,7 @@ pub fn component_docs() -> &'static [ComponentDoc] {
 
 const BASIC_ACCESSIBILITY: &str = "Renders native semantic elements and stable focusable controls.";
 
-const COMPONENT_DOCS: [ComponentDoc; 49] = [
+const COMPONENT_DOCS: [ComponentDoc; 52] = [
     ComponentDoc {
         name: "Button",
         category: ComponentCategory::Actions,
@@ -595,6 +595,33 @@ const COMPONENT_DOCS: [ComponentDoc; 49] = [
         accessibility: "Visual-only decoration; the icon glyph remains in the DOM and is not announced.",
         render: Some(crate::previews::scene::curved_trajectory_preview),
     },
+    ComponentDoc {
+        name: "Scene · Lower Third Demo",
+        category: ComponentCategory::Scene,
+        status: ComponentStatus::Ready,
+        summary: "ui-blocks: LowerThird chyron with name + role inside a 4s Scene + HoldEnd clip.",
+        snippet: SCENE_LOWER_THIRD_SNIPPET,
+        accessibility: "Parent aria-label carries \"<name>, <role>\".",
+        render: Some(crate::previews::scene::lower_third_demo_preview),
+    },
+    ComponentDoc {
+        name: "Scene · Caption Reading-Pace Demo",
+        category: ComponentCategory::Scene,
+        status: ComponentStatus::Ready,
+        summary: "ui-blocks: Caption block driving SplitText { Word } at 320ms/word reading pace.",
+        snippet: SCENE_CAPTION_SNIPPET,
+        accessibility: "SplitText parent carries the full text via aria-label; word spans are aria-hidden.",
+        render: Some(crate::previews::scene::caption_demo_preview),
+    },
+    ComponentDoc {
+        name: "Scene · Wipe Transition Demo",
+        category: ComponentCategory::Scene,
+        status: ComponentStatus::Ready,
+        summary: "ui-blocks: WipeTransition CSS mask sweep at 120deg across a gradient backdrop.",
+        snippet: SCENE_WIPE_SNIPPET,
+        accessibility: "Decorative; underlying heading is in normal reading order.",
+        render: Some(crate::previews::scene::wipe_demo_preview),
+    },
 ];
 
 const BUTTON_SNIPPET: &str = r#"Button {
@@ -1007,3 +1034,34 @@ const DROPDOWN_MENU_SNIPPET: &str = r#"DropdownMenu {
     ],
     on_select: move |id: String| /* dispatch */ {},
 }"#;
+
+const SCENE_LOWER_THIRD_SNIPPET: &str = r##"Scene {
+    id: "lower-third-demo",
+    duration_ms: 4_000.0,
+    Clip { start_ms: 500.0, duration_ms: 3_000.0, fill: ClipFill::HoldEnd,
+        LowerThird {
+            name: "Ada Lovelace".to_string(),
+            role: "Mathematician".to_string(),
+            accent: Some(LowerThirdAccent::Primary),
+        }
+    }
+}"##;
+
+const SCENE_CAPTION_SNIPPET: &str = r##"Scene {
+    id: "caption-demo",
+    duration_ms: 3_500.0,
+    TimelineScope { id: "caption-timeline", autoplay: true,
+        Caption {
+            text: "Built with kinetics ui-blocks.".to_string(),
+            reading_pace_ms_per_word: Some(320.0),
+        }
+    }
+}"##;
+
+const SCENE_WIPE_SNIPPET: &str = r##"Scene {
+    id: "wipe-demo",
+    duration_ms: 2_500.0,
+    WipeTransition { duration_ms: 2_500.0, angle_deg: Some(120.0),
+        /* gradient-filled backdrop */
+    }
+}"##;

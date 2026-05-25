@@ -17,6 +17,7 @@ ui-runtime.workspace = true
 ui-composition.workspace = true
 ui-motion.workspace = true
 ui-timeline.workspace = true
+ui-blocks = { path = "../../crates/ui-blocks" }
 
 [dev-dependencies]
 dioxus-ssr.workspace = true

@@ -37,7 +37,7 @@ test.describe("SP-4+5+6 ui-blocks catalog showcases", () => {
     expect(wordCount).toBe(4);
   });
 
-  test("WipeTransition emits mask-image inline style + data-angle-deg=120", async ({ page }) => {
+  test("WipeTransition emits ui-block-wipe-linear keyframe + data-angle-deg=120", async ({ page }) => {
     await page.goto("/");
     await page.locator(SCENE_SECTION).scrollIntoViewIfNeeded();
     const card = page.locator(
@@ -46,10 +46,14 @@ test.describe("SP-4+5+6 ui-blocks catalog showcases", () => {
     await expect(card).toBeVisible();
     const wipe = card.locator(".ui-block-wipe-transition").first();
     await expect(wipe).toHaveAttribute("data-angle-deg", "120");
+    // Post-T10: WipeTransition no longer paints `mask-image` inline; the mask
+    // sweep is owned by the `ui-block-wipe-{variant}` keyframe in
+    // `gsap_primitives.css`, and the inline style only configures the
+    // animation handle + the `--wipe-angle` custom property. The default
+    // (no `variant` prop) variant is Linear, which writes
+    // `animation-name: ui-block-wipe-linear`.
     const inlineStyle = (await wipe.getAttribute("style")) ?? "";
-    expect(
-      inlineStyle.includes("mask-image") ||
-        inlineStyle.includes("-webkit-mask-image"),
-    ).toBe(true);
+    expect(inlineStyle).toContain("animation-name: ui-block-wipe-linear");
+    expect(inlineStyle).toContain("--wipe-angle: 120deg");
   });
 });

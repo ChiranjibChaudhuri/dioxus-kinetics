@@ -9,6 +9,7 @@ mod scheduler_native;
 mod scheduler_web;
 
 pub mod animation;
+pub mod frame_adapter;
 pub mod measurement;
 pub mod presence;
 pub mod reduced_motion;

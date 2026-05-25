@@ -121,7 +121,7 @@ fn SequenceBody() -> Element {
     rsx! {
         Sequence {
             cues: Some(cues),
-            clock: TimelineClock::Manual { elapsed_ms },
+            clock: Some(TimelineClock::Manual { elapsed_ms }),
             KineticBox { id: "title", h4 { "Welcome" } }
             KineticBox { id: "body", p { "Subtle entry choreography" } }
             KineticBox { id: "cta", Button { "Get started" } }

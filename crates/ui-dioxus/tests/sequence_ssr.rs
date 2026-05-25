@@ -27,7 +27,7 @@ fn sequence_provides_state_map_via_context() {
     let html = dioxus_ssr::render_element(rsx! {
         Sequence {
             timeline: Some(timeline),
-            clock: TimelineClock::Manual { elapsed_ms: 0.0 },
+            clock: Some(TimelineClock::Manual { elapsed_ms: 0.0 }),
             KineticBox { id: "title", "Hello" }
         }
     });
@@ -51,7 +51,7 @@ fn sequence_with_cues_vec_equivalent_to_timeline_prop() {
     let html = dioxus_ssr::render_element(rsx! {
         Sequence {
             cues: Some(cues),
-            clock: TimelineClock::Manual { elapsed_ms: 0.0 },
+            clock: Some(TimelineClock::Manual { elapsed_ms: 0.0 }),
             KineticBox { id: "title", "Hello" }
         }
     });
@@ -66,7 +66,7 @@ fn sequence_renders_data_timeline_id_attribute() {
             cues: Some(vec![Cue::new("title", 0.0, MotionCue::Opacity {
                 from: 0.0, to: 1.0, transition: linear_220(),
             })]),
-            clock: TimelineClock::Manual { elapsed_ms: 0.0 },
+            clock: Some(TimelineClock::Manual { elapsed_ms: 0.0 }),
             KineticBox { id: "title", "Hello" }
         }
     });

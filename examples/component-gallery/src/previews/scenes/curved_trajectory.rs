@@ -39,7 +39,7 @@ pub fn CurvedTrajectoryScene() -> Element {
             controls: Some(true),
             Sequence {
                 timeline: Some(timeline),
-                clock: TimelineClock::Manual { elapsed_ms: 0.0 },
+                clock: Some(TimelineClock::Manual { elapsed_ms: 0.0 }),
                 MotionPath {
                     id: "trajectory-icon".to_string(),
                     path: pts,

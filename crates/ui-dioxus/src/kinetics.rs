@@ -144,9 +144,23 @@ pub fn Sequence(
     #[props(default)] timeline: Option<Timeline>,
     #[props(default)] cues: Option<Vec<Cue>>,
     #[props(default = "sequence".to_string())] id: String,
-    #[props(default = TimelineClock::Playback { elapsed_ms: 0.0 })] clock: TimelineClock,
+    #[props(default)] clock: Option<TimelineClock>,
     children: Element,
 ) -> Element {
+    // Resolve effective clock with this precedence:
+    //   1. Explicit `clock` prop wins (tests + advanced callers).
+    //   2. Surrounding SceneContext.elapsed_ms when present.
+    //   3. Default to TimelineClock::Playback { elapsed_ms: 0.0 }.
+    let resolved_clock = match clock {
+        Some(c) => c,
+        None => match try_consume_context::<crate::scene_player::SceneContext>() {
+            Some(scene_ctx) => TimelineClock::Manual {
+                elapsed_ms: *scene_ctx.clock.elapsed_ms.read(),
+            },
+            None => TimelineClock::Playback { elapsed_ms: 0.0 },
+        },
+    };
+
     // Build a flat map of kinetic-id → (MotionCue, start_ms) from the `cues`
     // list.  This is stored in the context so that KineticBox can reconstruct
     // the (from, to, transition) triplet and use start_ms as the WAAPI delay.
@@ -173,7 +187,7 @@ pub fn Sequence(
         };
     };
 
-    let sample = use_timeline_sample(timeline_value, clock);
+    let sample = use_timeline_sample(timeline_value, resolved_clock);
 
     // Seed the context exactly once with the initial sample so SSR renders the
     // settled inline styles for each kinetic id. `use_hook` runs only on the

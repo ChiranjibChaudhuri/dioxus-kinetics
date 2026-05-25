@@ -319,12 +319,37 @@ pub fn KineticText(
 ) -> Element {
     let kinetic_id = KineticId::new(id);
 
+    // Effective elapsed_ms is the maximum-priority context available:
+    //   1. StaggerCursor + SceneContext (positional stagger inside
+    //      TimelineScope) → subtract `index * step_ms` from the
+    //      surrounding Scene clock.
+    //   2. SceneContext only → use the Scene's elapsed_ms directly.
+    //   3. None → static markup (no animation style emitted).
+    let stagger = try_consume_context::<crate::stagger::StaggerCursor>();
+    let scene = try_consume_context::<crate::scene_player::SceneContext>();
+
+    let inline_style: String = match (stagger, scene) {
+        (Some(cursor), Some(ctx)) => {
+            let parent = *ctx.clock.elapsed_ms.read();
+            let index = cursor.next_index();
+            let offset = index as f32 * cursor.step_ms;
+            let local = (parent - offset).max(0.0);
+            crate::cue_style::cue_inline_style(&cue, local)
+        }
+        (None, Some(ctx)) => {
+            let elapsed = *ctx.clock.elapsed_ms.read();
+            crate::cue_style::cue_inline_style(&cue, elapsed)
+        }
+        _ => String::new(),
+    };
+
     rsx! {
         span {
             class: "ui-kinetic-text",
             "data-kinetic-id": "{kinetic_id.0}",
             "data-motion-cue": "{cue}",
             aria_label: "{text}",
+            style: "{inline_style}",
             "{text}"
         }
     }

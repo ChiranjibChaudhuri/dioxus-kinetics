@@ -257,7 +257,15 @@ pub fn TimelineScope(
     // Provide a fresh StaggerCursor per render so kinetic leaves
     // inside the scope each grab a sequential index. SSR is single-
     // threaded so the Rc<Cell<u32>> counter is safe.
-    use_context_provider(|| crate::stagger::StaggerCursor::new(step_ms));
+    //
+    // `use_context_provider` only runs its initializer on the FIRST
+    // render. To make the cursor restart at 0 on every render, we
+    // call `.reset()` after retrieving the cached value — the
+    // closure builds a new cursor on first render, and every
+    // subsequent render reuses the same Rc<Cell<u32>> with its
+    // counter reset to 0 before children render.
+    let cursor = use_context_provider(|| crate::stagger::StaggerCursor::new(step_ms));
+    cursor.reset();
 
     rsx! {
         section {

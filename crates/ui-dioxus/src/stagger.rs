@@ -41,4 +41,13 @@ impl StaggerCursor {
         let i = self.cursor.get();
         i as f32 * self.step_ms
     }
+
+    /// Resets the cursor back to index 0. Must be called at the start
+    /// of every TimelineScope render — `use_context_provider` only
+    /// runs its initializer once, so without this the counter retains
+    /// the previous render's terminal value and subsequent renders
+    /// emit indices N, N+1, … instead of 0, 1, …
+    pub fn reset(&self) {
+        self.cursor.set(0);
+    }
 }

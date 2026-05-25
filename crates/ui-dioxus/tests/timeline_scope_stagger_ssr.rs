@@ -22,9 +22,18 @@ fn timeline_scope_inside_scene_staggers_children_by_step_ms() {
             }
         }
     });
-    assert!(html.contains("animation-delay: -2000ms"), "want index 0: {html}");
-    assert!(html.contains("animation-delay: -1920ms"), "want index 1: {html}");
-    assert!(html.contains("animation-delay: -1840ms"), "want index 2: {html}");
+    assert!(
+        html.contains("animation-delay: -2000ms"),
+        "want index 0: {html}"
+    );
+    assert!(
+        html.contains("animation-delay: -1920ms"),
+        "want index 1: {html}"
+    );
+    assert!(
+        html.contains("animation-delay: -1840ms"),
+        "want index 2: {html}"
+    );
 }
 
 #[test]

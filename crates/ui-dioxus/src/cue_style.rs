@@ -38,11 +38,7 @@ pub fn cue_inline_style(cue: &str, elapsed_ms: f32) -> String {
 /// used by blocks (LowerThird/SocialOverlay/MetricCounter) whose
 /// choreographies need per-child timing distinct from the cue's
 /// default.
-pub fn cue_inline_style_with_duration(
-    cue: &str,
-    elapsed_ms: f32,
-    duration_ms: f32,
-) -> String {
+pub fn cue_inline_style_with_duration(cue: &str, elapsed_ms: f32, duration_ms: f32) -> String {
     let elapsed = if elapsed_ms.is_finite() && elapsed_ms > 0.0 {
         elapsed_ms.round() as i64
     } else {

@@ -54,7 +54,10 @@ pub fn SplitText(
         .unwrap_or(0.0);
 
     let step_ms = cursor.as_ref().map(|c| c.step_ms).unwrap_or(80.0);
-    let base_offset_ms = cursor.as_ref().map(|c| c.current_offset_ms()).unwrap_or(0.0);
+    let base_offset_ms = cursor
+        .as_ref()
+        .map(|c| c.current_offset_ms())
+        .unwrap_or(0.0);
 
     // Reserve this SplitText's slot in the surrounding stagger cursor so
     // siblings after this SplitText continue past it. Single-advance — we

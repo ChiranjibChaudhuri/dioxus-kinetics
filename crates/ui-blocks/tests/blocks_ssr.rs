@@ -61,7 +61,10 @@ fn wipe_transition_emits_mask_image_kinetic_box() {
     assert!(html.contains("ui-block-wipe-transition"), "{html}");
     assert!(html.contains("data-block=\"wipe-transition\""), "{html}");
     assert!(html.contains("covered content"), "{html}");
-    assert!(html.contains("animation-name: ui-block-wipe-linear"), "{html}");
+    assert!(
+        html.contains("animation-name: ui-block-wipe-linear"),
+        "{html}"
+    );
     assert!(html.contains("data-variant=\"linear\""), "{html}");
 }
 
@@ -140,7 +143,10 @@ fn wipe_transition_inside_scene_emits_negative_animation_delay() {
     // use animation-delay = -1500ms.
     assert!(html.contains("animation-delay: -1500ms"), "{html}");
     // Default variant is Linear.
-    assert!(html.contains("animation-name: ui-block-wipe-linear"), "{html}");
+    assert!(
+        html.contains("animation-name: ui-block-wipe-linear"),
+        "{html}"
+    );
 }
 
 #[test]
@@ -153,14 +159,17 @@ fn wipe_transition_variant_conic_picks_correct_keyframe() {
             p { "x" }
         }
     });
-    assert!(html.contains("animation-name: ui-block-wipe-conic"), "{html}");
+    assert!(
+        html.contains("animation-name: ui-block-wipe-conic"),
+        "{html}"
+    );
 }
 
 #[test]
 fn lower_third_inside_scene_choreographs_via_timeline_scope() {
+    use ui_blocks::LowerThird;
     use ui_dioxus::Scene;
     use ui_runtime::reduced_motion::ReducedMotionProvider;
-    use ui_blocks::LowerThird;
     let html = dioxus_ssr::render_element(rsx! {
         ReducedMotionProvider { reduced: Some(true),
             Scene {
@@ -179,9 +188,9 @@ fn lower_third_inside_scene_choreographs_via_timeline_scope() {
 
 #[test]
 fn social_overlay_inside_scene_choreographs_handle_and_message() {
+    use ui_blocks::{SocialOverlay, SocialPlatform};
     use ui_dioxus::Scene;
     use ui_runtime::reduced_motion::ReducedMotionProvider;
-    use ui_blocks::{SocialOverlay, SocialPlatform};
     let html = dioxus_ssr::render_element(rsx! {
         ReducedMotionProvider { reduced: Some(true),
             Scene {
@@ -196,14 +205,17 @@ fn social_overlay_inside_scene_choreographs_handle_and_message() {
         }
     });
     assert!(html.contains("animation-name: ui-cue-"), "{html}");
-    assert!(html.contains("ui-block-social-overlay--instagram"), "{html}");
+    assert!(
+        html.contains("ui-block-social-overlay--instagram"),
+        "{html}"
+    );
 }
 
 #[test]
 fn metric_counter_inside_scene_choreographs_label_value_delta() {
+    use ui_blocks::MetricCounter;
     use ui_dioxus::Scene;
     use ui_runtime::reduced_motion::ReducedMotionProvider;
-    use ui_blocks::MetricCounter;
     let html = dioxus_ssr::render_element(rsx! {
         ReducedMotionProvider { reduced: Some(true),
             Scene {

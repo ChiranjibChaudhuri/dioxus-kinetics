@@ -75,8 +75,8 @@ fn split_text_word_mode_preserves_whitespace_between_words() {
 
 #[test]
 fn split_text_glyphs_emit_cue_animation_when_inside_scene() {
-    use ui_runtime::reduced_motion::ReducedMotionProvider;
     use ui_dioxus::{Scene, TimelineScope};
+    use ui_runtime::reduced_motion::ReducedMotionProvider;
     let html = dioxus_ssr::render_element(rsx! {
         ReducedMotionProvider { reduced: Some(true),
             Scene {
@@ -93,14 +93,16 @@ fn split_text_glyphs_emit_cue_animation_when_inside_scene() {
     //   glyph H: index 0 → 1000ms
     //   glyph i: index 1 → 920ms
     assert!(html.contains("animation-name: ui-cue-rise-in"), "{html}");
-    assert!(html.contains("animation-delay: -1000ms") || html.contains("animation-delay: -920ms"),
-            "{html}");
+    assert!(
+        html.contains("animation-delay: -1000ms") || html.contains("animation-delay: -920ms"),
+        "{html}"
+    );
 }
 
 #[test]
 fn split_text_cue_prop_overrides_default() {
-    use ui_runtime::reduced_motion::ReducedMotionProvider;
     use ui_dioxus::Scene;
+    use ui_runtime::reduced_motion::ReducedMotionProvider;
     let html = dioxus_ssr::render_element(rsx! {
         ReducedMotionProvider { reduced: Some(true),
             Scene {

@@ -100,9 +100,23 @@ pub fn install_scroll_driver(
     };
     observer.observe(&trigger);
 
-    // Seed initial progress before any event fires.
-    let initial = compute_progress(&window, &trigger, start_offset, end_offset);
-    (on_progress.borrow_mut())(initial);
+    // Defer the initial seed to the next animation frame so the trigger
+    // element has been laid out. Otherwise getBoundingClientRect() returns
+    // zeros and the progress formula degenerates to ~1.0 (the Scene
+    // settles instantly on cold mount).
+    let on_progress_for_seed = on_progress.clone();
+    let window_for_seed = window.clone();
+    let trigger_for_seed = trigger.clone();
+    let seed_closure = Closure::once_into_js(move || {
+        let progress = compute_progress(
+            &window_for_seed,
+            &trigger_for_seed,
+            start_offset,
+            end_offset,
+        );
+        (on_progress_for_seed.borrow_mut())(progress);
+    });
+    let _ = window.request_animation_frame(seed_closure.unchecked_ref());
 
     ScrollDriverHandle {
         _observer: Some(observer),

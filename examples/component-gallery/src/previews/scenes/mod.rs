@@ -1,3 +1,4 @@
+pub mod caption_demo;
 pub mod cta_pulse;
 pub mod curved_trajectory;
 pub mod flip_card_deck;

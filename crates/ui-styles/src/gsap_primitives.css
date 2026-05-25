@@ -13,3 +13,28 @@
   position: relative;
   display: inline-block;
 }
+
+/* Wipe variants — each maps to a different mask-image keyframe. The
+   browser interpolates from "hidden" to "fully revealed" over
+   animation-duration; consumers set animation-delay = -elapsed_ms to
+   seek deterministically. */
+
+@keyframes ui-block-wipe-linear {
+  from { mask-image: linear-gradient(var(--wipe-angle, 90deg), black 0%, transparent 0%); }
+  to   { mask-image: linear-gradient(var(--wipe-angle, 90deg), black 100%, transparent 100%); }
+}
+
+@keyframes ui-block-wipe-conic {
+  from { mask-image: conic-gradient(from 0deg at 50% 50%, black 0deg, transparent 0deg); }
+  to   { mask-image: conic-gradient(from 0deg at 50% 50%, black 360deg, transparent 360deg); }
+}
+
+@keyframes ui-block-wipe-mask-position {
+  from { mask-position: -100% 0%; }
+  to   { mask-position: 100% 0%; }
+}
+
+@keyframes ui-block-wipe-iris {
+  from { mask-image: radial-gradient(circle at 50% 50%, black 0%, transparent 0%); }
+  to   { mask-image: radial-gradient(circle at 50% 50%, black 100%, transparent 100%); }
+}

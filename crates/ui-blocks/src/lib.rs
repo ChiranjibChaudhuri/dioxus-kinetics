@@ -12,4 +12,4 @@ pub use caption::Caption;
 pub use lower_third::{LowerThird, LowerThirdAccent};
 pub use metric_counter::MetricCounter;
 pub use social_overlay::{SocialOverlay, SocialPlatform};
-pub use wipe_transition::WipeTransition;
+pub use wipe_transition::{WipeTransition, WipeVariant};

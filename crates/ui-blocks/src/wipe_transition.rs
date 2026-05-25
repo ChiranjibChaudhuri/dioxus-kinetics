@@ -1,5 +1,25 @@
 use dioxus::prelude::*;
 
+#[derive(Clone, Copy, Debug, PartialEq, Default)]
+pub enum WipeVariant {
+    #[default]
+    Linear,
+    Conic,
+    MaskPosition,
+    Iris,
+}
+
+impl WipeVariant {
+    fn css_keyword(self) -> &'static str {
+        match self {
+            Self::Linear => "linear",
+            Self::Conic => "conic",
+            Self::MaskPosition => "mask-position",
+            Self::Iris => "iris",
+        }
+    }
+}
+
 /// Full-coverage wipe transition. The mask sweeps across the child
 /// region over `duration_ms`. Direction controlled by `angle_deg`
 /// (default 90.0 = left-to-right).

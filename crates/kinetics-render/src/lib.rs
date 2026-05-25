@@ -2,6 +2,9 @@
 
 //! Frame-by-frame SSR exporter for kinetics Scene compositions.
 
+mod capture;
+mod template;
+
 use std::io;
 use std::path::PathBuf;
 
@@ -165,12 +168,20 @@ impl Renderer {
         // which `to_string_pretty` would break.
         fs::write(&manifest_path, serde_json::to_string(&manifest_json)?)?;
 
+        let mut report_warnings: Vec<String> = Vec::new();
+        let mut png_dir: Option<PathBuf> = None;
+        if self.config.capture_png {
+            let outcome = capture::run_capture(&self.config.output_dir);
+            png_dir = outcome.png_dir;
+            report_warnings.extend(outcome.warnings);
+        }
+
         Ok(RenderReport {
             frames_written: self.config.frames,
             html_dir,
-            png_dir: None,
+            png_dir,
             mp4_path: None,
-            warnings: Vec::new(),
+            warnings: report_warnings,
         })
     }
 }

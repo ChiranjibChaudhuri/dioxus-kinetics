@@ -9,7 +9,7 @@
 //! visibly through high-curvature regions.
 
 /// A single point on a parametric path.
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq, serde::Serialize, serde::Deserialize)]
 pub enum PathPoint {
     /// Straight line from the previous point's endpoint to `end`. When
     /// `PathPoint::Line` is the first point in a path, its `end` is the

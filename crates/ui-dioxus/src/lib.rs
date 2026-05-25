@@ -11,6 +11,7 @@ mod display;
 mod forms;
 mod kinetics;
 mod layout;
+mod motion_path;
 mod navigation;
 mod overlays;
 mod popover;
@@ -62,6 +63,7 @@ pub use kinetics::{
     TimelineScope,
 };
 pub use layout::{SharedElement, SharedLayout};
+pub use motion_path::MotionPath;
 pub use navigation::{
     Breadcrumb, BreadcrumbItem, Pagination, SegmentItem, SegmentedControl, Sidebar, SidebarItem,
     SidebarSection, Stepper, StepperStep, TabItem, TabPanel, Tabs, Toolbar,

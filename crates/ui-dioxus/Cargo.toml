@@ -18,6 +18,7 @@ ui-motion.workspace = true
 ui-runtime.workspace = true
 ui-timeline.workspace = true
 ui-tokens.workspace = true
+serde_json = "1"
 
 [dev-dependencies]
 dioxus-ssr.workspace = true

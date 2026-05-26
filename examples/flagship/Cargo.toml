@@ -1,0 +1,36 @@
+[package]
+name = "flagship"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[dependencies]
+dioxus.workspace = true
+kinetics.workspace = true
+ui-styles.workspace = true
+ui-glass.workspace = true
+ui-glass-dioxus.workspace = true
+ui-glass-engine.workspace = true
+ui-tokens.workspace = true
+ui-runtime.workspace = true
+ui-composition.workspace = true
+ui-motion.workspace = true
+ui-timeline.workspace = true
+ui-blocks = { path = "../../crates/ui-blocks" }
+component-gallery = { path = "../component-gallery" }
+
+[features]
+web = ["dioxus/web"]
+
+[target.'cfg(target_arch = "wasm32")'.dependencies]
+web-sys = { version = "0.3", features = ["Window"] }
+wasm-bindgen = "0.2"
+js-sys = "0.3"
+
+[lib]
+path = "src/lib.rs"
+
+[[bin]]
+name = "flagship"
+path = "src/main.rs"

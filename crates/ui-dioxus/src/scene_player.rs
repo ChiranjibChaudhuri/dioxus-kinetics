@@ -41,13 +41,26 @@ pub fn Scene(
     autoplay: Option<bool>,
     controls: Option<bool>,
     driver: Option<SceneDriver>,
+    /// Seek the clock to this elapsed time once at mount, before
+    /// autoplay starts. Combined with `autoplay: false`, this lets
+    /// hosts render the scene frozen at a specific cinematic frame —
+    /// useful for marketing-page heroes that want a curated still
+    /// instead of a running film. The value is clamped to the scene's
+    /// duration.
+    initial_elapsed_ms: Option<f32>,
     children: Element,
 ) -> Element {
     let fps = fps.unwrap_or(60).max(1);
     let autoplay = autoplay.unwrap_or(true);
     let reduced = use_reduced_motion();
 
-    let clock = use_hook(|| SceneClock::new(duration_ms, fps, reduced));
+    let clock = use_hook(|| {
+        let c = SceneClock::new(duration_ms, fps, reduced);
+        if let Some(ms) = initial_elapsed_ms {
+            c.seek_ms(ms);
+        }
+        c
+    });
     let registry = use_hook(FrameAdapterRegistry::default);
     let id_rc: Rc<str> = Rc::from(id.as_str());
     let id_signal = use_hook(|| Signal::new(id_rc.clone()));

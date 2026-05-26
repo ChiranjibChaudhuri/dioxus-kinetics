@@ -397,6 +397,11 @@ pub fn KineticText(
     id: String,
     text: String,
     #[props(default = "text-flow".to_string())] cue: String,
+    /// Extra classes appended after `ui-kinetic-text` so scene authors
+    /// can attach styling hooks (e.g., a display-tier hero title) without
+    /// reaching for the internal `data-kinetic-id` selector.
+    #[props(default)]
+    class: String,
 ) -> Element {
     let kinetic_id = KineticId::new(id);
 
@@ -424,9 +429,15 @@ pub fn KineticText(
         _ => String::new(),
     };
 
+    let class_attr = if class.is_empty() {
+        "ui-kinetic-text".to_string()
+    } else {
+        format!("ui-kinetic-text {class}")
+    };
+
     rsx! {
         span {
-            class: "ui-kinetic-text",
+            class: "{class_attr}",
             "data-kinetic-id": "{kinetic_id.0}",
             "data-motion-cue": "{cue}",
             aria_label: "{text}",

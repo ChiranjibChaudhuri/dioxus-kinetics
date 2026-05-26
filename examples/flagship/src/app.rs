@@ -1,6 +1,7 @@
 use dioxus::prelude::*;
 use ui_styles::library_css;
 
+use crate::sections::cta::CallToAction;
 use crate::sections::features::Features;
 use crate::sections::hero::Hero;
 use crate::sections::metrics::Metrics;
@@ -19,6 +20,7 @@ pub fn App() -> Element {
             Story {}
             Features {}
             Metrics {}
+            CallToAction {}
         }
     }
 }

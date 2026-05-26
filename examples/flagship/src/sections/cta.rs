@@ -1,5 +1,7 @@
 use dioxus::prelude::*;
-use kinetics::prelude::*;
+
+const REPO_URL: &str = "https://github.com/ChiranjibChaudhuri/dioxus-kinetics";
+const GALLERY_HASH: &str = "#flagship-features";
 
 #[component]
 pub fn CallToAction() -> Element {
@@ -13,9 +15,23 @@ pub fn CallToAction() -> Element {
                 p { class: "flagship-cta-caption",
                     "Built in Rust. MIT licensed. Web, desktop, mobile, and native."
                 }
+                // Anchors styled as buttons — real navigation, keyboard-
+                // activatable, no JS handler needed. The library's
+                // .ui-button rules style any element that carries the
+                // class, so anchors inherit the same hover/focus/press
+                // visual contract that <button> would.
                 div { class: "flagship-cta-actions",
-                    Button { variant: ButtonVariant::Primary, "View on GitHub" }
-                    Button { variant: ButtonVariant::Ghost, "Open the gallery" }
+                    a {
+                        class: "ui-button ui-button--primary",
+                        href: REPO_URL,
+                        rel: "noopener",
+                        "View on GitHub"
+                    }
+                    a {
+                        class: "ui-button ui-button--ghost",
+                        href: GALLERY_HASH,
+                        "Browse the components"
+                    }
                 }
             }
             footer { class: "flagship-footer",

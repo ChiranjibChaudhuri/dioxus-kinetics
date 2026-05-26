@@ -1,0 +1,15 @@
+{
+  "name": "flagship-e2e",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "playwright test",
+    "test:static": "playwright test --project=static",
+    "test:dev-loop": "KINETICS_E2E_MODE=dev-loop playwright test --project=dev-loop"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.48.0",
+    "http-server": "^14.1.1",
+    "typescript": "^5.5.0"
+  }
+}

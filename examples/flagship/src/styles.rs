@@ -90,6 +90,56 @@ pub const FLAGSHIP_CSS: &str = r#"
     height: 100%;
 }
 
+/* The hero hosts the Scene's stage at full bleed and provides its own
+   backdrop (ambient mesh). Override the scene-stage's default dark fill
+   so the mesh shows through; drop the rounded corners and let the stage
+   fill the hero instead of locking to the 1920/1080 aspect ratio. */
+.flagship-hero .ui-scene-stage {
+    --ui-scene-stage-bg: transparent;
+    display: grid;
+    place-items: center;
+    border-radius: 0;
+    color: var(--ui-fg);
+    aspect-ratio: auto !important;
+}
+
+/* Stack all Clip children in the same grid cell so the active title and
+   subtitle land centred on top of each other rather than left-aligned at
+   the top of the stage. */
+.flagship-hero .ui-scene-stage > * {
+    grid-column: 1;
+    grid-row: 1;
+    align-self: center;
+    justify-self: center;
+}
+
+/* Hero KineticText: scene authors give the title and subtitle their own
+   classes (`scene-hero-title` / `scene-hero-subtitle`). The flagship
+   sizes them with its display ramp so the hero reads as cinematic
+   typography rather than body text. */
+.flagship-hero .scene-hero-title {
+    display: block;
+    text-align: center;
+    font-size: var(--flagship-display-1);
+    font-weight: 800;
+    line-height: 1.02;
+    letter-spacing: -0.02em;
+    color: var(--ui-fg);
+    max-width: min(90vw, 22ch);
+    margin-inline: auto;
+}
+
+.flagship-hero .scene-hero-subtitle {
+    display: block;
+    text-align: center;
+    font-size: clamp(20px, 2.4vw, 28px);
+    font-weight: 500;
+    line-height: 1.4;
+    color: var(--ui-muted-fg);
+    max-width: min(90vw, 36ch);
+    margin: var(--ui-space-3) auto 0;
+}
+
 /* Story: the embedded scene already provides a 200vh trigger and a sticky
    inner shell, so we only widen the outer slot. */
 .flagship-story {

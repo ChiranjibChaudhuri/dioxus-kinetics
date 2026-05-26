@@ -4,7 +4,18 @@ use dioxus::prelude::*;
 #[component]
 pub fn Hero() -> Element {
     rsx! {
-        section { class: "flagship-hero", aria_label: "Kinetics product introduction",
+        section { class: "flagship-hero", aria_labelledby: "flagship-hero-heading",
+            // The Hero's visible title is rendered inside ProductIntroScene
+            // via KineticText, which emits a span rather than a semantic
+            // heading. Screen-reader users still need a real h1 to anchor
+            // the page outline (and to satisfy the spec's heading-hierarchy
+            // requirement). The sr-only utility hides it visually while
+            // keeping it in the accessibility tree.
+            h1 {
+                id: "flagship-hero-heading",
+                class: "flagship-sr-only",
+                "Kinetics — composable motion for Rust apps"
+            }
             div { class: "flagship-hero-stage",
                 // Freeze the scene at the cinematic peak (t=2200ms) so the
                 // hero presents a curated still — title and body together,

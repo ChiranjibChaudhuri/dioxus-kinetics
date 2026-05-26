@@ -65,6 +65,22 @@ pub const FLAGSHIP_CSS: &str = r#"
     text-transform: uppercase;
 }
 
+/* Screen-reader-only utility for landmark headings that the visual
+   composition doesn't display (e.g., the Hero's h1 — the scene's
+   KineticText carries the visible title, but AT users still need a
+   real heading to anchor the page outline). */
+.flagship-sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    padding: 0;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    border: 0;
+    white-space: nowrap;
+}
+
 /* Hero: full viewport, no chrome, the scene fills it edge-to-edge. */
 .flagship-hero {
     position: relative;
@@ -276,6 +292,18 @@ pub const FLAGSHIP_CSS: &str = r#"
     flex-wrap: wrap;
     justify-content: center;
     padding-top: var(--ui-space-2);
+}
+
+/* The CTA uses anchor elements styled as buttons (real navigation,
+   keyboard-activatable). Library .ui-button rules target the visual
+   contract but assume a <button> base, so anchors need an explicit
+   inline-flex + text-decoration: none to look identical. */
+.flagship-cta-actions a.ui-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+    padding: 8px 18px;
 }
 
 .flagship-footer {

@@ -3,6 +3,7 @@ use ui_styles::library_css;
 
 use crate::sections::features::Features;
 use crate::sections::hero::Hero;
+use crate::sections::metrics::Metrics;
 use crate::sections::story::Story;
 use crate::styles::FLAGSHIP_CSS;
 
@@ -17,6 +18,7 @@ pub fn App() -> Element {
             Hero {}
             Story {}
             Features {}
+            Metrics {}
         }
     }
 }

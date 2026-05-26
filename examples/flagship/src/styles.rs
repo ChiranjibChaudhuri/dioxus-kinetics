@@ -93,24 +93,39 @@ pub const FLAGSHIP_CSS: &str = r#"
 /* The hero hosts the Scene's stage at full bleed and provides its own
    backdrop (ambient mesh). Override the scene-stage's default dark fill
    so the mesh shows through; drop the rounded corners and let the stage
-   fill the hero instead of locking to the 1920/1080 aspect ratio. */
+   fill the hero instead of locking to the 1920/1080 aspect ratio.
+   `place-content: center` (not `place-items`) keeps the row stack tight
+   and vertically centred — `place-items` would stretch each row to fill
+   half the container and split the text across the viewport. */
 .flagship-hero .ui-scene-stage {
     --ui-scene-stage-bg: transparent;
     display: grid;
-    place-items: center;
+    grid-auto-rows: auto;
+    place-content: center;
+    justify-items: center;
+    gap: var(--ui-space-3);
     border-radius: 0;
     color: var(--ui-fg);
     aspect-ratio: auto !important;
 }
 
-/* Stack all Clip children in the same grid cell so the active title and
-   subtitle land centred on top of each other rather than left-aligned at
-   the top of the stage. */
-.flagship-hero .ui-scene-stage > * {
-    grid-column: 1;
-    grid-row: 1;
-    align-self: center;
-    justify-self: center;
+/* The Scene marks inactive clips with `visibility: hidden`, which still
+   reserves layout space — that would push the active clips off centre.
+   Inside the flagship hero we know the cinematic-still composition is
+   `initial_elapsed_ms: 2400` + autoplay: false, so only the title and
+   body clips are active. Collapsing inactive clips with `display: none`
+   lets the visible ones flow naturally and centre via `place-items`. */
+.flagship-hero .ui-scene-clip[data-clip-active="false"] {
+    display: none;
+}
+
+/* Active clips stack vertically inside the centred grid cell of the
+   stage. Constrain their width so long lines wrap into hero-shaped
+   typography rather than spanning the full viewport. */
+.flagship-hero .ui-scene-clip[data-clip-active="true"] {
+    display: block;
+    max-width: min(100%, 980px);
+    margin-inline: auto;
 }
 
 /* Hero KineticText: scene authors give the title and subtitle their own

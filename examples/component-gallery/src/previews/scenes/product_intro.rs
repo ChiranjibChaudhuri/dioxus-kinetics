@@ -24,7 +24,13 @@ pub fn ProductIntroScene(
             autoplay: Some(true),
             controls: Some(controls),
 
-            Clip { start_ms: 0.0, duration_ms: 2_400.0, fill: ClipFill::HoldEnd,
+            // Title and body intentionally do NOT use HoldEnd — once the
+            // hero film plays through, the settled-state composition is
+            // just the CTA pulse (`Start building`) overlaid on the
+            // ambient backdrop. Holding the title and body too would
+            // stack three centred elements in the same grid cell when
+            // the scene is hosted full-bleed (e.g., the flagship hero).
+            Clip { start_ms: 0.0, duration_ms: 2_400.0,
                 KineticText {
                     id: "intro-title",
                     text: "Kinetics moves like light.".to_string(),
@@ -32,7 +38,7 @@ pub fn ProductIntroScene(
                     class: "scene-hero-title".to_string(),
                 }
             }
-            Clip { start_ms: 800.0, duration_ms: 2_400.0, fill: ClipFill::HoldEnd,
+            Clip { start_ms: 800.0, duration_ms: 2_400.0,
                 KineticText {
                     id: "intro-body",
                     text: "Composable motion for downstream SaaS.".to_string(),

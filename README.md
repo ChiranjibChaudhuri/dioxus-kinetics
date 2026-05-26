@@ -161,6 +161,29 @@ dx serve --package component-gallery --port 9173
 
 The gallery is registry-driven. To add a future component to the docs, update the registry in `examples/component-gallery/src/docs.rs` with its category, status, summary, snippet, accessibility note, and renderer.
 
+## Flagship Marketing Page
+
+A self-referential marketing page for `dioxus-kinetics` lives in
+`examples/flagship`. It composes existing scenes
+(`ProductIntroScene`, `ScrollPinnedStoryScene`, the glass triplet,
+`MetricCounter` strip, and a CTA band) at full bleed, with no
+documentation chrome. Use it as a reference for what shipping with
+kinetics actually looks like, and as the binding visual check for
+the workspace's Apple-quality story.
+
+```powershell
+dx serve --package flagship --port 9174
+```
+
+Open `http://localhost:9174` in a browser that supports WebGPU (the
+glass triplet section reveals the WebGPU `ui-glass-engine` path; on
+non-WebGPU browsers it falls back through SVG filter to solid).
+
+The binding visual check is documented in
+`docs/superpowers/specs/2026-05-25-flagship-marketing-page-design.md`
+(the "Hero-3-seconds" check). The reference screenshot lives at
+`examples/flagship/docs/hero-screenshot.png`.
+
 ## Render & CLI
 
 The workspace ships a Rust frame-by-frame SSR exporter and a CLI

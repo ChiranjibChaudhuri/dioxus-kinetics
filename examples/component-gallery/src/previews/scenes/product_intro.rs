@@ -13,6 +13,17 @@ pub fn ProductIntroScene(
     /// the flagship hero passes `false` to suppress the chrome.
     #[props(default = true)]
     controls: bool,
+    /// Whether the scene starts playing automatically. Defaults to
+    /// `true` for the gallery preview; the flagship hero passes
+    /// `false` so the scene renders as a static still at
+    /// `initial_elapsed_ms`.
+    #[props(default = true)]
+    autoplay: bool,
+    /// Seek the scene clock to this elapsed time once at mount.
+    /// Combined with `autoplay: false`, the scene renders the curated
+    /// frame indefinitely — used by the flagship hero to freeze at
+    /// the title + body cinematic peak.
+    initial_elapsed_ms: Option<f32>,
 ) -> Element {
     rsx! {
         Scene {
@@ -21,8 +32,9 @@ pub fn ProductIntroScene(
             height: 1080,
             duration_ms: 10_000.0,
             fps: Some(60),
-            autoplay: Some(true),
+            autoplay: Some(autoplay),
             controls: Some(controls),
+            initial_elapsed_ms: initial_elapsed_ms,
 
             // Title and body intentionally do NOT use HoldEnd — once the
             // hero film plays through, the settled-state composition is

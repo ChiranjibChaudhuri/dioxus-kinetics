@@ -22,6 +22,14 @@ pub fn subscribe_reduced_motion(on_change: impl FnMut(bool) + 'static) -> bool {
     imp::subscribe_reduced_motion(on_change)
 }
 
+/// Read the OS-level `prefers-color-scheme: dark` media query once.
+/// Returns `false` on native targets and when the browser does not
+/// expose a window. Used by the flagship to apply `data-ui-theme=dark`
+/// at mount, mirroring the reduced-motion read pattern.
+pub fn prefers_color_scheme_dark() -> bool {
+    imp::prefers_color_scheme_dark()
+}
+
 #[cfg(target_arch = "wasm32")]
 mod imp {
     use wasm_bindgen::closure::Closure;
@@ -46,6 +54,16 @@ mod imp {
             return false;
         };
         match window.match_media("(prefers-reduced-motion: reduce)") {
+            Ok(Some(mql)) => mql.matches(),
+            _ => false,
+        }
+    }
+
+    pub fn prefers_color_scheme_dark() -> bool {
+        let Some(window) = web_sys::window() else {
+            return false;
+        };
+        match window.match_media("(prefers-color-scheme: dark)") {
             Ok(Some(mql)) => mql.matches(),
             _ => false,
         }
@@ -85,6 +103,9 @@ mod imp {
         false
     }
     pub fn subscribe_reduced_motion(_on_change: impl FnMut(bool) + 'static) -> bool {
+        false
+    }
+    pub fn prefers_color_scheme_dark() -> bool {
         false
     }
 }

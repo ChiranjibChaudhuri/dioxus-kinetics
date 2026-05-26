@@ -512,7 +512,16 @@ Sequence {
 
 // Cue-driven primitives (cues are tokens defined in the host stylesheet)
 KineticBox { id: "card", cue: "rise-in".to_string(), /* content */ }
-KineticText { id: "headline", text: "Hello".to_string(), cue: "fade-in".to_string() }
+KineticText {
+    id: "headline",
+    text: "Hello".to_string(),
+    cue: "fade-in".to_string(),
+    // Optional styling hook — appended to the built-in `ui-kinetic-text`
+    // class. Use it when the scene's surrounding host needs to size the
+    // text differently than the default body inheritance (e.g., a
+    // display-tier hero title at 96 px).
+    class: "scene-hero-title".to_string(),
+}
 
 // FLIP transitions across tree positions
 SharedLayout {
@@ -520,6 +529,51 @@ SharedLayout {
     // …somewhere else in the same SharedLayout subtree…
 }
 ```
+
+### Scene player (`Scene` / `Clip`)
+
+```rust
+// Autoplay film, with on-screen transport
+Scene {
+    id: "product-intro",
+    width: 1920, height: 1080,
+    duration_ms: 10_000.0,
+    autoplay: Some(true),
+    controls: Some(true),
+    Clip { start_ms: 0.0, duration_ms: 2_400.0,
+        KineticText { id: "title", text: "Hello.".to_string(), cue: "rise-in" }
+    }
+    Clip { start_ms: 800.0, duration_ms: 2_400.0, fill: ClipFill::HoldEnd,
+        KineticText { id: "body", text: "Subtitle.".to_string(), cue: "fade-in" }
+    }
+}
+
+// Frozen still at a specific frame — no autoplay, no chrome.
+// Useful for marketing-page heroes that want a curated frame instead
+// of racing autoplay against first paint.
+Scene {
+    id: "hero-still",
+    width: 1920, height: 1080,
+    duration_ms: 10_000.0,
+    autoplay: Some(false),
+    controls: Some(false),
+    initial_elapsed_ms: Some(2_200.0),  // seek once at mount
+    // …clips…
+}
+```
+
+`ClipFill::None` (the default) hides the clip outside its window via
+`visibility: hidden` — the element still reserves layout space.
+Host pages that grid-stack multiple clips and only want active ones in
+flow can collapse hidden clips with their own CSS:
+
+```css
+.your-host .ui-scene-clip[data-clip-active="false"] { display: none; }
+```
+
+The scene stage's backdrop is overridable via the
+`--ui-scene-stage-bg` CSS variable; set it to `transparent` when the
+host already provides the backdrop (e.g., an ambient mesh).
 
 ---
 
@@ -663,9 +717,48 @@ features = [
 - **Glass material types**: `crates/ui-glass/src/lib.rs`
 - **Motion primitives**: `crates/ui-motion/`, `crates/ui-timeline/`
 - **Runtime hooks**: `crates/ui-runtime/src/`
-- **Stylesheet**: `crates/ui-styles/src/lib.rs` (`COMPONENT_CSS`)
+- **Stylesheet**: `crates/ui-styles/src/lib.rs` (`COMPONENT_CSS`,
+  `SCENE_PLAYER_CSS`, `KINETIC_CUES_CSS`)
 - **Prelude truth**: `crates/kinetics/src/lib.rs::prelude`
 - **Gallery preview patterns**: `examples/component-gallery/src/previews/`
+- **Flagship marketing-page patterns**: `examples/flagship/src/` —
+  five full-bleed sections (Hero / Story / Features / Metrics / CTA)
+  composed entirely from existing scenes and components. Useful as
+  a template for product-launch surfaces and as a worked example of
+  hosting `Scene` outside the gallery's documentation chrome.
+
+---
+
+## Reading OS preferences
+
+The gallery's `persistence` module exposes one-shot read helpers that
+work on both wasm (via `match_media`) and native (return `false`):
+
+```rust
+use component_gallery::persistence::{
+    prefers_reduced_motion,
+    prefers_color_scheme_dark,
+};
+
+let reduced = prefers_reduced_motion();
+let dark = prefers_color_scheme_dark();
+```
+
+Apply them to the shell via `data-*` attributes — the library's CSS
+keys off the same attributes (`[data-ui-motion="reduced"]`,
+`[data-ui-theme="dark"]`):
+
+```rust
+main {
+    "data-ui-motion": if reduced { "reduced" } else { "normal" },
+    "data-ui-theme": if dark { "dark" } else { "light" },
+    // children
+}
+```
+
+`subscribe_reduced_motion(callback)` is available for live updates;
+the marketing-page flagship deliberately reads once at mount and
+accepts that mid-session OS toggles require a refresh.
 
 ---
 
@@ -676,3 +769,7 @@ features = [
 - `docs/platform-support.md` — target matrix
 - `examples/component-gallery/` — every component rendered in 4
   variants, served via `dx serve` or built via `dx build --release`
+- `examples/flagship/` — full-bleed marketing page; canonical
+  reference for hosting scenes outside docs chrome and for the
+  binding "Hero-3-seconds" visual check
+  (`examples/flagship/docs/hero-screenshot.png`)

@@ -91,10 +91,14 @@ crates/
   kinetics-cli/     kinetics CLI (init/preview/render/lint/doctor)
 examples/
   component-gallery/ runnable Dioxus documentation gallery
+  flagship/         self-referential marketing page (full-bleed,
+                    composed entirely from existing scenes and
+                    components — no documentation chrome)
 docs/
   component-naming.md
   glass-materials.md
   platform-support.md
+  ai-cheatsheet.md
 ```
 
 ## Features
@@ -368,6 +372,9 @@ This is an MVP library foundation. The current implementation includes:
 - native capture manifest boundary
 - unified facade crate
 - component gallery example app
+- flagship marketing page example (full-bleed hero, scroll-driven
+  story, glass triplet, metric strip, CTA — composed from existing
+  primitives)
 
 Future phases should add overlay managers, focus trapping, runtime theme/density switching, keyboard engines, data-heavy workflow components, visual regression checks, native fidelity work, and deeper backend integrations.
 
@@ -388,3 +395,5 @@ Future phases should add overlay managers, focus trapping, runtime theme/density
 - `docs/superpowers/plans/2026-05-25-gsap-tier-primitives.md`
 - `docs/superpowers/specs/2026-05-25-render-cli-catalog-design.md` — SP-4+5+6 render + CLI + ui-blocks catalog
 - `docs/superpowers/plans/2026-05-25-render-cli-catalog.md`
+- `docs/superpowers/specs/2026-05-25-flagship-marketing-page-design.md` — flagship marketing page (cinematic hero, full-bleed composition)
+- `docs/superpowers/plans/2026-05-25-flagship-marketing-page.md`

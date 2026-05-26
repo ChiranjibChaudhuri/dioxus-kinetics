@@ -13,7 +13,7 @@ pub fn Metrics() -> Element {
                 div { class: "flagship-metrics-grid",
                     MetricCounter {
                         label: "Components ready".to_string(),
-                        value: "33".to_string(),
+                        value: "34".to_string(),
                         delta_text: Some("from the public prelude".to_string()),
                     }
                     MetricCounter {

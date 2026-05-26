@@ -1,4 +1,4 @@
-use component_gallery::persistence::prefers_reduced_motion;
+use component_gallery::persistence::{prefers_color_scheme_dark, prefers_reduced_motion};
 use dioxus::prelude::*;
 use ui_runtime::ReducedMotion;
 use ui_styles::library_css;
@@ -14,15 +14,17 @@ use crate::styles::FLAGSHIP_CSS;
 pub fn App() -> Element {
     let shared = library_css();
 
-    // Read OS-level prefers-reduced-motion once at mount. The flagship has
-    // no runtime motion-pref toggle (unlike the gallery's PreferenceBar), so
-    // changes during a session require a refresh. That's acceptable for a
-    // marketing page; the cost of subscribing to changes (forget'd Closure +
-    // MediaQueryList plumbing) is not justified for this surface.
+    // Read OS-level prefers-reduced-motion and prefers-color-scheme once
+    // at mount. The flagship has no runtime preference UI (unlike the
+    // gallery's PreferenceBar), so OS changes during a session require a
+    // refresh. That's acceptable for a marketing page; subscribing to
+    // MediaQueryList changes (forget'd Closures) is not justified here.
     let reduced = prefers_reduced_motion();
+    let dark = prefers_color_scheme_dark();
     use_context_provider(|| ReducedMotion(reduced));
 
     let motion_attr = if reduced { "reduced" } else { "normal" };
+    let theme_attr = if dark { "dark" } else { "light" };
 
     rsx! {
         style { "{shared}" }
@@ -30,6 +32,7 @@ pub fn App() -> Element {
         main {
             class: "flagship-shell",
             "data-ui-motion": "{motion_attr}",
+            "data-ui-theme": "{theme_attr}",
             Hero {}
             Story {}
             Features {}

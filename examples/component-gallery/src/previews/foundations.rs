@@ -38,3 +38,83 @@ pub fn glass_layer_preview() -> Element {
         }
     }
 }
+
+pub fn heading_preview() -> Element {
+    // Walk the document outline 1..4 so the type ramp is visible top-to-bottom.
+    // Each row keeps its semantic level (h1..h4) while the default variant
+    // derives from that level, so the outline and the visual scale agree.
+    let headings = [
+        (1u8, "Level 1 · h1 → Title1", "Quarterly performance"),
+        (2u8, "Level 2 · h2 → Title2", "Revenue by region"),
+        (3u8, "Level 3 · h3 → Title3", "North America"),
+        (4u8, "Level 4 · h4 → Body", "Enterprise accounts"),
+    ];
+    rsx! {
+        div { class: "gallery-variant-grid gallery-variant-grid--stack",
+            for (level, label, copy) in headings {
+                div { class: "gallery-variant-tile",
+                    span { class: "gallery-variant-label", "{label}" }
+                    Heading { level, "{copy}" }
+                }
+            }
+            div { class: "gallery-variant-tile",
+                span { class: "gallery-variant-label", "Level 2 · variant override → Display" }
+                Heading { level: 2, variant: TextVariant::Display, "Display override" }
+            }
+        }
+    }
+}
+
+pub fn text_preview() -> Element {
+    // Surface several steps of the shared type scale, largest to smallest, so
+    // the optical ramp reads clearly. `as_element` is set per tile to show the
+    // tag allowlist (div/span/p) alongside the variant.
+    let steps = [
+        (
+            TextVariant::Display,
+            "Display",
+            "div",
+            "The optical top of the scale.",
+        ),
+        (
+            TextVariant::Title1,
+            "Title1",
+            "div",
+            "Primary section heading weight.",
+        ),
+        (
+            TextVariant::Headline,
+            "Headline",
+            "span",
+            "Emphasised inline lead-in.",
+        ),
+        (
+            TextVariant::Body,
+            "Body",
+            "p",
+            "Default reading size for paragraphs and prose.",
+        ),
+        (
+            TextVariant::Footnote,
+            "Footnote",
+            "p",
+            "Secondary supporting detail.",
+        ),
+        (
+            TextVariant::Caption,
+            "Caption",
+            "span",
+            "Smallest legible annotation.",
+        ),
+    ];
+    rsx! {
+        div { class: "gallery-variant-grid gallery-variant-grid--stack",
+            for (variant, label, tag, copy) in steps {
+                div { class: "gallery-variant-tile",
+                    span { class: "gallery-variant-label", "{label}" }
+                    Text { variant, as_element: tag.to_string(), "{copy}" }
+                }
+            }
+        }
+    }
+}

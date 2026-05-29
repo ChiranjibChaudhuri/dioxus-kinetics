@@ -294,6 +294,130 @@ fn PopoverPreviewBody() -> Element {
     }
 }
 
+pub fn toaster_preview() -> Element {
+    rsx! { ToasterPreviewBody {} }
+}
+
+#[component]
+fn ToasterPreviewBody() -> Element {
+    // Pre-seed one entry per tone so the static SSR snapshot always shows a
+    // populated stack rather than an empty region. Newly-triggered entries
+    // append with a fresh id; the Toaster's own countdown calls back into
+    // `on_dismiss` with the id to drop. Mirrors ToastPreviewBody pre-seeding.
+    let mut entries: Signal<Vec<ToastEntry>> = use_signal(|| {
+        vec![
+            ToastEntry::new(
+                format!("toaster-{}", TOAST_ID.fetch_add(1, Ordering::Relaxed)),
+                "Report exported",
+            )
+            .with_tone(ToastTone::Success)
+            .with_description("The PDF is ready to download."),
+            ToastEntry::new(
+                format!("toaster-{}", TOAST_ID.fetch_add(1, Ordering::Relaxed)),
+                "Sync started",
+            )
+            .with_tone(ToastTone::Info)
+            .with_description("Pulling the latest data from the broker."),
+            ToastEntry::new(
+                format!("toaster-{}", TOAST_ID.fetch_add(1, Ordering::Relaxed)),
+                "Quota close",
+            )
+            .with_tone(ToastTone::Warning)
+            .with_description("You are at 92% of the plan."),
+        ]
+    });
+
+    let mut push = move |tone: ToastTone, title: &'static str, description: &'static str| {
+        let id = format!("toaster-{}", TOAST_ID.fetch_add(1, Ordering::Relaxed));
+        entries.write().push(
+            ToastEntry::new(id, title)
+                .with_tone(tone)
+                .with_description(description),
+        );
+    };
+
+    rsx! {
+        div { class: "gallery-demo-frame",
+            div { class: "gallery-demo-frame-header",
+                span { class: "gallery-variant-label", "Toaster · fixed-position stack" }
+                div { class: "gallery-demo-frame-transport",
+                    button {
+                        class: "ui-button ui-button--secondary",
+                        r#type: "button",
+                        onclick: move |_| push(ToastTone::Success, "Saved", "Your changes are live."),
+                        "Push success"
+                    }
+                    button {
+                        class: "ui-button ui-button--secondary",
+                        r#type: "button",
+                        onclick: move |_| push(ToastTone::Danger, "Export failed", "Retry or contact support."),
+                        "Push error"
+                    }
+                }
+            }
+            Toaster {
+                items: entries.read().clone(),
+                duration_ms: 5000,
+                on_dismiss: move |id: String| {
+                    entries.write().retain(|entry| entry.id != id);
+                },
+            }
+        }
+    }
+}
+
+pub fn spinner_preview() -> Element {
+    rsx! {
+        div { class: "gallery-variant-grid gallery-variant-grid--stack",
+            div { class: "gallery-variant-tile",
+                span { class: "gallery-variant-label", "Standalone" }
+                Spinner { label: "Loading workspace" }
+            }
+            div { class: "gallery-variant-tile",
+                span { class: "gallery-variant-label", "Inline with text" }
+                span { style: "display: inline-flex; align-items: center; gap: 8px;",
+                    Spinner { label: "Saving" }
+                    span { "Saving changes…" }
+                }
+            }
+        }
+    }
+}
+
+pub fn sheet_preview() -> Element {
+    rsx! { SheetPreviewBody {} }
+}
+
+#[component]
+fn SheetPreviewBody() -> Element {
+    let mut open = use_signal(|| true);
+    rsx! {
+        div { class: "gallery-demo-frame",
+            div { class: "gallery-demo-frame-header",
+                span { class: "gallery-variant-label", "Sheet · end-docked, open by default" }
+                button {
+                    class: "ui-button ui-button--secondary",
+                    r#type: "button",
+                    onclick: move |_| open.set(true),
+                    "Reopen"
+                }
+            }
+            Sheet {
+                open: *open.read(),
+                side: SheetSide::End,
+                title: "Edit filters",
+                on_dismiss: move |_| open.set(false),
+                div { style: "display: grid; gap: 12px;",
+                    p { style: "margin: 0; color: var(--ui-muted-fg);",
+                        "Slides in from the inline-end edge and traps focus while open. Supply any body content; the sheet owns the backdrop, Escape-to-dismiss, and the close button."
+                    }
+                    Button { variant: ButtonVariant::Primary, "Apply filters" }
+                }
+            }
+        }
+    }
+}
+
 pub fn skeleton_preview() -> Element {
     rsx! {
         div { class: "gallery-variant-grid gallery-variant-grid--stack",

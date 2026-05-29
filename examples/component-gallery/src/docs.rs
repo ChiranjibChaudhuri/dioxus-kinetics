@@ -44,6 +44,7 @@ pub enum ComponentCategory {
     Composition,
     Capture,
     Scene,
+    AiNative,
 }
 
 impl ComponentCategory {
@@ -61,6 +62,7 @@ impl ComponentCategory {
             Self::Composition => "Composition",
             Self::Capture => "Capture",
             Self::Scene => "Scene",
+            Self::AiNative => "AI",
         }
     }
 
@@ -82,6 +84,9 @@ impl ComponentCategory {
             Self::Scene => {
                 "Seekable cinematic compositions: one paused clock drives every animation runtime."
             }
+            Self::AiNative => {
+                "Streaming answers, citations, source rails, prompt composers, and agent surfaces for AI-native products."
+            }
         }
     }
 
@@ -99,6 +104,7 @@ impl ComponentCategory {
             Self::Composition => "composition",
             Self::Capture => "capture",
             Self::Scene => "scene",
+            Self::AiNative => "ai",
         }
     }
 }
@@ -137,6 +143,7 @@ pub fn categories() -> &'static [ComponentCategory] {
         ComponentCategory::Navigation,
         ComponentCategory::Layout,
         ComponentCategory::Surfaces,
+        ComponentCategory::AiNative,
         ComponentCategory::Feedback,
         ComponentCategory::DataWorkflows,
         ComponentCategory::Motion,
@@ -152,7 +159,7 @@ pub fn component_docs() -> &'static [ComponentDoc] {
 
 const BASIC_ACCESSIBILITY: &str = "Renders native semantic elements and stable focusable controls.";
 
-const COMPONENT_DOCS: [ComponentDoc; 58] = [
+const COMPONENT_DOCS: [ComponentDoc; 72] = [
     ComponentDoc {
         name: "Button",
         category: ComponentCategory::Actions,
@@ -676,7 +683,321 @@ const COMPONENT_DOCS: [ComponentDoc; 58] = [
         accessibility: "Decorative; the underlying heading is in normal reading order.",
         render: Some(crate::previews::scene::wipe_mask_position_demo_preview),
     },
+    ComponentDoc {
+        name: "StreamingText",
+        category: ComponentCategory::AiNative,
+        status: ComponentStatus::Ready,
+        summary: "Incremental assistant output that renders a settled prefix, a freshly faded latest-chunk token, and a blinking caret while streaming.",
+        snippet: STREAMING_TEXT_SNIPPET,
+        accessibility: "The block is a polite, non-atomic live region (role=status, aria-live=polite) so assistive tech announces only newly appended text, and the caret is aria-hidden.",
+        render: Some(crate::previews::ai::streaming_text_preview),
+    },
+    ComponentDoc {
+        name: "AiStatus",
+        category: ComponentCategory::AiNative,
+        status: ComponentStatus::Ready,
+        summary: "A compact status pill that animates the assistant's current phase (idle, thinking, searching, generating) and swaps to a check glyph when done.",
+        snippet: AI_STATUS_SNIPPET,
+        accessibility: "Rendered as a polite live region (role=status, aria-live=polite) so each phase change is announced once; the dots and check icon are aria-hidden.",
+        render: Some(crate::previews::ai::ai_status_preview),
+    },
+    ComponentDoc {
+        name: "CitationChip",
+        category: ComponentCategory::AiNative,
+        status: ComponentStatus::Ready,
+        summary: "A numbered inline source reference: a real link when given an href, or a non-navigating button chip when not.",
+        snippet: CITATION_CHIP_SNIPPET,
+        accessibility: "Each chip carries an aria-label of the form 'Citation N: <title>' and a title tooltip, so the index and source name are always announced.",
+        render: Some(crate::previews::ai::citation_chip_preview),
+    },
+    ComponentDoc {
+        name: "SourceCard",
+        category: ComponentCategory::AiNative,
+        status: ComponentStatus::Ready,
+        summary: "A Perplexity-style source rail of search-result cards, each showing a favicon (or letter monogram), title, index+domain line, and snippet.",
+        snippet: SOURCE_CARD_SNIPPET,
+        accessibility: "SourceRail is an ARIA list (role=list) and each card is a listitem, so the sources read as one coherent group; favicon glyphs are aria-hidden.",
+        render: Some(crate::previews::ai::source_card_preview),
+    },
+    ComponentDoc {
+        name: "PromptInput",
+        category: ComponentCategory::AiNative,
+        status: ComponentStatus::Ready,
+        summary: "An auto-growing chat composer where Enter submits and Shift+Enter inserts a newline; while streaming, the send button becomes a square Stop control.",
+        snippet: PROMPT_INPUT_SNIPPET,
+        accessibility: "The textarea derives its aria-label from the placeholder, and the send/stop buttons carry explicit aria-labels ('Send' / 'Stop').",
+        render: Some(crate::previews::ai::prompt_input_preview),
+    },
+    ComponentDoc {
+        name: "AssistantPanel",
+        category: ComponentCategory::AiNative,
+        status: ComponentStatus::Ready,
+        summary: "A non-modal docked side panel hosting a full Comet-style assistant: status pill, streaming answer, source rail, and a prompt composer.",
+        snippet: ASSISTANT_PANEL_SNIPPET,
+        accessibility: "Rendered as role=complementary with an aria-label from the title; it is non-modal so focus is not trapped, and both the close button and the Escape key fire on_dismiss.",
+        render: Some(crate::previews::ai::assistant_panel_preview),
+    },
+    ComponentDoc {
+        name: "AgentTimeline",
+        category: ComponentCategory::AiNative,
+        status: ComponentStatus::Ready,
+        summary: "A vertical agent-run timeline whose steps mix done (check), active (filled ring), and pending (hollow ring) nodes with connectors between them.",
+        snippet: AGENT_TIMELINE_SNIPPET,
+        accessibility: "Built as an ordered list (<ol>); the active step is marked aria-current='step' and each node's state is mirrored in visually-hidden text, while glyphs and connectors are aria-hidden.",
+        render: Some(crate::previews::ai::agent_timeline_preview),
+    },
+    ComponentDoc {
+        name: "Heading",
+        category: ComponentCategory::Foundations,
+        status: ComponentStatus::Ready,
+        summary: "Semantic h1..h6 headings whose visual size defaults from the level so the document outline and the type ramp stay in sync.",
+        snippet: HEADING_SNIPPET,
+        accessibility: "Renders the correct h1..h6 element for its level so screen-reader document outlines are accurate; visual size can be overridden without breaking the semantic level.",
+        render: Some(crate::previews::foundations::heading_preview),
+    },
+    ComponentDoc {
+        name: "Text",
+        category: ComponentCategory::Foundations,
+        status: ComponentStatus::Ready,
+        summary: "Body and inline text across the shared TextVariant type scale, with an as_element allowlist (p/span/div) for the rendered tag.",
+        snippet: TEXT_SNIPPET,
+        accessibility: "Decouples visual size from semantics: pick the variant for the optical scale and as_element for the correct element, so emphasis never forces an inappropriate heading tag.",
+        render: Some(crate::previews::foundations::text_preview),
+    },
+    ComponentDoc {
+        name: "Toaster",
+        category: ComponentCategory::Feedback,
+        status: ComponentStatus::Ready,
+        summary: "Fixed-position toast stack that owns a list of ToastEntry values and auto-dismisses each after a per-entry countdown.",
+        snippet: TOASTER_SNIPPET,
+        accessibility: "Each toast carries role=\"alert\" for danger/warning tones and role=\"status\" otherwise, and the countdown pauses on pointer hover so a reader is never interrupted.",
+        render: Some(crate::previews::feedback::toaster_preview),
+    },
+    ComponentDoc {
+        name: "Spinner",
+        category: ComponentCategory::Feedback,
+        status: ComponentStatus::Ready,
+        summary: "Indeterminate loading spinner for inline or standalone busy states, with a CSS-driven animation.",
+        snippet: SPINNER_SNIPPET,
+        accessibility: "Renders role=\"status\" with an aria-label so screen readers announce the loading state, and the spin animation is gated by prefers-reduced-motion in the host stylesheet.",
+        render: Some(crate::previews::feedback::spinner_preview),
+    },
+    ComponentDoc {
+        name: "Sheet",
+        category: ComponentCategory::Feedback,
+        status: ComponentStatus::Ready,
+        summary: "Modal side sheet / drawer that slides in from an inline edge, traps focus, and dismisses on backdrop click, Escape, or the close button.",
+        snippet: SHEET_SNIPPET,
+        accessibility: "The panel is role=\"dialog\" with aria-modal=\"true\" and an aria-label from the title; it pulls focus on mount, traps Tab inside, and restores focus to the opener on every dismissal path.",
+        render: Some(crate::previews::feedback::sheet_preview),
+    },
+    ComponentDoc {
+        name: "Badge",
+        category: ComponentCategory::Surfaces,
+        status: ComponentStatus::Ready,
+        summary: "A small inline status pill that signals semantics through one of six tones, neutral by default.",
+        snippet: BADGE_SNIPPET,
+        accessibility: "Tone is conveyed visually; pair the badge text with a meaningful label so the status is not communicated by color alone.",
+        render: Some(crate::previews::surfaces::badge_preview),
+    },
+    ComponentDoc {
+        name: "Avatar",
+        category: ComponentCategory::Surfaces,
+        status: ComponentStatus::Ready,
+        summary: "A circular user or entity avatar that renders an image when src is set, otherwise derived initials, at three size presets.",
+        snippet: AVATAR_SNIPPET,
+        accessibility: "Image avatars set alt to the name; initials avatars expose aria-label = name so the identity is announced either way.",
+        render: Some(crate::previews::surfaces::avatar_preview),
+    },
 ];
+
+const STREAMING_TEXT_SNIPPET: &str = r#"// chunk_boundaries are BYTE offsets; the largest in-range one splits the
+// settled prefix from the highlighted tail token.
+StreamingText {
+    text: "Revenue grew 18% quarter over quarter, driven mostly by enterprise renewals".to_string(),
+    streaming: true,
+    chunk_boundaries: vec![64],
+}
+StreamingText {
+    text: "Revenue grew 18% quarter over quarter, driven mostly by enterprise renewals.".to_string(),
+    streaming: false,
+}"#;
+
+const AI_STATUS_SNIPPET: &str = r#"AiStatus { state: AiStatusState::Idle, label: "Ready".to_string() }
+AiStatus { state: AiStatusState::Thinking, label: "Reasoning over your request…".to_string() }
+AiStatus { state: AiStatusState::Searching, label: "Searching 4 sources…".to_string() }
+AiStatus { state: AiStatusState::Generating, label: "Generating answer…".to_string() }
+AiStatus { state: AiStatusState::Done, label: "Done".to_string() }"#;
+
+const CITATION_CHIP_SNIPPET: &str = r#"p {
+    "The Rust ownership model prevents data races at compile time"
+    CitationChip {
+        index: 1,
+        title: "The Rust Reference",
+        href: "https://doc.rust-lang.org/reference/",
+    }
+    " and is enforced by the borrow checker"
+    CitationChip { index: 2, title: "Rust Book · Ownership", href: "https://doc.rust-lang.org/book/" }
+    "."
+}
+// No href → renders as a button-role chip (e.g. opens a popover preview).
+CitationChip { index: 3, title: "Tokio · Internal scheduler" }"#;
+
+const SOURCE_CARD_SNIPPET: &str = r#"SourceRail {
+    SourceCard {
+        index: 1,
+        title: "Understanding Ownership",
+        domain: "doc.rust-lang.org",
+        snippet: "Ownership is Rust's most unique feature and enables memory safety without a garbage collector.",
+        href: "https://doc.rust-lang.org/book/ch04-00-understanding-ownership.html",
+    }
+    SourceCard {
+        index: 2,
+        title: "Fearless Concurrency",
+        domain: "blog.rust-lang.org",
+        snippet: "The type system and ownership rules catch concurrency bugs at compile time.",
+        href: "https://blog.rust-lang.org/",
+    }
+    // No href → renders as a static <article> card.
+    SourceCard {
+        index: 3,
+        title: "The Rustonomicon",
+        domain: "doc.rust-lang.org",
+        snippet: "The dark arts of unsafe Rust, for when the safe subset is not enough.",
+    }
+}"#;
+
+const PROMPT_INPUT_SNIPPET: &str = r#"// `value` is fully controlled by the caller via `on_input`.
+let mut value = use_signal(|| "Summarise this quarter's revenue drivers".to_string());
+let mut streaming = use_signal(|| false);
+rsx! {
+    PromptInput {
+        value: value.read().clone(),
+        streaming: *streaming.read(),
+        placeholder: "Ask anything…",
+        on_input: move |next: String| value.set(next),
+        on_submit: move |_submitted: String| value.set(String::new()),
+        on_stop: move |_| streaming.set(false),
+    }
+}"#;
+
+const ASSISTANT_PANEL_SNIPPET: &str = r#"let mut open = use_signal(|| true);
+let mut composer = use_signal(|| String::new());
+rsx! {
+    AssistantPanel {
+        open: *open.read(),
+        side: AssistantSide::End,
+        title: "Workspace assistant",
+        on_dismiss: move |_| open.set(false),
+        AiStatus { state: AiStatusState::Generating, label: "Generating answer…".to_string() }
+        StreamingText {
+            text: "The 0.7 release adds AI-native surfaces".to_string(),
+            streaming: true,
+            chunk_boundaries: vec![20],
+        }
+        SourceRail {
+            SourceCard { index: 1, title: "Release notes · 0.7", domain: "github.com", href: "https://github.com/" }
+        }
+        PromptInput {
+            value: composer.read().clone(),
+            streaming: false,
+            placeholder: "Reply to the assistant…",
+            on_input: move |next: String| composer.set(next),
+            on_submit: move |_submitted: String| composer.set(String::new()),
+        }
+    }
+}"#;
+
+const AGENT_TIMELINE_SNIPPET: &str = r#"AgentTimeline {
+    steps: vec![
+        AgentStep::new("Parse the request", AgentStepState::Done),
+        AgentStep::new("Search the knowledge base", AgentStepState::Done),
+        AgentStep::new("Synthesise an answer", AgentStepState::Active),
+        AgentStep::new("Cite sources", AgentStepState::Pending),
+        AgentStep::new("Deliver response", AgentStepState::Pending),
+    ],
+}"#;
+
+const HEADING_SNIPPET: &str = r#"// Level drives both the semantic tag (h1..h6) and the default visual size.
+Heading { level: 1, "Quarterly performance" }
+Heading { level: 2, "Revenue by region" }
+Heading { level: 3, "North America" }
+Heading { level: 4, "Enterprise accounts" }
+
+// Keep the semantic level but override the visual variant.
+Heading { level: 2, variant: TextVariant::Display, "Display override" }"#;
+
+const TEXT_SNIPPET: &str = r#"// `variant` selects the type scale; `as_element` picks the tag (p / span / div).
+Text { variant: TextVariant::Display, as_element: "div".to_string(), "The optical top of the scale." }
+Text { variant: TextVariant::Title1, as_element: "div".to_string(), "Primary section heading weight." }
+Text { variant: TextVariant::Headline, as_element: "span".to_string(), "Emphasised inline lead-in." }
+Text { variant: TextVariant::Body, "Default reading size for paragraphs and prose." }
+Text { variant: TextVariant::Footnote, "Secondary supporting detail." }
+Text { variant: TextVariant::Caption, as_element: "span".to_string(), "Smallest legible annotation." }"#;
+
+const TOASTER_SNIPPET: &str = r#"let mut entries = use_signal(|| vec![
+    ToastEntry::new("saved", "Report exported")
+        .with_tone(ToastTone::Success)
+        .with_description("The PDF is ready to download."),
+    ToastEntry::new("sync", "Sync started")
+        .with_tone(ToastTone::Info)
+        .with_description("Pulling the latest data from the broker."),
+    ToastEntry::new("quota", "Quota close")
+        .with_tone(ToastTone::Warning)
+        .with_description("You are at 92% of the plan."),
+]);
+
+rsx! {
+    Toaster {
+        items: entries.read().clone(),
+        duration_ms: 5000,
+        on_dismiss: move |id: String| {
+            entries.write().retain(|entry| entry.id != id);
+        },
+    }
+}"#;
+
+const SPINNER_SNIPPET: &str = r#"Spinner { label: "Loading workspace" }
+
+span { style: "display: inline-flex; align-items: center; gap: 8px;",
+    Spinner { label: "Saving" }
+    span { "Saving changes…" }
+}"#;
+
+const SHEET_SNIPPET: &str = r#"let mut open = use_signal(|| true);
+
+rsx! {
+    Sheet {
+        open: *open.read(),
+        side: SheetSide::End,
+        title: "Edit filters",
+        on_dismiss: move |_| open.set(false),
+        div { style: "display: grid; gap: 12px;",
+            p { style: "margin: 0; color: var(--ui-muted-fg);",
+                "Slides in from the inline-end edge and traps focus while open. Supply any body content; the sheet owns the backdrop, Escape-to-dismiss, and the close button."
+            }
+            Button { variant: ButtonVariant::Primary, "Apply filters" }
+        }
+    }
+}"#;
+
+const BADGE_SNIPPET: &str = r#"div { style: "display: flex; flex-wrap: wrap; gap: 8px; align-items: center;",
+    Badge { tone: BadgeTone::Neutral, "Draft" }
+    Badge { tone: BadgeTone::Primary, "New" }
+    Badge { tone: BadgeTone::Success, "Active" }
+    Badge { tone: BadgeTone::Warning, "Degraded" }
+    Badge { tone: BadgeTone::Danger, "Down" }
+    Badge { tone: BadgeTone::Info, "Beta" }
+}"#;
+
+const AVATAR_SNIPPET: &str = r#"div { style: "display: flex; align-items: center; gap: 16px;",
+    // Initials fallback when no src is provided
+    Avatar { name: "Ada Lovelace", size: AvatarSize::Sm }
+    Avatar { name: "Ada Lovelace", size: AvatarSize::Md }
+    Avatar { name: "Ada Lovelace", size: AvatarSize::Lg }
+    // Image avatar — swap src for your own asset or URL
+    Avatar { name: "Ada Lovelace", src: "https://i.pravatar.cc/96", size: AvatarSize::Lg }
+}"#;
 
 const BUTTON_SNIPPET: &str = r#"Button {
     variant: ButtonVariant::Primary,

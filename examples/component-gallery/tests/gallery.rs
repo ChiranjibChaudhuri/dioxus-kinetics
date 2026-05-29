@@ -13,6 +13,7 @@ fn registry_groups_components_by_product_category() {
             ComponentCategory::Navigation,
             ComponentCategory::Layout,
             ComponentCategory::Surfaces,
+            ComponentCategory::AiNative,
             ComponentCategory::Feedback,
             ComponentCategory::DataWorkflows,
             ComponentCategory::Motion,

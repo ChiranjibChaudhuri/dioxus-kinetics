@@ -85,6 +85,26 @@ export const COMPONENT_MANIFEST: ManifestEntry[] = [
   { name: "Scene · Wipe Conic Demo", slug: "scene-wipe-conic-demo", status: "ready", layers: { smoke: true, motion: true, visual: true } },
   { name: "Scene · Wipe Iris Demo", slug: "scene-wipe-iris-demo", status: "ready", layers: { smoke: true, motion: true, visual: true } },
   { name: "Scene · Wipe Mask-Position Demo", slug: "scene-wipe-mask-position-demo", status: "ready", layers: { smoke: true, motion: true, visual: true } },
+  // AI-native (smoke-covered; visual baselines deferred — the new design
+  // tokens intentionally shift pixels, so visual snapshots are regenerated in
+  // a separate, human-reviewed pass).
+  { name: "StreamingText", slug: "streaming-text", status: "ready", layers: { smoke: true, motion: false, visual: false } },
+  { name: "AiStatus", slug: "ai-status", status: "ready", layers: { smoke: true, motion: false, visual: false } },
+  { name: "CitationChip", slug: "citation-chip", status: "ready", layers: { smoke: true, motion: false, visual: false } },
+  { name: "SourceCard", slug: "source-card", status: "ready", layers: { smoke: true, motion: false, visual: false } },
+  { name: "PromptInput", slug: "prompt-input", status: "ready", layers: { smoke: true, motion: false, visual: false } },
+  { name: "AssistantPanel", slug: "assistant-panel", status: "ready", layers: { smoke: true, motion: false, visual: false } },
+  { name: "AgentTimeline", slug: "agent-timeline", status: "ready", layers: { smoke: true, motion: false, visual: false } },
+  // Foundations
+  { name: "Heading", slug: "heading", status: "ready", layers: { smoke: true, motion: false, visual: false } },
+  { name: "Text", slug: "text", status: "ready", layers: { smoke: true, motion: false, visual: false } },
+  // Feedback
+  { name: "Toaster", slug: "toaster", status: "ready", layers: { smoke: true, motion: false, visual: false } },
+  { name: "Spinner", slug: "spinner", status: "ready", layers: { smoke: true, motion: false, visual: false } },
+  { name: "Sheet", slug: "sheet", status: "ready", layers: { smoke: true, motion: false, visual: false } },
+  // Surfaces
+  { name: "Badge", slug: "badge", status: "ready", layers: { smoke: true, motion: false, visual: false } },
+  { name: "Avatar", slug: "avatar", status: "ready", layers: { smoke: true, motion: false, visual: false } },
 ];
 
 export function readyComponents(): ManifestEntry[] {

@@ -7,6 +7,14 @@
 //!   - the consumer owns both `value` (selected option) and `query`
 //!     (current text), making the component fully controlled.
 //!
+//! The input owns a roving active-index over the *filtered* options:
+//! ArrowDown/ArrowUp move through the visible matches (wrapping), Enter
+//! commits the active match (or the first when none is active yet) via
+//! `on_select`, and Escape clears the query / closes the listbox. The
+//! active option carries `data-active="true"`, mirrored onto the input
+//! via `aria-activedescendant`. A visually-hidden `aria-live="polite"`
+//! status sibling announces the visible result count.
+//!
 //! Use `Select` for short, fixed lists where typeahead is overkill,
 //! and `Combobox` for longer lists or when free-text input matters.
 
@@ -55,6 +63,40 @@ pub fn filter_options<'a>(options: &'a [ComboboxOption], query: &str) -> Vec<&'a
         .collect()
 }
 
+/// Pure helper: the screen-reader status string announcing how many
+/// options are currently visible.
+fn results_status(count: usize) -> String {
+    match count {
+        0 => "No results".to_string(),
+        1 => "1 result".to_string(),
+        n => format!("{n} results"),
+    }
+}
+
+/// Step the active index by `delta` (±1) across the filtered options,
+/// wrapping around and skipping disabled rows. Returns `None` when no
+/// visible option is selectable.
+fn step_visible(visible: &[&ComboboxOption], from: usize, delta: i32) -> Option<usize> {
+    let len = visible.len();
+    if len == 0 || visible.iter().all(|opt| opt.disabled) {
+        return None;
+    }
+    let len_i = len as i32;
+    let mut idx = from as i32;
+    for _ in 0..len {
+        idx = (idx + delta).rem_euclid(len_i);
+        if !visible[idx as usize].disabled {
+            return Some(idx as usize);
+        }
+    }
+    None
+}
+
+/// First selectable (enabled) index in the filtered options.
+fn first_visible_index(visible: &[&ComboboxOption]) -> Option<usize> {
+    visible.iter().position(|opt| !opt.disabled)
+}
+
 #[component]
 pub fn Combobox(
     /// Stable id; also passed to the underlying Popover as its panel id.
@@ -80,12 +122,34 @@ pub fn Combobox(
     on_select: Option<EventHandler<String>>,
 ) -> Element {
     let mut open = use_signal(|| default_open);
+    // Roving active index over the *filtered* options. Clamped against
+    // the visible length each render so query changes never leave a
+    // stale out-of-range cursor.
+    let mut active = use_signal(|| 0usize);
 
     let label_id = format!("{id}-label");
     let popover_id = format!("{id}-popover");
     let listbox_id = format!("{id}-listbox");
+    let status_id = format!("{id}-status");
     let visible = filter_options(&options, &query);
     let has_matches = !visible.is_empty();
+
+    // Clamp the active index into the current visible range.
+    let active_index = if visible.is_empty() {
+        0
+    } else {
+        (*active.read()).min(visible.len() - 1)
+    };
+    let active_descendant = visible
+        .get(active_index)
+        .filter(|_| *open.read() && has_matches)
+        .map(|opt| format!("{id}-option-{}", opt.value))
+        .unwrap_or_default();
+    let status_text = results_status(visible.len());
+
+    // Snapshots for the keydown closure.
+    let key_options = options.clone();
+    let key_query = query.clone();
 
     rsx! {
         div { class: "ui-combobox",
@@ -109,26 +173,96 @@ pub fn Combobox(
                         "aria-haspopup": "listbox",
                         "aria-expanded": if *open.read() { "true" } else { "false" },
                         "aria-controls": "{listbox_id}",
+                        "aria-activedescendant": "{active_descendant}",
                         disabled,
                         oninput: move |evt| {
                             open.set(true);
+                            // A fresh query reframes the result set; restart
+                            // the cursor at the first match.
+                            active.set(0);
                             if let Some(handler) = &on_query {
                                 handler.call(evt.value());
                             }
                         },
                         onfocus: move |_| open.set(true),
+                        onkeydown: move |evt| {
+                            let current_visible = filter_options(&key_options, &key_query);
+                            let current = *active.read();
+                            match evt.key() {
+                                Key::ArrowDown => {
+                                    evt.prevent_default();
+                                    if !*open.read() {
+                                        open.set(true);
+                                    }
+                                    if let Some(next) = step_visible(&current_visible, current, 1) {
+                                        active.set(next);
+                                    }
+                                }
+                                Key::ArrowUp => {
+                                    evt.prevent_default();
+                                    if !*open.read() {
+                                        open.set(true);
+                                    }
+                                    if let Some(next) = step_visible(&current_visible, current, -1) {
+                                        active.set(next);
+                                    }
+                                }
+                                Key::Enter => {
+                                    // Commit the active match, or the first
+                                    // selectable match when the cursor has not
+                                    // moved yet.
+                                    let target = current_visible
+                                        .get(current)
+                                        .filter(|opt| !opt.disabled)
+                                        .map(|_| current)
+                                        .or_else(|| first_visible_index(&current_visible));
+                                    if let Some(idx) = target {
+                                        if let Some(opt) = current_visible.get(idx) {
+                                            evt.prevent_default();
+                                            if let Some(handler) = &on_select {
+                                                handler.call(opt.value.clone());
+                                            }
+                                            open.set(false);
+                                        }
+                                    }
+                                }
+                                Key::Escape => {
+                                    evt.stop_propagation();
+                                    active.set(0);
+                                    if !key_query.is_empty() {
+                                        if let Some(handler) = &on_query {
+                                            handler.call(String::new());
+                                        }
+                                    }
+                                    open.set(false);
+                                }
+                                _ => {}
+                            }
+                        },
                     }
                 },
+                // Screen-reader status announcing the live result count.
+                // `aria-live="polite"` makes this a live region without the
+                // explicit `role="status"` (which would collide with the
+                // empty-state `<p role="status">` for single-element locators).
+                div {
+                    id: "{status_id}",
+                    class: "visually-hidden",
+                    "aria-live": "polite",
+                    "aria-atomic": "true",
+                    "{status_text}"
+                }
                 if has_matches {
                     ul {
                         id: "{listbox_id}",
                         class: "ui-combobox-listbox",
                         role: "listbox",
                         "aria-labelledby": "{label_id}",
-                        for option in visible.iter().copied().cloned() {
+                        for (idx, option) in visible.iter().copied().cloned().enumerate() {
                             {
                                 let option_value = option.value.clone();
                                 let is_selected = option_value == value;
+                                let is_active = idx == active_index;
                                 let opt_class = if option.disabled {
                                     "ui-combobox-option ui-combobox-option--disabled"
                                 } else if is_selected {
@@ -137,16 +271,20 @@ pub fn Combobox(
                                     "ui-combobox-option"
                                 };
                                 let disabled_opt = option.disabled;
+                                let option_dom_id = format!("{id}-option-{option_value}");
                                 rsx! {
                                     li {
+                                        id: "{option_dom_id}",
                                         class: "{opt_class}",
                                         role: "option",
                                         "aria-selected": if is_selected { "true" } else { "false" },
                                         "aria-disabled": if disabled_opt { "true" } else { "false" },
+                                        "data-active": if is_active && !disabled_opt { "true" } else { "false" },
                                         onclick: move |_| {
                                             if disabled_opt {
                                                 return;
                                             }
+                                            active.set(idx);
                                             if let Some(handler) = &on_select {
                                                 handler.call(option_value.clone());
                                             }
@@ -210,5 +348,44 @@ mod tests {
     fn disabled_builder_sets_flag() {
         let opt = ComboboxOption::new("apple", "Apple").disabled();
         assert!(opt.disabled);
+    }
+
+    #[test]
+    fn results_status_singular_plural_and_empty() {
+        assert_eq!(results_status(0), "No results");
+        assert_eq!(results_status(1), "1 result");
+        assert_eq!(results_status(3), "3 results");
+    }
+
+    #[test]
+    fn step_visible_wraps_and_skips_disabled() {
+        let all = vec![
+            ComboboxOption::new("a", "A"),
+            ComboboxOption::new("b", "B").disabled(),
+            ComboboxOption::new("c", "C"),
+        ];
+        let visible = filter_options(&all, "");
+        assert_eq!(step_visible(&visible, 0, 1), Some(2));
+        assert_eq!(step_visible(&visible, 2, 1), Some(0));
+        assert_eq!(step_visible(&visible, 0, -1), Some(2));
+    }
+
+    #[test]
+    fn step_visible_empty_or_all_disabled_is_none() {
+        let empty: Vec<&ComboboxOption> = Vec::new();
+        assert_eq!(step_visible(&empty, 0, 1), None);
+        let all = vec![ComboboxOption::new("a", "A").disabled()];
+        let visible = filter_options(&all, "");
+        assert_eq!(step_visible(&visible, 0, 1), None);
+    }
+
+    #[test]
+    fn first_visible_index_skips_leading_disabled() {
+        let all = vec![
+            ComboboxOption::new("a", "A").disabled(),
+            ComboboxOption::new("b", "B"),
+        ];
+        let visible = filter_options(&all, "");
+        assert_eq!(first_visible_index(&visible), Some(1));
     }
 }

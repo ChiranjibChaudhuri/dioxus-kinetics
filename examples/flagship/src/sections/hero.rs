@@ -1,5 +1,6 @@
 use component_gallery::previews::scenes::product_intro::ProductIntroScene;
 use dioxus::prelude::*;
+use kinetics::prelude::{Presence, PresenceCue};
 
 #[component]
 pub fn Hero() -> Element {
@@ -17,17 +18,28 @@ pub fn Hero() -> Element {
                 "Kinetics — composable motion for Rust apps"
             }
             div { class: "flagship-hero-stage",
-                // Freeze the scene at the cinematic peak (t=2200ms) so the
-                // hero presents a curated still — title and body together,
-                // pre-flip-cards — rather than racing autoplay against
-                // first paint. The title clip's window is [0, 2400) and
-                // the body clip's is [800, 3200); 2200ms sits inside both
-                // with the body fully faded in. The transport stays
-                // hidden.
-                ProductIntroScene {
-                    controls: false,
-                    autoplay: false,
-                    initial_elapsed_ms: 2_200.0,
+                // One-shot entrance: Presence mounts with `present: true`,
+                // so under normal motion it starts in `Entering` and ramps
+                // `--ui-presence-t` 0 -> 1 once on load (the `rise` cue fades
+                // and lifts the frozen still into place). Under reduced
+                // motion `use_presence_animation` starts in `Visible` and
+                // the library's `[data-ui-motion=reduced] .ui-presence` rule
+                // pins `--ui-presence-t: 1`, so the still simply appears.
+                // `.ui-presence` is `display: contents`, so the wrapper does
+                // not disturb the hero-stage grid sizing.
+                Presence { present: true, cue: PresenceCue::Rise,
+                    // Freeze the scene at the cinematic peak (t=2200ms) so the
+                    // hero presents a curated still — title and body together,
+                    // pre-flip-cards — rather than racing autoplay against
+                    // first paint. The title clip's window is [0, 2400) and
+                    // the body clip's is [800, 3200); 2200ms sits inside both
+                    // with the body fully faded in. The transport stays
+                    // hidden.
+                    ProductIntroScene {
+                        controls: false,
+                        autoplay: false,
+                        initial_elapsed_ms: 2_200.0,
+                    }
                 }
             }
         }

@@ -1,8 +1,10 @@
 /* SplitText: per-glyph and per-word spans must be inline-block so
    transforms applied by KineticBox parents (translate, scale, rotate)
-   actually render — inline elements ignore transform. */
-.ui-split-text-glyph,
-.ui-split-text-word {
+   actually render — inline elements ignore transform. The component emits
+   BEM double-underscore class names (ui-split-text__glyph / __word), so the
+   selectors here must match exactly or the styles silently no-op. */
+.ui-split-text__glyph,
+.ui-split-text__word {
   display: inline-block;
   will-change: transform, opacity;
 }

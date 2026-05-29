@@ -3,7 +3,15 @@ use kinetics::prelude::*;
 use ui_composition::ClipFill;
 
 #[component]
-pub fn ScrollPinnedStoryScene() -> Element {
+pub fn ScrollPinnedStoryScene(
+    /// Show the Scene's transport (play/pause + scrubber + time readout).
+    /// Defaults to `true` so the gallery preview tile keeps its scrub UI;
+    /// the flagship Story section passes `false` so a debug transport does
+    /// not surface inside the marketing narrative. Mirrors
+    /// `ProductIntroScene::controls`.
+    #[props(default = true)]
+    controls: bool,
+) -> Element {
     let driver = SceneDriver::Scroll(ScrollObserverConfig::new("#scroll-story-trigger"));
     rsx! {
         div { class: "scene-scroll-shell",
@@ -19,7 +27,7 @@ pub fn ScrollPinnedStoryScene() -> Element {
                         height: 720,
                         duration_ms: 10_000.0,
                         driver: Some(driver),
-                        controls: Some(true),
+                        controls: Some(controls),
 
                         Clip { start_ms: 0.0, duration_ms: 2_500.0, fill: ClipFill::HoldEnd,
                             KineticText {

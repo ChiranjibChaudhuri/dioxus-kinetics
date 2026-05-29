@@ -102,7 +102,14 @@ pub fn use_animation_value_from(
                 }
                 Transition::Spring(spring) => {
                     let v = *velocity_cell.borrow();
-                    let step = spring.step(current, current_target, v, (dt_ms as f32) / 1000.0);
+                    // Analytic (closed-form) integration stays stable even when
+                    // `dt_ms` spikes (e.g. a backgrounded tab regains focus and
+                    // the RAF loop is handed a multi-second delta); the explicit
+                    // Euler `step` would overshoot/diverge there. The persisted
+                    // `velocity_cell` carries momentum across retargets so an
+                    // interrupted spring continues smoothly instead of restarting.
+                    let step =
+                        spring.analytic_step(current, current_target, v, (dt_ms as f32) / 1000.0);
                     *velocity_cell.borrow_mut() = step.velocity;
                     signal.set(step.value);
                     if (step.value - current_target).abs() < 0.001 && step.velocity.abs() < 0.01 {

@@ -34,8 +34,24 @@ impl Capabilities {
     /// The most-capable tier this environment can support, modulo user
     /// preferences. High-contrast and reduced-transparency snap to SolidCss
     /// regardless of GPU availability.
+    ///
+    /// `reduced_motion` never selects a live GPU loop (`WgpuWebGpu` /
+    /// `WgpuWebGl2`): the per-frame compositor render is an ongoing animation
+    /// that the user has asked us to suppress. Instead it snaps down to the
+    /// best *static* tier — `SvgFilter` (a non-animated CSS
+    /// `backdrop-filter` chain) when backdrop-filter is available, otherwise
+    /// `SolidCss`. Transparency is preserved where possible; only the live
+    /// motion is dropped.
     pub fn best_tier(&self) -> Tier {
         if self.high_contrast || self.reduced_transparency {
+            return Tier::SolidCss;
+        }
+        if self.reduced_motion {
+            // Skip the wgpu tiers — they imply a continuous rAF render loop.
+            // Fall straight to the static fallbacks.
+            if self.has_backdrop_filter {
+                return Tier::SvgFilter;
+            }
             return Tier::SolidCss;
         }
         if self.has_webgpu {
@@ -110,5 +126,65 @@ pub fn detect() -> Capabilities {
         reduced_motion: false,
         reduced_transparency: false,
         high_contrast: false,
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::{Capabilities, Tier};
+
+    #[test]
+    fn reduced_motion_avoids_live_gpu_loop_uses_svg() {
+        // Even with WebGPU available, reduced-motion must not select a
+        // continuous render loop tier — it snaps to the static SvgFilter.
+        let caps = Capabilities {
+            has_webgpu: true,
+            has_webgl2: true,
+            has_backdrop_filter: true,
+            reduced_motion: true,
+            reduced_transparency: false,
+            high_contrast: false,
+        };
+        assert_eq!(caps.best_tier(), Tier::SvgFilter);
+    }
+
+    #[test]
+    fn reduced_motion_without_backdrop_filter_falls_to_solid() {
+        let caps = Capabilities {
+            has_webgpu: true,
+            has_webgl2: true,
+            has_backdrop_filter: false,
+            reduced_motion: true,
+            reduced_transparency: false,
+            high_contrast: false,
+        };
+        assert_eq!(caps.best_tier(), Tier::SolidCss);
+    }
+
+    #[test]
+    fn reduced_transparency_still_wins_over_reduced_motion() {
+        // reduced_transparency forces SolidCss regardless of reduced_motion.
+        let caps = Capabilities {
+            has_webgpu: true,
+            has_webgl2: true,
+            has_backdrop_filter: true,
+            reduced_motion: true,
+            reduced_transparency: true,
+            high_contrast: false,
+        };
+        assert_eq!(caps.best_tier(), Tier::SolidCss);
+    }
+
+    #[test]
+    fn no_reduced_motion_still_prefers_webgpu() {
+        let caps = Capabilities {
+            has_webgpu: true,
+            has_webgl2: true,
+            has_backdrop_filter: true,
+            reduced_motion: false,
+            reduced_transparency: false,
+            high_contrast: false,
+        };
+        assert_eq!(caps.best_tier(), Tier::WgpuWebGpu);
     }
 }

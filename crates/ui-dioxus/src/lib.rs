@@ -1,6 +1,7 @@
 #![forbid(unsafe_code)]
 
 mod accordion;
+mod ai;
 mod buttons;
 mod capture;
 mod combobox;
@@ -20,6 +21,7 @@ mod scene_player;
 mod select;
 mod split_text;
 pub mod stagger;
+mod typography;
 
 use dioxus::prelude::*;
 use ui_glass::{GlassDensity, GlassLevel, GlassTone};
@@ -43,6 +45,10 @@ use ui_glass::{GlassDensity, GlassLevel, GlassTone};
 // ---------------------------------------------------------------------------
 
 pub use accordion::{Accordion, AccordionSection};
+pub use ai::{
+    AgentStep, AgentStepState, AgentTimeline, AiStatus, AiStatusState, AssistantPanel,
+    AssistantSide, CitationChip, PromptInput, SourceCard, SourceRail, StreamingText,
+};
 pub use buttons::{IconButton, IconButtonSize, IconButtonTone};
 pub use capture::CaptureStage;
 pub use combobox::{filter_options, Combobox, ComboboxOption};
@@ -51,10 +57,13 @@ pub use composition::{FrameClip, FrameLayer, FrameStage};
 pub use cue_style::{cue_animation_duration_ms, cue_inline_style, cue_inline_style_with_duration};
 pub use data_table::{DataTable, DataTableColumn, DataTableRow, SortDirection};
 pub use datepicker::{
-    day_of_week, days_in_month, format_iso_date, parse_iso_date, DatePicker,
-    DATEPICKER_DEFAULT_ANCHOR,
+    add_days, add_months, day_of_week, days_in_month, end_of_week, format_iso_date, parse_iso_date,
+    start_of_week, DatePicker, DATEPICKER_DEFAULT_ANCHOR,
 };
-pub use display::{Alert, AlertTone, EmptyState, MetricCard, MetricTone, Progress, Skeleton};
+pub use display::{
+    Alert, AlertTone, Avatar, AvatarSize, Badge, BadgeTone, EmptyState, MetricCard, MetricTone,
+    Progress, Skeleton, Spinner,
+};
 pub use display::{EmptyState as BlankState, MetricCard as MetricReadout};
 pub use forms::{Checkbox, RadioGroup, RadioOption, Slider, Switch, TextField, TextFieldType};
 pub use forms::{
@@ -74,7 +83,7 @@ pub use navigation::{
 pub use navigation::{Sidebar as NavigationRail, Tabs as ViewSwitcher, Toolbar as ActionBar};
 pub use overlays::{
     CommandGroup, CommandItem, CommandMenu, Dialog, DialogAction, DialogActionTone, DropdownMenu,
-    DropdownMenuItem, Toast, ToastTone, Tooltip,
+    DropdownMenuItem, Sheet, SheetSide, Toast, ToastEntry, ToastTone, Toaster, Tooltip,
 };
 pub use overlays::{
     CommandMenu as CommandFinder, Dialog as ModalLayer, DropdownMenu as ActionMenu,
@@ -85,8 +94,9 @@ pub use scene_player::{Clip, Scene, SceneContext};
 pub use select::{Select, SelectOption};
 pub use split_text::{SplitMode, SplitText};
 pub use stagger::StaggerCursor;
+pub use typography::{Heading, Text, TextVariant};
 #[cfg(feature = "liquid-glass")]
-pub use ui_glass_dioxus::{LiquidSurface, LiquidSurfaceProps};
+pub use ui_glass_dioxus::{GlassPower, LiquidSurface, LiquidSurfaceProps};
 pub use ui_runtime::SceneState;
 
 pub use Button as ActionControl;

@@ -390,9 +390,9 @@ body::before {
 
 [data-ui-theme="dark"] body::before {
     background:
-        radial-gradient(closest-side at 18% 28%, rgba(40, 90, 140, 0.50), transparent 70%),
-        radial-gradient(closest-side at 78% 22%, rgba(110, 60, 150, 0.40), transparent 70%),
-        radial-gradient(closest-side at 50% 82%, rgba(30, 110, 100, 0.40), transparent 70%),
+        radial-gradient(closest-side at 18% 28%, color-mix(in srgb, var(--ui-primary), transparent 55%), transparent 70%),
+        radial-gradient(closest-side at 78% 22%, color-mix(in srgb, var(--ui-info), transparent 60%), transparent 70%),
+        radial-gradient(closest-side at 50% 82%, color-mix(in srgb, var(--ui-success), transparent 62%), transparent 70%),
         var(--ui-bg);
 }
 

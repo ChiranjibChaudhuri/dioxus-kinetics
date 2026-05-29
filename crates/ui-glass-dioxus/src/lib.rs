@@ -20,3 +20,4 @@ pub mod web;
 pub mod stub;
 
 pub use component::{LiquidSurface, LiquidSurfaceProps};
+pub use surface_state::GlassPower;

@@ -418,3 +418,42 @@ pub fn build_mipmap_pipeline(device: &Arc<wgpu::Device>) -> wgpu::RenderPipeline
         cache: None,
     })
 }
+
+// `cargo build` does NOT validate WGSL — wgpu compiles shaders via `naga` at
+// runtime (on a GPU). These tests run `naga`'s WGSL front-end + validator over
+// the embedded shader sources at `cargo test` time, so a syntax/type error
+// (e.g. a uniform field mismatch with `uniforms.rs`, a bad `vec4` arity, or an
+// undefined identifier) fails CI WITHOUT needing a GPU. `wgpu` re-exports the
+// exact `naga` it uses, so validation matches the runtime pipeline.
+#[cfg(all(test, not(target_arch = "wasm32")))]
+mod shader_validation_tests {
+    use super::{BLUR_SRC, COMPOSE_SRC, MIPMAP_SRC};
+    use wgpu::naga;
+
+    fn validate(label: &str, src: &str) {
+        let module = naga::front::wgsl::parse_str(src)
+            .unwrap_or_else(|e| panic!("{label} should parse as WGSL: {e:?}"));
+        let mut validator = naga::valid::Validator::new(
+            naga::valid::ValidationFlags::all(),
+            naga::valid::Capabilities::all(),
+        );
+        validator
+            .validate(&module)
+            .unwrap_or_else(|e| panic!("{label} should pass naga validation: {e:?}"));
+    }
+
+    #[test]
+    fn compose_shader_is_valid_wgsl() {
+        validate("compose.wgsl", COMPOSE_SRC);
+    }
+
+    #[test]
+    fn blur_shader_is_valid_wgsl() {
+        validate("blur.wgsl", BLUR_SRC);
+    }
+
+    #[test]
+    fn mipmap_shader_is_valid_wgsl() {
+        validate("mipmap.wgsl", MIPMAP_SRC);
+    }
+}

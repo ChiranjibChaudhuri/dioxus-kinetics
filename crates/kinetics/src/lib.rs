@@ -7,20 +7,24 @@ pub mod prelude {
     };
     #[allow(deprecated)]
     pub use ui_dioxus::{
-        Accordion, AccordionSection, ActionBar, ActionControl, ActionMenu, Alert, AlertTone,
-        BlankState, Breadcrumb, BreadcrumbItem, Button, ButtonVariant, CaptureStage, Checkbox,
-        ChoiceMark, Clip, Combobox, ComboboxOption, CommandFinder, CommandGroup, CommandItem,
-        CommandMenu, ContentPlane, ContextHint, Cue, DataTable, DataTableColumn, DataTableRow,
-        DatePicker, Dialog, DialogAction, DialogActionTone, DropdownMenu, DropdownMenuItem,
-        EmptyState, FrameClip, FrameLayer, FrameStage, GlassLayer, GlassSurface, IconButton,
+        Accordion, AccordionSection, ActionBar, ActionControl, ActionMenu, AgentStep,
+        AgentStepState, AgentTimeline, AiStatus, AiStatusState, Alert, AlertTone, AssistantPanel,
+        AssistantSide, Avatar, AvatarSize, Badge, BadgeTone, BlankState, Breadcrumb,
+        BreadcrumbItem, Button, ButtonVariant, CaptureStage, Checkbox, ChoiceMark, CitationChip,
+        Clip, Combobox, ComboboxOption, CommandFinder, CommandGroup, CommandItem, CommandMenu,
+        ContentPlane, ContextHint, Cue, DataTable, DataTableColumn, DataTableRow, DatePicker,
+        Dialog, DialogAction, DialogActionTone, DropdownMenu, DropdownMenuItem, EmptyState,
+        FrameClip, FrameLayer, FrameStage, GlassLayer, GlassSurface, Heading, IconButton,
         IconButtonSize, IconButtonTone, KineticBox, KineticText, MetricCard, MetricReadout,
         MetricTone, ModalLayer, MotionPath, NavigationRail, NoticeStack, OptionGroup, Pagination,
-        Popover, PopoverSide, Presence, PresenceCue, PresenceGate, Progress, RadioGroup,
-        RadioOption, Scene, SceneContext, SegmentItem, SegmentedControl, Select, SelectOption,
-        Sequence, SequenceContext, SharedElement, SharedLayout, Sidebar, SidebarItem,
-        SidebarSection, Skeleton, Slider, SortDirection, SplitMode, SplitText, Stack, StateSwitch,
-        Stepper, StepperStep, Surface, Switch, TabItem, TabPanel, Tabs, TextEntry, TextField,
-        TimelineScope, Toast, ToastTone, Toolbar, Tooltip, ViewSwitcher,
+        Popover, PopoverSide, Presence, PresenceCue, PresenceGate, Progress, PromptInput,
+        RadioGroup, RadioOption, Scene, SceneContext, SegmentItem, SegmentedControl, Select,
+        SelectOption, Sequence, SequenceContext, SharedElement, SharedLayout, Sheet, SheetSide,
+        Sidebar, SidebarItem, SidebarSection, Skeleton, Slider, SortDirection, SourceCard,
+        SourceRail, Spinner, SplitMode, SplitText, Stack, StateSwitch, Stepper, StepperStep,
+        StreamingText, Surface, Switch, TabItem, TabPanel, Tabs, Text, TextEntry, TextField,
+        TextVariant, TimelineScope, Toast, ToastEntry, ToastTone, Toaster, Toolbar, Tooltip,
+        ViewSwitcher,
     };
     pub use ui_glass::{
         resolve_glass, GlassDensity, GlassLevel, GlassPolicy, GlassRecipe, GlassRequest, GlassTone,
@@ -136,6 +140,22 @@ pub fn public_api_names() -> Vec<&'static str> {
         "PathPoint",
         "SplitText",
         "SplitMode",
+        "StreamingText",
+        "AiStatus",
+        "CitationChip",
+        "SourceCard",
+        "SourceRail",
+        "PromptInput",
+        "AssistantPanel",
+        "AgentTimeline",
+        "Heading",
+        "Text",
+        "Badge",
+        "Avatar",
+        "Spinner",
+        "Sheet",
+        "Toaster",
+        "ToastEntry",
     ];
 
     #[cfg(feature = "icons")]
@@ -148,6 +168,13 @@ pub fn public_api_names() -> Vec<&'static str> {
         "Minus",
         "Trash",
         "Search",
+        "Sparkle",
+        "Stop",
+        "Send",
+        "Quote",
+        "Globe",
+        "Copy",
+        "Link",
     ]);
 
     #[cfg(feature = "runtime")]

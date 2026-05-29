@@ -106,6 +106,15 @@ pub const FLAGSHIP_CSS: &str = r#"
     height: 100%;
 }
 
+/* The hero's one-shot entrance wraps the scene in `.ui-presence`, which is
+   `display: contents` — so the real sizing target becomes the scene one
+   level deeper. Re-assert the full-bleed sizing on the presence wrapper's
+   child so the frozen still keeps filling the stage. */
+.flagship-hero-stage > .ui-presence > * {
+    width: 100%;
+    height: 100%;
+}
+
 /* The hero hosts the Scene's stage at full bleed and provides its own
    backdrop (ambient mesh). Override the scene-stage's default dark fill
    so the mesh shows through; drop the rounded corners and let the stage
@@ -177,6 +186,13 @@ pub const FLAGSHIP_CSS: &str = r#"
     width: 100vw;
 }
 
+/* Belt-and-suspenders with `ScrollPinnedStoryScene { controls: false }`:
+   even if a transport were emitted, the marketing narrative must never
+   show a debug scrubber. */
+.flagship-story .ui-scene-transport {
+    display: none;
+}
+
 .flagship-story .scene-scroll-trigger {
     width: 100vw;
 }
@@ -228,6 +244,43 @@ pub const FLAGSHIP_CSS: &str = r#"
     margin: 0;
     color: var(--ui-muted-fg);
     line-height: 1.5;
+}
+
+/* Scroll-reveal choreography (Metrics + CTA). The IntersectionObserver in
+   metrics.rs / cta.rs flips `data-revealed="true"` per card as it scrolls
+   into view, with a staggered inline `transition-delay`. Cards start
+   slightly lifted + transparent and settle on reveal.
+
+   Motion is gated: the lifted/transparent base state and the transition
+   ONLY apply under normal motion. Under `[data-ui-motion="reduced"]` the
+   cards render fully visible at rest with no transform/opacity ramp, even
+   before the observer runs (the script also reveals them immediately, so
+   this is the no-flash guarantee). Wrapped in the same
+   prefers-reduced-motion media query for OS-level requests that bypass the
+   attribute. */
+.flagship-reveal-card {
+    opacity: 1;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+    .flagship-shell:not([data-ui-motion="reduced"]) .flagship-reveal-card {
+        opacity: 0;
+        transform: translateY(16px);
+        transition:
+            opacity var(--ui-motion-slow, 480ms) ease,
+            transform var(--ui-motion-slow, 480ms) cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    .flagship-shell:not([data-ui-motion="reduced"]) .flagship-reveal-card[data-revealed="true"] {
+        opacity: 1;
+        transform: none;
+    }
+}
+
+[data-ui-motion="reduced"] .flagship-reveal-card {
+    opacity: 1 !important;
+    transform: none !important;
+    transition: none !important;
 }
 
 /* Live metric strip. */

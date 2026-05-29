@@ -34,7 +34,7 @@ struct GlassUniforms {
     inner_shadow_alpha: f32,
     adapt_strength:     f32,
     time_seconds:       f32,
-    _pad0:              f32,
+    surface_alpha:      f32,
 };
 
 @group(0) @binding(0) var<uniform> u: GlassUniforms;
@@ -139,9 +139,15 @@ fn fs_main(in: VsOut) -> @location(0) vec4<f32> {
         color = mix(color, color * avg, clamp(u.adapt_strength, 0.0, 1.0));
     }
 
-    // Virtual light specular along normal.
+    // Virtual light specular along normal. When the pointer feature is on the
+    // light direction leans toward the cursor, so the highlight tracks it and
+    // the glass reads as a dynamic, hand-lit material instead of a static one.
     if (FEAT_SPECULAR) {
-        let n_dot_l = max(dot(normal, u.light_dir), 0.0);
+        var light = u.light_dir;
+        if (FEAT_POINTER) {
+            light = normalize(mix(u.light_dir, normalize(u.pointer + vec2<f32>(1e-5)), 0.4));
+        }
+        let n_dot_l = max(dot(normal, light), 0.0);
         let spec = pow(n_dot_l, 4.0) * u.light_intensity;
         // Concentrate the highlight near the edge.
         let edge_mask = smoothstep(0.0, max(u.edge_falloff, 0.5), -sdf);
@@ -163,5 +169,10 @@ fn fs_main(in: VsOut) -> @location(0) vec4<f32> {
         color = color + (c0 + c1 + c2) * 0.18;
     }
 
-    return vec4<f32>(color, 1.0);
+    // Premultiplied-alpha output: the compose pipeline blends with
+    // PREMULTIPLIED_ALPHA_BLENDING, so multiply rgb by alpha here. surface_alpha
+    // defaults to 1.0 (fully opaque — identical to the historical output); a
+    // lower value composites the glass translucently over the page backdrop.
+    let a = clamp(u.surface_alpha, 0.0, 1.0);
+    return vec4<f32>(color * a, a);
 }

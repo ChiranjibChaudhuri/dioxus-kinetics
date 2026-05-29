@@ -34,7 +34,15 @@ pub struct GlassUniforms {
     pub inner_shadow_alpha: f32,
     pub adapt_strength: f32,
     pub time_seconds: f32,
-    pub _pad0: f32,
+    /// Overall surface opacity in `[0,1]`. The compose shader emits
+    /// premultiplied-alpha `vec4(color * surface_alpha, surface_alpha)` and the
+    /// compose pipeline blends with `PREMULTIPLIED_ALPHA_BLENDING`, so a value
+    /// below `1.0` lets the glass composite translucently over the page behind
+    /// the canvas. Defaults to `1.0` (fully opaque — identical to the historical
+    /// behavior); opt in via [`GlassUniforms::with_surface_alpha`]. This field
+    /// occupies the former `_pad0` tail slot, so the 16-byte-aligned layout that
+    /// `compose.wgsl`'s `GlassUniforms` block mirrors is unchanged.
+    pub surface_alpha: f32,
 }
 
 impl Default for GlassUniforms {
@@ -61,7 +69,7 @@ impl Default for GlassUniforms {
             inner_shadow_alpha: 0.0,
             adapt_strength: 0.0,
             time_seconds: 0.0,
-            _pad0: 0.0,
+            surface_alpha: 1.0,
         }
     }
 }
@@ -69,6 +77,18 @@ impl Default for GlassUniforms {
 impl GlassUniforms {
     pub fn with_pointer(mut self, pointer_norm: [f32; 2]) -> Self {
         self.pointer = pointer_norm;
+        self
+    }
+
+    /// Sets the overall surface opacity (premultiplied alpha) used by the
+    /// compose shader. `1.0` is fully opaque (default); lower values let the
+    /// page behind the canvas show through the glass.
+    pub fn with_surface_alpha(mut self, alpha: f32) -> Self {
+        self.surface_alpha = if alpha.is_finite() {
+            alpha.clamp(0.0, 1.0)
+        } else {
+            1.0
+        };
         self
     }
 
@@ -117,7 +137,9 @@ impl GlassUniforms {
             inner_shadow_alpha: material.inner_shadow_alpha,
             adapt_strength: material.adapt_to_background,
             time_seconds: 0.0,
-            _pad0: 0.0,
+            // Opaque by default to preserve the historical look; translucency is
+            // opt-in via `with_surface_alpha`.
+            surface_alpha: 1.0,
         }
     }
 }

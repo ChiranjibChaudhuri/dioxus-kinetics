@@ -2,6 +2,8 @@
 
 use dioxus::prelude::*;
 
+use super::focus_trap;
+
 /// Tone of a single dialog action, mapped to a button variant class.
 ///
 /// `Primary` is the affirmative call-to-action; `Danger` flags an
@@ -92,44 +94,22 @@ impl From<&str> for DialogAction {
     }
 }
 
-/// Installs a Tab-cycling focus trap on the most recently mounted
-/// `.ui-dialog-panel`. The handler is registered on the panel element so when
-/// the panel is removed from the DOM, the listener is garbage-collected
-/// together with it — no Rust-side teardown needed.
-fn install_dialog_focus_trap() {
-    const FOCUSABLE_SELECTOR: &str =
-        "button:not([disabled]),[href],input:not([disabled]),select:not([disabled]),textarea:not([disabled]),[tabindex]:not([tabindex=\"-1\"])";
-    let script = format!(
-        r#"
-        (function() {{
-            const panel = document.querySelector('.ui-dialog-panel');
-            if (!panel || panel.__kineticsTrap) return;
-            panel.__kineticsTrap = true;
-            panel.addEventListener('keydown', (e) => {{
-                if (e.key !== 'Tab') return;
-                const f = panel.querySelectorAll('{selector}');
-                if (f.length === 0) {{ e.preventDefault(); panel.focus(); return; }}
-                const first = f[0];
-                const last = f[f.length - 1];
-                const active = document.activeElement;
-                if (e.shiftKey && (active === first || active === panel)) {{
-                    e.preventDefault();
-                    last.focus();
-                }} else if (!e.shiftKey && active === last) {{
-                    e.preventDefault();
-                    first.focus();
-                }}
-            }});
-        }})();
-        "#,
-        selector = FOCUSABLE_SELECTOR,
-    );
-    let _ = dioxus::document::eval(&script);
+/// Derives the element id for one part (`title`, `description`, `panel`)
+/// of a dialog from its `id` base, so concurrent dialogs get distinct ids.
+fn dialog_part_id(id: &str, part: &str) -> String {
+    format!("{id}-{part}")
 }
 
 #[component]
 pub fn Dialog(
     title: String,
+    /// Stable id base for this dialog. The title, description, and panel
+    /// elements derive `{id}-title`, `{id}-description`, and `{id}-panel`
+    /// ids from it so concurrently mounted dialogs never collide on the
+    /// global `.ui-dialog-panel`/`ui-dialog-title` ids. Defaults to
+    /// `"ui-dialog"` so single-dialog call sites keep their old ids.
+    #[props(default = "ui-dialog".to_string())]
+    id: String,
     #[props(default)] open: bool,
     #[props(default)] description: String,
     #[props(default)] body: String,
@@ -143,22 +123,33 @@ pub fn Dialog(
     }
 
     let has_description = !description.is_empty();
+    let title_id = dialog_part_id(&id, "title");
+    let description_id = dialog_part_id(&id, "description");
+    let panel_id = dialog_part_id(&id, "panel");
     let described_by = if has_description {
-        "ui-dialog-description"
+        description_id.clone()
     } else {
-        ""
+        String::new()
     };
+
+    // Restore focus to the opener (FocusPolicy::RestoreOnClose) on every
+    // built-in dismissal path — Escape and backdrop click. Each handler
+    // owns its own clone of the panel id.
+    let panel_for_key = panel_id.clone();
+    let panel_for_backdrop = panel_id.clone();
+    let panel_for_mount = panel_id.clone();
 
     rsx! {
         div {
             class: "ui-dialog",
             role: "dialog",
             "aria-modal": "true",
-            "aria-labelledby": "ui-dialog-title",
+            "aria-labelledby": "{title_id}",
             "aria-describedby": "{described_by}",
             onkeydown: move |evt| {
                 if dismissible && evt.key() == Key::Escape {
                     evt.stop_propagation();
+                    focus_trap::restore_opener(&panel_for_key);
                     if let Some(handler) = &on_dismiss {
                         handler.call(());
                     }
@@ -168,6 +159,7 @@ pub fn Dialog(
                 class: "ui-dialog-backdrop",
                 onclick: move |_evt| {
                     if dismissible {
+                        focus_trap::restore_opener(&panel_for_backdrop);
                         if let Some(handler) = &on_dismiss {
                             handler.call(());
                         }
@@ -175,17 +167,21 @@ pub fn Dialog(
                 },
             }
             div {
+                id: "{panel_id}",
                 class: "ui-dialog-panel",
+                "data-state": "open",
                 tabindex: "-1",
                 onmounted: move |evt| {
+                    let panel_id = panel_for_mount.clone();
+                    focus_trap::capture_opener(&panel_id);
                     spawn(async move {
                         let _ = evt.set_focus(true).await;
                     });
-                    install_dialog_focus_trap();
+                    focus_trap::install_trap(&panel_id);
                 },
-                h2 { id: "ui-dialog-title", class: "ui-dialog-title", "{title}" }
+                h2 { id: "{title_id}", class: "ui-dialog-title", "{title}" }
                 if has_description {
-                    p { id: "ui-dialog-description", class: "ui-dialog-description", "{description}" }
+                    p { id: "{description_id}", class: "ui-dialog-description", "{description}" }
                 }
                 if !body.is_empty() {
                     div { class: "ui-dialog-body", "{body}" }
@@ -215,5 +211,48 @@ pub fn Dialog(
                 }
             }
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn dialog_part_ids_default_to_legacy_names() {
+        assert_eq!(dialog_part_id("ui-dialog", "title"), "ui-dialog-title");
+        assert_eq!(
+            dialog_part_id("ui-dialog", "description"),
+            "ui-dialog-description"
+        );
+        assert_eq!(dialog_part_id("ui-dialog", "panel"), "ui-dialog-panel");
+    }
+
+    #[test]
+    fn concurrent_dialogs_get_distinct_panel_ids() {
+        assert_ne!(
+            dialog_part_id("confirm", "panel"),
+            dialog_part_id("settings", "panel")
+        );
+    }
+
+    #[test]
+    fn string_label_maps_to_neutral_action() {
+        let action: DialogAction = "Cancel".into();
+        assert_eq!(action.id, "Cancel");
+        assert_eq!(action.label, "Cancel");
+        assert_eq!(action.tone, DialogActionTone::Neutral);
+    }
+
+    #[test]
+    fn tone_class_names_are_stable() {
+        assert_eq!(
+            DialogActionTone::Primary.class_name(),
+            "ui-button ui-button--primary"
+        );
+        assert_eq!(
+            DialogActionTone::Danger.class_name(),
+            "ui-button ui-button--danger"
+        );
     }
 }

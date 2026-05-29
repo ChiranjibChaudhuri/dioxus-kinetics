@@ -92,6 +92,40 @@ pub fn material_style(recipe: &ui_glass::GlassRecipe) -> String {
         .to_inline_style()
 }
 
+/// Wide-gamut sibling of [`material_style`]: emits the same `--ui-material-*`
+/// custom properties but expresses colors with `color(display-p3 ...)` so the
+/// material can opt into a wider working space on capable displays. The values
+/// are gamut-clamped to sRGB by construction, so this stays visually identical
+/// to [`material_style`]; callers can gate it behind an `@supports` query.
+pub fn material_style_p3(recipe: &ui_glass::GlassRecipe) -> String {
+    CssStyleWriter::new()
+        .set("--ui-material-bg", recipe.background.css_p3())
+        .set(
+            "--ui-material-solid-bg",
+            recipe.fallback_background.css_p3(),
+        )
+        .set("--ui-material-border", recipe.border.css_p3())
+        .set(
+            "--ui-material-blur",
+            format!("{}px", trim_float(recipe.backdrop_blur_px)),
+        )
+        .set(
+            "--ui-material-saturate",
+            format!("{}%", recipe.saturate_percent),
+        )
+        .set("background", "var(--ui-material-bg)")
+        .set("border-color", "var(--ui-material-border)")
+        .set(
+            "backdrop-filter",
+            "blur(var(--ui-material-blur)) saturate(var(--ui-material-saturate))",
+        )
+        .set(
+            "-webkit-backdrop-filter",
+            "blur(var(--ui-material-blur)) saturate(var(--ui-material-saturate))",
+        )
+        .to_inline_style()
+}
+
 fn trim_float(value: f32) -> String {
     let value = finite_or_zero(value);
 

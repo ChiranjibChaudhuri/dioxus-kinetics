@@ -217,6 +217,125 @@ pub fn EmptyState(
     }
 }
 
+/// Tone of a `Badge`, mapped to a CSS modifier class. `Neutral` (the
+/// default) carries no modifier.
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
+pub enum BadgeTone {
+    #[default]
+    Neutral,
+    Primary,
+    Success,
+    Warning,
+    Danger,
+    Info,
+}
+
+impl BadgeTone {
+    pub const fn class_name(self) -> &'static str {
+        match self {
+            Self::Neutral => "ui-badge",
+            Self::Primary => "ui-badge ui-badge--primary",
+            Self::Success => "ui-badge ui-badge--success",
+            Self::Warning => "ui-badge ui-badge--warning",
+            Self::Danger => "ui-badge ui-badge--danger",
+            Self::Info => "ui-badge ui-badge--info",
+        }
+    }
+}
+
+/// A small inline status pill. Neutral by default; pick a `tone` to
+/// signal semantics (e.g. `Success` for "Active", `Danger` for "Down").
+#[component]
+pub fn Badge(#[props(default)] tone: BadgeTone, children: Element) -> Element {
+    rsx! {
+        span { class: "{tone.class_name()}", {children} }
+    }
+}
+
+/// Diameter preset for an `Avatar`.
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
+pub enum AvatarSize {
+    Sm,
+    #[default]
+    Md,
+    Lg,
+}
+
+impl AvatarSize {
+    pub const fn class_suffix(self) -> &'static str {
+        match self {
+            Self::Sm => "sm",
+            Self::Md => "md",
+            Self::Lg => "lg",
+        }
+    }
+}
+
+/// Derives up to two uppercase initials from a display name. Takes the
+/// first letter of the first and last whitespace-separated words;
+/// degrades to a single initial for one-word names and an empty string
+/// for blank input.
+fn initials(name: &str) -> String {
+    let words: Vec<&str> = name.split_whitespace().collect();
+    let first = words.first().and_then(|w| w.chars().next());
+    let last = if words.len() > 1 {
+        words.last().and_then(|w| w.chars().next())
+    } else {
+        None
+    };
+
+    let mut out = String::new();
+    if let Some(c) = first {
+        out.extend(c.to_uppercase());
+    }
+    if let Some(c) = last {
+        out.extend(c.to_uppercase());
+    }
+    out
+}
+
+/// A circular user/entity avatar. Renders the image at `src` (with
+/// `alt = name`) when one is provided, otherwise falls back to derived
+/// initials with `aria-label = name` so the identity is still
+/// announced.
+#[component]
+pub fn Avatar(
+    name: String,
+    #[props(default)] src: String,
+    #[props(default)] size: AvatarSize,
+) -> Element {
+    let class = format!("ui-avatar ui-avatar--{}", size.class_suffix());
+
+    rsx! {
+        span { class: "{class}",
+            if !src.is_empty() {
+                img { class: "ui-avatar-image", src: "{src}", alt: "{name}" }
+            } else {
+                span {
+                    class: "ui-avatar-initials",
+                    "aria-label": "{name}",
+                    "{initials(&name)}"
+                }
+            }
+        }
+    }
+}
+
+/// An indeterminate loading spinner. Exposes `role="status"` with an
+/// `aria-label` so screen readers announce the loading state; the spin
+/// animation is CSS-driven and gated by `prefers-reduced-motion` in the
+/// host stylesheet.
+#[component]
+pub fn Spinner(#[props(default = "Loading…".to_string())] label: String) -> Element {
+    rsx! {
+        span {
+            class: "ui-spinner",
+            role: "status",
+            "aria-label": "{label}",
+        }
+    }
+}
+
 fn build_sparkline_path(points: &[f32]) -> Option<String> {
     if points.len() < 2 {
         return None;
@@ -253,4 +372,49 @@ fn build_sparkline_path(points: &[f32]) -> Option<String> {
         }
     }
     Some(d)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn badge_tone_neutral_has_no_modifier() {
+        assert_eq!(BadgeTone::Neutral.class_name(), "ui-badge");
+        assert_eq!(
+            BadgeTone::Primary.class_name(),
+            "ui-badge ui-badge--primary"
+        );
+        assert_eq!(BadgeTone::Danger.class_name(), "ui-badge ui-badge--danger");
+    }
+
+    #[test]
+    fn avatar_size_maps_to_suffix() {
+        assert_eq!(AvatarSize::Sm.class_suffix(), "sm");
+        assert_eq!(AvatarSize::Md.class_suffix(), "md");
+        assert_eq!(AvatarSize::Lg.class_suffix(), "lg");
+        assert_eq!(AvatarSize::default(), AvatarSize::Md);
+    }
+
+    #[test]
+    fn initials_takes_first_and_last() {
+        assert_eq!(initials("Ada Lovelace"), "AL");
+        assert_eq!(initials("Grace Brewster Hopper"), "GH");
+    }
+
+    #[test]
+    fn initials_single_word_is_one_letter() {
+        assert_eq!(initials("Plato"), "P");
+    }
+
+    #[test]
+    fn initials_blank_is_empty() {
+        assert_eq!(initials(""), "");
+        assert_eq!(initials("   "), "");
+    }
+
+    #[test]
+    fn initials_uppercases() {
+        assert_eq!(initials("ada lovelace"), "AL");
+    }
 }

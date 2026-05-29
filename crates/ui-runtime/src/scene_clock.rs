@@ -154,11 +154,43 @@ impl SceneClock {
         let duration_signal = self.duration_ms;
         let mut elapsed_signal = self.elapsed_ms;
         let mut state_signal = self.state;
+        let fps_signal = self.fps;
         let slot = self.handle_slot.peek().0.clone();
+
+        // Honor the configured fps. Raw `dt_ms` from the platform scheduler
+        // (rAF on web, a 16 ms tokio ticker on native) is accumulated against
+        // the frame period `1000 / fps`; `elapsed_ms` only advances once a full
+        // period's worth of time has banked, and the leftover is carried into
+        // the next tick. This decouples the logical scene frame rate from the
+        // display refresh rate (e.g. a 24 fps scene on a 120 Hz panel) and
+        // keeps playback duration accurate regardless of jitter.
+        let accumulator = Rc::new(RefCell::new(0.0_f32));
 
         let handle = spawn_frame_loop(move |dt_ms: f64| {
             let duration = *duration_signal.peek();
-            let next = (*elapsed_signal.peek() + dt_ms as f32).min(duration);
+            let fps = (*fps_signal.peek()).max(1) as f32;
+            let period = 1000.0 / fps;
+
+            let dt = dt_ms as f32;
+            let dt = if dt.is_finite() && dt > 0.0 { dt } else { 0.0 };
+
+            let mut acc = accumulator.borrow_mut();
+            *acc += dt;
+
+            // Drain whole frame periods out of the accumulator, carrying the
+            // sub-period remainder forward. `frames` is the number of logical
+            // scene frames elapsed since the last advance.
+            let frames = (*acc / period).floor();
+            if frames < 1.0 {
+                // Not enough time banked for a frame yet — keep the loop alive
+                // without mutating `elapsed_ms`.
+                return ControlFlow::Continue;
+            }
+            *acc -= frames * period;
+            drop(acc);
+
+            let advance = frames * period;
+            let next = (*elapsed_signal.peek() + advance).min(duration);
             elapsed_signal.set(next);
             if next >= duration {
                 state_signal.set(SceneState::Settled);

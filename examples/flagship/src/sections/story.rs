@@ -14,7 +14,11 @@ pub fn Story() -> Element {
                 class: "flagship-sr-only",
                 "Scroll-driven storytelling"
             }
-            ScrollPinnedStoryScene {}
+            // controls:false suppresses the Scene transport — the marketing
+            // narrative should read as a pinned story, not a debug scrubber.
+            // Belt-and-suspenders with the `.flagship-story .ui-scene-transport`
+            // display:none rule in styles.rs.
+            ScrollPinnedStoryScene { controls: false }
         }
     }
 }

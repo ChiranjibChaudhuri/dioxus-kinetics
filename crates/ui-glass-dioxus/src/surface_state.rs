@@ -14,6 +14,32 @@ use std::sync::Arc;
 #[cfg(target_arch = "wasm32")]
 use ui_glass_engine::{negotiate_surface_format, Compositor};
 
+/// GPU power-preference hint for adapter selection. Most glass surfaces are
+/// static chrome that does not justify spinning up the discrete GPU, so the
+/// default is [`GlassPower::Low`]. Authors of full-screen, GPU-heavy hero
+/// surfaces can opt into [`GlassPower::High`] via the `power` prop.
+///
+/// Kept as a UI-level enum (rather than re-exporting `wgpu::PowerPreference`)
+/// so the public component API stays decoupled from the wgpu version.
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
+pub enum GlassPower {
+    /// Prefer an integrated / low-power adapter. Default for static chrome.
+    #[default]
+    Low,
+    /// Prefer the highest-performance (often discrete) adapter.
+    High,
+}
+
+#[cfg(target_arch = "wasm32")]
+impl GlassPower {
+    fn to_wgpu(self) -> wgpu::PowerPreference {
+        match self {
+            GlassPower::Low => wgpu::PowerPreference::LowPower,
+            GlassPower::High => wgpu::PowerPreference::HighPerformance,
+        }
+    }
+}
+
 #[cfg(target_arch = "wasm32")]
 pub struct SurfaceState {
     pub device: Arc<wgpu::Device>,
@@ -28,10 +54,16 @@ pub struct SurfaceState {
 impl SurfaceState {
     /// Initialize wgpu from a canvas element. Returns `None` if no adapter is
     /// available (e.g. WebGPU unavailable and no WebGL2 fallback) or if
-    /// surface creation fails.
+    /// surface creation fails. The component treats `None` as a signal to
+    /// render the `data-glass-*` CSS fallback markup.
+    ///
+    /// `power` controls the adapter power-preference hint; static chrome
+    /// should pass [`GlassPower::Low`] (the default) so the integrated GPU is
+    /// preferred over the discrete one.
     pub async fn from_canvas(
         canvas: web_sys::HtmlCanvasElement,
         physical_size: (u32, u32),
+        power: GlassPower,
     ) -> Option<Self> {
         let instance = wgpu::Instance::new(&wgpu::InstanceDescriptor {
             backends: wgpu::Backends::BROWSER_WEBGPU | wgpu::Backends::GL,
@@ -44,7 +76,7 @@ impl SurfaceState {
 
         let adapter = instance
             .request_adapter(&wgpu::RequestAdapterOptions {
-                power_preference: wgpu::PowerPreference::HighPerformance,
+                power_preference: power.to_wgpu(),
                 compatible_surface: Some(&surface),
                 force_fallback_adapter: false,
             })
@@ -133,4 +165,21 @@ pub struct SurfaceState;
 #[cfg(not(target_arch = "wasm32"))]
 impl SurfaceState {
     pub fn resize(&mut self, _physical_size: (u32, u32)) {}
+}
+
+#[cfg(test)]
+mod tests {
+    use super::GlassPower;
+
+    #[test]
+    fn default_power_is_low() {
+        // Static chrome must default to the low-power adapter so the discrete
+        // GPU is not spun up for chrome surfaces.
+        assert_eq!(GlassPower::default(), GlassPower::Low);
+    }
+
+    #[test]
+    fn power_variants_distinct() {
+        assert_ne!(GlassPower::Low, GlassPower::High);
+    }
 }

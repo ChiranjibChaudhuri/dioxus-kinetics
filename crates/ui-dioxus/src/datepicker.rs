@@ -2,7 +2,16 @@
 //!
 //! Renders a trigger button that shows the currently-selected ISO date
 //! (or placeholder), opens a Popover containing a month-navigable
-//! calendar grid, emits `on_select(iso_date)` when a day is clicked.
+//! calendar grid, emits `on_select(iso_date)` when a day is clicked or
+//! committed via the keyboard.
+//!
+//! The grid honours the WAI-ARIA grid keyboard contract: Arrow
+//! Left/Right move ±1 day, Arrow Up/Down move ∓1 week, PageUp/PageDown
+//! move ∓1 month, Home/End jump to the start/end of the focused week,
+//! and Enter/Space select the focused day. Day arithmetic rolls over
+//! month and year boundaries via the pure [`add_days`] helper, keeping
+//! the `view_year` / `view_month` state in sync so the visible grid
+//! always frames the focused day.
 //!
 //! Dates are stored as ISO `YYYY-MM-DD` strings to keep this crate
 //! dependency-free (no `chrono` / `time` in the workspace). The
@@ -99,6 +108,64 @@ pub fn day_of_week(year: i32, month: u32, day: u32) -> u32 {
     }
 }
 
+/// Pure date arithmetic: add `delta` days (which may be negative) to
+/// `(year, month, day)`, rolling over month and year boundaries.
+/// Assumes the input is a valid calendar date.
+pub fn add_days(year: i32, month: u32, day: u32, delta: i32) -> (i32, u32, u32) {
+    let mut y = year;
+    let mut m = month as i32;
+    let mut d = day as i32 + delta;
+
+    // Walk backwards over month boundaries.
+    while d < 1 {
+        m -= 1;
+        if m < 1 {
+            m = 12;
+            y -= 1;
+        }
+        d += days_in_month(y, m as u32) as i32;
+    }
+    // Walk forwards over month boundaries.
+    loop {
+        let dim = days_in_month(y, m as u32) as i32;
+        if d <= dim {
+            break;
+        }
+        d -= dim;
+        m += 1;
+        if m > 12 {
+            m = 1;
+            y += 1;
+        }
+    }
+    (y, m as u32, d as u32)
+}
+
+/// Add (or subtract, when negative) `delta` calendar months to
+/// `(year, month)`, clamping `day` into the resulting month's length so
+/// e.g. Jan 31 → Feb 28. Rolls the year over as needed.
+pub fn add_months(year: i32, month: u32, day: u32, delta: i32) -> (i32, u32, u32) {
+    // Convert to a zero-based absolute month count to apply the delta,
+    // then back to 1-indexed.
+    let total = (year as i64) * 12 + (month as i64 - 1) + delta as i64;
+    let new_year = total.div_euclid(12) as i32;
+    let new_month = (total.rem_euclid(12) + 1) as u32;
+    let clamped_day = day.min(days_in_month(new_year, new_month));
+    (new_year, new_month, clamped_day)
+}
+
+/// Monday-anchored start of the week containing `(year, month, day)`.
+pub fn start_of_week(year: i32, month: u32, day: u32) -> (i32, u32, u32) {
+    let dow = day_of_week(year, month, day) as i32; // 0 = Monday
+    add_days(year, month, day, -dow)
+}
+
+/// Sunday-anchored end of the week containing `(year, month, day)`.
+pub fn end_of_week(year: i32, month: u32, day: u32) -> (i32, u32, u32) {
+    let dow = day_of_week(year, month, day) as i32; // 0 = Monday … 6 = Sunday
+    add_days(year, month, day, 6 - dow)
+}
+
 #[component]
 pub fn DatePicker(
     /// Stable id; passed to the underlying Popover.
@@ -124,12 +191,34 @@ pub fn DatePicker(
 ) -> Element {
     let mut open = use_signal(|| default_open);
 
-    let (anchor_year, anchor_month) = parse_iso_date(&value)
+    let (anchor_year, anchor_month, anchor_day) = parse_iso_date(&value)
         .or_else(|| parse_iso_date(&today))
-        .map(|(y, m, _)| (y, m))
-        .unwrap_or(DATEPICKER_DEFAULT_ANCHOR);
+        .unwrap_or((DATEPICKER_DEFAULT_ANCHOR.0, DATEPICKER_DEFAULT_ANCHOR.1, 1));
     let mut view_year = use_signal(|| anchor_year);
     let mut view_month = use_signal(|| anchor_month);
+    // Day-of-month that holds keyboard focus within the visible grid.
+    let mut focused_day = use_signal(|| anchor_day);
+
+    // Deferred keyboard focus: keydown writes the new view_year/view_month/
+    // focused_day signals, but the target cell only exists after the new
+    // month re-renders. Mirroring the command-menu scroll-into-view effect,
+    // this effect re-runs whenever the open state or focused position
+    // changes and moves DOM focus once the new cells are in the DOM.
+    let focus_grid_id = id.clone();
+    use_effect(use_reactive(
+        (
+            &*open.read(),
+            &*view_year.read(),
+            &*view_month.read(),
+            &*focused_day.read(),
+        ),
+        move |(is_open, year, month, day)| {
+            if !is_open {
+                return;
+            }
+            focus_day_cell(&focus_grid_id, year, month, day);
+        },
+    ));
 
     let trigger_label = if value.is_empty() {
         placeholder.clone()
@@ -149,6 +238,10 @@ pub fn DatePicker(
     let total_days = days_in_month(year_now, month_now);
     let first_day_idx = day_of_week(year_now, month_now, 1);
     let value_clone = value.clone();
+    // Clamp the focused day into the visible month (it can dangle after a
+    // month change shortens the month, e.g. Jan 31 → Feb).
+    let focused_now = (*focused_day.read()).clamp(1, total_days);
+    let grid_id = id.clone();
 
     rsx! {
         div { class: "ui-datepicker",
@@ -213,6 +306,49 @@ pub fn DatePicker(
                         class: "ui-datepicker-grid",
                         role: "grid",
                         "aria-labelledby": "{label_id}",
+                        onkeydown: move |evt| {
+                            let y = *view_year.read();
+                            let m = *view_month.read();
+                            let d = (*focused_day.read()).clamp(1, days_in_month(y, m));
+                            let next = match evt.key() {
+                                Key::ArrowLeft => Some(add_days(y, m, d, -1)),
+                                Key::ArrowRight => Some(add_days(y, m, d, 1)),
+                                Key::ArrowUp => Some(add_days(y, m, d, -7)),
+                                Key::ArrowDown => Some(add_days(y, m, d, 7)),
+                                Key::PageUp => Some(add_months(y, m, d, -1)),
+                                Key::PageDown => Some(add_months(y, m, d, 1)),
+                                Key::Home => Some(start_of_week(y, m, d)),
+                                Key::End => Some(end_of_week(y, m, d)),
+                                Key::Enter => {
+                                    evt.prevent_default();
+                                    let iso = format_iso_date(y, m, d);
+                                    if let Some(handler) = &on_select {
+                                        handler.call(iso);
+                                    }
+                                    open.set(false);
+                                    None
+                                }
+                                Key::Character(ref c) if c.as_str() == " " => {
+                                    evt.prevent_default();
+                                    let iso = format_iso_date(y, m, d);
+                                    if let Some(handler) = &on_select {
+                                        handler.call(iso);
+                                    }
+                                    open.set(false);
+                                    None
+                                }
+                                _ => None,
+                            };
+                            if let Some((ny, nm, nd)) = next {
+                                evt.prevent_default();
+                                // Write the new month/day; DOM focus is applied
+                                // by the deferred use_effect above once the new
+                                // month cells have rendered.
+                                view_year.set(ny);
+                                view_month.set(nm);
+                                focused_day.set(nd);
+                            }
+                        },
                         for label in WEEKDAY_SHORT.iter() {
                             div { class: "ui-datepicker-weekday", role: "columnheader", "{label}" }
                         }
@@ -225,19 +361,28 @@ pub fn DatePicker(
                             {
                                 let iso = format_iso_date(year_now, month_now, day);
                                 let is_selected = iso == value_clone;
+                                let is_focused = day == focused_now;
                                 let cell_class = if is_selected {
                                     "ui-datepicker-cell ui-datepicker-cell--selected"
                                 } else {
                                     "ui-datepicker-cell"
                                 };
+                                let cell_dom_id = format!("{grid_id}-day-{iso}");
+                                // Roving tabindex: only the focused day is in
+                                // the tab order; arrows move focus among the rest.
+                                let tabindex = if is_focused { "0" } else { "-1" };
                                 rsx! {
                                     button {
+                                        id: "{cell_dom_id}",
                                         class: "{cell_class}",
                                         r#type: "button",
                                         role: "gridcell",
+                                        tabindex: "{tabindex}",
                                         "aria-label": "{iso}",
                                         "aria-selected": if is_selected { "true" } else { "false" },
+                                        "data-active": if is_focused { "true" } else { "false" },
                                         onclick: move |_| {
+                                            focused_day.set(day);
                                             if let Some(handler) = &on_select {
                                                 handler.call(iso.clone());
                                             }
@@ -253,6 +398,22 @@ pub fn DatePicker(
             }
         }
     }
+}
+
+/// Move DOM focus to the gridcell with id `{grid_id}-day-{iso}`.
+/// Mirrors `navigation::focus_tab`: the ISO date is digit/`-` only, and
+/// the grid id is validated before interpolating into the JS literal.
+fn focus_day_cell(grid_id: &str, year: i32, month: u32, day: u32) {
+    let safe = grid_id
+        .chars()
+        .all(|c| c.is_ascii_alphanumeric() || c == '-' || c == '_' || c == ':' || c == '.');
+    if !safe {
+        return;
+    }
+    let iso = format_iso_date(year, month, day);
+    let _ = dioxus::document::eval(&format!(
+        "const el = document.getElementById('{grid_id}-day-{iso}'); if (el) el.focus();"
+    ));
 }
 
 #[cfg(test)]
@@ -291,5 +452,60 @@ mod tests {
         assert_eq!(day_of_week(2026, 1, 1), 3);
         // 2000-01-01 is a Saturday → ISO index 5.
         assert_eq!(day_of_week(2000, 1, 1), 5);
+    }
+
+    #[test]
+    fn add_days_within_month() {
+        assert_eq!(add_days(2026, 5, 10, 5), (2026, 5, 15));
+        assert_eq!(add_days(2026, 5, 10, -3), (2026, 5, 7));
+        assert_eq!(add_days(2026, 5, 10, -9), (2026, 5, 1));
+    }
+
+    #[test]
+    fn add_days_rolls_over_month_forward() {
+        // 2026-01-31 + 1 → 2026-02-01.
+        assert_eq!(add_days(2026, 1, 31, 1), (2026, 2, 1));
+        // +7 over a month edge.
+        assert_eq!(add_days(2026, 1, 28, 7), (2026, 2, 4));
+    }
+
+    #[test]
+    fn add_days_rolls_over_month_backward() {
+        // 2026-03-01 - 1 → 2026-02-28.
+        assert_eq!(add_days(2026, 3, 1, -1), (2026, 2, 28));
+        // 2024 is a leap year: 2024-03-01 - 1 → 2024-02-29.
+        assert_eq!(add_days(2024, 3, 1, -1), (2024, 2, 29));
+    }
+
+    #[test]
+    fn add_days_rolls_over_year() {
+        assert_eq!(add_days(2026, 12, 31, 1), (2027, 1, 1));
+        assert_eq!(add_days(2027, 1, 1, -1), (2026, 12, 31));
+    }
+
+    #[test]
+    fn add_months_clamps_day_into_short_month() {
+        // Jan 31 - 1 month → Feb 28 (2026 not leap).
+        assert_eq!(add_months(2026, 1, 31, 1), (2026, 2, 28));
+        // Mar 31 - 1 month → Feb 28.
+        assert_eq!(add_months(2026, 3, 31, -1), (2026, 2, 28));
+    }
+
+    #[test]
+    fn add_months_rolls_over_year() {
+        assert_eq!(add_months(2026, 12, 15, 1), (2027, 1, 15));
+        assert_eq!(add_months(2026, 1, 15, -1), (2025, 12, 15));
+        // Multi-year jump.
+        assert_eq!(add_months(2026, 6, 10, -18), (2024, 12, 10));
+    }
+
+    #[test]
+    fn week_edges_anchor_monday_and_sunday() {
+        // 2026-05-23 is a Saturday (ISO 5).
+        // Start of week (Monday) → 2026-05-18; end (Sunday) → 2026-05-24.
+        assert_eq!(start_of_week(2026, 5, 23), (2026, 5, 18));
+        assert_eq!(end_of_week(2026, 5, 23), (2026, 5, 24));
+        // A Monday is its own start of week.
+        assert_eq!(start_of_week(2026, 5, 18), (2026, 5, 18));
     }
 }

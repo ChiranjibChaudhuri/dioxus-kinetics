@@ -11,6 +11,13 @@
 //! the panel via `PopoverSide` and the host stylesheet handles spacing.
 
 use dioxus::prelude::*;
+use ui_runtime::reduced_motion::use_reduced_motion;
+
+/// How long the panel stays mounted with `data-state="closed"` after
+/// `open` flips false, so the Wave-1 exit animation can play before the
+/// node is removed. Kept in lockstep with the `ui-overlay-in` timing
+/// (200ms enter); the exit reuses the same easing window.
+const CLOSE_ANIMATION_MS: u32 = 160;
 
 #[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
 pub enum PopoverSide {
@@ -55,6 +62,44 @@ pub fn Popover(
 ) -> Element {
     let panel_class = side.class_name();
     let aria_expanded = if open { "true" } else { "false" };
+    let reduced = use_reduced_motion();
+
+    // The panel stays mounted while `open` is true and for a short
+    // closing phase afterwards so the Wave-1 exit animation can play. We
+    // track that phase locally: `mounted` is the source of truth for
+    // whether the panel node exists in the DOM.
+    let mut mounted = use_signal(|| open);
+
+    // `open`/`reduced` are plain props, not signals, so the effect is wrapped
+    // in `use_reactive` to re-run whenever either value changes between
+    // renders (a bare `use_effect` only re-runs on signal reads).
+    use_effect(use_reactive((&open, &reduced), move |(open, reduced)| {
+        if open {
+            // Opening (or re-opening before a pending close fires):
+            // ensure the panel is mounted immediately.
+            mounted.set(true);
+        } else if *mounted.peek() {
+            // Closing: keep the panel mounted with data-state="closed" so
+            // the exit animation runs, then unmount. Reduced-motion users
+            // skip the delay and unmount immediately.
+            if reduced {
+                mounted.set(false);
+            } else {
+                spawn(async move {
+                    let mut eval = dioxus::document::eval(&close_delay_script(CLOSE_ANIMATION_MS));
+                    let _ = eval.recv::<bool>().await;
+                    // Only unmount if we are still meant to be closed; a
+                    // re-open during the delay flips `open` back to true.
+                    if !open {
+                        mounted.set(false);
+                    }
+                });
+            }
+        }
+    }));
+
+    let render_panel = open || mounted();
+    let panel_state = if open { "open" } else { "closed" };
 
     rsx! {
         div { class: "ui-popover-root", "data-state": if open { "open" } else { "closed" },
@@ -70,12 +115,13 @@ pub fn Popover(
                 },
                 {trigger}
             }
-            if open {
+            if render_panel {
                 div {
                     id: "{id}",
                     class: "{panel_class}",
                     role: "dialog",
                     "data-side": "{side_attr(side)}",
+                    "data-state": "{panel_state}",
                     onkeydown: move |evt| {
                         if dismissible && evt.key() == Key::Escape {
                             evt.stop_propagation();
@@ -91,11 +137,50 @@ pub fn Popover(
     }
 }
 
+/// Builds a script that resolves back to Rust after `ms` milliseconds via
+/// `setTimeout`, used to drive the popover's closing-phase unmount. On
+/// non-web targets the eval is a no-op and the awaiting task simply never
+/// resolves, which is harmless (the panel is already detached at render).
+fn close_delay_script(ms: u32) -> String {
+    format!(
+        r#"
+        setTimeout(() => {{ dioxus.send(true); }}, {ms});
+        "#,
+        ms = ms,
+    )
+}
+
 const fn side_attr(side: PopoverSide) -> &'static str {
     match side {
         PopoverSide::Top => "top",
         PopoverSide::Bottom => "bottom",
         PopoverSide::Start => "start",
         PopoverSide::End => "end",
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn side_attr_maps_every_variant() {
+        assert_eq!(side_attr(PopoverSide::Top), "top");
+        assert_eq!(side_attr(PopoverSide::Bottom), "bottom");
+        assert_eq!(side_attr(PopoverSide::Start), "start");
+        assert_eq!(side_attr(PopoverSide::End), "end");
+    }
+
+    #[test]
+    fn default_side_is_bottom() {
+        assert_eq!(PopoverSide::default(), PopoverSide::Bottom);
+    }
+
+    #[test]
+    fn close_delay_script_uses_the_configured_duration() {
+        let script = close_delay_script(CLOSE_ANIMATION_MS);
+        assert!(script.contains("setTimeout"));
+        assert!(script.contains("dioxus.send(true)"));
+        assert!(script.contains(&format!(", {CLOSE_ANIMATION_MS})")));
     }
 }

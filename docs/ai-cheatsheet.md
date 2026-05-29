@@ -9,9 +9,12 @@ and gotchas that aren't obvious from API signatures.
 ## TL;DR
 
 - **What it is**: A Rust UI library on top of Dioxus 0.7, designed for
-  semantic glass-style SaaS interfaces. Ships 45 components across
-  Foundations, Actions, Inputs, Navigation, Layout, Surfaces, Feedback,
-  Data Workflows, Motion, Composition, and Capture.
+  semantic glass-style SaaS interfaces. Ships 60+ components across
+  Foundations, Actions, Inputs, Navigation, Layout, Surfaces, AI,
+  Feedback, Data Workflows, Motion, Composition, Capture, and Scene —
+  including a dedicated **AI-native surfaces** family (streaming text,
+  status pills, citations, source cards/rails, a prompt composer, a
+  docked assistant panel, and an agent timeline).
 - **Single dependency**: `kinetics`. Pull
   `kinetics::prelude::*` and you have everything (components, tokens,
   motion primitives, icons, runtime hooks).
@@ -73,6 +76,11 @@ Standard name → functional alias (if any) → category. Every component
 is in `kinetics::prelude::*`.
 
 ### Foundations
+- `Heading` — semantic `h1..h6` chosen by a numeric `level`, with an
+  optional `TextVariant` visual override (level and visual size are
+  decoupled).
+- `Text` — body / inline text on the `TextVariant` type scale;
+  `as_element` picks the `p` / `span` / `div` tag.
 - `Surface` / `ContentPlane` — neutral content container.
 - `GlassSurface` / `GlassLayer` — glass-styled container; auto picks
   wgpu LiquidSurface or CSS fallback based on device tier.
@@ -111,15 +119,44 @@ is in `kinetics::prelude::*`.
 
 ### Surfaces
 - `MetricCard` / `MetricReadout` — KPI tile with tone + delta.
+- `Badge` — inline status pill; 6 tones (`BadgeTone`), single size.
+- `Avatar` — circular image avatar with a derived-initials fallback;
+  3 sizes (`AvatarSize`).
 - `Popover` — anchored overlay primitive.
+
+### AI-native
+- `StreamingText` — incremental assistant output: a settled prefix, a
+  freshly-faded tail token, and a blinking caret (`role="status"`,
+  polite live region). `chunk_boundaries` are **byte** offsets.
+- `AiStatus` — status pill driven by `AiStatusState`
+  (idle / thinking / searching / generating → dots, done → check).
+  One pill = one state; render several for a phase sequence.
+- `CitationChip` — numbered inline source reference; a real `<a>` when
+  given `href`, a non-navigating `<button>`-role chip when not.
+- `SourceCard` / `SourceRail` — search-result source cards (favicon,
+  title, domain, snippet) wrapped in an ARIA `list` rail.
+- `PromptInput` — auto-growing chat composer; Enter submits,
+  Shift+Enter inserts a newline, the send button flips to **Stop**
+  while `streaming`. Fully controlled (`value` + `on_input`).
+- `AssistantPanel` — **non-modal** docked side panel shell
+  (`AssistantSide`) that hosts the surfaces above; dismiss via close
+  button or Escape. No backdrop, no focus trap.
+- `AgentTimeline` — vertical agent-run timeline from `Vec<AgentStep>`
+  (`AgentStepState`: pending / active / done); the active step is
+  `aria-current="step"`.
 
 ### Feedback
 - `Alert` — page-level banner, 5 tones.
 - `Progress` — determinate + indeterminate.
+- `Spinner` — indeterminate loading spinner (`role="status"` + label).
 - `Skeleton` — loading placeholder.
 - `EmptyState` / `BlankState` — empty-data CTA.
 - `Dialog` / `ModalLayer` — modal panel.
-- `Toast` / `NoticeStack` — transient notification.
+- `Sheet` — modal side sheet / drawer (`SheetSide`) with focus trap +
+  opener-focus restoration.
+- `Toast` / `NoticeStack` — a single transient notification card.
+- `Toaster` — fixed-position toast **stack** driven by
+  `Vec<ToastEntry>` with per-entry auto-dismiss (hover pauses).
 - `Tooltip` / `ContextHint` — hover/focus tooltip.
 
 ### Motion
@@ -447,6 +484,182 @@ fn CheckoutFlow() -> Element {
 }
 ```
 
+### AI assistant surfaces (AssistantPanel composing the AI family)
+
+```rust
+// A docked assistant panel composing the AI-native surfaces. The panel is
+// NON-MODAL (no backdrop, no focus trap) — the rest of the page stays
+// interactive. The panel is just a shell; YOU supply the surfaces as children.
+#[component]
+fn WorkspaceAssistant() -> Element {
+    let mut open = use_signal(|| true);
+    let mut prompt = use_signal(String::new);
+    let streaming = use_signal(|| true);
+
+    rsx! {
+        AssistantPanel {
+            open: *open.read(),                 // false → renders nothing
+            side: AssistantSide::End,           // dock to inline-end (right in LTR)
+            title: "Workspace assistant",       // also the aria-label
+            on_dismiss: move |_| open.set(false), // fired by close button AND Escape
+
+            // Phase pill — render ONE AiStatus for the current phase.
+            AiStatus { state: AiStatusState::Generating, label: "Generating answer…".to_string() }
+
+            // Streaming answer. `chunk_boundaries` are BYTE offsets; the
+            // largest in-range one splits the settled prefix from the
+            // highlighted tail token. `streaming` toggles the caret.
+            StreamingText {
+                text: "Revenue grew 18% QoQ, led by enterprise renewals".to_string(),
+                streaming: *streaming.read(),
+                chunk_boundaries: vec![38],
+            }
+
+            // Sources as an ARIA list of cards. A card with `href` is a link
+            // (<a target="_blank">); without `href` it is a static <article>.
+            SourceRail {
+                SourceCard {
+                    index: 1,
+                    title: "Q3 revenue report",
+                    domain: "docs.internal",
+                    snippet: "Enterprise renewals drove the majority of QoQ growth.",
+                    href: "https://docs.internal/q3",
+                }
+                SourceCard { index: 2, title: "Pipeline dashboard", domain: "app.internal" }
+            }
+
+            // Controlled composer. Enter submits; the send button flips to
+            // Stop while `streaming`. You own `value` via `on_input`.
+            PromptInput {
+                value: prompt.read().clone(),
+                streaming: *streaming.read(),
+                placeholder: "Ask about this workspace…",
+                on_input: move |next: String| prompt.set(next),
+                on_submit: move |_text: String| prompt.set(String::new()), // clear yourself
+                on_stop: move |_| { /* cancel the in-flight stream */ },
+            }
+        }
+    }
+}
+```
+
+### Agent run timeline
+
+```rust
+// `steps` is a Vec<AgentStep> DATA prop (not children). Build with
+// AgentStep::new(label, state). The active step gets aria-current="step".
+AgentTimeline {
+    steps: vec![
+        AgentStep::new("Parse the request", AgentStepState::Done),
+        AgentStep::new("Search the knowledge base", AgentStepState::Done),
+        AgentStep::new("Synthesise an answer", AgentStepState::Active),
+        AgentStep::new("Cite sources", AgentStepState::Pending),
+        AgentStep::new("Deliver response", AgentStepState::Pending),
+    ],
+}
+```
+
+### Inline citations (CitationChip in prose)
+
+```rust
+// CitationChip renders inline with no wrapper — place it directly in text.
+// With `href` → <a target="_blank" rel="noopener noreferrer">. Without
+// `href` → a non-navigating <button>-role chip (wire your own popover).
+// `href` is an empty-String sentinel, NOT Option.
+p {
+    "Ownership prevents data races at compile time"
+    CitationChip { index: 1, title: "The Rust Reference", href: "https://doc.rust-lang.org/reference/" }
+    " and is enforced by the borrow checker"
+    CitationChip { index: 2, title: "Rust Book · Ownership", href: "https://doc.rust-lang.org/book/" }
+    "."
+    // No href → button chip, e.g. to open a source-preview popover.
+    CitationChip { index: 3, title: "Internal scheduler notes" }
+}
+```
+
+### Side sheet / drawer (Sheet)
+
+```rust
+// Modal: owns the backdrop, Escape-to-dismiss, the close button, and a
+// focus trap keyed by `id`. Fully controlled — when `open` is false the
+// component renders an empty tree, so hold the flag yourself.
+#[component]
+fn FiltersSheet() -> Element {
+    let mut open = use_signal(|| false);
+    rsx! {
+        Button { variant: ButtonVariant::Primary, onclick: move |_| open.set(true), "Edit filters" }
+        Sheet {
+            open: *open.read(),
+            side: SheetSide::End,               // inline-end (right in LTR)
+            title: "Edit filters",              // also the panel aria-label
+            // id: "filters-sheet",             // set a unique id if >1 sheet can be open at once
+            on_dismiss: move |_| open.set(false), // EventHandler<()> — no payload
+            Stack { gap: "md".to_string(),
+                TextField { id: "filter-name", label: "Name contains", value: String::new() }
+                Button { variant: ButtonVariant::Primary, "Apply" }
+            }
+        }
+    }
+}
+```
+
+### Auto-dismissing toast stack (Toaster)
+
+```rust
+// Unlike manually stacking `Toast` cards (see "Toast notification stack"
+// above), `Toaster` auto-dismisses each entry — hover pauses the countdown.
+// It is RENDER-DRIVEN: you own the Vec<ToastEntry>. To add a toast, push to
+// your signal; you MUST remove the id inside on_dismiss or it never clears.
+#[component]
+fn ExportToasts() -> Element {
+    let mut entries = use_signal(|| vec![
+        ToastEntry::new("export", "Report exported")
+            .with_tone(ToastTone::Success)
+            .with_description("The PDF is ready to download."),
+    ]);
+    let mut next = use_signal(|| 0u32);
+
+    rsx! {
+        Button {
+            variant: ButtonVariant::Primary,
+            onclick: move |_| {
+                let id = *next.read();
+                next.set(id + 1);
+                entries.write().push(
+                    ToastEntry::new(format!("sync-{id}"), "Sync started").with_tone(ToastTone::Info)
+                );
+            },
+            "Start sync"
+        }
+        Toaster {
+            items: entries.read().clone(),
+            duration_ms: 5000,                  // Option<u32>; omit for the 5000ms default
+            on_dismiss: move |id: String| { entries.write().retain(|e| e.id != id); },
+        }
+    }
+}
+```
+
+### Typography & identity (Heading / Text / Badge / Avatar)
+
+```rust
+Stack { gap: "sm".to_string(),
+    // `level` fixes the semantic h1..h6; `variant` overrides ONLY the size.
+    Heading { level: 1, "Quarterly performance" }
+    Heading { level: 2, variant: TextVariant::Display, "Display-sized, still an <h2>" }
+
+    // `Text` never emits hN — `as_element` (a String) picks p / span / div.
+    Text { variant: TextVariant::Body, "Default reading size for prose." }
+    Text { variant: TextVariant::Caption, as_element: "span".to_string(), "Smallest legible annotation." }
+
+    div { style: "display: flex; gap: 8px; align-items: center;",
+        Avatar { name: "Ada Lovelace", size: AvatarSize::Sm } // no src → derived "AL" initials
+        Badge { tone: BadgeTone::Success, "Active" }
+        Badge { tone: BadgeTone::Danger, "Down" }
+    }
+}
+```
+
 ---
 
 ## Tokens reference
@@ -464,10 +677,21 @@ ButtonVariant::{Primary, Secondary, Ghost, Danger}
 IconButtonTone::{Neutral, Primary, Danger}
 IconButtonSize::{Compact, Default, Spacious}
 
-// Alert / Toast / Metric
+// Alert / Toast / Metric (Danger/Warning render role="alert"; others role="status")
 AlertTone::{Neutral, Success, Warning, Danger, Info}
 ToastTone::{Neutral, Success, Warning, Danger, Info}
 MetricTone::{Neutral, Success, Warning, Danger, Info}
+
+// Typography (Heading + Text share this scale; default = Body)
+TextVariant::{Caption2, Caption, Footnote, Subhead, Callout, Body,
+              Headline, Title3, Title2, Title1, LargeTitle, Display}
+//   Heading.variant is Option<TextVariant> (default None → derived from
+//   level: 1→Title1, 2→Title2, 3→Title3, 4..→Body).
+//   Text.variant is a bare TextVariant (default Body). Don't copy the type.
+
+// Badge / Avatar
+BadgeTone::{Neutral, Primary, Success, Warning, Danger, Info} // default Neutral; Neutral has no modifier class
+AvatarSize::{Sm, Md, Lg}                                       // default Md
 
 // Forms
 TextFieldType::{Text, Email, Password, Number, Search, Tel, Url}
@@ -478,9 +702,21 @@ SortDirection::{None, Ascending, Descending}
 // Popover/overlays
 PopoverSide::{Top, Bottom, Start, End}
 
+// Sheet (side sheet / drawer)
+SheetSide::{Start, End}  // default End (inline-end / right in LTR)
+
+// AI-native surfaces
+AiStatusState::{Idle, Thinking, Searching, Generating, Done}  // default Idle; required by AiStatus
+AgentStepState::{Pending, Active, Done}                       // default Pending; AgentStep::new(label, state)
+AssistantSide::{End, Start}  // default End
+
 // Dialog actions
 DialogActionTone::{Primary, Ghost, Danger}
 // Helper constructors: DialogAction::primary(id, label), .ghost(...), .danger(...)
+
+// AI data builders
+// AgentStep::new(label, AgentStepState)
+// ToastEntry::new(id, title).with_tone(ToastTone).with_description(text)
 ```
 
 ---
@@ -602,7 +838,20 @@ Plus { size: 16 }
 Minus { size: 16 }
 Trash { size: 16 }
 Search { size: 18 }
+
+// Added for the AI-native surfaces
+Sparkle { size: 16 }   // assistant / AI affordance
+Send { size: 16 }      // prompt send
+Stop { size: 16 }      // stop streaming
+Quote { size: 16 }     // citation
+Globe { size: 16 }     // web source
+Copy { size: 16 }      // copy message
+Link { size: 16 }      // source link
 ```
+
+(The AI components inline their own glyphs — e.g. `PromptInput` draws the
+send arrow and stop square directly — so importing these icons is only
+needed when you build your own AI affordances.)
 
 ---
 
@@ -652,6 +901,49 @@ Search { size: 18 }
 9. **`SegmentedControl` is for short equal-weight choices**;
    `RadioGroup` is for long-form options with descriptive copy.
    Don't conflate them.
+
+10. **`StreamingText` `chunk_boundaries` are BYTE offsets**, not char
+    indices. To highlight the last word as the streaming tail, pass
+    `text.rfind(' ').map(|i| i + 1)`. An empty/zero boundary makes the
+    *whole* string the highlighted tail (intended for a brand-new
+    stream).
+
+11. **AI "no link" cases are empty strings, not `Option`.**
+    `CitationChip` and `SourceCard` take `href` (and `favicon`/`snippet`)
+    as `String`; an empty `href` silently switches `CitationChip` from
+    `<a>` to a non-navigating `<button>` and `SourceCard` from `<a>` to a
+    static `<article>`. There's no `onclick` — wire the button variant's
+    behavior yourself.
+
+12. **`PromptInput` is fully controlled.** Wire `on_input` to a signal
+    and feed `value` back, or the textarea won't update. `on_submit`
+    hands you the current value — clear it yourself
+    (`value.set(String::new())`); the component doesn't.
+
+13. **`AssistantPanel` is NON-modal; `Sheet`/`Dialog` are modal.** The
+    assistant panel renders no backdrop and does not trap focus (the
+    page stays usable). `Sheet` and `Dialog` trap focus, dim the page,
+    and restore focus to the opener on close. Give each simultaneously
+    open `Sheet`/`Dialog` a unique `id` so their focus traps don't
+    collide.
+
+14. **`Toaster` is render-driven — you own the list.** It does not keep
+    a queue. Hold a `Signal<Vec<ToastEntry>>`, pass
+    `items: entries.read().clone()`, push to add, and **remove the id in
+    `on_dismiss`** (`entries.write().retain(|e| e.id != id)`) or the
+    toast never clears. Auto-dismiss pauses while the pointer hovers.
+
+15. **`Heading` vs `Text`: level ≠ size.** `Heading.level` fixes the
+    semantic `h1..h6` tag; `Heading.variant` (an `Option<TextVariant>`)
+    overrides only the visual size. `Text` never emits an `hN` tag — use
+    it for prose, `Heading` for the document outline. Deep headings
+    (level 4+) default to `Body` size unless you pass an explicit
+    `variant`.
+
+16. **`Avatar` chooses image vs initials by `src.is_empty()`** — there
+    is no load-error fallback, so a broken `src` shows a broken image.
+    `name` is required and doubles as the `<img alt>` / initials
+    `aria-label`; never leave it blank.
 
 ---
 
@@ -704,15 +996,30 @@ features = [
     "composition",   # FrameStage + Composition
     "capture",       # CaptureStage descriptor
     "icons",         # Icon set
-    "liquid-glass",  # wgpu glass engine (recommended)
+    "liquid-glass",  # wgpu glass engine via ui-glass-dioxus + ui-glass-engine (default, recommended)
+    "blocks",        # ui-blocks Scene catalog: LowerThird/Caption/WipeTransition/MetricCounter/SocialOverlay (default)
 ]
 ```
+
+`liquid-glass` and `blocks` are **on by default**; drop them with
+`default-features = false` only if you've measured you don't need the
+wgpu glass path or the cinematic Scene blocks. The AI-native surfaces,
+typography, feedback, and overlay primitives are unconditional (no
+feature flag).
 
 ---
 
 ## Where to look in the source
 
 - **Component implementations**: `crates/ui-dioxus/src/`
+- **AI-native surfaces**: `crates/ui-dioxus/src/ai/` (`streaming_text`,
+  `status`, `citation`, `source_card`, `prompt_input`,
+  `assistant_panel`, `agent_timeline`)
+- **Typography / display primitives**: `crates/ui-dioxus/src/typography.rs`
+  (`Heading`, `Text`), `crates/ui-dioxus/src/display.rs` (`Badge`,
+  `Avatar`, `Spinner`, `Alert`, `Progress`, `Skeleton`)
+- **Overlays** (`Sheet`, `Toaster`, focus trap):
+  `crates/ui-dioxus/src/overlays/`
 - **Foundational types**: `crates/ui-core/src/lib.rs`
 - **Glass material types**: `crates/ui-glass/src/lib.rs`
 - **Motion primitives**: `crates/ui-motion/`, `crates/ui-timeline/`

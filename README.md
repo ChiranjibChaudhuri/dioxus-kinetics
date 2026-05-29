@@ -18,42 +18,24 @@ use kinetics::prelude::*;
 
 This repository is a Rust Cargo workspace. The public API is exposed through `crates/kinetics`; the other crates keep design tokens, material recipes, motion math, layout math, renderer adapters, and optional backend boundaries focused.
 
-Ready rendered components:
+Ready rendered components, grouped the way the gallery presents them. Every
+component also ships a SaaS-role alias (`Button` / `ActionControl`, `Sidebar` /
+`NavigationRail`, `Dialog` / `ModalLayer`, …); both name surfaces are public and
+stable — see `docs/component-naming.md`. The newest addition is a dedicated
+**AI-native surfaces** family: streaming answers, citations, source rails,
+prompt composers, and agent surfaces for AI-native products.
 
-- `Button`
-- `TextField`
-- `Checkbox`
-- `Switch`
-- `CommandMenu`
-- `Toolbar`
-- `Stack`
-- `Tabs`
-- `Sidebar`
-- `Surface`
-- `GlassSurface`
-- `MetricCard`
-- `Dialog`
-- `Toast`
-- `Tooltip`
-- `EmptyState`
-- `Sequence`
-- `SharedLayout`
-- `SharedElement`
-- `Scene`
-- `Clip`
-- `KineticBox`
-- `KineticText`
-- `Presence`
-- `PresenceGate`
-- `TimelineScope`
-- `SplitText`
-- `MotionPath`
-- `FrameStage` (legacy, kept as deprecation shim)
-- `LowerThird`
-- `Caption`
-- `WipeTransition`
-- `MetricCounter`
-- `SocialOverlay`
+- **Foundations & actions** — `Button`, `IconButton`, `CommandMenu`, `Toolbar`, `DropdownMenu`, `Heading`, `Text`
+- **Inputs** — `TextField`, `Checkbox`, `Switch`, `Select`, `Combobox`, `DatePicker`, `RadioGroup`, `Slider`, `SegmentedControl`
+- **Navigation** — `Breadcrumb`, `Stepper`
+- **Layout & surfaces** — `Stack`, `Tabs`, `Sidebar`, `Accordion`, `Surface`, `GlassSurface`, `MetricCard`, `Badge`, `Avatar`
+- **AI-native surfaces** — `StreamingText`, `AiStatus`, `CitationChip`, `SourceCard`, `SourceRail`, `PromptInput`, `AssistantPanel`, `AgentTimeline`
+- **Feedback & overlays** — `Dialog`, `Sheet`, `Popover`, `Tooltip`, `Toast`, `Toaster`, `Alert`, `Progress`, `Skeleton`, `Spinner`, `EmptyState`
+- **Data workflows** — `DataTable`, `Pagination`
+- **Motion** — `Presence`, `PresenceGate`, `Sequence`, `TimelineScope`, `KineticBox`, `KineticText`, `SharedLayout`, `SharedElement`, `SplitText`, `MotionPath`
+- **Scene & composition** — `Scene`, `Clip` (current); `FrameStage` / `FrameClip` / `FrameLayer` (legacy deprecation shims)
+- **Capture** — `CaptureStage`
+- **Cinematic blocks** (`ui-blocks`, behind the default `blocks` feature) — `LowerThird`, `Caption`, `WipeTransition`, `MetricCounter`, `SocialOverlay`
 
 ## Design Principles
 
@@ -78,7 +60,9 @@ crates/
   ui-layout/        renderer-neutral FLIP layout math
   ui-dom/           CSS/style serialization for WebView and web targets
   ui-native/        native capability planning for glass rendering
-  ui-dioxus/        semantic Dioxus components
+  ui-glass-engine/  WebGPU/WebGL2 liquid-glass render engine (tiered, degrades to SVG/solid)
+  ui-glass-dioxus/  Dioxus bindings for the liquid-glass engine
+  ui-dioxus/        semantic Dioxus components (incl. the ai/ AI-native surfaces submodule)
   ui-styles/        shared library CSS variables and component classes
   ui-timeline/      native timeline, stagger, presence, scroll, and shared movement contracts
   ui-composition/   native frame composition and deterministic frame sampling
@@ -118,8 +102,13 @@ Default `kinetics` features:
 - `capture`
 - `runtime`
 - `icons`
+- `liquid-glass` (WebGPU/WebGL2 glass via `ui-glass-dioxus`/`ui-glass-engine`)
+- `blocks` (the `ui-blocks` cinematic catalog: `LowerThird`, `Caption`, `WipeTransition`, `MetricCounter`, `SocialOverlay`)
 
-Optional features:
+`liquid-glass` and `blocks` are on by default but can be dropped with
+`--no-default-features`.
+
+Optional (non-default) features:
 
 - `native`
 - `a11y-tests`
@@ -338,6 +327,11 @@ Glass is represented by a renderer-neutral recipe:
 
 Web, Desktop, and Mobile WebView paths use `backdrop-filter` when supported. Native targets use the same recipe and map it through `NativeCapabilities`. Reduced transparency and solid fallback policies force a non-blurred surface.
 
+With the default `liquid-glass` feature, `ui-glass-engine` resolves the best
+available render tier — WebGPU → WebGL2 → SVG `backdrop-filter` → solid CSS.
+Reduced-transparency and high-contrast preferences snap to the solid tier, and
+reduced-motion deliberately avoids the live GPU loop.
+
 See `docs/glass-materials.md` for the material model.
 
 ## Platform Support
@@ -366,6 +360,11 @@ This is an MVP library foundation. The current implementation includes:
 - native capability adapter
 - Dioxus semantic component MVP
 - advanced SaaS controls and surfaces
+- AI-native surfaces (streaming text, status, citations, source cards/rails, prompt input, assistant panel, agent timeline)
+- expanded primitive set: typography, feedback, navigation, inputs, overlays, and a data table
+- WebGPU/WebGL2 liquid-glass engine with SVG and solid degradation
+- shared focus-trap plus Escape/backdrop dismissal across modal and anchored overlays
+- Playwright end-to-end coverage (smoke, motion, visual)
 - reusable shared CSS crate
 - native timeline boundary
 - native frame composition boundary
@@ -376,7 +375,7 @@ This is an MVP library foundation. The current implementation includes:
   story, glass triplet, metric strip, CTA — composed from existing
   primitives)
 
-Future phases should add overlay managers, focus trapping, runtime theme/density switching, keyboard engines, data-heavy workflow components, visual regression checks, native fidelity work, and deeper backend integrations.
+Future phases should add runtime theme/density switching, richer keyboard engines, deeper native fidelity work, and deeper backend integrations.
 
 ## Documentation
 

@@ -18,6 +18,27 @@ fn base_css_exposes_theme_density_and_preference_hooks() {
 }
 
 #[test]
+fn base_css_handles_forced_colors_high_contrast() {
+    let css = base_css();
+
+    assert!(
+        css.contains("@media (forced-colors: active)"),
+        "expected a forced-colors (Windows High Contrast) block"
+    );
+    // The block must map to CSS system colors, not our own tokens.
+    let idx = css.find("@media (forced-colors: active)").unwrap();
+    let block = &css[idx..];
+    assert!(
+        block.contains("CanvasText"),
+        "forced-colors should map borders/text to CanvasText"
+    );
+    assert!(
+        block.contains("Highlight"),
+        "forced-colors should map focus rings to Highlight"
+    );
+}
+
+#[test]
 fn component_css_covers_advanced_component_classes() {
     let css = COMPONENT_CSS;
 

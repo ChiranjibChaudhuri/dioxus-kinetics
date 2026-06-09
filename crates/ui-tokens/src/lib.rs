@@ -78,11 +78,55 @@ pub enum ThemeMode {
     Dark,
 }
 
+impl ThemeMode {
+    /// The `data-ui-theme` attribute value for this mode, matching the
+    /// selectors in the shared CSS (`light` / `dark`).
+    pub const fn data_attr(self) -> &'static str {
+        match self {
+            Self::Light => "light",
+            Self::Dark => "dark",
+        }
+    }
+
+    /// Parse a `data-ui-theme` attribute value back into a `ThemeMode`.
+    /// Returns `None` for any unrecognized value.
+    pub fn from_attr(value: &str) -> Option<Self> {
+        match value {
+            "light" => Some(Self::Light),
+            "dark" => Some(Self::Dark),
+            _ => None,
+        }
+    }
+}
+
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum Density {
     Compact,
     Comfortable,
     Spacious,
+}
+
+impl Density {
+    /// The `data-ui-density` attribute value for this density, matching the
+    /// selectors in the shared CSS (`compact` / `comfortable` / `spacious`).
+    pub const fn data_attr(self) -> &'static str {
+        match self {
+            Self::Compact => "compact",
+            Self::Comfortable => "comfortable",
+            Self::Spacious => "spacious",
+        }
+    }
+
+    /// Parse a `data-ui-density` attribute value back into a `Density`.
+    /// Returns `None` for any unrecognized value.
+    pub fn from_attr(value: &str) -> Option<Self> {
+        match value {
+            "compact" => Some(Self::Compact),
+            "comfortable" => Some(Self::Comfortable),
+            "spacious" => Some(Self::Spacious),
+            _ => None,
+        }
+    }
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
@@ -124,11 +168,11 @@ impl SemanticColors {
             foreground: Color::rgba(20, 23, 28, 1.0),
             muted_foreground: Color::rgba(86, 94, 108, 1.0),
             border: Color::rgba(120, 132, 150, 0.24),
-            primary: Color::rgba(0, 102, 204, 1.0),
-            success: Color::rgba(31, 122, 53, 1.0),
+            primary: Color::rgba(0, 88, 179, 1.0),
+            success: Color::rgba(26, 107, 46, 1.0),
             warning: Color::rgba(154, 88, 0, 1.0),
             danger: Color::rgba(196, 43, 43, 1.0),
-            info: Color::rgba(20, 118, 191, 1.0),
+            info: Color::rgba(15, 99, 163, 1.0),
             focus: Color::rgba(0, 122, 255, 1.0),
         }
     }
@@ -210,11 +254,11 @@ impl Default for Theme {
                 foreground: Color::rgba(20, 23, 28, 1.0),
                 muted_foreground: Color::rgba(86, 94, 108, 1.0),
                 border: Color::rgba(120, 132, 150, 0.24),
-                primary: Color::rgba(0, 102, 204, 1.0),
-                success: Color::rgba(31, 122, 53, 1.0),
+                primary: Color::rgba(0, 88, 179, 1.0),
+                success: Color::rgba(26, 107, 46, 1.0),
                 warning: Color::rgba(154, 88, 0, 1.0),
                 danger: Color::rgba(196, 43, 43, 1.0),
-                info: Color::rgba(20, 118, 191, 1.0),
+                info: Color::rgba(15, 99, 163, 1.0),
                 focus: Color::rgba(0, 122, 255, 1.0),
             },
             radius: RadiusScale {

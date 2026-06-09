@@ -33,11 +33,11 @@ fn default_theme_has_apple_like_surface_bias() {
     assert_eq!(theme.motion.slow_ms, 260);
     assert_eq!(
         theme.semantic.success.css_rgba(),
-        "rgba(31, 122, 53, 1.000)"
+        "rgba(26, 107, 46, 1.000)"
     );
     assert_eq!(theme.semantic.warning.css_rgba(), "rgba(154, 88, 0, 1.000)");
     assert_eq!(theme.semantic.danger.css_rgba(), "rgba(196, 43, 43, 1.000)");
-    assert_eq!(theme.semantic.info.css_rgba(), "rgba(20, 118, 191, 1.000)");
+    assert_eq!(theme.semantic.info.css_rgba(), "rgba(15, 99, 163, 1.000)");
     assert_eq!(theme.motion_preference, MotionPreference::Allow);
 }
 

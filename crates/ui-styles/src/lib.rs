@@ -23,14 +23,15 @@ pub fn base_css() -> String {
     --ui-muted-fg: #5c6778;
     --ui-border: rgba(118, 132, 150, 0.26);
     --ui-focus: #007aff;
-    --ui-focus-text: #0064d6;
-    --ui-primary: #0066cc;
-    --ui-success: #1f7a35;
+    --ui-primary: #0058b3;
+    --ui-success: #1a6b2e;
     --ui-warning: #9a5800;
     --ui-danger: #c42b2b;
-    --ui-info: #1476bf;
+    --ui-info: #0f63a3;
     --ui-accent: var(--ui-primary);
     --ui-on-accent: #ffffff;
+    --ui-on-danger: #ffffff;
+    --ui-on-warning: #1a1a1a;
     --ui-shadow-soft: 0 18px 46px rgba(27, 39, 61, 0.10);
     --ui-shadow-lifted: 0 24px 80px rgba(13, 20, 32, 0.24);
     --ui-elevation-0: {l0};
@@ -117,7 +118,6 @@ pub fn base_css() -> String {
     --ui-muted-fg: #aab4c2;
     --ui-border: rgba(205, 215, 228, 0.18);
     --ui-focus: #64b5ff;
-    --ui-focus-text: #8fc4ff;
     --ui-primary: #4c9bff;
     --ui-success: #3ecf6a;
     --ui-warning: #f0a82e;
@@ -125,6 +125,8 @@ pub fn base_css() -> String {
     --ui-info: #5cb6ff;
     --ui-accent: var(--ui-primary);
     --ui-on-accent: #06121f;
+    --ui-on-danger: #3a0d0d;
+    --ui-on-warning: #1a1a1a;
     --ui-shadow-soft: 0 18px 46px rgba(0, 0, 0, 0.24);
     --ui-shadow-lifted: 0 26px 90px rgba(0, 0, 0, 0.42);
     --ui-elevation-0: {d0};
@@ -185,6 +187,83 @@ select {{
         animation-duration: 0.01ms !important;
         animation-iteration-count: 1 !important;
         scroll-behavior: auto !important;
+    }}
+}}
+
+/* Windows High Contrast / forced-colors. The OS replaces our palette with a
+   user-chosen system color set, so we map the load-bearing surfaces, borders
+   and focus rings to CSS system colors and let decorative glass fall back to
+   the system Canvas. forced-color-adjust:auto (the default) keeps controls in
+   the system theme; we only adjust where our own tokens would otherwise leak a
+   non-system color. Inset focus rings are pushed to a non-negative offset so
+   the OS-drawn Highlight ring is not clipped by overflow:hidden ancestors. */
+@media (forced-colors: active) {{
+    :root,
+    [data-ui-theme="light"],
+    [data-ui-theme="dark"] {{
+        --ui-border: CanvasText;
+        --ui-focus: Highlight;
+    }}
+    .ui-glass-surface,
+    .ui-glass-layer,
+    .ui-metric-card,
+    .ui-empty-state,
+    .ui-dialog-panel,
+    .ui-command-menu-panel,
+    .ui-popover,
+    .ui-tooltip-content,
+    .ui-sidebar,
+    .ui-toast,
+    .ui-alert,
+    .ui-assistant-panel,
+    .ui-prompt-input,
+    .ui-surface {{
+        background: Canvas;
+        color: CanvasText;
+        border-color: CanvasText;
+        /* Drop translucent/blurred decoration so the system colors stay
+           legible; the OS owns the contrast contract here. */
+        backdrop-filter: none;
+        -webkit-backdrop-filter: none;
+        box-shadow: none;
+    }}
+    .ui-button:focus-visible,
+    .ui-field-control:focus-visible,
+    .ui-checkbox-input:focus-visible,
+    .ui-switch-control:focus-visible,
+    .ui-tab:focus-visible,
+    .ui-command-menu-input:focus-visible,
+    .ui-sidebar-link:focus-visible,
+    .ui-icon-button:focus-visible,
+    .ui-combobox-input:focus-visible,
+    .ui-radio-input:focus-visible,
+    .ui-datepicker-cell:focus-visible,
+    .ui-dropdown-menu-button:focus-visible {{
+        outline: 2px solid Highlight;
+        outline-offset: 2px;
+    }}
+}}
+
+/* Higher-contrast preference: strengthen our hairline borders and drop the
+   backdrop blur so material surfaces read as crisp panels. */
+@media (prefers-contrast: more) {{
+    :root,
+    [data-ui-theme="light"] {{
+        --ui-border: rgba(60, 72, 90, 0.62);
+    }}
+    [data-ui-theme="dark"] {{
+        --ui-border: rgba(220, 230, 244, 0.52);
+    }}
+    .ui-glass-surface,
+    .ui-glass-layer,
+    .ui-dialog-panel,
+    .ui-command-menu-panel,
+    .ui-popover,
+    .ui-tooltip-content,
+    .ui-assistant-panel,
+    .ui-prompt-input {{
+        backdrop-filter: blur(0) saturate(160%);
+        -webkit-backdrop-filter: blur(0) saturate(160%);
     }}
 }}
 "#,
@@ -290,7 +369,7 @@ pub const COMPONENT_CSS: &str = r#"
 
 .ui-button--danger {
     background: var(--ui-danger);
-    color: #ffffff;
+    color: var(--ui-on-danger);
 }
 
 .ui-surface,
@@ -1181,7 +1260,7 @@ pub const COMPONENT_CSS: &str = r#"
 .ui-datepicker-cell:hover { background: var(--ui-surface-muted); }
 .ui-datepicker-cell:focus-visible {
     outline: 2px solid var(--ui-focus);
-    outline-offset: -2px;
+    outline-offset: 0;
 }
 .ui-datepicker-cell--selected {
     background: var(--ui-fg);
@@ -1670,7 +1749,7 @@ pub const COMPONENT_CSS: &str = r#"
 
 .ui-dropdown-menu-button:focus-visible {
     outline: 2px solid var(--ui-focus);
-    outline-offset: -2px;
+    outline-offset: 0;
 }
 
 .ui-dropdown-menu-button[data-active="true"] {

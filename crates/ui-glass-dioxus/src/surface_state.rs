@@ -46,6 +46,13 @@ pub struct SurfaceState {
     pub queue: Arc<wgpu::Queue>,
     pub surface: wgpu::Surface<'static>,
     pub surface_format: wgpu::TextureFormat,
+    /// Alpha mode negotiated from the surface caps in `from_canvas`. Stored so
+    /// `reconfigure` reuses the negotiated value instead of hardcoding one the
+    /// surface may not advertise.
+    pub alpha_mode: wgpu::CompositeAlphaMode,
+    /// Present mode negotiated from the surface caps in `from_canvas`. Stored so
+    /// `reconfigure` reuses the negotiated value instead of hardcoding `Fifo`.
+    pub present_mode: wgpu::PresentMode,
     pub compositor: Compositor,
     pub physical_size: (u32, u32),
 }
@@ -111,32 +118,43 @@ impl SurfaceState {
             .copied()
             .find(|m| *m == wgpu::CompositeAlphaMode::PreMultiplied)
             .unwrap_or(caps.alpha_modes[0]);
-
-        surface.configure(
-            &device,
-            &wgpu::SurfaceConfiguration {
-                usage: wgpu::TextureUsages::RENDER_ATTACHMENT,
-                format: surface_format,
-                width: physical_size.0,
-                height: physical_size.1,
-                present_mode: caps.present_modes[0],
-                desired_maximum_frame_latency: 2,
-                alpha_mode,
-                view_formats: vec![],
-            },
-        );
+        let present_mode = caps.present_modes[0];
 
         let compositor =
             Compositor::with_output_format(device.clone(), queue.clone(), surface_format);
 
-        Some(Self {
+        let state = Self {
             device,
             queue,
             surface,
             surface_format,
+            alpha_mode,
+            present_mode,
             compositor,
             physical_size,
-        })
+        };
+        // Configure the surface using the negotiated values via the shared
+        // `reconfigure` helper so init and recovery stay in lockstep.
+        state.reconfigure();
+        Some(state)
+    }
+
+    /// Build the `SurfaceConfiguration` from the current size + negotiated
+    /// format/alpha/present modes and (re)configure the surface. Bypasses the
+    /// size-change guard in `resize`, so callers recovering from a Lost/Outdated
+    /// surface can force a reconfigure even when the size has not changed.
+    pub fn reconfigure(&self) {
+        let config = wgpu::SurfaceConfiguration {
+            usage: wgpu::TextureUsages::RENDER_ATTACHMENT,
+            format: self.surface_format,
+            width: self.physical_size.0,
+            height: self.physical_size.1,
+            present_mode: self.present_mode,
+            desired_maximum_frame_latency: 2,
+            alpha_mode: self.alpha_mode,
+            view_formats: vec![],
+        };
+        self.surface.configure(&self.device, &config);
     }
 
     pub fn resize(&mut self, physical_size: (u32, u32)) {
@@ -144,17 +162,7 @@ impl SurfaceState {
             return;
         }
         self.physical_size = physical_size;
-        let config = wgpu::SurfaceConfiguration {
-            usage: wgpu::TextureUsages::RENDER_ATTACHMENT,
-            format: self.surface_format,
-            width: physical_size.0,
-            height: physical_size.1,
-            present_mode: wgpu::PresentMode::Fifo,
-            desired_maximum_frame_latency: 2,
-            alpha_mode: wgpu::CompositeAlphaMode::PreMultiplied,
-            view_formats: vec![],
-        };
-        self.surface.configure(&self.device, &config);
+        self.reconfigure();
     }
 }
 

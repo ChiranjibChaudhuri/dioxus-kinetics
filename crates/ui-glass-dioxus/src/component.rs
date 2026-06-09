@@ -305,7 +305,15 @@ fn handle_canvas_mounted(
                 motion_state,
                 dirty.clone(),
             );
-            let frame = start_frame_loop(surface_state, motion_state, region, width, height, dirty);
+            let frame = start_frame_loop(
+                surface_state,
+                wgpu_failed,
+                motion_state,
+                region,
+                width,
+                height,
+                dirty,
+            );
             live.borrow_mut().replace(LiveResources {
                 _frame: frame,
                 _listeners: listeners,
@@ -340,8 +348,10 @@ fn handle_canvas_mounted(
 // material/background/rect props. Each frame it reads the current region from the
 // signal, so prop changes are reflected immediately without restarting the loop.
 #[cfg(target_arch = "wasm32")]
+#[allow(clippy::too_many_arguments)]
 fn start_frame_loop(
     surface_state: Signal<Option<SurfaceState>>,
+    mut wgpu_failed: Signal<bool>,
     mut motion_state: Signal<MotionState>,
     region: Signal<ui_glass_engine::GlassRegion>,
     width: u32,
@@ -400,14 +410,27 @@ fn start_frame_loop(
         let frame = match state.surface.get_current_texture() {
             Ok(f) => f,
             Err(wgpu::SurfaceError::Lost) | Err(wgpu::SurfaceError::Outdated) => {
-                state.resize(state.physical_size);
+                // Force a reconfigure: `resize(state.physical_size)` would be a
+                // no-op because the size is unchanged, so call `reconfigure`
+                // directly to bypass the size-change guard and actually
+                // re-`configure` the surface.
+                state.reconfigure();
                 // Re-arm: this frame did not paint; retry on the next tick.
                 dirty.set(true);
                 return ControlFlow::Continue;
             }
-            Err(_) => {
+            // Transient — the compositor took too long this frame. Re-arm and
+            // retry next tick; the surface is still healthy.
+            Err(wgpu::SurfaceError::Timeout) => {
                 dirty.set(true);
                 return ControlFlow::Continue;
+            }
+            // Non-recoverable (OutOfMemory / Other): retrying would busy-spin
+            // forever. Degrade to the CSS `data-glass-*` fallback by flipping
+            // `wgpu_failed` (re-renders the fallback markup) and halt the loop.
+            Err(wgpu::SurfaceError::OutOfMemory) | Err(_) => {
+                wgpu_failed.set(true);
+                return ControlFlow::Stop;
             }
         };
         let output_view = frame.texture.create_view(&Default::default());

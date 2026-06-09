@@ -77,24 +77,12 @@ fn results_status(count: usize) -> String {
 /// wrapping around and skipping disabled rows. Returns `None` when no
 /// visible option is selectable.
 fn step_visible(visible: &[&ComboboxOption], from: usize, delta: i32) -> Option<usize> {
-    let len = visible.len();
-    if len == 0 || visible.iter().all(|opt| opt.disabled) {
-        return None;
-    }
-    let len_i = len as i32;
-    let mut idx = from as i32;
-    for _ in 0..len {
-        idx = (idx + delta).rem_euclid(len_i);
-        if !visible[idx as usize].disabled {
-            return Some(idx as usize);
-        }
-    }
-    None
+    ui_core::roving::step_focusable(visible.len(), from, delta, |i| !visible[i].disabled)
 }
 
 /// First selectable (enabled) index in the filtered options.
 fn first_visible_index(visible: &[&ComboboxOption]) -> Option<usize> {
-    visible.iter().position(|opt| !opt.disabled)
+    ui_core::roving::first_focusable(visible.len(), |i| !visible[i].disabled)
 }
 
 #[component]

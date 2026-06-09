@@ -1,5 +1,7 @@
 #![forbid(unsafe_code)]
 
+pub mod roving;
+
 #[derive(Clone, Debug, PartialEq, Eq, Hash)]
 pub struct ComponentId(String);
 

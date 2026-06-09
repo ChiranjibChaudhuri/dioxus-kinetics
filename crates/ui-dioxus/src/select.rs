@@ -258,44 +258,31 @@ pub fn Select(
 /// First index whose option is enabled, or `None` if every option is
 /// disabled / the list is empty.
 fn first_enabled_index(options: &[SelectOption]) -> Option<usize> {
-    options.iter().position(|opt| !opt.disabled)
+    ui_core::roving::first_focusable(options.len(), |i| !options[i].disabled)
 }
 
 /// Last index whose option is enabled, or `None` if none are.
 fn last_enabled_index(options: &[SelectOption]) -> Option<usize> {
-    options.iter().rposition(|opt| !opt.disabled)
+    ui_core::roving::last_focusable(options.len(), |i| !options[i].disabled)
 }
 
 /// Step the active index by `delta` (±1), wrapping around the list and
 /// skipping disabled options. Returns `None` only when no option is
 /// enabled.
 fn step_enabled(options: &[SelectOption], from: usize, delta: i32) -> Option<usize> {
-    let len = options.len();
-    if len == 0 || options.iter().all(|opt| opt.disabled) {
-        return None;
-    }
-    let len_i = len as i32;
-    let mut idx = from as i32;
-    for _ in 0..len {
-        idx = (idx + delta).rem_euclid(len_i);
-        if !options[idx as usize].disabled {
-            return Some(idx as usize);
-        }
-    }
-    None
+    ui_core::roving::step_focusable(options.len(), from, delta, |i| !options[i].disabled)
 }
 
 /// Typeahead: first enabled option whose lowercased label starts with
 /// the lowercased `buffer`. Returns `None` when nothing matches so the
 /// caller can keep the current active option.
 fn typeahead_index(options: &[SelectOption], buffer: &str) -> Option<usize> {
-    if buffer.is_empty() {
-        return None;
-    }
-    let needle = buffer.to_lowercase();
-    options
-        .iter()
-        .position(|opt| !opt.disabled && opt.label.to_lowercase().starts_with(&needle))
+    ui_core::roving::typeahead_index(
+        options.len(),
+        buffer,
+        |i| !options[i].disabled,
+        |i| options[i].label.clone(),
+    )
 }
 
 /// The `value` of the option at `index`, or `None` when the index is out

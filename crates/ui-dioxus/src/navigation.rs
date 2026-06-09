@@ -458,28 +458,24 @@ fn step_tab(ids: &[String], current: &str, delta: i32) -> Option<String> {
     if ids.is_empty() {
         return None;
     }
-    let index = ids
+    // Every tab participates in the roving sequence (no disabled tabs), so the
+    // step reduces to `ui_core::roving::step_focusable` with an all-focusable
+    // predicate. step_focusable wraps with rem_euclid, so for delta = ±1 it
+    // matches the prior `((i + delta) % len + len) % len` idiom exactly. When
+    // `current` is unknown, seed `len - 1` (forward) so the +1 step wraps to
+    // the first tab, or `0` (backward) so the -1 step wraps to the last tab —
+    // reproducing the original `-1` / `len` seeds.
+    let from = ids
         .iter()
         .position(|candidate| candidate == current)
-        .map(|i| i as i32)
-        .unwrap_or(if delta >= 0 { -1 } else { ids.len() as i32 });
-    let len = ids.len() as i32;
-    let next = ((index + delta) % len + len) % len;
-    ids.get(next as usize).cloned()
+        .unwrap_or(if delta >= 0 { ids.len() - 1 } else { 0 });
+    ui_core::roving::step_focusable(ids.len(), from, delta, |_| true)
+        .and_then(|i| ids.get(i).cloned())
 }
 
 fn focus_tab(value: &str) {
-    // Manual focus follows selection for the WAI-ARIA tab pattern. Allow only
-    // identifier characters before interpolating into the JS literal.
-    if !value
-        .chars()
-        .all(|c| c.is_ascii_alphanumeric() || c == '-' || c == '_' || c == ':' || c == '.')
-    {
-        return;
-    }
-    let _ = dioxus::document::eval(&format!(
-        "const el = document.getElementById('tab-{value}'); if (el) el.focus();"
-    ));
+    // Manual focus follows selection for the WAI-ARIA tab pattern.
+    crate::roving::focus_element_by_id(&format!("tab-{value}"));
 }
 
 #[cfg(test)]

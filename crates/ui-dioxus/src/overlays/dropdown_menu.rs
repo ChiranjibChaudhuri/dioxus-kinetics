@@ -264,59 +264,35 @@ pub fn DropdownMenu(
 
 /// First index whose row is focusable (enabled, non-separator).
 fn first_focusable_index(items: &[DropdownMenuItem]) -> Option<usize> {
-    items.iter().position(|item| item.is_focusable())
+    ui_core::roving::first_focusable(items.len(), |i| items[i].is_focusable())
 }
 
 /// Last index whose row is focusable.
 fn last_focusable_index(items: &[DropdownMenuItem]) -> Option<usize> {
-    items.iter().rposition(|item| item.is_focusable())
+    ui_core::roving::last_focusable(items.len(), |i| items[i].is_focusable())
 }
 
 /// Step focus by `delta` (±1) across focusable rows, wrapping and
 /// skipping separators / disabled rows. Returns `None` when nothing is
 /// focusable.
 fn step_focusable(items: &[DropdownMenuItem], from: usize, delta: i32) -> Option<usize> {
-    let len = items.len();
-    if len == 0 || !items.iter().any(|item| item.is_focusable()) {
-        return None;
-    }
-    let len_i = len as i32;
-    let mut idx = from as i32;
-    for _ in 0..len {
-        idx = (idx + delta).rem_euclid(len_i);
-        if items[idx as usize].is_focusable() {
-            return Some(idx as usize);
-        }
-    }
-    None
+    ui_core::roving::step_focusable(items.len(), from, delta, |i| items[i].is_focusable())
 }
 
 /// Typeahead: first focusable row whose lowercased label starts with the
 /// lowercased `buffer`.
 fn typeahead_index(items: &[DropdownMenuItem], buffer: &str) -> Option<usize> {
-    if buffer.is_empty() {
-        return None;
-    }
-    let needle = buffer.to_lowercase();
-    items
-        .iter()
-        .position(|item| item.is_focusable() && item.label.to_lowercase().starts_with(&needle))
+    ui_core::roving::typeahead_index(
+        items.len(),
+        buffer,
+        |i| items[i].is_focusable(),
+        |i| items[i].label.clone(),
+    )
 }
 
 /// Move DOM focus to the menu button with id `{menu_id}-item-{item_id}`.
-/// Mirrors `navigation::focus_tab`: only identifier-safe characters are
-/// interpolated into the JS literal.
 fn focus_menu_item(menu_id: &str, item_id: &str) {
-    let safe = |s: &str| {
-        s.chars()
-            .all(|c| c.is_ascii_alphanumeric() || c == '-' || c == '_' || c == ':' || c == '.')
-    };
-    if !safe(menu_id) || !safe(item_id) {
-        return;
-    }
-    let _ = dioxus::document::eval(&format!(
-        "const el = document.getElementById('{menu_id}-item-{item_id}'); if (el) el.focus();"
-    ));
+    crate::roving::focus_element_by_id(&format!("{menu_id}-item-{item_id}"));
 }
 
 #[cfg(test)]

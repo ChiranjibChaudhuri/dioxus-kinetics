@@ -17,6 +17,7 @@ mod motion_path;
 mod navigation;
 mod overlays;
 mod popover;
+mod roving;
 mod scene_player;
 mod select;
 mod split_text;

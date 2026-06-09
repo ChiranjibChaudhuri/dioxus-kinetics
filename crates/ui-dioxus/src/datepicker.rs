@@ -428,20 +428,12 @@ pub fn DatePicker(
     }
 }
 
-/// Move DOM focus to the gridcell with id `{grid_id}-day-{iso}`.
-/// Mirrors `navigation::focus_tab`: the ISO date is digit/`-` only, and
-/// the grid id is validated before interpolating into the JS literal.
+/// Move DOM focus to the gridcell with id `{grid_id}-day-{iso}`. The id is
+/// validated by the shared focus helper before interpolating into the JS
+/// literal.
 fn focus_day_cell(grid_id: &str, year: i32, month: u32, day: u32) {
-    let safe = grid_id
-        .chars()
-        .all(|c| c.is_ascii_alphanumeric() || c == '-' || c == '_' || c == ':' || c == '.');
-    if !safe {
-        return;
-    }
     let iso = format_iso_date(year, month, day);
-    let _ = dioxus::document::eval(&format!(
-        "const el = document.getElementById('{grid_id}-day-{iso}'); if (el) el.focus();"
-    ));
+    crate::roving::focus_element_by_id(&format!("{grid_id}-day-{iso}"));
 }
 
 #[cfg(test)]

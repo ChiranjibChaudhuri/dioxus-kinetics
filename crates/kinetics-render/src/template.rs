@@ -2,7 +2,7 @@
 
 pub const CAPTURE_CJS: &str = r#"// kinetics-render PNG capture script
 //
-// Usage: node capture.cjs <output-dir>
+// Usage: node capture.cjs <output-dir> [width] [height]
 // Iterates output-dir/frames/*.html and writes output-dir/png/<i>.png
 // via Playwright Chromium.
 
@@ -15,13 +15,15 @@ async function main() {
         console.error("Usage: node capture.cjs <output-dir>");
         process.exit(2);
     }
+    const width = parseInt(process.argv[3] || '1280', 10);
+    const height = parseInt(process.argv[4] || '720', 10);
     const framesDir = path.join(outDir, "frames");
     const pngDir = path.join(outDir, "png");
     fs.mkdirSync(pngDir, { recursive: true });
 
     const playwright = require("playwright");
     const browser = await playwright.chromium.launch({ headless: true });
-    const page = await browser.newPage({ viewport: { width: 1280, height: 720 } });
+    const page = await browser.newPage({ viewport: { width, height } });
 
     const frames = fs
         .readdirSync(framesDir)

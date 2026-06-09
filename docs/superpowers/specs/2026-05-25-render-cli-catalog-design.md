@@ -8,7 +8,8 @@ primitives. This phase adds:
 
 - **SP-4**: a frame-by-frame Rust renderer that walks any `Scene` via
   `SceneDriver::Manual` + `clock.seek_ms(t)` and emits per-frame
-  HTML + an `ExportManifest`. PNG capture (via Playwright child) and
+  HTML + a minimal composition manifest JSON. PNG capture (via
+  Playwright child) and
   MP4 encoding (via FFmpeg child) are opt-in, graceful-degradation
   features.
 - **SP-5**: a `kinetics` CLI (`init`, `preview`, `render`, `lint`,
@@ -35,7 +36,9 @@ In scope:
      `clock.seek_ms((frame / fps) * 1000)`, and serializes the
      resulting `Element` via `dioxus_ssr::render_element`.
    - Output: `<output_dir>/frames/<frame_index>.html` per frame plus
-     `<output_dir>/manifest.json` (a `ui_capture::ExportManifest`).
+     `<output_dir>/manifest.json` (a minimal composition manifest JSON
+     of shape
+     `{ schema_version, composition: { id, width, height, fps, frame_count } }`).
    - Errors via `RenderError` enum (IO, invalid config). No panics
      in the public API.
    - Cross-platform native: tokio + std::fs. No wasm-bindgen.
@@ -279,18 +282,14 @@ COMMANDS:
 
 `kinetics render --scene <name>` reads from a static `SceneRegistry`
 in `scene_registry.rs` that maps named scenes (e.g.
-`"product-intro"`, `"scroll-story"`, `"split-headline"`) to the
-corresponding `RenderConfig` + `scene_fn`. SP-4+5+6 ships five
-named scenes:
+`"hello"`, `"product-intro"`) to the corresponding `RenderConfig` +
+`scene_fn`. The shipped registry contains two named scenes:
 
+- `hello`
 - `product-intro` (SP-1)
-- `scroll-story` (SP-3)
-- `split-headline` (SP-3)
-- `curved-trajectory` (SP-3)
-- `lower-third` (SP-6)
 
-The registry is hard-coded for SP-4+5+6; user-extensible registries
-are a follow-up.
+The registry is hard-coded; user-extensible registries are a
+follow-up.
 
 ### `ui-blocks` catalog
 
@@ -419,7 +418,7 @@ For each frame in 0..N:
   - html = dioxus_ssr::render_element(rsx! { {element} })
   - fs::write("frames/{frame}.html", html)
    ↓
-[Renderer writes manifest.json (ExportManifest)]
+[Renderer writes manifest.json (minimal composition manifest)]
    ↓
 [capture_png: true → write capture.cjs, spawn "node capture.cjs <out>"]
    ↓

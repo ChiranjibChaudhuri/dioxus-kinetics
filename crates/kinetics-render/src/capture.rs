@@ -1,6 +1,7 @@
 //! PNG capture orchestrator.
 //!
-//! Spawns `node capture.cjs <output_dir>` as a child process. Returns
+//! Spawns `node capture.cjs <output_dir> <width> <height>` as a child
+//! process. Returns
 //! `Some(png_dir)` on success or `None` plus a warning string on any
 //! failure (missing node, missing playwright, missing browsers, or
 //! non-zero exit). This is a graceful-degradation stage — never errors.
@@ -15,7 +16,7 @@ pub struct CaptureOutcome {
     pub warnings: Vec<String>,
 }
 
-pub fn run_capture(output_dir: &Path) -> CaptureOutcome {
+pub fn run_capture(output_dir: &Path, width: u32, height: u32) -> CaptureOutcome {
     let mut warnings = Vec::new();
     let script_path = output_dir.join("capture.cjs");
     if let Err(e) = std::fs::write(&script_path, CAPTURE_CJS) {
@@ -29,7 +30,12 @@ pub fn run_capture(output_dir: &Path) -> CaptureOutcome {
     }
 
     let cmd = if cfg!(windows) { "node.exe" } else { "node" };
-    let result = Command::new(cmd).arg(&script_path).arg(output_dir).output();
+    let result = Command::new(cmd)
+        .arg(&script_path)
+        .arg(output_dir)
+        .arg(width.to_string())
+        .arg(height.to_string())
+        .output();
 
     let output = match result {
         Ok(o) => o,

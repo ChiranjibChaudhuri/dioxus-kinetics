@@ -147,9 +147,10 @@ impl Renderer {
             fs::write(&frame_path, body)?;
         }
 
-        // Write the ExportManifest. We don't pull ui_capture's full
-        // manifest builder API in to avoid extra deps — write the
-        // minimal JSON shape directly.
+        // Write a minimal composition manifest. We don't pull
+        // ui_capture's full manifest builder API in to avoid extra deps —
+        // write the minimal JSON shape directly:
+        //   { schema_version, composition: { id, width, height, fps, frame_count } }
         let manifest_path = self.config.output_dir.join("manifest.json");
         let manifest_json = serde_json::json!({
             "schema_version": 1,
@@ -169,7 +170,11 @@ impl Renderer {
         let mut report_warnings: Vec<String> = Vec::new();
         let mut png_dir: Option<PathBuf> = None;
         if self.config.capture_png {
-            let outcome = capture::run_capture(&self.config.output_dir);
+            let outcome = capture::run_capture(
+                &self.config.output_dir,
+                self.config.width,
+                self.config.height,
+            );
             png_dir = outcome.png_dir;
             report_warnings.extend(outcome.warnings);
         }

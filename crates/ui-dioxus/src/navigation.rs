@@ -1,5 +1,18 @@
 use dioxus::prelude::*;
 
+/// Resolve the `aria-current` attribute value. When `active`, emit the
+/// caller's token (`"step"`, `"page"`, …); otherwise emit the literal
+/// `"false"`. Emitting an empty string here is a trap: Dioxus renders it
+/// as `aria-current=""`, which WAI-ARIA maps to the default token
+/// `"true"`, so every inactive item would be announced as current.
+pub(crate) fn aria_current(active: bool, token: &'static str) -> &'static str {
+    if active {
+        token
+    } else {
+        "false"
+    }
+}
+
 /// One crumb in a `Breadcrumb` trail.
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct BreadcrumbItem {
@@ -121,7 +134,7 @@ pub fn Stepper(
                                 button {
                                     class: "ui-stepper-trigger",
                                     r#type: "button",
-                                    "aria-current": if is_active { "step" } else { "" },
+                                    "aria-current": aria_current(is_active, "step"),
                                     onclick: move |_| {
                                         if let Some(handler) = &on_select {
                                             handler.call(step_id.clone());
@@ -159,7 +172,7 @@ fn pagination_button(page: u32, current: u32, on_select: &Option<EventHandler<u3
             button {
                 class: "{class}",
                 r#type: "button",
-                "aria-current": if is_current { "page" } else { "" },
+                "aria-current": aria_current(is_current, "page"),
                 "aria-label": "Page {page}",
                 onclick: move |_| {
                     if let Some(handler) = &on_select {

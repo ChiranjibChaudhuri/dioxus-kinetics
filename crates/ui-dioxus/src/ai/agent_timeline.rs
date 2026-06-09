@@ -3,6 +3,8 @@
 
 use dioxus::prelude::*;
 
+use crate::navigation::aria_current;
+
 /// Lifecycle state of a single agent step.
 #[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
 pub enum AgentStepState {
@@ -66,7 +68,7 @@ pub fn AgentTimeline(steps: Vec<AgentStep>) -> Element {
                             key: "{i}",
                             class: "ui-agent-timeline-step",
                             "data-state": "{suffix}",
-                            "aria-current": if is_active { "step" } else { "" },
+                            "aria-current": aria_current(is_active, "step"),
                             span { class: "ui-agent-timeline-node", "aria-hidden": "true",
                                 if is_done {
                                     svg {

@@ -47,6 +47,9 @@ pub fn PromptInput(
 ) -> Element {
     let submit_value = value.clone();
     let key_value = value.clone();
+    // An all-whitespace prompt is not submittable: gate the send button,
+    // the Enter key, and the form submit on real content.
+    let empty = value.trim().is_empty();
 
     // Stable per-instance id so the auto-grow eval targets *this*
     // textarea (getElementById) rather than the first match on the page.
@@ -67,6 +70,9 @@ pub fn PromptInput(
             class: "ui-prompt-input",
             onsubmit: move |evt| {
                 evt.prevent_default();
+                if submit_value.trim().is_empty() {
+                    return;
+                }
                 if let Some(handler) = &on_submit {
                     handler.call(submit_value.clone());
                 }
@@ -91,8 +97,13 @@ pub fn PromptInput(
                 },
                 onkeydown: move |evt| {
                     // Enter submits; Shift+Enter falls through to insert a newline.
+                    // Suppressed while streaming (the affordance is Stop, not
+                    // Send) and for an empty/whitespace-only prompt.
                     if evt.key() == Key::Enter && !evt.modifiers().shift() {
                         evt.prevent_default();
+                        if streaming || key_value.trim().is_empty() {
+                            return;
+                        }
                         if let Some(handler) = &on_submit {
                             handler.call(key_value.clone());
                         }
@@ -122,6 +133,7 @@ pub fn PromptInput(
                 button {
                     class: "ui-prompt-send",
                     r#type: "submit",
+                    disabled: empty,
                     "aria-label": "Send",
                     svg {
                         "viewBox": "0 0 24 24",
@@ -143,16 +155,29 @@ pub fn PromptInput(
 
 #[cfg(test)]
 mod tests {
-    /// Mirror of the submit gate in `onkeydown`: Enter without Shift
-    /// submits; Shift+Enter does not.
-    fn enter_submits(is_enter: bool, shift: bool) -> bool {
-        is_enter && !shift
+    /// Mirror of the full submit gate in `onkeydown`: Enter without Shift
+    /// submits, but only when not streaming and the trimmed value is
+    /// non-empty.
+    fn enter_submits(is_enter: bool, shift: bool, streaming: bool, value: &str) -> bool {
+        is_enter && !shift && !streaming && !value.trim().is_empty()
     }
 
     #[test]
     fn plain_enter_submits_shift_enter_does_not() {
-        assert!(enter_submits(true, false));
-        assert!(!enter_submits(true, true));
-        assert!(!enter_submits(false, false));
+        assert!(enter_submits(true, false, false, "hi"));
+        assert!(!enter_submits(true, true, false, "hi"));
+        assert!(!enter_submits(false, false, false, "hi"));
+    }
+
+    #[test]
+    fn empty_or_whitespace_value_does_not_submit() {
+        assert!(!enter_submits(true, false, false, ""));
+        assert!(!enter_submits(true, false, false, "   "));
+        assert!(!enter_submits(true, false, false, "\n\t"));
+    }
+
+    #[test]
+    fn streaming_suppresses_enter_submit() {
+        assert!(!enter_submits(true, false, true, "hi"));
     }
 }

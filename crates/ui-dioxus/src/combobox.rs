@@ -130,9 +130,14 @@ pub fn Combobox(
     let label_id = format!("{id}-label");
     let popover_id = format!("{id}-popover");
     let listbox_id = format!("{id}-listbox");
+    let empty_id = format!("{id}-empty");
     let status_id = format!("{id}-status");
     let visible = filter_options(&options, &query);
     let has_matches = !visible.is_empty();
+    // `aria-controls` must point at the actual listbox, which only exists
+    // when there are matches; in the empty state the panel is a status
+    // paragraph (with its own `empty_id`), so omit the attribute.
+    let controls_id: Option<String> = has_matches.then(|| listbox_id.clone());
 
     // Clamp the active index into the current visible range.
     let active_index = if visible.is_empty() {
@@ -172,7 +177,7 @@ pub fn Combobox(
                         "aria-autocomplete": "list",
                         "aria-haspopup": "listbox",
                         "aria-expanded": if *open.read() { "true" } else { "false" },
-                        "aria-controls": "{listbox_id}",
+                        "aria-controls": controls_id,
                         "aria-activedescendant": "{active_descendant}",
                         disabled,
                         oninput: move |evt| {
@@ -298,7 +303,7 @@ pub fn Combobox(
                     }
                 } else {
                     p {
-                        id: "{listbox_id}",
+                        id: "{empty_id}",
                         class: "ui-combobox-empty",
                         role: "status",
                         "{empty_text}"

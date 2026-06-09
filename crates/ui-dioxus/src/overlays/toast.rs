@@ -295,7 +295,7 @@ mod tests {
         // The auto-dismiss task advances `elapsed` in `TOAST_TICK_MS`
         // chunks (clamped to the remaining time), so the tick must be
         // non-zero and no larger than a default-duration countdown.
-        assert!(TOAST_TICK_MS > 0);
-        assert!(TOAST_TICK_MS <= DEFAULT_TOAST_DURATION_MS);
+        const { assert!(TOAST_TICK_MS > 0) };
+        const { assert!(TOAST_TICK_MS <= DEFAULT_TOAST_DURATION_MS) };
     }
 }

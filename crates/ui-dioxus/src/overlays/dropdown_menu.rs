@@ -74,6 +74,10 @@ pub fn DropdownMenu(
     /// The interactive element that opens the menu.
     trigger: Element,
     items: Vec<DropdownMenuItem>,
+    /// Accessible name for the menu. The opaque caller `trigger` exposes
+    /// no id to reference, so the menu names itself via `aria-label`.
+    #[props(default = "Menu".to_string())]
+    label: String,
     #[props(default = PopoverSide::Bottom)] side: PopoverSide,
     /// Seed the internal open-state signal so the menu renders on
     /// first paint. Lets gallery previews and SSR screenshots show
@@ -95,6 +99,11 @@ pub fn DropdownMenu(
     let key_items = items.clone();
     let key_id = id.clone();
     let key_id_for_handler = id.clone();
+    // Snapshot for the onmounted focus handler: move DOM focus onto the
+    // initially-active item when the menu opens so the roving keyboard
+    // engine is live immediately (rather than only after the user Tabs in).
+    let mount_id = id.clone();
+    let mount_items = items.clone();
 
     rsx! {
         Popover {
@@ -106,7 +115,15 @@ pub fn DropdownMenu(
             ul {
                 class: "ui-dropdown-menu",
                 role: "menu",
-                "aria-labelledby": "{id}-trigger",
+                "aria-label": "{label}",
+                onmounted: move |_evt| {
+                    // Focus the initially-active focusable item on open. The
+                    // empty / all-disabled case has no focusable index, so
+                    // this is a no-op.
+                    if let Some(idx) = first_focusable_index(&mount_items) {
+                        focus_menu_item(&mount_id, &mount_items[idx].id);
+                    }
+                },
                 onkeydown: move |evt| {
                     let current = *active.read();
                     match evt.key() {

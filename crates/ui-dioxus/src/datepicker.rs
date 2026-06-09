@@ -242,6 +242,23 @@ pub fn DatePicker(
     // month change shortens the month, e.g. Jan 31 → Feb).
     let focused_now = (*focused_day.read()).clamp(1, total_days);
     let grid_id = id.clone();
+    // Lay the month out as calendar weeks for the `role="row"` wrappers:
+    // `first_day_idx` leading fillers (None), then each day-of-month, then
+    // trailing fillers to pad the final week to seven cells. Chunking by
+    // seven keeps the grid > row > gridcell ARIA structure well-formed.
+    let weeks: Vec<Vec<Option<u32>>> = {
+        let mut cells: Vec<Option<u32>> = Vec::new();
+        for _ in 0..first_day_idx {
+            cells.push(None);
+        }
+        for day in 1u32..=total_days {
+            cells.push(Some(day));
+        }
+        while !cells.len().is_multiple_of(7) {
+            cells.push(None);
+        }
+        cells.chunks(7).map(|chunk| chunk.to_vec()).collect()
+    };
 
     rsx! {
         div { class: "ui-datepicker",
@@ -349,46 +366,57 @@ pub fn DatePicker(
                                 focused_day.set(nd);
                             }
                         },
-                        for label in WEEKDAY_SHORT.iter() {
-                            div { class: "ui-datepicker-weekday", role: "columnheader", "{label}" }
+                        // Weekday header row.
+                        div { role: "row",
+                            for label in WEEKDAY_SHORT.iter() {
+                                div { class: "ui-datepicker-weekday", role: "columnheader", "{label}" }
+                            }
                         }
-                        // Empty cells before the first of the month.
-                        for _idx in 0u32..first_day_idx {
-                            div { class: "ui-datepicker-cell ui-datepicker-cell--empty" }
-                        }
-                        // Day cells.
-                        for day in 1u32..=total_days {
-                            {
-                                let iso = format_iso_date(year_now, month_now, day);
-                                let is_selected = iso == value_clone;
-                                let is_focused = day == focused_now;
-                                let cell_class = if is_selected {
-                                    "ui-datepicker-cell ui-datepicker-cell--selected"
-                                } else {
-                                    "ui-datepicker-cell"
-                                };
-                                let cell_dom_id = format!("{grid_id}-day-{iso}");
-                                // Roving tabindex: only the focused day is in
-                                // the tab order; arrows move focus among the rest.
-                                let tabindex = if is_focused { "0" } else { "-1" };
-                                rsx! {
-                                    button {
-                                        id: "{cell_dom_id}",
-                                        class: "{cell_class}",
-                                        r#type: "button",
-                                        role: "gridcell",
-                                        tabindex: "{tabindex}",
-                                        "aria-label": "{iso}",
-                                        "aria-selected": if is_selected { "true" } else { "false" },
-                                        "data-active": if is_focused { "true" } else { "false" },
-                                        onclick: move |_| {
-                                            focused_day.set(day);
-                                            if let Some(handler) = &on_select {
-                                                handler.call(iso.clone());
+                        // One `role="row"` per calendar week; leading/trailing
+                        // filler cells keep every row seven cells wide.
+                        for (week_idx, week) in weeks.iter().enumerate() {
+                            div { key: "week-{week_idx}", role: "row",
+                                for (cell_idx, cell) in week.iter().enumerate() {
+                                    if let Some(day) = *cell {
+                                        {
+                                            let iso = format_iso_date(year_now, month_now, day);
+                                            let is_selected = iso == value_clone;
+                                            let is_focused = day == focused_now;
+                                            let cell_class = if is_selected {
+                                                "ui-datepicker-cell ui-datepicker-cell--selected"
+                                            } else {
+                                                "ui-datepicker-cell"
+                                            };
+                                            let cell_dom_id = format!("{grid_id}-day-{iso}");
+                                            // Roving tabindex: only the focused day is in
+                                            // the tab order; arrows move focus among the rest.
+                                            let tabindex = if is_focused { "0" } else { "-1" };
+                                            rsx! {
+                                                button {
+                                                    id: "{cell_dom_id}",
+                                                    class: "{cell_class}",
+                                                    r#type: "button",
+                                                    role: "gridcell",
+                                                    tabindex: "{tabindex}",
+                                                    "aria-label": "{iso}",
+                                                    "aria-selected": if is_selected { "true" } else { "false" },
+                                                    "data-active": if is_focused { "true" } else { "false" },
+                                                    onclick: move |_| {
+                                                        focused_day.set(day);
+                                                        if let Some(handler) = &on_select {
+                                                            handler.call(iso.clone());
+                                                        }
+                                                        open.set(false);
+                                                    },
+                                                    "{day}"
+                                                }
                                             }
-                                            open.set(false);
-                                        },
-                                        "{day}"
+                                        }
+                                    } else {
+                                        div {
+                                            key: "filler-{week_idx}-{cell_idx}",
+                                            class: "ui-datepicker-cell ui-datepicker-cell--empty"
+                                        }
                                     }
                                 }
                             }

@@ -184,9 +184,11 @@ front-end.
 
 `kinetics-render` walks any `Scene` via `SceneClock { driver: Manual }`,
 serializes each frame via `dioxus-ssr`, and writes per-frame HTML +
-an `ExportManifest` JSON. Optional stages capture PNGs via a
-Playwright sidecar and encode MP4 via FFmpeg; both stages
-gracefully skip when their tools are not on PATH.
+a minimal composition manifest JSON of shape
+`{ schema_version, composition: { id, width, height, fps, frame_count } }`.
+Optional stages capture PNGs via a Playwright sidecar and encode MP4
+via FFmpeg; both stages gracefully skip when their tools are not on
+PATH.
 
 The `kinetics` CLI wraps the renderer plus the dev-loop:
 
@@ -366,6 +368,10 @@ This is an MVP library foundation. The current implementation includes:
 - shared focus-trap plus Escape/backdrop dismissal across modal and anchored overlays
 - Playwright end-to-end coverage (smoke, motion, visual)
 - reusable shared CSS crate
+- runtime-reactive preference providers (`ReducedMotionProvider`,
+  `ThemeProvider`/`use_theme_mode`/`use_density`) that source from
+  `prefers-color-scheme` and `data-ui-theme`/`data-ui-density`
+- forced-colors (Windows High Contrast) and `prefers-contrast` CSS fallbacks
 - native timeline boundary
 - native frame composition boundary
 - native capture manifest boundary
@@ -375,7 +381,7 @@ This is an MVP library foundation. The current implementation includes:
   story, glass triplet, metric strip, CTA — composed from existing
   primitives)
 
-Future phases should add runtime theme/density switching, richer keyboard engines, deeper native fidelity work, and deeper backend integrations.
+Future phases should add richer keyboard engines, deeper native fidelity work, and deeper backend integrations.
 
 ## Documentation
 

@@ -1,5 +1,21 @@
 #![forbid(unsafe_code)]
 
+//! Dioxus Kinetics — the single intended downstream facade for the workspace.
+//!
+//! Downstream apps should depend on this crate alone and pull everything in
+//! through the prelude:
+//!
+//! ```ignore
+//! use kinetics::prelude::*;
+//! ```
+//!
+//! The prelude re-exports the stable, semantically named public surface of the
+//! underlying crates (components, tokens, motion primitives, and feature-gated
+//! runtimes) so callers never reach into the individual `ui-*` crates directly.
+//!
+//! See `docs/ai-cheatsheet.md` for ready-to-paste prelude examples and
+//! `docs/component-naming.md` for the naming conventions behind these exports.
+
 pub mod prelude {
     pub use motion_core::{Ease, PresenceState, Spring, SpringStep, Transition};
     pub use ui_core::{
@@ -23,8 +39,8 @@ pub mod prelude {
         Sidebar, SidebarItem, SidebarSection, Skeleton, Slider, SortDirection, SourceCard,
         SourceRail, Spinner, SplitMode, SplitText, Stack, StateSwitch, Stepper, StepperStep,
         StreamingText, Surface, Switch, TabItem, TabPanel, Tabs, Text, TextEntry, TextField,
-        TextVariant, TimelineScope, Toast, ToastEntry, ToastTone, Toaster, Toolbar, Tooltip,
-        ViewSwitcher,
+        TextFieldType, TextVariant, TimelineScope, Toast, ToastEntry, ToastTone, Toaster, Toolbar,
+        Tooltip, ViewSwitcher,
     };
     pub use ui_glass::{
         resolve_glass, GlassDensity, GlassLevel, GlassPolicy, GlassRecipe, GlassRequest, GlassTone,
@@ -32,7 +48,9 @@ pub mod prelude {
     pub use ui_layout::{compute_flip, FlipDelta, Rect};
     pub use ui_styles::{base_css, library_css, COMPONENT_CSS};
     #[cfg(feature = "timeline")]
-    pub use ui_timeline::{Axis, MotionCue, PathPoint, ResolvedMotionState, TimelineClock};
+    pub use ui_timeline::{
+        Axis, MotionCue, PathPoint, ResolvedMotionState, Timeline, TimelineClock,
+    };
     pub use ui_tokens::{
         Color, Density, MotionPreference, MotionScale, RadiusScale, SemanticColors, SpacingScale,
         Theme, ThemeMode, TransparencyPreference,
@@ -48,19 +66,23 @@ pub mod prelude {
     pub use ui_timeline::{TimelineCapability, TimelineRuntime};
 
     #[cfg(feature = "composition")]
-    pub use ui_composition::Composition;
+    pub use ui_composition::{ClipFill, Composition};
 
     #[cfg(feature = "capture")]
     pub use ui_capture::CaptureStageDescriptor;
 
+    #[cfg(feature = "liquid-glass")]
+    pub use ui_dioxus::{GlassPower, LiquidSurface, LiquidSurfaceProps};
+
     #[cfg(feature = "runtime")]
     pub use ui_runtime::{
-        use_animation_value, use_element_computed_style, use_element_rect, use_presence_animation,
-        use_presence_state, use_reduced_motion, use_shared_element_registry, use_timeline_sample,
-        CssKeyframesAdapter, ElementSnapshot, FrameAdapter, FrameAdapterHandle,
-        FrameAdapterRegistry, MountedRectCallback, ReducedMotion, SceneClock, SceneDriver,
-        SceneState, ScrollObserverConfig, SequenceAdapter, SharedElementRegistry, SharedTransition,
-        WaapiAdapter,
+        use_animation_value, use_density, use_element_computed_style, use_element_rect,
+        use_presence_animation, use_presence_state, use_reduced_motion,
+        use_shared_element_registry, use_theme_mode, use_timeline_sample, CssKeyframesAdapter,
+        ElementSnapshot, FrameAdapter, FrameAdapterHandle, FrameAdapterRegistry,
+        MountedRectCallback, ReducedMotion, SceneClock, SceneDriver, SceneState,
+        ScrollObserverConfig, SequenceAdapter, SharedElementRegistry, SharedTransition,
+        ThemeProvider, WaapiAdapter,
     };
 
     #[cfg(feature = "icons")]
@@ -73,6 +95,9 @@ pub mod prelude {
     };
 }
 
+/// The introspectable list of stable public names exposed through
+/// [`prelude`]. This list is pinned by `tests/prelude.rs` so that renames or
+/// accidental removals of the facade's public surface are caught at test time.
 pub fn public_api_names() -> Vec<&'static str> {
     let mut names = vec![
         "Button",
@@ -82,6 +107,7 @@ pub fn public_api_names() -> Vec<&'static str> {
         "IconButtonSize",
         "TextField",
         "TextEntry",
+        "TextFieldType",
         "Checkbox",
         "ChoiceMark",
         "Switch",
@@ -195,6 +221,9 @@ pub fn public_api_names() -> Vec<&'static str> {
         "SequenceAdapter",
         "WaapiAdapter",
         "CssKeyframesAdapter",
+        "ThemeProvider",
+        "use_theme_mode",
+        "use_density",
     ]);
 
     #[cfg(feature = "blocks")]
@@ -207,6 +236,12 @@ pub fn public_api_names() -> Vec<&'static str> {
         "SocialOverlay",
         "SocialPlatform",
     ]);
+
+    #[cfg(feature = "composition")]
+    names.push("ClipFill");
+
+    #[cfg(feature = "liquid-glass")]
+    names.push("LiquidSurface");
 
     names
 }

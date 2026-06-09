@@ -20,6 +20,7 @@ pub mod scene_driver;
 pub mod scheduler;
 pub mod shared;
 pub mod state;
+pub mod theme;
 pub mod timeline;
 
 #[cfg(not(target_arch = "wasm32"))]
@@ -48,6 +49,9 @@ pub use shared::{
     SHARED_SNAPSHOT_STALENESS_MS,
 };
 pub use state::{advance_presence, PresenceInputs, PresenceState, PresenceTransition};
+pub use theme::{
+    detect_density_at_root, detect_theme_mode_at_root, use_density, use_theme_mode, ThemeProvider,
+};
 pub use timeline::use_timeline_sample;
 pub use waapi::{is_supported as is_waapi_supported, AnimatedProperty, WaapiAnimation};
 

@@ -78,6 +78,35 @@ fn public_api_names_include_advanced_wave_names() {
 }
 
 #[test]
+fn prelude_reexports_cheatsheet_named_types() {
+    let _ = TextFieldType::Email;
+
+    #[cfg(feature = "composition")]
+    let _ = ClipFill::None;
+
+    #[cfg(feature = "liquid-glass")]
+    let _ = LiquidSurface;
+
+    let names = kinetics::public_api_names();
+    assert!(
+        names.contains(&"TextFieldType"),
+        "missing public API name TextFieldType"
+    );
+
+    #[cfg(feature = "composition")]
+    assert!(
+        names.contains(&"ClipFill"),
+        "missing public API name ClipFill"
+    );
+
+    #[cfg(feature = "liquid-glass")]
+    assert!(
+        names.contains(&"LiquidSurface"),
+        "missing public API name LiquidSurface"
+    );
+}
+
+#[test]
 fn public_api_names_use_native_system_boundaries() {
     let names = kinetics::public_api_names();
 
@@ -207,6 +236,9 @@ fn public_api_includes_sequence_runtime_names() {
         "Axis",
         "use_timeline_sample",
         "ResolvedMotionState",
+        "ThemeProvider",
+        "use_theme_mode",
+        "use_density",
     ] {
         assert!(names.contains(&expected), "missing {expected}");
     }

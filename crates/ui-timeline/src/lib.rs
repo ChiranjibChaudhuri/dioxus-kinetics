@@ -1,6 +1,6 @@
 #![forbid(unsafe_code)]
 
-use ui_motion::{apply_ease, interpolate, Clamp, Transition};
+use ui_motion::{apply_ease, interpolate, Clamp, Spring, Transition};
 
 pub mod path;
 pub use path::{sample_path, sample_path_parametric, sample_path_tangent, PathPoint};
@@ -330,6 +330,15 @@ impl MotionSegment {
     }
 }
 
+/// A single animated property over a timeline segment.
+///
+/// Each variant carries a [`Transition`]. When sampled (via [`MotionCue::sample`]),
+/// tweens follow their easing curve and springs reproduce true damped-spring
+/// shape — including overshoot for underdamped springs — by integrating the
+/// spring ODE, matching `ui-motion`'s WAAPI keyframe path. See
+/// [`apply_transition_progress`]. The exception is [`MotionCue::Path`], whose
+/// local progress stays clamped to `[0, 1]` because a parametric path is only
+/// defined across its endpoints.
 #[derive(Clone, Debug, PartialEq)]
 pub enum MotionCue {
     Opacity {
@@ -441,7 +450,7 @@ impl MotionCue {
             } => {
                 let eased = apply_transition_progress(p, transition);
                 MotionCueSample {
-                    opacity: Some(interpolate(from, to, eased, Clamp::Yes)),
+                    opacity: Some(interpolate(from, to, eased, transition_clamp(transition))),
                     ..Default::default()
                 }
             }
@@ -452,7 +461,7 @@ impl MotionCue {
                 transition,
             } => {
                 let eased = apply_transition_progress(p, transition);
-                let value = interpolate(from, to, eased, Clamp::Yes);
+                let value = interpolate(from, to, eased, transition_clamp(transition));
                 let mut sample = MotionCueSample::default();
                 match axis {
                     Axis::X => sample.translate_x = Some(value),
@@ -467,7 +476,7 @@ impl MotionCue {
             } => {
                 let eased = apply_transition_progress(p, transition);
                 MotionCueSample {
-                    scale: Some(interpolate(from, to, eased, Clamp::Yes)),
+                    scale: Some(interpolate(from, to, eased, transition_clamp(transition))),
                     ..Default::default()
                 }
             }
@@ -478,7 +487,12 @@ impl MotionCue {
             } => {
                 let eased = apply_transition_progress(p, transition);
                 MotionCueSample {
-                    rotate_deg: Some(interpolate(from_deg, to_deg, eased, Clamp::Yes)),
+                    rotate_deg: Some(interpolate(
+                        from_deg,
+                        to_deg,
+                        eased,
+                        transition_clamp(transition),
+                    )),
                     ..Default::default()
                 }
             }
@@ -506,10 +520,77 @@ impl MotionCue {
     }
 }
 
+/// Map a normalized timeline `progress` (0..=1 across a segment) to the eased
+/// fraction used to interpolate `from`→`to`.
+///
+/// Tweens apply their easing curve. Springs reproduce real damped-spring shape:
+/// the segment's normalized time `progress` is mapped onto the spring's
+/// settling window and the spring ODE is integrated to that point, returning
+/// the spring's displacement fraction. This mirrors the WAAPI keyframe path in
+/// `ui-motion` (`spring_keyframes_seeded`), which integrates the same ODE at the
+/// same sampling rate — so a `Transition::Spring` cue sampled through the
+/// timeline shows the same overshoot/settle as the browser keyframes rather than
+/// degrading to linear.
+///
+/// Because spring overshoot can carry the fraction above 1.0 (or below 0.0),
+/// callers must interpolate spring cues with [`Clamp::No`] to preserve the
+/// bounce; see [`transition_clamp`].
 fn apply_transition_progress(progress: f32, transition: Transition) -> f32 {
     match transition {
         Transition::Tween { ease, .. } => apply_ease(progress.clamp(0.0, 1.0), ease),
-        Transition::Spring(_) => progress.clamp(0.0, 1.0),
+        Transition::Spring(spring) => spring_progress(spring, progress.clamp(0.0, 1.0)),
+    }
+}
+
+/// Sampling rate (frames per second) used to integrate the spring ODE. Matches
+/// `ui-motion`'s `SPRING_FPS` so the timeline sampler and the WAAPI keyframe
+/// builder trace the same trajectory.
+const SPRING_FPS: f32 = 60.0;
+/// Settling tolerance used to bound the spring's settling window. Matches
+/// `ui-motion`'s `SPRING_TOLERANCE` / keyframe clamp.
+const SPRING_TOLERANCE: f32 = 0.005;
+
+/// Integrate a unit spring (0→1) to the point `t` (a fraction of its settling
+/// window) and return the resulting displacement fraction. The fraction can
+/// exceed `[0, 1]` for underdamped springs (overshoot) and is pinned to exactly
+/// `1.0` at `t == 1.0` so the segment lands cleanly on `to`.
+fn spring_progress(spring: Spring, t: f32) -> f32 {
+    if t <= 0.0 {
+        return 0.0;
+    }
+    if t >= 1.0 {
+        return 1.0;
+    }
+    // Mirror `spring_keyframes_seeded`: settle window and frame count derive from
+    // the spring's settling duration, integrated with the same fixed `dt`.
+    let settle = spring
+        .settling_duration_ms(SPRING_TOLERANCE)
+        .clamp(50.0, 4_000.0);
+    let count = ((settle * SPRING_FPS / 1000.0).ceil() as usize).max(2);
+    let dt = 1.0 / SPRING_FPS;
+    // Number of whole frames to integrate to reach normalized time `t`.
+    let frames = (t * count as f32).round() as usize;
+    let mut value = 0.0_f32;
+    let mut velocity = 0.0_f32;
+    for _ in 0..frames {
+        let step = spring.step(value, 1.0, velocity, dt);
+        value = step.value;
+        velocity = step.velocity;
+    }
+    if value.is_finite() {
+        value
+    } else {
+        t
+    }
+}
+
+/// Clamp policy for interpolating a cue driven by `transition`. Springs use
+/// [`Clamp::No`] so overshoot from [`spring_progress`] survives; tweens stay
+/// clamped to `[0, 1]`.
+const fn transition_clamp(transition: Transition) -> Clamp {
+    match transition {
+        Transition::Tween { .. } => Clamp::Yes,
+        Transition::Spring(_) => Clamp::No,
     }
 }
 
@@ -630,5 +711,78 @@ fn finite_or_zero(value: f32) -> f32 {
         value
     } else {
         0.0
+    }
+}
+
+#[cfg(test)]
+mod spring_shape_tests {
+    use super::*;
+    use ui_motion::Spring;
+
+    /// A spring cue must not interpolate linearly: at the midpoint its eased
+    /// fraction departs from the linear `0.5`, proving the timeline sampler
+    /// honors spring shape (regression — springs previously degraded to linear).
+    #[test]
+    fn spring_midpoint_differs_from_linear() {
+        let transition = Transition::Spring(Spring::bouncy());
+        let eased = apply_transition_progress(0.5, transition);
+        assert!(
+            (eased - 0.5).abs() > 1e-2,
+            "spring midpoint should not equal linear 0.5, got {eased}"
+        );
+    }
+
+    /// An underdamped spring overshoots its target somewhere in (0, 1); the
+    /// `Translate` cue must surface that overshoot rather than clipping it,
+    /// confirming the spring branch interpolates with `Clamp::No`.
+    #[test]
+    fn underdamped_spring_cue_overshoots_target() {
+        let cue = MotionCue::Translate {
+            axis: Axis::X,
+            from: 0.0,
+            to: 100.0,
+            transition: Transition::Spring(Spring::bouncy()),
+        };
+        let mut max_x = f32::MIN;
+        for i in 0..=100 {
+            let p = i as f32 / 100.0;
+            let sample = cue.clone().sample(p);
+            if let Some(x) = sample.translate_x {
+                max_x = max_x.max(x);
+            }
+        }
+        assert!(
+            max_x > 100.0,
+            "underdamped spring should overshoot past 100, peak was {max_x}"
+        );
+    }
+
+    /// Endpoints stay pinned: a spring cue lands exactly on `from` at 0 and on
+    /// `to` at 1, so the segment resolves cleanly despite mid-flight overshoot.
+    #[test]
+    fn spring_cue_pins_endpoints() {
+        let cue = MotionCue::Scale {
+            from: 0.5,
+            to: 2.0,
+            transition: Transition::Spring(Spring::snappy()),
+        };
+        let start = cue.clone().sample(0.0).scale.unwrap();
+        let end = cue.sample(1.0).scale.unwrap();
+        assert!(
+            (start - 0.5).abs() < 1e-4,
+            "start should be from, got {start}"
+        );
+        assert!((end - 2.0).abs() < 1e-4, "end should be to, got {end}");
+    }
+
+    /// Tweens remain clamped to `[0, 1]` — the spring-aware clamp policy must not
+    /// leak overshoot into the tween path.
+    #[test]
+    fn tween_cue_stays_clamped() {
+        assert_eq!(transition_clamp(Transition::tween(220)), Clamp::Yes);
+        assert_eq!(
+            transition_clamp(Transition::Spring(Spring::bouncy())),
+            Clamp::No
+        );
     }
 }

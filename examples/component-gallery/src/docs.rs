@@ -159,7 +159,7 @@ pub fn component_docs() -> &'static [ComponentDoc] {
 
 const BASIC_ACCESSIBILITY: &str = "Renders native semantic elements and stable focusable controls.";
 
-const COMPONENT_DOCS: [ComponentDoc; 72] = [
+const COMPONENT_DOCS: [ComponentDoc; 81] = [
     ComponentDoc {
         name: "Button",
         category: ComponentCategory::Actions,
@@ -808,6 +808,87 @@ const COMPONENT_DOCS: [ComponentDoc; 72] = [
         snippet: AVATAR_SNIPPET,
         accessibility: "Image avatars set alt to the name; initials avatars expose aria-label = name so the identity is announced either way.",
         render: Some(crate::previews::surfaces::avatar_preview),
+    },
+    ComponentDoc {
+        name: "Sparkline",
+        category: ComponentCategory::DataWorkflows,
+        status: ComponentStatus::Ready,
+        summary: "A compact, axis-free trend line with six semantic tones and an optional area fill, sized for metric cards and table cells.",
+        snippet: SPARKLINE_SNIPPET,
+        accessibility: "Decorative (aria-hidden) when no label is given; with a label it exposes role=\"img\" and the label as the accessible name.",
+        render: Some(crate::previews::dataviz::sparkline_preview),
+    },
+    ComponentDoc {
+        name: "LineChart",
+        category: ComponentCategory::DataWorkflows,
+        status: ComponentStatus::Ready,
+        summary: "Multi-series line chart with nice-number gridlines, legend, optional area fill, and a staggered draw-in that can be pinned frame-by-frame for capture.",
+        snippet: LINE_CHART_SNIPPET,
+        accessibility: "The SVG is role=\"img\" named by the label, and the full dataset is mirrored in a visually-hidden table so screen reader users get the numbers, not a picture. Draw-in animation is disabled under reduced motion.",
+        render: Some(crate::previews::dataviz::line_chart_preview),
+    },
+    ComponentDoc {
+        name: "BarChart",
+        category: ComponentCategory::DataWorkflows,
+        status: ComponentStatus::Ready,
+        summary: "Grouped bar chart with a zero-anchored domain, staggered spring rise-in, and the same deterministic progress override as LineChart.",
+        snippet: BAR_CHART_SNIPPET,
+        accessibility: "Mirrors LineChart: named role=\"img\" SVG plus a visually-hidden data table; bar rise-in is stilled under reduced motion.",
+        render: Some(crate::previews::dataviz::bar_chart_preview),
+    },
+    ComponentDoc {
+        name: "DonutGauge",
+        category: ComponentCategory::DataWorkflows,
+        status: ComponentStatus::Ready,
+        summary: "Radial KPI gauge sweeping from 12 o'clock, with a center readout, six tones, and a deterministic sweep override for capture.",
+        snippet: DONUT_GAUGE_SNIPPET,
+        accessibility: "Exposes role=\"meter\" with aria-valuemin/max/now and the human-readable display value as aria-valuetext.",
+        render: Some(crate::previews::dataviz::donut_gauge_preview),
+    },
+    ComponentDoc {
+        name: "SortableList",
+        category: ComponentCategory::DataWorkflows,
+        status: ComponentStatus::Ready,
+        summary: "Reorderable list with pointer drag-and-drop, an insertion indicator, and a complete keyboard grab-move-drop flow on the grip handle.",
+        snippet: SORTABLE_LIST_SNIPPET,
+        accessibility: "Each grip is a real button labelled with the row's name and position; Space/Enter grabs, arrows move, Escape restores the order at grab time, and every transition is announced through an assertive live region.",
+        render: Some(crate::previews::workflows::sortable_list_preview),
+    },
+    ComponentDoc {
+        name: "KanbanBoard",
+        category: ComponentCategory::DataWorkflows,
+        status: ComponentStatus::Ready,
+        summary: "Multi-column kanban board whose cards move by drag-and-drop or keyboard, reporting each move as data your state applies with apply_kanban_move.",
+        snippet: KANBAN_BOARD_SNIPPET,
+        accessibility: "Cards are focusable role=\"button\" surfaces labelled with card, column, and position; arrows move a grabbed card within and across columns, and moves are announced via a live region.",
+        render: Some(crate::previews::workflows::kanban_board_preview),
+    },
+    ComponentDoc {
+        name: "Tour",
+        category: ComponentCategory::Feedback,
+        status: ComponentStatus::Ready,
+        summary: "Guided product tour: a Spotlight scrim with a tracked cutout over each step's target plus an anchored callout with Back / Next / Skip and progress dots.",
+        snippet: TOUR_SNIPPET,
+        accessibility: "The callout is role=\"dialog\" with aria-modal, labelled by the step title; focus moves into it on every step, Tab is trapped inside, Escape and the scrim dismiss, and focus returns to the opener. The cutout pulse is disabled under reduced motion.",
+        render: Some(crate::previews::guidance::tour_preview),
+    },
+    ComponentDoc {
+        name: "Waveform",
+        category: ComponentCategory::AiNative,
+        status: ComponentStatus::Ready,
+        summary: "Audio level trace rendered as centered bars from plain level props, with a staggered pulse while active — deterministic for SSR and capture.",
+        snippet: WAVEFORM_SNIPPET,
+        accessibility: "Decorative by default; passing a label upgrades it to role=\"img\". The active pulse is stilled under reduced motion while the static bar heights keep encoding the levels.",
+        render: Some(crate::previews::voice::waveform_preview),
+    },
+    ComponentDoc {
+        name: "VoiceInput",
+        category: ComponentCategory::AiNative,
+        status: ComponentStatus::Ready,
+        summary: "Push-to-talk voice composer with a mic toggle, live waveform, elapsed readout, and a four-state lifecycle the host drives (idle / recording / processing / error).",
+        snippet: VOICE_INPUT_SNIPPET,
+        accessibility: "The toggle is a labelled button with aria-pressed; state changes are announced through role=\"status\", escalating to role=\"alert\" for errors.",
+        render: Some(crate::previews::voice::voice_input_preview),
     },
 ];
 
@@ -1498,3 +1579,113 @@ const SCENE_WIPE_MASK_POSITION_SNIPPET: &str = r##"WipeTransition {
     variant: WipeVariant::MaskPosition,
     /* gradient-filled child */
 }"##;
+
+const SPARKLINE_SNIPPET: &str = r#"// Decorative inline trend (aria-hidden); add `label` to name it for AT.
+Sparkline {
+    points: vec![4.0, 6.0, 5.0, 9.0, 7.0, 12.0],
+    tone: ChartTone::Success,
+    filled: true,
+    label: "Weekly active users trending up".to_string(),
+}"#;
+
+const LINE_CHART_SNIPPET: &str = r#"LineChart {
+    label: "Monthly revenue versus forecast".to_string(),
+    series: vec![
+        ChartSeries::new("Revenue", vec![42.0, 55.0, 49.0, 71.0, 68.0, 90.0]),
+        ChartSeries::new("Forecast", vec![40.0, 50.0, 56.0, 63.0, 72.0, 82.0]),
+    ],
+    x_labels: vec!["Jan".into(), "Feb".into(), "Mar".into(), "Apr".into(), "May".into(), "Jun".into()],
+    show_area: true,
+    // For deterministic capture, pin the draw-in from a Scene clock instead:
+    // progress: Some(clock_t),
+}"#;
+
+const BAR_CHART_SNIPPET: &str = r#"BarChart {
+    label: "Quarterly seats by plan tier".to_string(),
+    series: vec![
+        ChartSeries::new("Pro", vec![32.0, 41.0, 54.0, 61.0]),
+        ChartSeries::new("Enterprise", vec![18.0, 25.0, 33.0, 47.0]),
+    ],
+    x_labels: vec!["Q1".into(), "Q2".into(), "Q3".into(), "Q4".into()],
+}"#;
+
+const DONUT_GAUGE_SNIPPET: &str = r#"DonutGauge {
+    label: "Storage used".to_string(),
+    value: 0.72,                       // 0.0..=1.0
+    description: "of 2 TB".to_string(),
+    tone: ChartTone::Primary,
+    // display_value: "1.4 TB".to_string(),  // overrides the % readout
+}"#;
+
+const SORTABLE_LIST_SNIPPET: &str = r#"let mut items = use_signal(|| vec![
+    SortableItem::new("triage", "Triage inbox").with_description("Route new reports"),
+    SortableItem::new("review", "Review escalations"),
+]);
+
+rsx! {
+    SortableList {
+        label: "Today's priorities".to_string(),
+        items: items.read().clone(),
+        on_reorder: move |order: Vec<String>| {
+            let current = items.read().clone();
+            items.set(order.iter()
+                .filter_map(|id| current.iter().find(|i| &i.id == id).cloned())
+                .collect());
+        },
+    }
+}"#;
+
+const KANBAN_BOARD_SNIPPET: &str = r#"let mut columns = use_signal(|| vec![
+    KanbanColumn::new("backlog", "Backlog", vec![SortableItem::new("a", "Audit tokens")]),
+    KanbanColumn::new("doing", "In progress", vec![]),
+]);
+
+rsx! {
+    KanbanBoard {
+        label: "Sprint board".to_string(),
+        columns: columns.read().clone(),
+        on_move: move |mv: KanbanMove| {
+            let next = apply_kanban_move(&columns.read(), &mv);
+            columns.set(next);
+        },
+    }
+}"#;
+
+const TOUR_SNIPPET: &str = r#"let mut open = use_signal(|| false);
+let mut active = use_signal(|| 0usize);
+
+rsx! {
+    Tour {
+        id: "onboarding".to_string(),
+        open: *open.read(),
+        active: *active.read(),
+        steps: vec![
+            TourStep::new("compose", "Compose anywhere", "Start a new report here.")
+                .with_target("compose-button"),
+            TourStep::new("filters", "Refine the view", "Saved filters live here.")
+                .with_target("filters-button")
+                .with_placement(TourPlacement::Top),
+            TourStep::new("finish", "You're all set", "Centered closing step."),
+        ],
+        on_change: move |next: usize| active.set(next),
+        on_dismiss: move |_| open.set(false),
+    }
+}"#;
+
+const WAVEFORM_SNIPPET: &str = r#"Waveform {
+    levels: vec![0.2, 0.5, 0.8, 0.6, 0.9, 0.4],  // 0.0..=1.0 per bar
+    active: true,                                 // staggered pulse
+    label: "Recorded clip levels".to_string(),    // omit for decorative
+}"#;
+
+const VOICE_INPUT_SNIPPET: &str = r#"let mut state = use_signal(|| VoiceInputState::Idle);
+
+rsx! {
+    VoiceInput {
+        state: *state.read(),
+        levels: live_levels,            // stream real mic levels in wasm
+        elapsed: "0:07".to_string(),    // host-formatted for determinism
+        on_start: move |_| state.set(VoiceInputState::Recording),
+        on_stop: move |_| state.set(VoiceInputState::Processing),
+    }
+}"#;

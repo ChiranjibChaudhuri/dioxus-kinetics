@@ -105,6 +105,19 @@ export const COMPONENT_MANIFEST: ManifestEntry[] = [
   // Surfaces
   { name: "Badge", slug: "badge", status: "ready", layers: { smoke: true, motion: false, visual: false } },
   { name: "Avatar", slug: "avatar", status: "ready", layers: { smoke: true, motion: false, visual: false } },
+  // Data workflows: charts + sortable surfaces (smoke-covered; visual
+  // baselines follow the same human-reviewed pass as the AI surfaces).
+  { name: "Sparkline", slug: "sparkline", status: "ready", layers: { smoke: true, motion: false, visual: false } },
+  { name: "LineChart", slug: "line-chart", status: "ready", layers: { smoke: true, motion: false, visual: false } },
+  { name: "BarChart", slug: "bar-chart", status: "ready", layers: { smoke: true, motion: false, visual: false } },
+  { name: "DonutGauge", slug: "donut-gauge", status: "ready", layers: { smoke: true, motion: false, visual: false } },
+  { name: "SortableList", slug: "sortable-list", status: "ready", layers: { smoke: true, motion: false, visual: false } },
+  { name: "KanbanBoard", slug: "kanban-board", status: "ready", layers: { smoke: true, motion: false, visual: false } },
+  // Guidance
+  { name: "Tour", slug: "tour", status: "ready", layers: { smoke: true, motion: false, visual: false } },
+  // AI-native voice
+  { name: "Waveform", slug: "waveform", status: "ready", layers: { smoke: true, motion: false, visual: false } },
+  { name: "VoiceInput", slug: "voice-input", status: "ready", layers: { smoke: true, motion: false, visual: false } },
 ];
 
 export function readyComponents(): ManifestEntry[] {

@@ -1,7 +1,7 @@
 # Component Gallery Audit Report
 
-- Started: 2026-05-25T22:11:47.542Z
-- Finished: 2026-05-25T22:12:52.542Z
+- Started: 2026-06-09T23:51:09.418Z
+- Finished: 2026-06-09T23:51:51.532Z
 
 ## Summary
 
@@ -65,6 +65,29 @@
 | Scene · Wipe Conic Demo | n/a | n/a | n/a | partial |  |
 | Scene · Wipe Iris Demo | n/a | n/a | n/a | partial |  |
 | Scene · Wipe Mask-Position Demo | n/a | n/a | n/a | partial |  |
+| StreamingText | n/a | n/a | n/a | partial |  |
+| AiStatus | n/a | n/a | n/a | partial |  |
+| CitationChip | n/a | n/a | n/a | partial |  |
+| SourceCard | n/a | n/a | n/a | partial |  |
+| PromptInput | n/a | n/a | n/a | partial |  |
+| AssistantPanel | n/a | n/a | n/a | partial |  |
+| AgentTimeline | n/a | n/a | n/a | partial |  |
+| Heading | n/a | n/a | n/a | partial |  |
+| Text | n/a | n/a | n/a | partial |  |
+| Toaster | n/a | n/a | n/a | partial |  |
+| Spinner | n/a | n/a | n/a | partial |  |
+| Sheet | n/a | n/a | n/a | partial |  |
+| Badge | n/a | n/a | n/a | partial |  |
+| Avatar | n/a | n/a | n/a | partial |  |
+| Sparkline | n/a | n/a | n/a | partial |  |
+| LineChart | n/a | n/a | n/a | partial |  |
+| BarChart | n/a | n/a | n/a | partial |  |
+| DonutGauge | n/a | n/a | n/a | partial |  |
+| SortableList | n/a | n/a | n/a | partial |  |
+| KanbanBoard | n/a | n/a | n/a | partial |  |
+| Tour | n/a | n/a | n/a | partial |  |
+| Waveform | n/a | n/a | n/a | partial |  |
+| VoiceInput | n/a | n/a | n/a | partial |  |
 
 ## Coming Soon
 

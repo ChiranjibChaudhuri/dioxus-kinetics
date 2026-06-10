@@ -118,6 +118,19 @@ export const COMPONENT_MANIFEST: ManifestEntry[] = [
   // AI-native voice
   { name: "Waveform", slug: "waveform", status: "ready", layers: { smoke: true, motion: false, visual: false } },
   { name: "VoiceInput", slug: "voice-input", status: "ready", layers: { smoke: true, motion: false, visual: false } },
+  // Learning (ui-learn)
+  { name: "CourseOutline", slug: "course-outline", status: "ready", layers: { smoke: true, motion: false, visual: false } },
+  { name: "CourseProgressCard", slug: "course-progress-card", status: "ready", layers: { smoke: true, motion: false, visual: false } },
+  { name: "ResumeLearning", slug: "resume-learning", status: "ready", layers: { smoke: true, motion: false, visual: false } },
+  { name: "QuestionCard", slug: "question-card", status: "ready", layers: { smoke: true, motion: false, visual: false } },
+  { name: "QuizResults", slug: "quiz-results", status: "ready", layers: { smoke: true, motion: false, visual: false } },
+  { name: "QuizTimer", slug: "quiz-timer", status: "ready", layers: { smoke: true, motion: false, visual: false } },
+  { name: "FlashcardDeck", slug: "flashcard-deck", status: "ready", layers: { smoke: true, motion: false, visual: false } },
+  { name: "XpBar", slug: "xp-bar", status: "ready", layers: { smoke: true, motion: false, visual: false } },
+  { name: "StreakBadge", slug: "streak-badge", status: "ready", layers: { smoke: true, motion: false, visual: false } },
+  { name: "AchievementUnlock", slug: "achievement-unlock", status: "ready", layers: { smoke: true, motion: false, visual: false } },
+  { name: "Leaderboard", slug: "leaderboard", status: "ready", layers: { smoke: true, motion: false, visual: false } },
+  { name: "CertificateCard", slug: "certificate-card", status: "ready", layers: { smoke: true, motion: false, visual: false } },
 ];
 
 export function readyComponents(): ManifestEntry[] {

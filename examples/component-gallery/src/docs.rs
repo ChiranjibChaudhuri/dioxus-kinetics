@@ -40,6 +40,7 @@ pub enum ComponentCategory {
     Surfaces,
     Feedback,
     DataWorkflows,
+    Learning,
     Motion,
     Composition,
     Capture,
@@ -58,6 +59,7 @@ impl ComponentCategory {
             Self::Surfaces => "Surfaces",
             Self::Feedback => "Feedback",
             Self::DataWorkflows => "Data workflows",
+            Self::Learning => "Learning",
             Self::Motion => "Motion",
             Self::Composition => "Composition",
             Self::Capture => "Capture",
@@ -76,6 +78,9 @@ impl ComponentCategory {
             Self::Surfaces => "Containers that define visual layers and material treatment.",
             Self::Feedback => "Overlays and messages that respond to user or system state.",
             Self::DataWorkflows => "Readouts and surfaces that summarize product data.",
+            Self::Learning => {
+                "Course structure, assessment, practice, and recognition surfaces for learning products."
+            }
             Self::Motion => "Lifecycle and layout motion primitives for continuity.",
             Self::Composition => {
                 "Frame-addressable scenes for previews and export-safe compositions."
@@ -100,6 +105,7 @@ impl ComponentCategory {
             Self::Surfaces => "surfaces",
             Self::Feedback => "feedback",
             Self::DataWorkflows => "data-workflows",
+            Self::Learning => "learning",
             Self::Motion => "motion",
             Self::Composition => "composition",
             Self::Capture => "capture",
@@ -146,6 +152,7 @@ pub fn categories() -> &'static [ComponentCategory] {
         ComponentCategory::AiNative,
         ComponentCategory::Feedback,
         ComponentCategory::DataWorkflows,
+        ComponentCategory::Learning,
         ComponentCategory::Motion,
         ComponentCategory::Composition,
         ComponentCategory::Capture,
@@ -159,7 +166,7 @@ pub fn component_docs() -> &'static [ComponentDoc] {
 
 const BASIC_ACCESSIBILITY: &str = "Renders native semantic elements and stable focusable controls.";
 
-const COMPONENT_DOCS: [ComponentDoc; 81] = [
+const COMPONENT_DOCS: [ComponentDoc; 93] = [
     ComponentDoc {
         name: "Button",
         category: ComponentCategory::Actions,
@@ -889,6 +896,114 @@ const COMPONENT_DOCS: [ComponentDoc; 81] = [
         snippet: VOICE_INPUT_SNIPPET,
         accessibility: "The toggle is a labelled button with aria-pressed; state changes are announced through role=\"status\", escalating to role=\"alert\" for errors.",
         render: Some(crate::previews::voice::voice_input_preview),
+    },
+    ComponentDoc {
+        name: "CourseOutline",
+        category: ComponentCategory::Learning,
+        status: ComponentStatus::Ready,
+        summary: "A course curriculum tree: modules with per-lesson completed / current / available / locked states and per-module completion counts.",
+        snippet: COURSE_OUTLINE_SNIPPET,
+        accessibility: "Lessons are real buttons inside a labelled nav; locked lessons are disabled with a visually-hidden \"Locked\" suffix, and the current lesson carries aria-current=\"step\".",
+        render: Some(crate::previews::learning::course_outline_preview),
+    },
+    ComponentDoc {
+        name: "CourseProgressCard",
+        category: ComponentCategory::Learning,
+        status: ComponentStatus::Ready,
+        summary: "Course-level progress readout: completion gauge, lesson counts, time remaining, and an optional recent-activity trend.",
+        snippet: COURSE_PROGRESS_CARD_SNIPPET,
+        accessibility: "The gauge exposes role=\"meter\" with the percentage; counts are plain text, so the same information is available with or without the visual.",
+        render: Some(crate::previews::learning::course_progress_card_preview),
+    },
+    ComponentDoc {
+        name: "ResumeLearning",
+        category: ComponentCategory::Learning,
+        status: ComponentStatus::Ready,
+        summary: "A pick-up-where-you-left-off strip: course and lesson context, a thin progress track, and one primary action.",
+        snippet: RESUME_LEARNING_SNIPPET,
+        accessibility: "The strip is a labelled region; lesson progress is a role=\"progressbar\" with aria-valuenow, and the action is a native button.",
+        render: Some(crate::previews::learning::resume_learning_preview),
+    },
+    ComponentDoc {
+        name: "QuestionCard",
+        category: ComponentCategory::Learning,
+        status: ComponentStatus::Ready,
+        summary: "One quiz question rendering all five shapes — single choice, multi-select, true/false, ordering (keyboard-reorderable), short answer — with reveal feedback and explanations, graded by the pure grade_answer helper.",
+        snippet: QUESTION_CARD_SNIPPET,
+        accessibility: "Options are native radio/checkbox inputs inside a fieldset/legend; reveal disables the fieldset, marks correct and missed options, and announces the verdict through role=\"status\". Ordering reuses SortableList's full keyboard flow.",
+        render: Some(crate::previews::learning::question_card_preview),
+    },
+    ComponentDoc {
+        name: "QuizResults",
+        category: ComponentCategory::Learning,
+        status: ComponentStatus::Ready,
+        summary: "End-of-quiz summary: score gauge with tone by performance, per-question verdict dots, and an optional retry action.",
+        snippet: QUIZ_RESULTS_SNIPPET,
+        accessibility: "The gauge is a labelled role=\"meter\"; each verdict dot carries visually-hidden per-question text, so the breakdown reads out question by question.",
+        render: Some(crate::previews::learning::quiz_results_preview),
+    },
+    ComponentDoc {
+        name: "QuizTimer",
+        category: ComponentCategory::Learning,
+        status: ComponentStatus::Ready,
+        summary: "A controlled countdown readout: the host ticks remaining_seconds, the component renders the clock, a shrinking track, and a warning treatment in the final 20%.",
+        snippet: QUIZ_TIMER_SNIPPET,
+        accessibility: "Exposes role=\"timer\" with an accessible label; the warning state changes color and is reinforced by the numeric clock, not color alone.",
+        render: Some(crate::previews::learning::quiz_timer_preview),
+    },
+    ComponentDoc {
+        name: "FlashcardDeck",
+        category: ComponentCategory::Learning,
+        status: ComponentStatus::Ready,
+        summary: "A spaced-repetition review session: 3D flip card, session counter, and Again / Hard / Good / Easy rating flow feeding the pure next_review SM-2 scheduler.",
+        snippet: FLASHCARD_DECK_SNIPPET,
+        accessibility: "The card is a toggle button (aria-pressed mirrors the flip) and the hidden face is aria-hidden; under reduced motion the rotation becomes an instant swap.",
+        render: Some(crate::previews::learning::flashcard_deck_preview),
+    },
+    ComponentDoc {
+        name: "XpBar",
+        category: ComponentCategory::Learning,
+        status: ComponentStatus::Ready,
+        summary: "Experience progress toward the next level with a level chip; set leveled_up after a level-up to play the celebration pulse.",
+        snippet: XP_BAR_SNIPPET,
+        accessibility: "The track is a role=\"progressbar\" whose aria-valuetext spells out level and XP; the chip and counts are aria-hidden duplicates of that text.",
+        render: Some(crate::previews::learning::xp_bar_preview),
+    },
+    ComponentDoc {
+        name: "StreakBadge",
+        category: ComponentCategory::Learning,
+        status: ComponentStatus::Ready,
+        summary: "A consecutive-days streak chip; active means today already counts and fills the flame with a gentle flicker.",
+        snippet: STREAK_BADGE_SNIPPET,
+        accessibility: "Exposes role=\"img\" with an \"N-day streak\" label; the flicker is decorative and stilled under reduced motion.",
+        render: Some(crate::previews::learning::streak_badge_preview),
+    },
+    ComponentDoc {
+        name: "AchievementUnlock",
+        category: ComponentCategory::Learning,
+        status: ComponentStatus::Ready,
+        summary: "An achievement-unlocked card with a deterministic CSS particle burst — trajectories are pure functions of the particle index, so renders are capture-safe.",
+        snippet: ACHIEVEMENT_UNLOCK_SNIPPET,
+        accessibility: "Announced via role=\"status\" without stealing focus; the burst and badge pop are disabled under reduced motion, leaving a static highlight.",
+        render: Some(crate::previews::learning::achievement_unlock_preview),
+    },
+    ComponentDoc {
+        name: "Leaderboard",
+        category: ComponentCategory::Learning,
+        status: ComponentStatus::Ready,
+        summary: "Ordered standings with podium treatments for the top three and a pinned \"You\" highlight row.",
+        snippet: LEADERBOARD_SNIPPET,
+        accessibility: "A labelled ordered list, so rank order is conveyed structurally; the viewer's row adds a visible \"You\" tag rather than color alone.",
+        render: Some(crate::previews::learning::leaderboard_preview),
+    },
+    ComponentDoc {
+        name: "CertificateCard",
+        category: ComponentCategory::Learning,
+        status: ComponentStatus::Ready,
+        summary: "A completion certificate laid out for export: fixed aspect, CSS-drawn ornamental frame and seal, serif display type — render through kinetics-render for a shareable PNG.",
+        snippet: CERTIFICATE_CARD_SNIPPET,
+        accessibility: "Exposed as a single labelled role=\"img\" naming recipient, course, date, and issuer, since the certificate is one semantic artifact.",
+        render: Some(crate::previews::learning::certificate_card_preview),
     },
 ];
 
@@ -1688,4 +1803,138 @@ rsx! {
         on_start: move |_| state.set(VoiceInputState::Recording),
         on_stop: move |_| state.set(VoiceInputState::Processing),
     }
+}"#;
+
+const COURSE_OUTLINE_SNIPPET: &str = r#"CourseOutline {
+    label: "Rust fundamentals curriculum".to_string(),
+    modules: vec![
+        CourseModule::new("m1", "Module 1 · Foundations", vec![
+            CourseLesson::new("ownership", "Ownership & borrowing")
+                .with_duration("12 min")
+                .with_state(LessonState::Completed),
+            CourseLesson::new("lifetimes", "Lifetimes in practice")
+                .with_state(LessonState::Current),
+            CourseLesson::new("traits", "Traits and generics"),
+        ]),
+        CourseModule::new("m2", "Module 2 · Async", vec![
+            CourseLesson::new("futures", "Futures from scratch")
+                .with_state(LessonState::Locked),
+        ]),
+    ],
+    on_select: move |lesson_id: String| /* navigate */ {},
+}"#;
+
+const COURSE_PROGRESS_CARD_SNIPPET: &str = r#"CourseProgressCard {
+    title: "Rust fundamentals".to_string(),
+    completed: 9,
+    total: 14,
+    time_remaining: "1 h 40 min".to_string(),
+    trend: vec![1.0, 2.0, 1.0, 3.0, 2.0, 4.0, 3.0],  // optional sparkline
+}"#;
+
+const RESUME_LEARNING_SNIPPET: &str = r#"ResumeLearning {
+    course: "Rust fundamentals".to_string(),
+    lesson: "Lifetimes in practice".to_string(),
+    progress: 0.45,
+    on_resume: move |_| /* jump back into the lesson */ {},
+}"#;
+
+const QUESTION_CARD_SNIPPET: &str = r#"let mut answer = use_signal(|| None::<QuizAnswer>);
+let mut revealed = use_signal(|| false);
+
+let question = QuizQuestion::new(
+    "borrowck",
+    "What does the borrow checker enforce?",
+    QuizPrompt::SingleChoice {
+        choices: vec![
+            QuizChoice::new("gc", "Garbage collection pauses"),
+            QuizChoice::new("aliasing", "Aliasing and mutability rules"),
+        ],
+        correct: "aliasing".into(),
+    },
+)
+.with_explanation("One mutable ref, or many shared ones — never both.");
+
+rsx! {
+    QuestionCard {
+        question: question.clone(),
+        answer: answer.read().clone(),
+        revealed: *revealed.read(),
+        on_answer: move |next: QuizAnswer| answer.set(Some(next)),
+    }
+    Button {
+        onclick: move |_| revealed.set(true),
+        "Check answer"
+    }
+}
+// Score it with the pure helper:
+// grade_answer(&question, answer.read().as_ref().unwrap())  -> Some(true/false)"#;
+
+const QUIZ_RESULTS_SNIPPET: &str = r#"QuizResults {
+    correct: 8,
+    total: 10,
+    per_question: vec![true, true, false, true, true, true, false, true, true, true],
+    on_retry: move |_| /* restart the quiz */ {},
+}"#;
+
+const QUIZ_TIMER_SNIPPET: &str = r#"// Host ticks the clock (interval, Scene clock, or server) for determinism.
+QuizTimer {
+    total_seconds: 300,
+    remaining_seconds: 184,
+}"#;
+
+const FLASHCARD_DECK_SNIPPET: &str = r#"let mut index = use_signal(|| 0usize);
+let mut flipped = use_signal(|| false);
+
+rsx! {
+    FlashcardDeck {
+        cards: vec![
+            Flashcard::new("c1", "What does `&mut T` guarantee?",
+                "Exclusive access: no other live references."),
+        ],
+        index: *index.read(),
+        flipped: *flipped.read(),
+        on_flip: move |next: bool| flipped.set(next),
+        on_rate: move |rating: ReviewRating| {
+            // SM-2-lite: store per-card scheduling state.
+            // let next_state = next_review(card_state, rating);
+            flipped.set(false);
+            index.set(*index.read() + 1);
+        },
+    }
+}"#;
+
+const XP_BAR_SNIPPET: &str = r#"XpBar {
+    level: 7,
+    current_xp: 340,
+    next_level_xp: 500,
+    leveled_up: false,  // set true on the render after a level-up
+}"#;
+
+const STREAK_BADGE_SNIPPET: &str = r#"StreakBadge { days: 12, active: true }"#;
+
+const ACHIEVEMENT_UNLOCK_SNIPPET: &str = r#"AchievementUnlock {
+    title: "Week-long streak".to_string(),
+    description: "Practised seven days in a row.".to_string(),
+    celebrate: true,   // false = quiet variant for sober products
+    on_dismiss: move |_| /* hide */ {},
+}"#;
+
+const LEADERBOARD_SNIPPET: &str = r#"Leaderboard {
+    label: "Weekly standings".to_string(),
+    entries: vec![
+        LeaderboardEntry::new("Priya N.", "2,180 XP"),
+        LeaderboardEntry::new("Marcus T.", "1,940 XP"),
+        LeaderboardEntry::new("You", "1,510 XP").highlighted(),
+    ],
+}"#;
+
+const CERTIFICATE_CARD_SNIPPET: &str = r#"// Render inside a CaptureStage and export with kinetics-render for a PNG.
+CertificateCard {
+    recipient: "Ada Lovelace".to_string(),
+    course: "Rust Fundamentals: Ownership to Async".to_string(),
+    date: "9 June 2026".to_string(),
+    issuer: "Kinetics Academy".to_string(),
+    signature_name: "Grace Hopper".to_string(),
+    credential_id: "KA-2026-0142".to_string(),
 }"#;

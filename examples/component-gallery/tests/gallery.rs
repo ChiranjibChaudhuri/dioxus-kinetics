@@ -16,6 +16,7 @@ fn registry_groups_components_by_product_category() {
             ComponentCategory::AiNative,
             ComponentCategory::Feedback,
             ComponentCategory::DataWorkflows,
+            ComponentCategory::Learning,
             ComponentCategory::Motion,
             ComponentCategory::Composition,
             ComponentCategory::Capture,

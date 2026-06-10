@@ -1,7 +1,7 @@
 # Component Gallery Audit Report
 
-- Started: 2026-06-09T23:51:09.418Z
-- Finished: 2026-06-09T23:51:51.532Z
+- Started: 2026-06-10T00:37:31.234Z
+- Finished: 2026-06-10T00:38:23.272Z
 
 ## Summary
 
@@ -88,6 +88,18 @@
 | Tour | n/a | n/a | n/a | partial |  |
 | Waveform | n/a | n/a | n/a | partial |  |
 | VoiceInput | n/a | n/a | n/a | partial |  |
+| CourseOutline | n/a | n/a | n/a | partial |  |
+| CourseProgressCard | n/a | n/a | n/a | partial |  |
+| ResumeLearning | n/a | n/a | n/a | partial |  |
+| QuestionCard | n/a | n/a | n/a | partial |  |
+| QuizResults | n/a | n/a | n/a | partial |  |
+| QuizTimer | n/a | n/a | n/a | partial |  |
+| FlashcardDeck | n/a | n/a | n/a | partial |  |
+| XpBar | n/a | n/a | n/a | partial |  |
+| StreakBadge | n/a | n/a | n/a | partial |  |
+| AchievementUnlock | n/a | n/a | n/a | partial |  |
+| Leaderboard | n/a | n/a | n/a | partial |  |
+| CertificateCard | n/a | n/a | n/a | partial |  |
 
 ## Coming Soon
 

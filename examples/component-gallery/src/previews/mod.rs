@@ -8,6 +8,7 @@ pub mod foundations;
 pub mod guidance;
 pub mod inputs;
 pub mod layout;
+pub mod learning;
 pub mod liquid_glass;
 pub mod motion;
 pub mod navigation;

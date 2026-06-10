@@ -9,23 +9,12 @@ function entryFor(page: Page, name: string): Locator {
 }
 
 /**
- * Mount and close the open-by-default fixed overlays (Sheet, AssistantPanel)
- * that intercept pointer events aimed at other entries — same workaround as
- * new-surfaces.spec.ts. Trigger buttons inside entries use dispatchEvent
- * because the fixed Toaster demo overlaps parts of the grid.
+ * mountGallery dismisses the open-by-default modal overlays (Dialog, Sheet,
+ * AssistantPanel) before returning. Trigger buttons inside entries still use
+ * dispatchEvent because the fixed Toaster demo overlaps parts of the grid.
  */
 async function prepare(page: Page) {
   await mountGallery(page);
-  const openSheet = page.locator(".ui-sheet[data-state='open']");
-  if ((await openSheet.count()) > 0) {
-    await openSheet.getByRole("button", { name: "Close" }).click({ force: true });
-    await expect(openSheet).toHaveCount(0);
-  }
-  const assistant = page.locator(".ui-assistant-panel");
-  if ((await assistant.count()) > 0) {
-    await assistant.getByRole("button", { name: "Close" }).click({ force: true });
-    await expect(assistant).toHaveCount(0);
-  }
 }
 
 test.describe("Course structure", () => {

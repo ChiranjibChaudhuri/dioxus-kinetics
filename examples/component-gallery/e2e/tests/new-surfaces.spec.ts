@@ -9,26 +9,14 @@ function entryFor(page: Page, name: string): Locator {
 }
 
 /**
- * Mount the gallery and close the demos that render as open fixed overlays by
- * default and therefore swallow pointer events aimed at other entries: the
- * Sheet (aria-modal with a viewport backdrop) and the AssistantPanel (a
- * non-modal panel docked fixed to the end side, covering the right column).
- * Buttons inside entries are still force-clicked below for the same reason
- * mount.ts force-clicks the preference radios: surrounding tile prose can
- * intercept the hit test in WebKit.
+ * mountGallery dismisses the open-by-default modal overlays (Dialog, Sheet,
+ * AssistantPanel) before returning. Buttons inside entries are still
+ * force-clicked / event-dispatched below for the same reason mount.ts
+ * force-clicks the preference radios: surrounding tile prose and the fixed
+ * Toaster demo can intercept the hit test.
  */
 async function prepare(page: Page) {
   await mountGallery(page);
-  const openSheet = page.locator(".ui-sheet[data-state='open']");
-  if ((await openSheet.count()) > 0) {
-    await openSheet.getByRole("button", { name: "Close" }).click({ force: true });
-    await expect(openSheet).toHaveCount(0);
-  }
-  const assistant = page.locator(".ui-assistant-panel");
-  if ((await assistant.count()) > 0) {
-    await assistant.getByRole("button", { name: "Close" }).click({ force: true });
-    await expect(assistant).toHaveCount(0);
-  }
 }
 
 test.describe("Charts", () => {

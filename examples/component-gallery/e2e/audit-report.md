@@ -1,7 +1,7 @@
 # Component Gallery Audit Report
 
-- Started: 2026-06-10T00:37:31.234Z
-- Finished: 2026-06-10T00:38:23.272Z
+- Started: 2026-06-10T02:54:05.893Z
+- Finished: 2026-06-10T02:55:59.059Z
 
 ## Summary
 
@@ -88,18 +88,18 @@
 | Tour | n/a | n/a | n/a | partial |  |
 | Waveform | n/a | n/a | n/a | partial |  |
 | VoiceInput | n/a | n/a | n/a | partial |  |
-| CourseOutline | n/a | n/a | n/a | partial |  |
-| CourseProgressCard | n/a | n/a | n/a | partial |  |
-| ResumeLearning | n/a | n/a | n/a | partial |  |
-| QuestionCard | n/a | n/a | n/a | partial |  |
-| QuizResults | n/a | n/a | n/a | partial |  |
-| QuizTimer | n/a | n/a | n/a | partial |  |
-| FlashcardDeck | n/a | n/a | n/a | partial |  |
-| XpBar | n/a | n/a | n/a | partial |  |
-| StreakBadge | n/a | n/a | n/a | partial |  |
-| AchievementUnlock | n/a | n/a | n/a | partial |  |
-| Leaderboard | n/a | n/a | n/a | partial |  |
-| CertificateCard | n/a | n/a | n/a | partial |  |
+| CourseOutline | pass | n/a | n/a | ready |  |
+| CourseProgressCard | pass | n/a | n/a | ready |  |
+| ResumeLearning | pass | n/a | n/a | ready |  |
+| QuestionCard | pass | n/a | n/a | ready |  |
+| QuizResults | pass | n/a | n/a | ready |  |
+| QuizTimer | pass | n/a | n/a | ready |  |
+| FlashcardDeck | pass | n/a | n/a | ready |  |
+| XpBar | pass | n/a | n/a | ready |  |
+| StreakBadge | pass | n/a | n/a | ready |  |
+| AchievementUnlock | pass | n/a | n/a | ready |  |
+| Leaderboard | pass | n/a | n/a | ready |  |
+| CertificateCard | pass | n/a | n/a | ready |  |
 
 ## Coming Soon
 

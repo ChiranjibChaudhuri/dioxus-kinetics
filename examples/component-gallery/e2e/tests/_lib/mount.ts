@@ -41,7 +41,9 @@ export async function mountGallery(
 
   // Drive the preference bar. The four toggle groups are radio groups labelled
   // by "Theme", "Density", "Motion", "Glass". We click the radio whose
-  // accessible name matches the variant.
+  // accessible name matches the variant. The open-by-default overlay demos
+  // (Dialog, CommandMenu, Sheet, AssistantPanel) are contained inside their
+  // preview frames by the gallery CSS, so they cannot intercept these clicks.
   switch (variant) {
     case "default":
       // Defaults are already correct.

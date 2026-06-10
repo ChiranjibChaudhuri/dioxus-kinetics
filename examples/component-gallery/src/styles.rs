@@ -205,6 +205,42 @@ body {
     padding: var(--ui-space-4);
 }
 
+/* Contain the other open-by-default overlay demos inside their preview
+   frames, mirroring the .ui-dialog treatment above. Without this their
+   position:fixed surfaces escape the entry: the CommandMenu backdrop covers
+   the whole viewport (eating every click on the page, including the
+   theme/density/motion/glass preference radios), and the Sheet /
+   AssistantPanel dock over the right column of unrelated entries. */
+.gallery-preview .ui-command-menu {
+    position: relative;
+}
+
+.gallery-preview .ui-command-menu-backdrop {
+    position: absolute;
+    inset: 0;
+    border-radius: var(--ui-radius-lg);
+}
+
+.gallery-preview .ui-sheet-root {
+    position: relative;
+    display: block;
+    min-height: 360px;
+    overflow: hidden;
+    border-radius: var(--ui-radius-lg);
+}
+
+.gallery-preview .ui-sheet {
+    position: absolute;
+}
+
+.gallery-preview .ui-assistant-panel--docked-end,
+.gallery-preview .ui-assistant-panel--docked-start {
+    position: relative;
+    inset: auto;
+    width: min(420px, 100%);
+    height: 460px;
+}
+
 .gallery-inline {
     display: flex;
     flex-wrap: wrap;

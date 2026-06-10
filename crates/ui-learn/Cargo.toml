@@ -1,0 +1,16 @@
+[package]
+name = "ui-learn"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[dependencies]
+dioxus.workspace = true
+ui-dioxus = { path = "../ui-dioxus" }
+
+[dev-dependencies]
+dioxus-ssr.workspace = true
+
+[lib]
+path = "src/lib.rs"

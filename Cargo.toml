@@ -19,6 +19,7 @@ members = [
     "crates/ui-runtime",
     "crates/ui-icons",
     "crates/ui-blocks",
+    "crates/ui-learn",
     "examples/component-gallery",
     "examples/flagship",
     "crates/ui-glass-engine",

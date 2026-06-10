@@ -337,3 +337,34 @@ fn new_surface_animations_respect_both_reduced_motion_scopes() {
         );
     }
 }
+
+#[test]
+fn learn_css_is_bundled_with_motion_and_contrast_fallbacks() {
+    let css = library_css();
+    for class in [
+        ".ui-course-outline",
+        ".ui-question-card",
+        ".ui-quiz-timer",
+        ".ui-flip-card",
+        ".ui-flashcard-deck",
+        ".ui-xp-bar",
+        ".ui-streak-badge",
+        ".ui-achievement",
+        ".ui-leaderboard",
+        ".ui-certificate",
+    ] {
+        assert!(css.contains(class), "learn css missing {class}");
+    }
+    assert!(
+        ui_styles::LEARN_CSS.contains("@media (prefers-reduced-motion: reduce)"),
+        "learn.css must gate motion on the OS preference"
+    );
+    assert!(
+        ui_styles::LEARN_CSS.contains(r#"[data-ui-motion="reduced"]"#),
+        "learn.css must gate motion on the app-level attribute"
+    );
+    assert!(
+        ui_styles::LEARN_CSS.contains("@media (forced-colors: active)"),
+        "learn.css must provide forced-colors fallbacks"
+    );
+}

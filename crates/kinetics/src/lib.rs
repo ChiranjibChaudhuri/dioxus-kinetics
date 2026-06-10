@@ -96,6 +96,20 @@ pub mod prelude {
         Caption, LowerThird, LowerThirdAccent, MetricCounter, SocialOverlay, SocialPlatform,
         WipeTransition,
     };
+
+    #[cfg(feature = "learn")]
+    pub use ui_learn::{
+        course_progress, grade_answer, next_review, normalize_short_answer, AchievementUnlock,
+        CertificateCard, CourseLesson, CourseModule, CourseOutline, CourseProgressCard, Flashcard,
+        FlashcardDeck, FlipCard, Leaderboard, LeaderboardEntry, LessonState, QuestionCard,
+        QuizAnswer, QuizChoice, QuizPrompt, QuizQuestion, QuizResults, QuizTimer, ResumeLearning,
+        ReviewRating, ReviewState, StreakBadge, XpBar,
+    };
+    #[cfg(feature = "learn")]
+    pub use ui_learn::{
+        CertificateCard as CompletionCertificate, CourseOutline as LearningPath,
+        FlashcardDeck as ReviewDeck,
+    };
 }
 
 /// The introspectable list of stable public names exposed through
@@ -272,6 +286,41 @@ pub fn public_api_names() -> Vec<&'static str> {
 
     #[cfg(feature = "liquid-glass")]
     names.push("LiquidSurface");
+
+    #[cfg(feature = "learn")]
+    names.extend_from_slice(&[
+        "CourseOutline",
+        "LearningPath",
+        "CourseLesson",
+        "CourseModule",
+        "LessonState",
+        "course_progress",
+        "CourseProgressCard",
+        "ResumeLearning",
+        "QuestionCard",
+        "QuizQuestion",
+        "QuizPrompt",
+        "QuizAnswer",
+        "QuizChoice",
+        "QuizResults",
+        "QuizTimer",
+        "grade_answer",
+        "normalize_short_answer",
+        "FlipCard",
+        "FlashcardDeck",
+        "ReviewDeck",
+        "Flashcard",
+        "ReviewRating",
+        "ReviewState",
+        "next_review",
+        "XpBar",
+        "StreakBadge",
+        "AchievementUnlock",
+        "Leaderboard",
+        "LeaderboardEntry",
+        "CertificateCard",
+        "CompletionCertificate",
+    ]);
 
     names
 }

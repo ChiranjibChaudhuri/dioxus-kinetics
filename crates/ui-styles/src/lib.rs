@@ -2523,6 +2523,8 @@ pub const TOUR_CSS: &str = include_str!("tour.css");
 
 pub const VOICE_CSS: &str = include_str!("voice.css");
 
+pub const LEARN_CSS: &str = include_str!("learn.css");
+
 pub fn library_css() -> String {
     let base = base_css();
     let mut css = String::with_capacity(
@@ -2535,7 +2537,8 @@ pub fn library_css() -> String {
             + SORTABLE_CSS.len()
             + TOUR_CSS.len()
             + VOICE_CSS.len()
-            + 8,
+            + LEARN_CSS.len()
+            + 9,
     );
     css.push_str(&base);
     css.push('\n');
@@ -2554,5 +2557,7 @@ pub fn library_css() -> String {
     css.push_str(TOUR_CSS);
     css.push('\n');
     css.push_str(VOICE_CSS);
+    css.push('\n');
+    css.push_str(LEARN_CSS);
     css
 }

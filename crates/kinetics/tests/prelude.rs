@@ -361,3 +361,79 @@ fn prelude_and_public_names_cover_tour_and_voice() {
         assert!(names.contains(&expected), "missing name {expected}");
     }
 }
+
+#[cfg(feature = "learn")]
+#[test]
+fn prelude_and_public_names_cover_learning_surfaces() {
+    let _ = CourseOutline;
+    let _ = LearningPath;
+    let _ = CourseProgressCard;
+    let _ = ResumeLearning;
+    let _ = QuestionCard;
+    let _ = QuizResults;
+    let _ = QuizTimer;
+    let _ = FlipCard;
+    let _ = FlashcardDeck;
+    let _ = ReviewDeck;
+    let _ = XpBar;
+    let _ = StreakBadge;
+    let _ = AchievementUnlock;
+    let _ = Leaderboard;
+    let _ = CertificateCard;
+    let _ = CompletionCertificate;
+
+    // Vocabulary + pure helpers round-trip through the prelude.
+    let modules = vec![CourseModule::new(
+        "m1",
+        "Basics",
+        vec![CourseLesson::new("l1", "Intro").with_state(LessonState::Completed)],
+    )];
+    assert_eq!(course_progress(&modules), (1, 1));
+
+    let question = QuizQuestion::new(
+        "q1",
+        "2 + 2?",
+        QuizPrompt::ShortAnswer {
+            accepted: vec!["4".into(), "four".into()],
+        },
+    );
+    assert_eq!(
+        grade_answer(&question, &QuizAnswer::Text(" FOUR ".into())),
+        Some(true)
+    );
+    assert_eq!(normalize_short_answer("  A  B "), "a b");
+
+    let reviewed = next_review(ReviewState::default(), ReviewRating::Good);
+    assert_eq!(reviewed.interval_days, 1.0);
+
+    let _card = Flashcard::new("c1", "Front", "Back");
+    let _entry = LeaderboardEntry::new("Ada", "1,250 XP").highlighted();
+    let _choice = QuizChoice::new("a", "Option A");
+
+    let names = kinetics::public_api_names();
+    for expected in [
+        "CourseOutline",
+        "LearningPath",
+        "CourseProgressCard",
+        "ResumeLearning",
+        "QuestionCard",
+        "QuizResults",
+        "QuizTimer",
+        "grade_answer",
+        "FlipCard",
+        "FlashcardDeck",
+        "ReviewDeck",
+        "next_review",
+        "XpBar",
+        "StreakBadge",
+        "AchievementUnlock",
+        "Leaderboard",
+        "CertificateCard",
+        "CompletionCertificate",
+    ] {
+        assert!(
+            names.contains(&expected),
+            "missing learning name {expected}"
+        );
+    }
+}

@@ -186,7 +186,14 @@ is in `kinetics::prelude::*`.
 
 ### Learning (`ui-learn`, default `learn` feature)
 Neutral LMS vocabulary; everything is controlled and clock-free, so SSR
-and capture stay deterministic.
+and capture stay deterministic. The surfaces inherit the Apple/Comet
+material contract: `FlipCard` faces and `AchievementUnlock` are
+liquid-glass (backdrop blur + specular edge highlights, falling back to
+solid under `[data-ui-glass-policy="solid"]` /
+`[data-ui-transparency="reduced"]`), cards ride the translucent
+`--ui-surface` + elevation idiom, interactive rows carry the shared
+hover-lift / press-scale micro-states, and filled chips get the
+specular sheen.
 - `CourseOutline` / `LearningPath` — module→lesson tree from
   `Vec<CourseModule>`; `LessonState` (available / current / completed /
   locked) drives markers, `aria-current="step"`, and disabled gating.

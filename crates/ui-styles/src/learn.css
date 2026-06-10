@@ -63,11 +63,18 @@
     text-align: left;
     cursor: pointer;
     transition: background var(--ui-motion-fast) var(--ui-ease-standard),
-        border-color var(--ui-motion-fast) var(--ui-ease-standard);
+        border-color var(--ui-motion-fast) var(--ui-ease-standard),
+        transform var(--ui-motion-fast) var(--ui-ease-standard);
 }
 
-.ui-course-lesson-button:hover {
+.ui-course-lesson-button:hover:not(:disabled) {
     background: var(--ui-surface-muted);
+}
+
+.ui-course-lesson-button:active:not(:disabled) {
+    transform: scale(var(--ui-press-scale));
+    transition-duration: var(--ui-motion-press);
+    transition-timing-function: var(--ui-ease-accelerate);
 }
 
 .ui-course-lesson-button:focus-visible {
@@ -149,7 +156,8 @@
     padding: var(--ui-space-4);
     border: 1px solid var(--ui-border);
     border-radius: var(--ui-radius-lg);
-    background: var(--ui-surface-solid, var(--ui-surface));
+    background: var(--ui-surface);
+    box-shadow: var(--ui-elevation-0);
 }
 
 .ui-course-progress-gauge {
@@ -195,7 +203,8 @@
     padding: var(--ui-space-3) var(--ui-space-4);
     border: 1px solid var(--ui-border);
     border-radius: var(--ui-radius-lg);
-    background: var(--ui-surface-solid, var(--ui-surface));
+    background: var(--ui-surface);
+    box-shadow: var(--ui-elevation-0);
 }
 
 .ui-resume-learning-body {
@@ -230,6 +239,7 @@
     height: 100%;
     border-radius: inherit;
     background: var(--ui-primary);
+    box-shadow: inset 0 1px 0.5px rgba(255, 255, 255, 0.35);
 }
 
 /* Question card ----------------------------------------------------------- */
@@ -241,7 +251,8 @@
     border: 1px solid var(--ui-border);
     border-left-width: 3px;
     border-radius: var(--ui-radius-lg);
-    background: var(--ui-surface-solid, var(--ui-surface));
+    background: var(--ui-surface);
+    box-shadow: var(--ui-elevation-0);
 }
 
 .ui-question-card--correct {
@@ -303,11 +314,24 @@
     background: var(--ui-surface-solid, var(--ui-surface));
     cursor: pointer;
     transition: border-color var(--ui-motion-fast) var(--ui-ease-standard),
-        background var(--ui-motion-fast) var(--ui-ease-standard);
+        background var(--ui-motion-fast) var(--ui-ease-standard),
+        transform var(--ui-motion-fast) var(--ui-ease-standard);
 }
 
 .ui-quiz-option:hover {
     border-color: color-mix(in srgb, var(--ui-primary), transparent 40%);
+    transform: translateY(-1px);
+}
+
+.ui-question-fieldset:not(:disabled) .ui-quiz-option:active {
+    transform: translateY(0) scale(var(--ui-press-scale));
+    transition-duration: var(--ui-motion-press);
+    transition-timing-function: var(--ui-ease-accelerate);
+}
+
+.ui-question-fieldset:disabled .ui-quiz-option:hover {
+    transform: none;
+    border-color: var(--ui-border);
 }
 
 .ui-quiz-option:has(input:focus-visible) {
@@ -412,7 +436,8 @@
     padding: var(--ui-space-4);
     border: 1px solid var(--ui-border);
     border-radius: var(--ui-radius-lg);
-    background: var(--ui-surface-solid, var(--ui-surface));
+    background: var(--ui-surface);
+    box-shadow: var(--ui-elevation-0);
 }
 
 .ui-quiz-results .ui-donut-gauge {
@@ -525,12 +550,22 @@
     border-radius: var(--ui-radius-lg);
     transform-style: preserve-3d;
     transition: transform 480ms var(--ui-ease-emphasized);
+    /* `scale` is a separate property from `transform`, so the press
+       micro-state composes with the rotateY flip instead of replacing it. */
+    scale: 1;
+}
+
+.ui-flip-card:active .ui-flip-card-inner {
+    scale: var(--ui-press-scale);
 }
 
 .ui-flip-card--flipped .ui-flip-card-inner {
     transform: rotateY(180deg);
 }
 
+/* Liquid-glass card faces: the translucent material + specular top/bottom
+   edge highlights from the glass contract, falling back to the solid base
+   under [data-ui-glass-policy="solid"] / [data-ui-transparency="reduced"]. */
 .ui-flip-card-face {
     position: absolute;
     inset: 0;
@@ -539,8 +574,11 @@
     padding: var(--ui-space-4);
     border: 1px solid var(--ui-border);
     border-radius: var(--ui-radius-lg);
-    background: var(--ui-surface-solid, var(--ui-surface));
-    box-shadow: var(--ui-elevation-1);
+    background: var(--ui-glass);
+    backdrop-filter: blur(14px) saturate(150%);
+    -webkit-backdrop-filter: blur(14px) saturate(150%);
+    box-shadow: var(--ui-elevation-1), inset 0 1px 0.5px var(--ui-glass-highlight),
+        inset 0 -1px 0.5px var(--ui-glass-highlight-bottom);
     backface-visibility: hidden;
     -webkit-backface-visibility: hidden;
     font-size: var(--ui-text-headline);
@@ -548,9 +586,16 @@
     font-weight: var(--ui-weight-medium);
 }
 
+.ui-flip-card:hover .ui-flip-card-face {
+    box-shadow: var(--ui-elevation-2), inset 0 1px 0.5px var(--ui-glass-highlight),
+        inset 0 -1px 0.5px var(--ui-glass-highlight-bottom);
+}
+
 .ui-flip-card-face--back {
     transform: rotateY(180deg);
-    background: color-mix(in srgb, var(--ui-primary), var(--ui-surface-solid, var(--ui-surface)) 94%);
+    /* Tone wash idiom: blend the accent into the live glass material so the
+       answer side reads distinct while staying translucent. */
+    background: color-mix(in srgb, var(--ui-primary) 12%, var(--ui-glass));
 }
 
 /* Flashcard deck ------------------------------------------------------------ */
@@ -592,6 +637,18 @@
     font: inherit;
     font-weight: var(--ui-weight-medium);
     cursor: pointer;
+    transition: background var(--ui-motion-fast) var(--ui-ease-standard),
+        transform var(--ui-motion-fast) var(--ui-ease-standard);
+}
+
+.ui-flashcard-rating:hover {
+    transform: translateY(-1px);
+}
+
+.ui-flashcard-rating:active {
+    transform: translateY(0) scale(var(--ui-press-scale));
+    transition-duration: var(--ui-motion-press);
+    transition-timing-function: var(--ui-ease-accelerate);
 }
 
 .ui-flashcard-rating:focus-visible {
@@ -617,6 +674,8 @@
 }
 
 .ui-xp-bar-level {
+    position: relative;
+    overflow: hidden;
     flex: none;
     padding: 2px var(--ui-space-2);
     border-radius: var(--ui-radius-full);
@@ -625,6 +684,16 @@
     font-size: var(--ui-text-caption);
     line-height: var(--ui-leading-caption);
     font-weight: var(--ui-weight-bold);
+    box-shadow: 0 4px 12px color-mix(in srgb, var(--ui-primary), transparent 75%);
+}
+
+/* Specular sheen: same glossy top-down highlight the filled buttons carry. */
+.ui-xp-bar-level::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.28), transparent 50%);
 }
 
 .ui-xp-bar--level-up .ui-xp-bar-level {
@@ -655,6 +724,7 @@
     height: 100%;
     border-radius: inherit;
     background: linear-gradient(90deg, var(--ui-primary), var(--ui-info));
+    box-shadow: inset 0 1px 0.5px rgba(255, 255, 255, 0.35);
     transition: width var(--ui-motion-normal) var(--ui-ease-decelerate);
 }
 
@@ -709,6 +779,9 @@
 
 /* Achievement unlock ------------------------------------------------------------ */
 
+/* Comet-style floating glass card: warm tone wash over the live glass
+   material, specular edge highlights, and a key shadow tinted with the
+   accent — the same treatment the docked assistant panel carries. */
 .ui-achievement {
     position: relative;
     display: flex;
@@ -717,8 +790,12 @@
     padding: var(--ui-space-3) var(--ui-space-4);
     border: 1px solid color-mix(in srgb, var(--ui-warning), transparent 50%);
     border-radius: var(--ui-radius-lg);
-    background: var(--ui-surface-solid, var(--ui-surface));
-    box-shadow: var(--ui-elevation-1);
+    background: color-mix(in srgb, var(--ui-warning) 8%, var(--ui-glass));
+    backdrop-filter: blur(18px) saturate(160%);
+    -webkit-backdrop-filter: blur(18px) saturate(160%);
+    box-shadow: 0 10px 22px color-mix(in srgb, var(--ui-warning), transparent 82%),
+        inset 0 1px 0.5px var(--ui-glass-highlight),
+        inset 0 -1px 0.5px var(--ui-glass-highlight-bottom);
     overflow: visible;
 }
 
@@ -1016,6 +1093,30 @@
     line-height: var(--ui-leading-caption2);
 }
 
+/* Glass policy + transparency fallbacks --------------------------------------------------
+   Every backdrop-filter surface above must fall back to the opaque glass
+   base when the user prefers solid glass or reduced transparency — the same
+   contract the dialog/command-menu/assistant panels honour. */
+
+[data-ui-glass-policy="solid"] .ui-flip-card-face,
+[data-ui-transparency="reduced"] .ui-flip-card-face,
+[data-ui-glass-policy="solid"] .ui-achievement,
+[data-ui-transparency="reduced"] .ui-achievement {
+    background: var(--ui-glass-solid) !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+}
+
+[data-ui-glass-policy="solid"] .ui-flip-card-face--back,
+[data-ui-transparency="reduced"] .ui-flip-card-face--back {
+    background: color-mix(in srgb, var(--ui-primary) 12%, var(--ui-glass-solid)) !important;
+}
+
+[data-ui-glass-policy="solid"] .ui-achievement,
+[data-ui-transparency="reduced"] .ui-achievement {
+    background: color-mix(in srgb, var(--ui-warning) 10%, var(--ui-glass-solid)) !important;
+}
+
 /* Motion + contrast fallbacks ----------------------------------------------------------- */
 
 @media (prefers-reduced-motion: reduce) {
@@ -1030,12 +1131,18 @@
         animation: none;
     }
     .ui-quiz-timer-fill,
-    .ui-xp-bar-fill {
+    .ui-xp-bar-fill,
+    .ui-course-lesson-button,
+    .ui-quiz-option,
+    .ui-flashcard-rating {
         transition: none;
     }
 }
 
-[data-ui-motion="reduced"] .ui-flip-card-inner {
+[data-ui-motion="reduced"] .ui-flip-card-inner,
+[data-ui-motion="reduced"] .ui-course-lesson-button,
+[data-ui-motion="reduced"] .ui-quiz-option,
+[data-ui-motion="reduced"] .ui-flashcard-rating {
     transition: none;
 }
 

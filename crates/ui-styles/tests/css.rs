@@ -368,3 +368,38 @@ fn learn_css_is_bundled_with_motion_and_contrast_fallbacks() {
         "learn.css must provide forced-colors fallbacks"
     );
 }
+
+#[test]
+fn learn_surfaces_inherit_the_glass_and_microstate_contract() {
+    let css = ui_styles::LEARN_CSS;
+
+    // Liquid-glass material on the floating surfaces, with specular edges.
+    for class in [".ui-flip-card-face", ".ui-achievement"] {
+        let idx = css.find(class).expect("glass class exists");
+        let block = &css[idx..idx + 1200];
+        assert!(
+            block.contains("backdrop-filter"),
+            "{class} should use the glass material"
+        );
+        assert!(
+            block.contains("--ui-glass-highlight"),
+            "{class} should carry the specular edge highlights"
+        );
+    }
+
+    // Every backdrop-filter surface must honour the solid-glass policy and
+    // reduced-transparency preference, like the dialog/assistant panels.
+    for selector in [
+        r#"[data-ui-glass-policy="solid"] .ui-flip-card-face"#,
+        r#"[data-ui-transparency="reduced"] .ui-flip-card-face"#,
+        r#"[data-ui-glass-policy="solid"] .ui-achievement"#,
+        r#"[data-ui-transparency="reduced"] .ui-achievement"#,
+    ] {
+        assert!(css.contains(selector), "missing glass fallback {selector}");
+    }
+
+    // Press-scale micro-states ride the shared tokens.
+    assert!(css.contains("scale(var(--ui-press-scale))"));
+    assert!(css.contains("var(--ui-motion-press)"));
+    assert!(css.contains("var(--ui-ease-accelerate)"));
+}

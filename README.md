@@ -29,9 +29,12 @@ prompt composers, and agent surfaces for AI-native products.
 - **Inputs** — `TextField`, `Checkbox`, `Switch`, `Select`, `Combobox`, `DatePicker`, `RadioGroup`, `Slider`, `SegmentedControl`
 - **Navigation** — `Breadcrumb`, `Stepper`
 - **Layout & surfaces** — `Stack`, `Tabs`, `Sidebar`, `Accordion`, `Surface`, `GlassSurface`, `MetricCard`, `Badge`, `Avatar`
-- **AI-native surfaces** — `StreamingText`, `AiStatus`, `CitationChip`, `SourceCard`, `SourceRail`, `PromptInput`, `AssistantPanel`, `AgentTimeline`
+- **AI-native surfaces** — `StreamingText`, `AiStatus`, `CitationChip`, `SourceCard`, `SourceRail`, `PromptInput`, `AssistantPanel`, `AgentTimeline`, `Waveform`, `VoiceInput`
 - **Feedback & overlays** — `Dialog`, `Sheet`, `Popover`, `Tooltip`, `Toast`, `Toaster`, `Alert`, `Progress`, `Skeleton`, `Spinner`, `EmptyState`
+- **Guidance** — `Tour` (+ `TourStep`), `Spotlight`
 - **Data workflows** — `DataTable`, `Pagination`
+- **Charts** — `Sparkline`, `LineChart`, `BarChart`, `DonutGauge` (shared `ChartSeries` / `ChartTone` vocabulary; SR data-table mirrors; deterministic `progress` override for capture)
+- **Sortable surfaces** — `SortableList`, `KanbanBoard` (+ `apply_kanban_move`; full keyboard grab-move-drop with live-region announcements)
 - **Motion** — `Presence`, `PresenceGate`, `Sequence`, `TimelineScope`, `KineticBox`, `KineticText`, `SharedLayout`, `SharedElement`, `SplitText`, `MotionPath`
 - **Scene & composition** — `Scene`, `Clip` (current); `FrameStage` / `FrameClip` / `FrameLayer` (legacy deprecation shims)
 - **Capture** — `CaptureStage`

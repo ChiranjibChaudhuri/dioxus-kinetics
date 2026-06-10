@@ -144,6 +144,45 @@ is in `kinetics::prelude::*`.
 - `AgentTimeline` — vertical agent-run timeline from `Vec<AgentStep>`
   (`AgentStepState`: pending / active / done); the active step is
   `aria-current="step"`.
+- `Waveform` / `AudioLevels` — audio level trace from plain `levels`
+  props (0.0–1.0 per bar); `active` pulses the bars (stilled under
+  reduced motion). Decorative unless given a `label`.
+- `VoiceInput` — push-to-talk composer: mic toggle, live `Waveform`,
+  `elapsed` readout, and a `VoiceInputState` lifecycle
+  (idle / recording / processing / error). Fully controlled — the host
+  owns the audio pipeline; errors announce via `role="alert"`.
+
+### Charts
+- `Sparkline` / `TrendLine` — compact axis-free trend line, 6 tones
+  (`ChartTone`), optional `filled` area. Decorative without a `label`.
+- `LineChart` / `TrendChart` — multi-series lines from
+  `Vec<ChartSeries>`, nice-number grid, legend, optional area. The SVG
+  is `role="img"`; the data is mirrored in a visually-hidden table.
+- `BarChart` / `ComparisonChart` — grouped bars, zero-anchored domain,
+  staggered rise-in.
+- `DonutGauge` / `ProgressDial` — radial KPI gauge (`role="meter"`),
+  center readout via `display_value` / `description`.
+- All four animate via CSS by default; pass `progress: Some(t)` to pin
+  the draw-in deterministically (Scene clocks, capture), or
+  `animate: false` for no motion.
+
+### Sortable surfaces
+- `SortableList` / `ReorderList` — controlled reorderable list of
+  `SortableItem`s; emits the full new id order via `on_reorder`. Drag
+  or keyboard (Space grabs, arrows move, Escape restores).
+- `KanbanBoard` / `WorkflowBoard` — multi-column board of
+  `KanbanColumn`s; emits `KanbanMove` via `on_move` — apply it with
+  `apply_kanban_move(&columns, &mv)`.
+
+### Guidance
+- `Tour` / `GuidedTour` — controlled step-by-step product tour:
+  `Vec<TourStep>` (each optionally `.with_target(dom_id)` and
+  `.with_placement(TourPlacement)`), `active` index + `on_change`,
+  `on_dismiss` for Skip/Escape/scrim/Done. Focus is trapped in the
+  callout and restored on dismiss.
+- `Spotlight` — the scrim-with-cutout primitive `Tour` uses; exported
+  for custom guidance surfaces. Tracks `target_id` through resize and
+  scroll; children render above the scrim.
 
 ### Feedback
 - `Alert` — page-level banner, 5 tones.

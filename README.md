@@ -39,6 +39,7 @@ prompt composers, and agent surfaces for AI-native products.
 - **Scene & composition** — `Scene`, `Clip` (current); `FrameStage` / `FrameClip` / `FrameLayer` (legacy deprecation shims)
 - **Capture** — `CaptureStage`
 - **Cinematic blocks** (`ui-blocks`, behind the default `blocks` feature) — `LowerThird`, `Caption`, `WipeTransition`, `MetricCounter`, `SocialOverlay`
+- **Learning** (`ui-learn`, behind the default `learn` feature) — `CourseOutline`, `CourseProgressCard`, `ResumeLearning`, `QuestionCard` (5 question shapes + pure `grade_answer`), `QuizResults`, `QuizTimer`, `FlipCard` / `FlashcardDeck` (+ SM-2-lite `next_review` scheduler), `XpBar`, `StreakBadge`, `AchievementUnlock`, `Leaderboard`, `CertificateCard` (export-ready via kinetics-render)
 
 ## Design Principles
 
@@ -73,6 +74,7 @@ crates/
   ui-runtime/       animation runtime: frame scheduler and dioxus hooks
   ui-icons/         curated inline-svg icon components
   ui-blocks/        catalog of reusable cinematic Scene blocks
+  ui-learn/         learning-management surfaces (courses, quizzes, flashcards, gamification)
   kinetics/         public facade and prelude
   kinetics-render/  frame-by-frame SSR exporter (HTML + optional PNG/MP4)
   kinetics-cli/     kinetics CLI (init/preview/render/lint/doctor)

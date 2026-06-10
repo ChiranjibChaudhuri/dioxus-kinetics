@@ -184,6 +184,38 @@ is in `kinetics::prelude::*`.
   for custom guidance surfaces. Tracks `target_id` through resize and
   scroll; children render above the scrim.
 
+### Learning (`ui-learn`, default `learn` feature)
+Neutral LMS vocabulary; everything is controlled and clock-free, so SSR
+and capture stay deterministic.
+- `CourseOutline` / `LearningPath` — module→lesson tree from
+  `Vec<CourseModule>`; `LessonState` (available / current / completed /
+  locked) drives markers, `aria-current="step"`, and disabled gating.
+  `course_progress(&modules)` returns `(completed, total)`.
+- `CourseProgressCard` — completion gauge + counts + optional activity
+  sparkline. `ResumeLearning` — continue-where-you-left-off strip.
+- `QuestionCard` — one `QuizQuestion` in any of five `QuizPrompt`
+  shapes: SingleChoice, MultiSelect, TrueFalse, Ordering (reuses
+  SortableList's keyboard flow), ShortAnswer. Host stores the
+  `QuizAnswer`, flips `revealed` for feedback, and scores with the pure
+  `grade_answer(&question, &answer) -> Option<bool>`
+  (`normalize_short_answer` handles case/whitespace).
+- `QuizResults` — score gauge + per-question verdict dots + retry.
+- `QuizTimer` — `role="timer"` countdown; the HOST ticks
+  `remaining_seconds`; warning treatment in the final 20%.
+- `FlipCard` + `FlashcardDeck` / `ReviewDeck` — 3D flip (instant swap
+  under reduced motion) and an Again/Hard/Good/Easy session. Feed
+  ratings to the pure SM-2-lite scheduler:
+  `next_review(ReviewState, ReviewRating) -> ReviewState`
+  (`interval_days`, `ease` ≥ 1.3, `repetitions`); store per card and
+  compute due dates as `now + interval_days`.
+- `XpBar` (set `leveled_up` once after a level-up for the pulse),
+  `StreakBadge`, `AchievementUnlock` (deterministic CSS particle
+  burst; `celebrate: false` = quiet variant), `Leaderboard`
+  (host-sorted entries; `.highlighted()` marks "you").
+- `CertificateCard` / `CompletionCertificate` — export-quality
+  certificate (`role="img"` naming the full credential); render inside
+  a `CaptureStage` and export a PNG with kinetics-render.
+
 ### Feedback
 - `Alert` — page-level banner, 5 tones.
 - `Progress` — determinate + indeterminate.

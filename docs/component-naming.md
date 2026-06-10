@@ -30,6 +30,9 @@ Names describe the user-facing role or behavior:
 - `WorkflowBoard` (`KanbanBoard`)
 - `GuidedTour` (`Tour`)
 - `AudioLevels` (`Waveform`)
+- `LearningPath` (`CourseOutline`)
+- `ReviewDeck` (`FlashcardDeck`)
+- `CompletionCertificate` (`CertificateCard`)
 
 Public names do not borrow library, framework, platform, animation, or video product names.
 The previous MVP names can remain available during the `0.1.x` transition, but the default

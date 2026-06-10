@@ -247,20 +247,7 @@ impl Default for Theme {
         Self {
             mode: ThemeMode::Light,
             density: Density::Comfortable,
-            semantic: SemanticColors {
-                background: Color::rgba(246, 247, 249, 1.0),
-                surface: Color::rgba(255, 255, 255, 0.78),
-                surface_solid: Color::rgba(255, 255, 255, 1.0),
-                foreground: Color::rgba(20, 23, 28, 1.0),
-                muted_foreground: Color::rgba(86, 94, 108, 1.0),
-                border: Color::rgba(120, 132, 150, 0.24),
-                primary: Color::rgba(0, 88, 179, 1.0),
-                success: Color::rgba(26, 107, 46, 1.0),
-                warning: Color::rgba(154, 88, 0, 1.0),
-                danger: Color::rgba(196, 43, 43, 1.0),
-                info: Color::rgba(15, 99, 163, 1.0),
-                focus: Color::rgba(0, 122, 255, 1.0),
-            },
+            semantic: SemanticColors::light(),
             radius: RadiusScale {
                 small_px: 6.0,
                 medium_px: 10.0,

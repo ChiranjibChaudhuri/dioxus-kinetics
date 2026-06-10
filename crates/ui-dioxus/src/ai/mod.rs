@@ -14,6 +14,7 @@ mod prompt_input;
 mod source_card;
 mod status;
 mod streaming_text;
+mod voice;
 
 pub use agent_timeline::*;
 pub use assistant_panel::*;
@@ -22,3 +23,4 @@ pub use prompt_input::*;
 pub use source_card::*;
 pub use status::*;
 pub use streaming_text::*;
+pub use voice::*;

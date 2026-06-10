@@ -1,0 +1,167 @@
+/* ---------------------------------------------------------------------------
+   Guided tour: Spotlight overlay + Tour callout panel.
+
+   The Spotlight measure script writes the target rect into `--ui-tour-x/y/w/h`
+   and toggles `data-anchored` on the overlay. The cutout punches through the
+   scrim with an oversized box-shadow; the callout positions itself from the
+   same variables, falling back to a centered dialog when nothing is anchored.
+--------------------------------------------------------------------------- */
+
+.ui-spotlight-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 90;
+    background: color-mix(in srgb, #04070c, transparent 45%);
+}
+
+.ui-spotlight-overlay[data-anchored="true"] {
+    background: transparent;
+}
+
+.ui-spotlight-cutout {
+    display: none;
+    position: fixed;
+    left: var(--ui-tour-x, 0);
+    top: var(--ui-tour-y, 0);
+    width: var(--ui-tour-w, 0);
+    height: var(--ui-tour-h, 0);
+    border-radius: var(--ui-radius-md);
+    box-shadow: 0 0 0 200vmax color-mix(in srgb, #04070c, transparent 45%);
+    outline: 2px solid var(--ui-focus);
+    outline-offset: 2px;
+    pointer-events: none;
+}
+
+.ui-spotlight-overlay[data-anchored="true"] .ui-spotlight-cutout {
+    display: block;
+    animation: ui-spotlight-pulse 2200ms var(--ui-ease-standard) infinite;
+}
+
+@keyframes ui-spotlight-pulse {
+    0%,
+    100% {
+        outline-color: var(--ui-focus);
+    }
+    50% {
+        outline-color: color-mix(in srgb, var(--ui-focus), transparent 55%);
+    }
+}
+
+/* Callout panel ----------------------------------------------------------- */
+
+.ui-tour-panel {
+    position: fixed;
+    z-index: 91;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    width: min(360px, calc(100vw - 32px));
+    display: grid;
+    gap: var(--ui-space-2);
+    padding: var(--ui-space-4);
+    border: 1px solid var(--ui-border);
+    border-radius: var(--ui-radius-lg);
+    background: var(--ui-surface-strong, var(--ui-surface));
+    box-shadow: var(--ui-shadow-lifted);
+    color: var(--ui-fg);
+}
+
+.ui-tour-panel:focus-visible {
+    outline: 2px solid var(--ui-focus);
+    outline-offset: 2px;
+}
+
+.ui-spotlight-overlay[data-anchored="true"] .ui-tour-panel--bottom {
+    left: clamp(16px, var(--ui-tour-x, 16px), calc(100vw - min(360px, calc(100vw - 32px)) - 16px));
+    top: calc(var(--ui-tour-y, 0px) + var(--ui-tour-h, 0px) + 12px);
+    transform: none;
+}
+
+.ui-spotlight-overlay[data-anchored="true"] .ui-tour-panel--top {
+    left: clamp(16px, var(--ui-tour-x, 16px), calc(100vw - min(360px, calc(100vw - 32px)) - 16px));
+    top: auto;
+    bottom: calc(100vh - var(--ui-tour-y, 0px) + 12px);
+    transform: none;
+}
+
+.ui-tour-counter {
+    margin: 0;
+    color: var(--ui-muted-fg);
+    font-size: var(--ui-text-caption);
+    line-height: var(--ui-leading-caption);
+    font-variant-numeric: tabular-nums;
+}
+
+.ui-tour-title {
+    margin: 0;
+    font-size: var(--ui-text-headline);
+    line-height: var(--ui-leading-headline);
+    font-weight: var(--ui-weight-semibold);
+}
+
+.ui-tour-body {
+    margin: 0;
+    color: var(--ui-muted-fg);
+    font-size: var(--ui-text-callout);
+    line-height: var(--ui-leading-callout);
+}
+
+.ui-tour-actions {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--ui-space-2);
+    margin-top: var(--ui-space-1);
+}
+
+.ui-tour-steps-nav {
+    display: inline-flex;
+    gap: var(--ui-space-2);
+}
+
+.ui-tour-progress {
+    display: flex;
+    justify-content: center;
+    gap: var(--ui-space-1);
+}
+
+.ui-tour-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: var(--ui-radius-full);
+    background: var(--ui-border);
+}
+
+.ui-tour-dot--active {
+    background: var(--ui-primary);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .ui-spotlight-overlay[data-anchored="true"] .ui-spotlight-cutout {
+        animation: none;
+    }
+}
+
+[data-ui-motion="reduced"] .ui-spotlight-overlay[data-anchored="true"] .ui-spotlight-cutout {
+    animation: none;
+}
+
+@media (forced-colors: active) {
+    .ui-spotlight-overlay {
+        background: none;
+    }
+    .ui-spotlight-cutout {
+        box-shadow: none;
+        outline: 3px solid Highlight;
+        animation: none;
+    }
+    .ui-tour-panel {
+        border-color: CanvasText;
+    }
+    .ui-tour-dot {
+        background: GrayText;
+    }
+    .ui-tour-dot--active {
+        background: Highlight;
+    }
+}

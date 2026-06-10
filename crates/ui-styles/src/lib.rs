@@ -2515,6 +2515,14 @@ pub const GSAP_PRIMITIVES_CSS: &str = include_str!("gsap_primitives.css");
 
 pub const KINETIC_CUES_CSS: &str = include_str!("kinetic_cues.css");
 
+pub const CHARTS_CSS: &str = include_str!("charts.css");
+
+pub const SORTABLE_CSS: &str = include_str!("sortable.css");
+
+pub const TOUR_CSS: &str = include_str!("tour.css");
+
+pub const VOICE_CSS: &str = include_str!("voice.css");
+
 pub fn library_css() -> String {
     let base = base_css();
     let mut css = String::with_capacity(
@@ -2523,7 +2531,11 @@ pub fn library_css() -> String {
             + SCENE_PLAYER_CSS.len()
             + GSAP_PRIMITIVES_CSS.len()
             + KINETIC_CUES_CSS.len()
-            + 4,
+            + CHARTS_CSS.len()
+            + SORTABLE_CSS.len()
+            + TOUR_CSS.len()
+            + VOICE_CSS.len()
+            + 8,
     );
     css.push_str(&base);
     css.push('\n');
@@ -2534,5 +2546,13 @@ pub fn library_css() -> String {
     css.push_str(GSAP_PRIMITIVES_CSS);
     css.push('\n');
     css.push_str(KINETIC_CUES_CSS);
+    css.push('\n');
+    css.push_str(CHARTS_CSS);
+    css.push('\n');
+    css.push_str(SORTABLE_CSS);
+    css.push('\n');
+    css.push_str(TOUR_CSS);
+    css.push('\n');
+    css.push_str(VOICE_CSS);
     css
 }

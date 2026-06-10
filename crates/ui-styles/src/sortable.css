@@ -1,0 +1,224 @@
+/* ---------------------------------------------------------------------------
+   Sortable surfaces: SortableList + KanbanBoard.
+
+   Reorder feedback is CSS-only: dragged rows dim, the drop target shows an
+   insertion edge, and keyboard-grabbed entries get a focus-strength ring.
+   Transform/shadow transitions are gated for reduced motion.
+--------------------------------------------------------------------------- */
+
+.ui-sortable-list {
+    display: grid;
+    gap: var(--ui-space-2);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.ui-sortable-item {
+    display: flex;
+    align-items: center;
+    gap: var(--ui-space-2);
+    padding: var(--ui-space-2) var(--ui-space-3);
+    border: 1px solid var(--ui-border);
+    border-radius: var(--ui-radius-md);
+    background: var(--ui-surface-solid, var(--ui-surface));
+    box-shadow: var(--ui-elevation-0);
+    transition: box-shadow var(--ui-motion-fast) var(--ui-ease-standard),
+        border-color var(--ui-motion-fast) var(--ui-ease-standard),
+        opacity var(--ui-motion-fast) var(--ui-ease-standard);
+}
+
+.ui-sortable-item--dragging {
+    opacity: 0.45;
+}
+
+.ui-sortable-item--drop-target {
+    border-color: var(--ui-focus);
+    box-shadow: 0 -2px 0 0 var(--ui-focus), var(--ui-elevation-0);
+}
+
+.ui-sortable-item--grabbed {
+    border-color: var(--ui-focus);
+    box-shadow: 0 0 0 2px color-mix(in srgb, var(--ui-focus), transparent 55%),
+        var(--ui-elevation-2);
+}
+
+.ui-sortable-handle {
+    display: inline-grid;
+    place-items: center;
+    width: 28px;
+    height: 28px;
+    padding: 0;
+    border: none;
+    border-radius: var(--ui-radius-sm);
+    background: transparent;
+    color: var(--ui-muted-fg);
+    cursor: grab;
+}
+
+.ui-sortable-handle:hover {
+    background: var(--ui-surface-muted);
+    color: var(--ui-fg);
+}
+
+.ui-sortable-handle:focus-visible {
+    outline: 2px solid var(--ui-focus);
+    outline-offset: 1px;
+}
+
+.ui-sortable-handle:disabled {
+    cursor: not-allowed;
+    opacity: 0.5;
+}
+
+.ui-sortable-grip svg {
+    display: block;
+    width: 10px;
+    height: 16px;
+    fill: currentColor;
+}
+
+.ui-sortable-body {
+    display: grid;
+    gap: var(--ui-space-0);
+    min-width: 0;
+}
+
+.ui-sortable-label {
+    font-weight: var(--ui-weight-medium);
+}
+
+.ui-sortable-description {
+    color: var(--ui-muted-fg);
+    font-size: var(--ui-text-caption);
+    line-height: var(--ui-leading-caption);
+}
+
+/* KanbanBoard ------------------------------------------------------------ */
+
+.ui-kanban-columns {
+    display: grid;
+    grid-auto-flow: column;
+    grid-auto-columns: minmax(180px, 1fr);
+    gap: var(--ui-space-3);
+    align-items: start;
+    overflow-x: auto;
+    padding-bottom: var(--ui-space-1);
+}
+
+.ui-kanban-column {
+    display: grid;
+    gap: var(--ui-space-2);
+    padding: var(--ui-space-2);
+    border: 1px solid var(--ui-border);
+    border-radius: var(--ui-radius-lg);
+    background: var(--ui-surface-muted);
+}
+
+.ui-kanban-column-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--ui-space-2);
+    padding: var(--ui-space-0) var(--ui-space-1);
+}
+
+.ui-kanban-column-title {
+    margin: 0;
+    font-size: var(--ui-text-footnote);
+    line-height: var(--ui-leading-footnote);
+    font-weight: var(--ui-weight-semibold);
+    color: var(--ui-muted-fg);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+
+.ui-kanban-column-count {
+    color: var(--ui-muted-fg);
+    font-size: var(--ui-text-caption);
+    font-variant-numeric: tabular-nums;
+}
+
+.ui-kanban-cards {
+    display: grid;
+    gap: var(--ui-space-2);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    min-height: 24px;
+}
+
+.ui-kanban-card-surface {
+    display: grid;
+    gap: var(--ui-space-0);
+    padding: var(--ui-space-2) var(--ui-space-3);
+    border: 1px solid var(--ui-border);
+    border-radius: var(--ui-radius-md);
+    background: var(--ui-surface-solid, var(--ui-surface));
+    box-shadow: var(--ui-elevation-0);
+    cursor: grab;
+    transition: box-shadow var(--ui-motion-fast) var(--ui-ease-standard),
+        border-color var(--ui-motion-fast) var(--ui-ease-standard),
+        opacity var(--ui-motion-fast) var(--ui-ease-standard);
+}
+
+.ui-kanban-card-surface:focus-visible {
+    outline: 2px solid var(--ui-focus);
+    outline-offset: 1px;
+}
+
+.ui-kanban-card--dragging .ui-kanban-card-surface {
+    opacity: 0.45;
+}
+
+.ui-kanban-card--drop-target .ui-kanban-card-surface {
+    border-color: var(--ui-focus);
+    box-shadow: 0 -2px 0 0 var(--ui-focus), var(--ui-elevation-0);
+}
+
+.ui-kanban-card--grabbed .ui-kanban-card-surface {
+    border-color: var(--ui-focus);
+    box-shadow: 0 0 0 2px color-mix(in srgb, var(--ui-focus), transparent 55%),
+        var(--ui-elevation-2);
+}
+
+.ui-kanban-card-label {
+    font-weight: var(--ui-weight-medium);
+}
+
+.ui-kanban-card-description {
+    color: var(--ui-muted-fg);
+    font-size: var(--ui-text-caption);
+    line-height: var(--ui-leading-caption);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .ui-sortable-item,
+    .ui-kanban-card-surface {
+        transition: none;
+    }
+}
+
+[data-ui-motion="reduced"] .ui-sortable-item,
+[data-ui-motion="reduced"] .ui-kanban-card-surface {
+    transition: none;
+}
+
+@media (forced-colors: active) {
+    .ui-sortable-item,
+    .ui-kanban-column,
+    .ui-kanban-card-surface {
+        border-color: CanvasText;
+    }
+    .ui-sortable-item--drop-target,
+    .ui-sortable-item--grabbed,
+    .ui-kanban-card--drop-target .ui-kanban-card-surface,
+    .ui-kanban-card--grabbed .ui-kanban-card-surface {
+        border-color: Highlight;
+        box-shadow: none;
+        outline: 2px solid Highlight;
+    }
+    .ui-sortable-grip svg {
+        fill: CanvasText;
+    }
+}

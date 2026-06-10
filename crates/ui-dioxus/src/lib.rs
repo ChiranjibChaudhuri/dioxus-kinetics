@@ -4,6 +4,7 @@ mod accordion;
 mod ai;
 mod buttons;
 mod capture;
+mod charts;
 mod combobox;
 mod composition;
 pub mod cue_style;
@@ -20,8 +21,10 @@ mod popover;
 mod roving;
 mod scene_player;
 mod select;
+mod sortable;
 mod split_text;
 pub mod stagger;
+mod tour;
 mod typography;
 
 use dioxus::prelude::*;
@@ -46,12 +49,19 @@ use ui_glass::{GlassDensity, GlassLevel, GlassTone};
 // ---------------------------------------------------------------------------
 
 pub use accordion::{Accordion, AccordionSection};
+pub use ai::Waveform as AudioLevels;
 pub use ai::{
     AgentStep, AgentStepState, AgentTimeline, AiStatus, AiStatusState, AssistantPanel,
-    AssistantSide, CitationChip, PromptInput, SourceCard, SourceRail, StreamingText,
+    AssistantSide, CitationChip, PromptInput, SourceCard, SourceRail, StreamingText, VoiceInput,
+    VoiceInputState, Waveform,
 };
 pub use buttons::{IconButton, IconButtonSize, IconButtonTone};
 pub use capture::CaptureStage;
+pub use charts::{BarChart, ChartSeries, ChartTone, DonutGauge, LineChart, Sparkline};
+pub use charts::{
+    BarChart as ComparisonChart, DonutGauge as ProgressDial, LineChart as TrendChart,
+    Sparkline as TrendLine,
+};
 pub use combobox::{filter_options, Combobox, ComboboxOption};
 #[allow(deprecated)]
 pub use composition::{FrameClip, FrameLayer, FrameStage};
@@ -93,8 +103,14 @@ pub use overlays::{
 pub use popover::{Popover, PopoverSide};
 pub use scene_player::{Clip, Scene, SceneContext};
 pub use select::{Select, SelectOption};
+pub use sortable::{
+    apply_kanban_move, KanbanBoard, KanbanColumn, KanbanMove, SortableItem, SortableList,
+};
+pub use sortable::{KanbanBoard as WorkflowBoard, SortableList as ReorderList};
 pub use split_text::{SplitMode, SplitText};
 pub use stagger::StaggerCursor;
+pub use tour::Tour as GuidedTour;
+pub use tour::{Spotlight, Tour, TourPlacement, TourStep};
 pub use typography::{Heading, Text, TextVariant};
 #[cfg(feature = "liquid-glass")]
 pub use ui_glass_dioxus::{GlassPower, LiquidSurface, LiquidSurfaceProps};

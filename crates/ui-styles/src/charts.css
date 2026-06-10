@@ -1,0 +1,262 @@
+/* ---------------------------------------------------------------------------
+   Charts: Sparkline, LineChart, BarChart, DonutGauge.
+
+   The six-step series ramp maps onto semantic accents so it adapts to the
+   light/dark palettes automatically. Draw-in animations live behind the
+   `.ui-chart--animate` opt-in class and are neutralized for reduced motion;
+   components pin deterministic frames by writing the final geometry inline
+   and omitting the class.
+--------------------------------------------------------------------------- */
+
+.ui-chart,
+.ui-sparkline,
+.ui-donut-gauge {
+    --ui-chart-1: var(--ui-primary);
+    --ui-chart-2: var(--ui-info);
+    --ui-chart-3: var(--ui-success);
+    --ui-chart-4: var(--ui-warning);
+    --ui-chart-5: var(--ui-danger);
+    --ui-chart-6: var(--ui-accent);
+}
+
+.ui-chart {
+    display: grid;
+    gap: var(--ui-space-2);
+    margin: 0;
+    font-family: var(--ui-font-sans);
+}
+
+.ui-chart-canvas {
+    display: block;
+    width: 100%;
+    height: auto;
+}
+
+.ui-chart-grid line {
+    stroke: var(--ui-border);
+    stroke-width: 0.75;
+}
+
+.ui-chart-tick {
+    fill: var(--ui-muted-fg);
+    font-size: 8px;
+    font-variant-numeric: tabular-nums;
+}
+
+.ui-chart-empty {
+    fill: var(--ui-muted-fg);
+    font-size: 10px;
+}
+
+/* Series color ramp: each class sets a local series color consumed by the
+   line, area, bar, and legend-swatch rules below. */
+.ui-chart-series--1 { --ui-series-color: var(--ui-chart-1); }
+.ui-chart-series--2 { --ui-series-color: var(--ui-chart-2); }
+.ui-chart-series--3 { --ui-series-color: var(--ui-chart-3); }
+.ui-chart-series--4 { --ui-series-color: var(--ui-chart-4); }
+.ui-chart-series--5 { --ui-series-color: var(--ui-chart-5); }
+.ui-chart-series--6 { --ui-series-color: var(--ui-chart-6); }
+
+.ui-chart-line {
+    stroke: var(--ui-series-color, var(--ui-primary));
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    /* pathLength="1" normalizes every path; dasharray 1 + offset 0 shows the
+       settled line, and the draw-in animates the offset from 1 down to 0. */
+    stroke-dasharray: 1;
+    stroke-dashoffset: 0;
+}
+
+.ui-chart-area {
+    fill: color-mix(in srgb, var(--ui-series-color, var(--ui-primary)), transparent 86%);
+}
+
+.ui-chart-bar {
+    fill: var(--ui-series-color, var(--ui-primary));
+    transform-box: fill-box;
+    transform-origin: center bottom;
+}
+
+.ui-chart--animate .ui-chart-line {
+    animation: ui-chart-draw 900ms var(--ui-ease-decelerate) backwards;
+}
+
+.ui-chart--animate .ui-chart-bar {
+    animation: ui-chart-rise 640ms var(--ui-ease-decelerate) backwards;
+}
+
+@keyframes ui-chart-draw {
+    from { stroke-dashoffset: 1; }
+    to { stroke-dashoffset: 0; }
+}
+
+@keyframes ui-chart-rise {
+    from { transform: scaleY(0); }
+    to { transform: scaleY(1); }
+}
+
+.ui-chart-legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--ui-space-2) var(--ui-space-4);
+    margin: 0;
+    color: var(--ui-muted-fg);
+    font-size: var(--ui-text-caption);
+    line-height: var(--ui-leading-caption);
+}
+
+.ui-chart-legend-item {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--ui-space-1);
+}
+
+.ui-chart-swatch {
+    width: 10px;
+    height: 10px;
+    border-radius: 3px;
+    background: var(--ui-series-color, var(--ui-primary));
+}
+
+/* Sparkline ------------------------------------------------------------- */
+
+.ui-sparkline {
+    display: inline-block;
+    width: 100%;
+    color: var(--ui-primary);
+}
+
+.ui-sparkline svg {
+    display: block;
+    width: 100%;
+    height: 32px;
+}
+
+.ui-sparkline--primary { color: var(--ui-primary); }
+.ui-sparkline--success { color: var(--ui-success); }
+.ui-sparkline--warning { color: var(--ui-warning); }
+.ui-sparkline--danger { color: var(--ui-danger); }
+.ui-sparkline--info { color: var(--ui-info); }
+.ui-sparkline--neutral { color: var(--ui-muted-fg); }
+
+.ui-sparkline-line {
+    stroke: currentColor;
+    stroke-width: 1.5;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+.ui-sparkline-area {
+    fill: color-mix(in srgb, currentColor, transparent 86%);
+}
+
+/* DonutGauge ------------------------------------------------------------ */
+
+.ui-donut-gauge {
+    position: relative;
+    display: inline-grid;
+    place-items: center;
+    inline-size: 128px;
+    color: var(--ui-primary);
+}
+
+.ui-donut-gauge--primary { color: var(--ui-primary); }
+.ui-donut-gauge--success { color: var(--ui-success); }
+.ui-donut-gauge--warning { color: var(--ui-warning); }
+.ui-donut-gauge--danger { color: var(--ui-danger); }
+.ui-donut-gauge--info { color: var(--ui-info); }
+.ui-donut-gauge--neutral { color: var(--ui-fg); }
+
+.ui-donut-gauge-canvas {
+    display: block;
+    width: 100%;
+    height: auto;
+}
+
+.ui-donut-gauge-track {
+    stroke: var(--ui-border);
+    stroke-width: 10;
+}
+
+.ui-donut-gauge-arc {
+    stroke: currentColor;
+    stroke-width: 10;
+    stroke-linecap: round;
+    stroke-dasharray: var(--ui-gauge-value, 1) 1;
+    stroke-dashoffset: 0;
+}
+
+.ui-donut-gauge.ui-chart--animate .ui-donut-gauge-arc {
+    animation: ui-gauge-sweep 1100ms var(--ui-ease-decelerate) backwards;
+}
+
+@keyframes ui-gauge-sweep {
+    from { stroke-dashoffset: var(--ui-gauge-value, 1); }
+    to { stroke-dashoffset: 0; }
+}
+
+.ui-donut-gauge-readout {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-content: center;
+    justify-items: center;
+    gap: var(--ui-space-0);
+    text-align: center;
+}
+
+.ui-donut-gauge-value {
+    color: var(--ui-fg);
+    font-size: var(--ui-text-title3);
+    line-height: var(--ui-leading-title3);
+    font-weight: var(--ui-weight-bold);
+    font-variant-numeric: tabular-nums;
+}
+
+.ui-donut-gauge-description {
+    color: var(--ui-muted-fg);
+    font-size: var(--ui-text-caption2);
+    line-height: var(--ui-leading-caption2);
+}
+
+/* Motion + contrast fallbacks -------------------------------------------- */
+
+@media (prefers-reduced-motion: reduce) {
+    .ui-chart--animate .ui-chart-line,
+    .ui-chart--animate .ui-chart-bar,
+    .ui-donut-gauge.ui-chart--animate .ui-donut-gauge-arc {
+        animation: none;
+    }
+}
+
+[data-ui-motion="reduced"] .ui-chart--animate .ui-chart-line,
+[data-ui-motion="reduced"] .ui-chart--animate .ui-chart-bar,
+[data-ui-motion="reduced"] .ui-donut-gauge.ui-chart--animate .ui-donut-gauge-arc {
+    animation: none;
+}
+
+@media (forced-colors: active) {
+    .ui-chart-line,
+    .ui-sparkline-line,
+    .ui-donut-gauge-arc {
+        stroke: CanvasText;
+    }
+    .ui-chart-bar,
+    .ui-chart-swatch {
+        fill: CanvasText;
+        background: CanvasText;
+    }
+    .ui-chart-area,
+    .ui-sparkline-area {
+        fill: none;
+    }
+    .ui-chart-grid line,
+    .ui-donut-gauge-track {
+        stroke: GrayText;
+    }
+    .ui-chart-tick,
+    .ui-chart-empty {
+        fill: CanvasText;
+    }
+}

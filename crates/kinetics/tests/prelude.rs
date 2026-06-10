@@ -260,3 +260,104 @@ fn public_api_includes_shared_layout_and_shared_element() {
         assert!(names.contains(&expected), "missing {expected}");
     }
 }
+
+#[test]
+fn prelude_and_public_names_cover_chart_kit() {
+    let _ = Sparkline;
+    let _ = TrendLine;
+    let _ = LineChart;
+    let _ = TrendChart;
+    let _ = BarChart;
+    let _ = ComparisonChart;
+    let _ = DonutGauge;
+    let _ = ProgressDial;
+    let series = ChartSeries::new("Revenue", vec![1.0, 2.0]);
+    assert_eq!(series.name, "Revenue");
+    assert_eq!(ChartTone::default(), ChartTone::Primary);
+
+    let names = kinetics::public_api_names();
+    for expected in [
+        "Sparkline",
+        "TrendLine",
+        "LineChart",
+        "TrendChart",
+        "BarChart",
+        "ComparisonChart",
+        "DonutGauge",
+        "ProgressDial",
+        "ChartSeries",
+        "ChartTone",
+    ] {
+        assert!(names.contains(&expected), "missing chart name {expected}");
+    }
+}
+
+#[test]
+fn prelude_and_public_names_cover_sortable_surfaces() {
+    let _ = SortableList;
+    let _ = ReorderList;
+    let _ = KanbanBoard;
+    let _ = WorkflowBoard;
+
+    let columns = vec![KanbanColumn::new(
+        "todo",
+        "To do",
+        vec![SortableItem::new("a", "Task A")],
+    )];
+    let mv = KanbanMove {
+        item_id: "a".into(),
+        from_column: "todo".into(),
+        to_column: "todo".into(),
+        to_index: 0,
+    };
+    let next = apply_kanban_move(&columns, &mv);
+    assert_eq!(next[0].items.len(), 1);
+
+    let names = kinetics::public_api_names();
+    for expected in [
+        "SortableList",
+        "ReorderList",
+        "SortableItem",
+        "KanbanBoard",
+        "WorkflowBoard",
+        "KanbanColumn",
+        "KanbanMove",
+        "apply_kanban_move",
+    ] {
+        assert!(
+            names.contains(&expected),
+            "missing sortable name {expected}"
+        );
+    }
+}
+
+#[test]
+fn prelude_and_public_names_cover_tour_and_voice() {
+    let _ = Tour;
+    let _ = GuidedTour;
+    let _ = Spotlight;
+    let _ = Waveform;
+    let _ = AudioLevels;
+    let _ = VoiceInput;
+
+    let step = TourStep::new("s1", "Welcome", "Body")
+        .with_target("hero")
+        .with_placement(TourPlacement::Top);
+    assert_eq!(step.target_id, "hero");
+    assert_eq!(VoiceInputState::Error.live_role(), "alert");
+
+    let names = kinetics::public_api_names();
+    for expected in [
+        "Tour",
+        "GuidedTour",
+        "TourStep",
+        "TourPlacement",
+        "Spotlight",
+        "Waveform",
+        "AudioLevels",
+        "VoiceInput",
+        "VoiceInputState",
+    ] {
+        assert!(names.contains(&expected), "missing name {expected}");
+    }
+}

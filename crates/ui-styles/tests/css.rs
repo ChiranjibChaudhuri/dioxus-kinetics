@@ -295,3 +295,45 @@ fn solid_glass_ancestor_scope_neutralizes_backdrop_filter() {
     assert!(block.contains("backdrop-filter: none"));
     assert!(block.contains("background: var(--ui-glass-solid)"));
 }
+
+#[test]
+fn new_surface_css_sections_are_bundled() {
+    let css = library_css();
+    // Charts
+    assert!(css.contains(".ui-chart"));
+    assert!(css.contains(".ui-sparkline"));
+    assert!(css.contains(".ui-donut-gauge"));
+    assert!(css.contains("--ui-chart-6"));
+    // Sortable
+    assert!(css.contains(".ui-sortable-item"));
+    assert!(css.contains(".ui-kanban-card-surface"));
+    // Tour
+    assert!(css.contains(".ui-spotlight-overlay"));
+    assert!(css.contains(".ui-tour-panel"));
+    // Voice
+    assert!(css.contains(".ui-waveform-bar"));
+    assert!(css.contains(".ui-voice-input-toggle"));
+}
+
+#[test]
+fn new_surface_animations_respect_both_reduced_motion_scopes() {
+    for (name, css) in [
+        ("charts", ui_styles::CHARTS_CSS),
+        ("sortable", ui_styles::SORTABLE_CSS),
+        ("tour", ui_styles::TOUR_CSS),
+        ("voice", ui_styles::VOICE_CSS),
+    ] {
+        assert!(
+            css.contains("@media (prefers-reduced-motion: reduce)"),
+            "{name}.css must gate motion on the OS preference"
+        );
+        assert!(
+            css.contains(r#"[data-ui-motion="reduced"]"#),
+            "{name}.css must gate motion on the app-level attribute"
+        );
+        assert!(
+            css.contains("@media (forced-colors: active)"),
+            "{name}.css must provide forced-colors fallbacks"
+        );
+    }
+}

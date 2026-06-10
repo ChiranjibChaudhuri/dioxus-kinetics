@@ -1,0 +1,167 @@
+/* ---------------------------------------------------------------------------
+   Voice surfaces: Waveform + VoiceInput.
+
+   Waveform bars are plain SVG rects; the `--active` pulse animates scaleY
+   per bar with a staggered inline delay and is stilled under reduced
+   motion (the static bar heights already encode the levels).
+--------------------------------------------------------------------------- */
+
+.ui-waveform {
+    display: inline-block;
+    width: 100%;
+    color: var(--ui-primary);
+}
+
+.ui-waveform svg {
+    display: block;
+    width: 100%;
+    height: 32px;
+}
+
+.ui-waveform-bar {
+    fill: currentColor;
+    transform-box: fill-box;
+    transform-origin: center;
+}
+
+.ui-waveform--active .ui-waveform-bar {
+    animation: ui-waveform-pulse 900ms var(--ui-ease-standard) infinite;
+}
+
+@keyframes ui-waveform-pulse {
+    0%,
+    100% {
+        transform: scaleY(0.55);
+    }
+    50% {
+        transform: scaleY(1.2);
+    }
+}
+
+/* VoiceInput -------------------------------------------------------------- */
+
+.ui-voice-input {
+    display: flex;
+    align-items: center;
+    gap: var(--ui-space-3);
+    padding: var(--ui-space-2) var(--ui-space-3);
+    border: 1px solid var(--ui-border);
+    border-radius: var(--ui-radius-lg);
+    background: var(--ui-surface-solid, var(--ui-surface));
+}
+
+.ui-voice-input-toggle {
+    flex: none;
+    display: inline-grid;
+    place-items: center;
+    width: 40px;
+    height: 40px;
+    padding: 0;
+    border: 1px solid var(--ui-border);
+    border-radius: var(--ui-radius-full);
+    background: var(--ui-surface-muted);
+    color: var(--ui-fg);
+    cursor: pointer;
+    transition: background var(--ui-motion-fast) var(--ui-ease-standard),
+        color var(--ui-motion-fast) var(--ui-ease-standard);
+}
+
+.ui-voice-input-toggle:hover {
+    background: var(--ui-surface-strong, var(--ui-surface-muted));
+}
+
+.ui-voice-input-toggle:focus-visible {
+    outline: 2px solid var(--ui-focus);
+    outline-offset: 2px;
+}
+
+.ui-voice-input-toggle:disabled {
+    cursor: not-allowed;
+    opacity: 0.55;
+}
+
+.ui-voice-input--recording .ui-voice-input-toggle {
+    border-color: transparent;
+    background: var(--ui-danger);
+    color: var(--ui-on-danger);
+}
+
+.ui-voice-input--recording .ui-waveform {
+    color: var(--ui-danger);
+}
+
+.ui-voice-input--processing .ui-voice-input-toggle {
+    animation: ui-voice-processing 1200ms var(--ui-ease-standard) infinite;
+}
+
+@keyframes ui-voice-processing {
+    0%,
+    100% {
+        opacity: 0.55;
+    }
+    50% {
+        opacity: 1;
+    }
+}
+
+.ui-voice-input-icon {
+    width: 16px;
+    height: 16px;
+    fill: currentColor;
+}
+
+.ui-voice-input-trace {
+    flex: 1;
+    min-width: 0;
+}
+
+.ui-voice-input-meta {
+    flex: none;
+    display: grid;
+    gap: var(--ui-space-0);
+    justify-items: end;
+    text-align: right;
+}
+
+.ui-voice-input-elapsed {
+    font-size: var(--ui-text-footnote);
+    line-height: var(--ui-leading-footnote);
+    font-weight: var(--ui-weight-semibold);
+    font-variant-numeric: tabular-nums;
+}
+
+.ui-voice-input-status {
+    color: var(--ui-muted-fg);
+    font-size: var(--ui-text-caption);
+    line-height: var(--ui-leading-caption);
+}
+
+.ui-voice-input--error .ui-voice-input-status {
+    color: var(--ui-danger);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .ui-waveform--active .ui-waveform-bar,
+    .ui-voice-input--processing .ui-voice-input-toggle {
+        animation: none;
+    }
+}
+
+[data-ui-motion="reduced"] .ui-waveform--active .ui-waveform-bar,
+[data-ui-motion="reduced"] .ui-voice-input--processing .ui-voice-input-toggle {
+    animation: none;
+}
+
+@media (forced-colors: active) {
+    .ui-waveform-bar {
+        fill: CanvasText;
+    }
+    .ui-voice-input,
+    .ui-voice-input-toggle {
+        border-color: CanvasText;
+    }
+    .ui-voice-input--recording .ui-voice-input-toggle {
+        background: Highlight;
+        color: HighlightText;
+    }
+}

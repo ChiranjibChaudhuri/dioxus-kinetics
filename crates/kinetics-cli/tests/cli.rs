@@ -151,3 +151,41 @@ fn render_report_scene_writes_frames_with_chart_and_metrics() {
         "report frame missing metric: {settled}"
     );
 }
+
+#[test]
+fn render_showreel_scene_writes_frames_with_charts() {
+    let dir = tempdir().unwrap();
+    kinetics()
+        .args([
+            "render",
+            "--scene",
+            "showreel",
+            "--out",
+            dir.path().to_str().unwrap(),
+            "--frames",
+            "3",
+            "--fps",
+            "1",
+        ])
+        .assert()
+        .success();
+
+    let frame = std::fs::read_to_string(dir.path().join("frames").join("2.html")).unwrap();
+    assert!(
+        frame.contains("ui-chart--area"),
+        "showreel frame missing area chart: {frame}"
+    );
+    assert!(
+        frame.contains("ui-chart--funnel"),
+        "showreel frame missing funnel chart: {frame}"
+    );
+    assert!(
+        frame.contains("Cinematic UI, rendered in Rust."),
+        "showreel frame missing title: {frame}"
+    );
+    // The renderer inlines the shared library CSS so captured frames are self-contained.
+    assert!(
+        frame.contains("<style>"),
+        "showreel frame missing inlined CSS: {frame}"
+    );
+}

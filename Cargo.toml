@@ -22,6 +22,7 @@ members = [
     "crates/ui-learn",
     "examples/component-gallery",
     "examples/flagship",
+    "examples/showreel",
     "crates/ui-glass-engine",
     "crates/ui-glass-dioxus",
 ]

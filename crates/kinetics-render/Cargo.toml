@@ -11,6 +11,7 @@ dioxus-ssr.workspace = true
 ui-runtime = { path = "../ui-runtime" }
 ui-composition = { path = "../ui-composition" }
 ui-capture = { path = "../ui-capture" }
+ui-styles = { path = "../ui-styles" }
 serde_json = "1"
 tokio = { version = "1", features = ["fs", "process", "rt", "macros"] }
 

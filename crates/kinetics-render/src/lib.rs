@@ -124,6 +124,12 @@ impl Renderer {
 
         let scene_fn: SceneFn = SceneFn(Rc::new(scene_fn));
 
+        // Inline the full shared library CSS once so each frame is a
+        // self-contained HTML document — Playwright's file:// PNG capture
+        // has no server to resolve a linked stylesheet against, and reduced
+        // styling would make the captured video useless.
+        let css = ui_styles::library_css();
+
         // Each frame builds a fresh VirtualDom via dioxus_ssr's
         // render_element so SceneClock construction happens inside a
         // valid Dioxus runtime. We wrap the per-frame work in a tiny
@@ -143,8 +149,15 @@ impl Renderer {
                 }
             });
 
+            let doc = format!(
+                "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n<meta charset=\"utf-8\">\n\
+                 <meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">\n\
+                 <style>{css}</style>\n</head>\n\
+                 <body data-ui-theme=\"light\" data-ui-density=\"comfortable\">\n{body}\n</body>\n</html>\n",
+            );
+
             let frame_path = html_dir.join(format!("{frame}.html"));
-            fs::write(&frame_path, body)?;
+            fs::write(&frame_path, doc)?;
         }
 
         // Write a minimal composition manifest. We don't pull

@@ -116,3 +116,38 @@ fn render_known_scene_writes_html_frames() {
     }
     assert!(dir.path().join("manifest.json").exists());
 }
+
+#[test]
+fn render_report_scene_writes_frames_with_chart_and_metrics() {
+    let dir = tempdir().unwrap();
+    kinetics()
+        .args([
+            "render",
+            "--scene",
+            "report",
+            "--out",
+            dir.path().to_str().unwrap(),
+            "--frames",
+            "3",
+            "--fps",
+            "1",
+        ])
+        .assert()
+        .success();
+
+    // The report scene composes the AreaChart + MetricCounter data; the
+    // settled frame carries the chart and the metric copy.
+    let settled = std::fs::read_to_string(dir.path().join("frames").join("2.html")).unwrap();
+    assert!(
+        settled.contains("ui-chart--area"),
+        "report frame missing chart: {settled}"
+    );
+    assert!(
+        settled.contains("Q3 Performance Report"),
+        "report frame missing title: {settled}"
+    );
+    assert!(
+        settled.contains("Net MRR"),
+        "report frame missing metric: {settled}"
+    );
+}

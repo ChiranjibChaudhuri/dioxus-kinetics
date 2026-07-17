@@ -512,6 +512,418 @@ pub const COMPONENT_CSS: &str = r#"
 .ui-stack--gap-sm { gap: var(--ui-space-2); }
 .ui-stack--gap-md { gap: var(--ui-space-3); }
 
+.ui-form {
+    display: flex;
+    flex-direction: column;
+    gap: var(--ui-space-4);
+}
+
+.ui-form--disabled {
+    opacity: 0.6;
+    pointer-events: none;
+}
+
+.ui-form-summary {
+    margin: 0;
+    padding: var(--ui-space-2) var(--ui-space-4);
+    list-style: none;
+    border: 1px solid var(--ui-danger);
+    border-radius: var(--ui-radius-md);
+    background: color-mix(in srgb, var(--ui-danger) 8%, transparent);
+}
+
+.ui-form-summary-item {
+    color: var(--ui-danger);
+    font-size: var(--ui-text-footnote);
+}
+
+.ui-file-input {
+    display: grid;
+    gap: var(--ui-space-2);
+}
+
+.ui-file-input-label,
+.ui-dropzone-label {
+    font-weight: 700;
+}
+
+.ui-file-input-control {
+    width: 100%;
+    border: 1px solid var(--ui-border);
+    background: var(--ui-surface);
+    color: var(--ui-fg);
+    padding: var(--ui-space-2);
+    border-radius: var(--ui-radius-md);
+}
+
+.ui-file-input-help {
+    color: var(--ui-muted-fg);
+}
+
+.ui-dropzone {
+    border: 1.5px dashed var(--ui-border);
+    border-radius: var(--ui-radius-lg);
+    background: var(--ui-surface-muted);
+    padding: var(--ui-space-6);
+    text-align: center;
+}
+
+.ui-dropzone[data-disabled="true"] {
+    opacity: 0.6;
+    pointer-events: none;
+}
+
+.ui-dropzone-region {
+    display: flex;
+    flex-direction: column;
+    gap: var(--ui-space-1);
+    cursor: pointer;
+}
+
+.ui-dropzone-region--dragover {
+    outline: 2px solid var(--ui-focus);
+    outline-offset: 4px;
+    border-radius: var(--ui-radius-md);
+}
+
+.ui-dropzone-hint {
+    color: var(--ui-muted-fg);
+    font-size: var(--ui-text-footnote);
+}
+
+.ui-dropzone-input {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    opacity: 0;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+}
+
+.ui-attachment {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--ui-space-2);
+    padding: var(--ui-space-1) var(--ui-space-3);
+    border: 1px solid var(--ui-border);
+    border-radius: var(--ui-radius-full);
+    background: var(--ui-surface-muted);
+    font-size: var(--ui-text-footnote);
+}
+
+.ui-attachment-size {
+    color: var(--ui-muted-fg);
+}
+
+.ui-attachment-remove {
+    border: 0;
+    background: transparent;
+    color: var(--ui-muted-fg);
+    cursor: pointer;
+    line-height: 1;
+    padding: 0 var(--ui-space-1);
+}
+
+.ui-attachment-remove:hover {
+    color: var(--ui-danger);
+}
+
+.ui-tag-input {
+    display: grid;
+    gap: var(--ui-space-2);
+}
+
+.ui-tag-input-label {
+    font-weight: 700;
+}
+
+.ui-tag-input-field {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--ui-space-2);
+    align-items: center;
+    padding: var(--ui-space-2);
+    border: 1px solid var(--ui-border);
+    border-radius: var(--ui-radius-md);
+    background: var(--ui-surface);
+}
+
+.ui-tag-input-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--ui-space-1);
+    padding: 0 var(--ui-space-2);
+    border-radius: var(--ui-radius-full);
+    background: var(--ui-surface-muted);
+    font-size: var(--ui-text-footnote);
+}
+
+.ui-tag-input-chip-remove {
+    border: 0;
+    background: transparent;
+    color: var(--ui-muted-fg);
+    cursor: pointer;
+    line-height: 1;
+    padding: 0;
+}
+
+.ui-tag-input-chip-remove:hover {
+    color: var(--ui-danger);
+}
+
+.ui-tag-input-control {
+    flex: 1 1 8rem;
+    min-width: 6rem;
+    border: 0;
+    background: transparent;
+    color: var(--ui-fg);
+    outline: none;
+}
+
+.ui-tag-input-help {
+    color: var(--ui-muted-fg);
+}
+
+.ui-virtual-table-wrap {
+    border: 1px solid var(--ui-border);
+    border-radius: var(--ui-radius-md);
+    overflow: auto;
+}
+
+.ui-virtual-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.ui-virtual-table-spacer td {
+    padding: 0;
+    border: 0;
+}
+
+.ui-virtual-table .ui-data-table-head th {
+    position: sticky;
+    top: 0;
+    background: var(--ui-surface-muted);
+    z-index: 1;
+}
+
+/* Auth surfaces --------------------------------------------------------- */
+
+.ui-auth-card {
+    display: grid;
+    gap: var(--ui-space-4);
+    padding: var(--ui-space-6);
+    border: 1px solid var(--ui-border);
+    border-radius: var(--ui-radius-floating);
+    background: var(--ui-surface);
+}
+
+.ui-auth-card-title {
+    margin: 0;
+    font-size: var(--ui-text-title2);
+    font-weight: var(--ui-weight-bold);
+}
+
+.ui-auth-card-description {
+    margin: 0;
+    color: var(--ui-muted-fg);
+}
+
+.ui-auth-card-body {
+    display: grid;
+    gap: var(--ui-space-3);
+}
+
+.ui-oauth-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--ui-space-2);
+    padding: 0 var(--ui-space-4);
+    height: var(--ui-control-height);
+    border: 1px solid var(--ui-border);
+    border-radius: var(--ui-radius-md);
+    background: var(--ui-surface);
+    color: var(--ui-fg);
+    cursor: pointer;
+}
+
+.ui-oauth-button:hover {
+    background: var(--ui-surface-muted);
+}
+
+.ui-password-strength {
+    display: grid;
+    gap: var(--ui-space-1);
+}
+
+.ui-password-strength-bars {
+    display: flex;
+    gap: var(--ui-space-1);
+}
+
+.ui-password-strength-bar {
+    flex: 1;
+    height: 4px;
+    border-radius: var(--ui-radius-full);
+    background: var(--ui-border);
+}
+
+.ui-password-strength-bar--on { background: currentColor; }
+.ui-password-strength--weak { color: var(--ui-danger); }
+.ui-password-strength--fair { color: var(--ui-warning); }
+.ui-password-strength--good { color: var(--ui-info); }
+.ui-password-strength--strong { color: var(--ui-success); }
+
+.ui-password-strength-label {
+    font-size: var(--ui-text-caption2);
+    color: var(--ui-muted-fg);
+    text-transform: capitalize;
+}
+
+.ui-mfa-code-cells {
+    display: flex;
+    gap: var(--ui-space-2);
+}
+
+.ui-mfa-code-cell {
+    width: 2.5rem;
+    height: 3rem;
+    text-align: center;
+    font-size: var(--ui-text-title3);
+    border: 1px solid var(--ui-border);
+    border-radius: var(--ui-radius-md);
+    background: var(--ui-surface);
+    color: var(--ui-fg);
+}
+
+/* Billing surfaces ------------------------------------------------------ */
+
+.ui-pricing-table {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: var(--ui-space-4);
+}
+
+.ui-plan-card {
+    display: grid;
+    gap: var(--ui-space-4);
+    padding: var(--ui-space-5);
+    border: 1px solid var(--ui-border);
+    border-radius: var(--ui-radius-lg);
+    background: var(--ui-surface);
+}
+
+.ui-plan-card--featured {
+    border-color: var(--ui-primary);
+    box-shadow: var(--ui-shadow-soft);
+}
+
+.ui-plan-card-name {
+    margin: 0;
+    font-size: var(--ui-text-title3);
+    font-weight: var(--ui-weight-semibold);
+}
+
+.ui-plan-card-price {
+    font-size: var(--ui-text-title1);
+    font-weight: var(--ui-weight-bold);
+}
+
+.ui-plan-card-period {
+    color: var(--ui-muted-fg);
+}
+
+.ui-plan-card-features {
+    margin: 0;
+    padding-left: var(--ui-space-4);
+    display: grid;
+    gap: var(--ui-space-1);
+    color: var(--ui-fg);
+}
+
+.ui-plan-card-cta {
+    height: var(--ui-control-height);
+    border-radius: var(--ui-radius-md);
+    cursor: pointer;
+}
+
+.ui-plan-card-cta--primary {
+    border: 0;
+    background: var(--ui-primary);
+    color: var(--ui-on-accent);
+}
+
+.ui-plan-card-cta--ghost {
+    border: 1px solid var(--ui-border);
+    background: transparent;
+    color: var(--ui-fg);
+}
+
+.ui-usage-meter {
+    display: grid;
+    gap: var(--ui-space-1);
+}
+
+.ui-usage-meter-head {
+    display: flex;
+    justify-content: space-between;
+    font-size: var(--ui-text-footnote);
+}
+
+.ui-usage-meter-readout {
+    color: var(--ui-muted-fg);
+    font-variant-numeric: tabular-nums;
+}
+
+.ui-usage-meter-track {
+    height: 8px;
+    border-radius: var(--ui-radius-full);
+    background: var(--ui-surface-muted);
+    overflow: hidden;
+}
+
+.ui-usage-meter-bar {
+    height: 100%;
+    border-radius: inherit;
+    background: var(--ui-primary);
+}
+
+.ui-usage-meter--warning .ui-usage-meter-bar { background: var(--ui-warning); }
+.ui-usage-meter--critical .ui-usage-meter-bar { background: var(--ui-danger); }
+
+.ui-invoice-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: var(--ui-space-1);
+}
+
+.ui-invoice-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr auto;
+    gap: var(--ui-space-3);
+    align-items: center;
+    padding: var(--ui-space-2) var(--ui-space-3);
+    border: 1px solid var(--ui-border);
+    border-radius: var(--ui-radius-md);
+    background: var(--ui-surface);
+    font-size: var(--ui-text-footnote);
+}
+
+.ui-invoice-status {
+    padding: 0 var(--ui-space-2);
+    border-radius: var(--ui-radius-full);
+    font-size: var(--ui-text-caption2);
+    font-weight: var(--ui-weight-semibold);
+}
+
+.ui-invoice-status--paid { background: color-mix(in srgb, var(--ui-success) 16%, transparent); color: var(--ui-success); }
+.ui-invoice-status--due { background: color-mix(in srgb, var(--ui-info) 16%, transparent); color: var(--ui-info); }
+.ui-invoice-status--overdue { background: color-mix(in srgb, var(--ui-danger) 16%, transparent); color: var(--ui-danger); }
+.ui-invoice-status--draft { background: var(--ui-surface-muted); color: var(--ui-muted-fg); }
+
 .ui-text-field,
 .ui-checkbox,
 .ui-switch,

@@ -287,3 +287,110 @@ impl Theme {
         }
     }
 }
+
+/// Serialize a [`Theme`] to a `--ui-*` CSS custom-property block scoped under
+/// the theme's mode selector. This is the "token studio" export: a host can
+/// build a custom `Theme` (override any palette/ramp), dump this CSS, and
+/// inject it once near the app root to re-skin every kinetics surface.
+///
+/// Colors use `rgba()` so translucent tokens (borders, glass) round-trip
+/// correctly; opaque tokens still render identically.
+pub fn export_tokens_css(theme: &Theme) -> String {
+    let selector = match theme.mode {
+        ThemeMode::Light => ":root, [data-ui-theme=\"light\"]",
+        ThemeMode::Dark => "[data-ui-theme=\"dark\"]",
+    };
+    let c = &theme.semantic;
+    let r = &theme.radius;
+    let s = &theme.spacing;
+    let m = &theme.motion;
+    format!(
+        r#"{selector} {{
+    --ui-bg: {bg};
+    --ui-surface: {surface};
+    --ui-surface-strong: {surface_strong};
+    --ui-fg: {fg};
+    --ui-muted-fg: {mfg};
+    --ui-border: {border};
+    --ui-primary: {primary};
+    --ui-success: {success};
+    --ui-warning: {warning};
+    --ui-danger: {danger};
+    --ui-info: {info};
+    --ui-focus: {focus};
+    --ui-radius-sm: {rsm}px;
+    --ui-radius-md: {rmd}px;
+    --ui-radius-lg: {rlg}px;
+    --ui-radius-floating: {rfl}px;
+    --ui-space-0: {s0}px;
+    --ui-space-1: {s1}px;
+    --ui-space-2: {s2}px;
+    --ui-space-3: {s3}px;
+    --ui-space-4: {s4}px;
+    --ui-space-5: {s5}px;
+    --ui-space-6: {s6}px;
+    --ui-space-7: {s7}px;
+    --ui-space-8: {s8}px;
+    --ui-motion-fast: {mf}ms;
+    --ui-motion-normal: {mn}ms;
+    --ui-motion-slow: {mslow}ms;
+}}
+"#,
+        selector = selector,
+        bg = c.background.css_rgba(),
+        surface = c.surface.css_rgba(),
+        surface_strong = c.surface_solid.css_rgba(),
+        fg = c.foreground.css_rgba(),
+        mfg = c.muted_foreground.css_rgba(),
+        border = c.border.css_rgba(),
+        primary = c.primary.css_rgba(),
+        success = c.success.css_rgba(),
+        warning = c.warning.css_rgba(),
+        danger = c.danger.css_rgba(),
+        info = c.info.css_rgba(),
+        focus = c.focus.css_rgba(),
+        rsm = r.small_px,
+        rmd = r.medium_px,
+        rlg = r.large_px,
+        rfl = r.floating_px,
+        s0 = s.xxs_px,
+        s1 = s.xs_px,
+        s2 = s.sm_px,
+        s3 = s.md_px,
+        s4 = s.lg_px,
+        s5 = s.xl_px,
+        s6 = s.xxl_px,
+        s7 = s.xxxl_px,
+        s8 = s.xxxxl_px,
+        mf = m.fast_ms,
+        mn = m.normal_ms,
+        mslow = m.slow_ms,
+    )
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn export_targets_mode_selector() {
+        assert!(export_tokens_css(&Theme::default()).contains(":root,"));
+        assert!(export_tokens_css(&Theme::dark()).contains("[data-ui-theme=\"dark\"]"));
+    }
+
+    #[test]
+    fn export_includes_every_token_family() {
+        let css = export_tokens_css(&Theme::default());
+        assert!(css.contains("--ui-primary:"));
+        assert!(css.contains("--ui-radius-md:"));
+        assert!(css.contains("--ui-space-4:"));
+        assert!(css.contains("--ui-motion-normal:"));
+    }
+
+    #[test]
+    fn export_round_trips_custom_primary() {
+        let mut theme = Theme::default();
+        theme.semantic.primary = Color::rgba(1, 2, 3, 1.0);
+        assert!(export_tokens_css(&theme).contains("rgba(1, 2, 3, 1.000)"));
+    }
+}

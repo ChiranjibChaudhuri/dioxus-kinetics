@@ -7,6 +7,7 @@ mod cmd_init;
 mod cmd_lint;
 mod cmd_preview;
 mod cmd_render;
+mod cmd_tokens;
 mod scene_registry;
 
 #[derive(Parser)]
@@ -58,6 +59,14 @@ enum Commands {
     Lint,
     /// Print toolchain versions.
     Doctor,
+    /// Export the design-token system as `--ui-*` CSS custom properties
+    /// (the "token studio" export). Pipe to a `.css` file and inject once
+    /// near the app root to re-skin every kinetics surface.
+    Tokens {
+        /// Theme mode to export. Default: "light".
+        #[arg(long, default_value = "light")]
+        mode: String,
+    },
 }
 
 fn main() -> ExitCode {
@@ -75,6 +84,7 @@ fn main() -> ExitCode {
         } => cmd_render::run(&scene, &out, frames, fps, capture_png, encode_mp4),
         Commands::Lint => cmd_lint::run(),
         Commands::Doctor => cmd_doctor::run(),
+        Commands::Tokens { mode } => cmd_tokens::run(&mode),
     };
 
     match result {

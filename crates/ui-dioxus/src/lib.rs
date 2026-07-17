@@ -2,6 +2,8 @@
 
 mod accordion;
 mod ai;
+mod auth;
+mod billing;
 mod buttons;
 mod capture;
 mod charts;
@@ -9,8 +11,10 @@ mod combobox;
 mod composition;
 pub mod cue_style;
 mod data_table;
+mod data_table_virtual;
 mod datepicker;
 mod display;
+mod form;
 mod forms;
 mod kinetics;
 mod layout;
@@ -24,8 +28,10 @@ mod select;
 mod sortable;
 mod split_text;
 pub mod stagger;
+mod tag_input;
 mod tour;
 mod typography;
+mod upload;
 
 use dioxus::prelude::*;
 use ui_glass::{GlassDensity, GlassLevel, GlassTone};
@@ -55,8 +61,31 @@ pub use ai::{
     AssistantSide, CitationChip, PromptInput, SourceCard, SourceRail, StreamingText, VoiceInput,
     VoiceInputState, Waveform,
 };
+pub use auth::{
+    password_strength, MfaCodeInput, OAuthButton, OAuthProvider, PasswordStrength,
+    PasswordStrengthMeter, SignInCard,
+};
+pub use auth::{
+    MfaCodeInput as CodeInput, OAuthButton as SocialAuthButton,
+    PasswordStrengthMeter as StrengthMeter, SignInCard as AuthCard,
+};
+pub use billing::{
+    usage_fraction, usage_tone, Invoice, InvoiceList, InvoiceStatus, PlanCard, PlanCtaVariant,
+    PricingPlan, PricingTable, UsageMeter, UsageTone,
+};
+pub use billing::{
+    InvoiceList as BillingHistory, PlanCard as PlanTile, PricingTable as PlanPicker,
+    UsageMeter as QuotaBar,
+};
 pub use buttons::{IconButton, IconButtonSize, IconButtonTone};
 pub use capture::CaptureStage;
+pub use charts::{
+    AreaChart, FunnelChart, FunnelStage, GaugeChart, Heatmap, HeatmapRow, Treemap, TreemapItem,
+};
+pub use charts::{
+    AreaChart as AreaTrend, FunnelChart as ConversionFunnel, GaugeChart as ArcGauge,
+    Heatmap as DensityGrid, Treemap as ProportionMap,
+};
 pub use charts::{BarChart, ChartSeries, ChartTone, DonutGauge, LineChart, Sparkline};
 pub use charts::{
     BarChart as ComparisonChart, DonutGauge as ProgressDial, LineChart as TrendChart,
@@ -67,6 +96,8 @@ pub use combobox::{filter_options, Combobox, ComboboxOption};
 pub use composition::{FrameClip, FrameLayer, FrameStage};
 pub use cue_style::{cue_animation_duration_ms, cue_inline_style, cue_inline_style_with_duration};
 pub use data_table::{DataTable, DataTableColumn, DataTableRow, SortDirection};
+pub use data_table_virtual::VirtualizedDataTable as WindowedDataTable;
+pub use data_table_virtual::{visible_window, VirtualizedDataTable};
 pub use datepicker::{
     add_days, add_months, day_of_week, days_in_month, end_of_week, format_iso_date, parse_iso_date,
     start_of_week, DatePicker, DATEPICKER_DEFAULT_ANCHOR,
@@ -76,6 +107,8 @@ pub use display::{
     Progress, Skeleton, Spinner,
 };
 pub use display::{EmptyState as BlankState, MetricCard as MetricReadout};
+pub use form::Form as EntryForm;
+pub use form::{use_form_error, validate, FieldRules, Form, FormErrors, FormSchema, FormValues};
 pub use forms::{Checkbox, RadioGroup, RadioOption, Slider, Switch, TextField, TextFieldType};
 pub use forms::{
     Checkbox as ChoiceMark, RadioGroup as OptionGroup, Switch as StateSwitch,
@@ -109,12 +142,16 @@ pub use sortable::{
 pub use sortable::{KanbanBoard as WorkflowBoard, SortableList as ReorderList};
 pub use split_text::{SplitMode, SplitText};
 pub use stagger::StaggerCursor;
+pub use tag_input::TagInput;
+pub use tag_input::TagInput as ChipInput;
 pub use tour::Tour as GuidedTour;
 pub use tour::{Spotlight, Tour, TourPlacement, TourStep};
 pub use typography::{Heading, Text, TextVariant};
 #[cfg(feature = "liquid-glass")]
 pub use ui_glass_dioxus::{GlassPower, LiquidSurface, LiquidSurfaceProps};
 pub use ui_runtime::SceneState;
+pub use upload::{format_bytes, AttachedFile, Attachment, DropZone, FileInput};
+pub use upload::{Attachment as FileChip, DropZone as UploadZone, FileInput as FilePicker};
 
 pub use Button as ActionControl;
 pub use GlassSurface as GlassLayer;

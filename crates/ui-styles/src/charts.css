@@ -260,3 +260,148 @@
         fill: CanvasText;
     }
 }
+
+/* GaugeChart (semicircle) ----------------------------------------------- */
+
+.ui-gauge {
+    position: relative;
+    display: inline-grid;
+    place-items: center;
+    inline-size: 160px;
+    color: var(--ui-primary);
+}
+
+.ui-gauge--primary { color: var(--ui-primary); }
+.ui-gauge--success { color: var(--ui-success); }
+.ui-gauge--warning { color: var(--ui-warning); }
+.ui-gauge--danger { color: var(--ui-danger); }
+.ui-gauge--info { color: var(--ui-info); }
+.ui-gauge--neutral { color: var(--ui-fg); }
+
+.ui-gauge-canvas {
+    display: block;
+    width: 100%;
+    height: auto;
+}
+
+.ui-gauge-track {
+    stroke: var(--ui-border);
+    stroke-width: 12;
+    stroke-linecap: round;
+}
+
+.ui-gauge-arc {
+    stroke: currentColor;
+    stroke-width: 12;
+    stroke-linecap: round;
+    stroke-dasharray: var(--ui-gauge-value, 1) 1;
+    stroke-dashoffset: 0;
+}
+
+.ui-gauge.ui-chart--animate .ui-gauge-arc {
+    animation: ui-gauge-sweep 1100ms var(--ui-ease-decelerate) backwards;
+}
+
+.ui-gauge-readout {
+    margin-top: var(--ui-space-1);
+    display: grid;
+    justify-items: center;
+    gap: var(--ui-space-0);
+    text-align: center;
+}
+
+.ui-gauge-value {
+    color: var(--ui-fg);
+    font-size: var(--ui-text-title3);
+    line-height: var(--ui-leading-title3);
+    font-weight: var(--ui-weight-bold);
+    font-variant-numeric: tabular-nums;
+}
+
+.ui-gauge-description {
+    color: var(--ui-muted-fg);
+    font-size: var(--ui-text-caption2);
+    line-height: var(--ui-leading-caption2);
+}
+
+/* FunnelChart ----------------------------------------------------------- */
+
+.ui-chart-funnel-stage {
+    fill: var(--ui-series-color, var(--ui-primary));
+}
+
+.ui-chart-funnel-label {
+    fill: var(--ui-on-accent);
+    font-size: var(--ui-text-caption);
+    font-weight: var(--ui-weight-semibold);
+}
+
+.ui-chart--funnel.ui-chart--animate .ui-chart-funnel-stage {
+    transform-origin: center;
+    animation: ui-chart-funnel-grow 600ms var(--ui-ease-decelerate) backwards;
+}
+
+@keyframes ui-chart-funnel-grow {
+    from { transform: scaleX(0); opacity: 0; }
+    to { transform: scaleX(1); opacity: 1; }
+}
+
+/* Heatmap --------------------------------------------------------------- */
+
+.ui-chart-heat-cell {
+    fill: var(--ui-primary);
+}
+
+/* Treemap --------------------------------------------------------------- */
+
+.ui-chart-tile {
+    fill: var(--ui-series-color, var(--ui-primary));
+}
+
+.ui-chart-tile-label {
+    fill: var(--ui-on-accent);
+    font-size: var(--ui-text-caption);
+    font-weight: var(--ui-weight-semibold);
+}
+
+.ui-chart--treemap.ui-chart--animate .ui-chart-tile {
+    transform-origin: top left;
+    animation: ui-chart-tile-grow 500ms var(--ui-ease-decelerate) backwards;
+}
+
+@keyframes ui-chart-tile-grow {
+    from { transform: scaleY(0); opacity: 0; }
+    to { transform: scaleY(1); opacity: 1; }
+}
+
+/* Reduced-motion + forced-colors for the new chart families ------------- */
+
+@media (prefers-reduced-motion: reduce) {
+    .ui-gauge.ui-chart--animate .ui-gauge-arc,
+    .ui-chart--funnel.ui-chart--animate .ui-chart-funnel-stage,
+    .ui-chart--treemap.ui-chart--animate .ui-chart-tile {
+        animation: none;
+    }
+}
+
+[data-ui-motion="reduced"] .ui-gauge.ui-chart--animate .ui-gauge-arc,
+[data-ui-motion="reduced"] .ui-chart--funnel.ui-chart--animate .ui-chart-funnel-stage,
+[data-ui-motion="reduced"] .ui-chart--treemap.ui-chart--animate .ui-chart-tile {
+    animation: none;
+}
+
+@media (forced-colors: active) {
+    .ui-gauge-arc {
+        stroke: CanvasText;
+    }
+    .ui-gauge-track {
+        stroke: GrayText;
+    }
+    .ui-chart-funnel-stage,
+    .ui-chart-tile {
+        fill: CanvasText;
+    }
+    .ui-chart-heat-cell {
+        fill: CanvasText;
+    }
+}

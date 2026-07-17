@@ -45,10 +45,9 @@ pub fn TagInput(
                                 disabled,
                                 "aria-label": "Remove {tag}",
                                 onclick: {
-                                    let handler = on_change.clone();
+                                    let handler = on_change;
                                     let owned_tags = tags.clone();
                                     move |_| {
-                                        let handler = handler.clone();
                                         if let Some(h) = handler {
                                             let mut next = owned_tags.clone();
                                             if index < next.len() {
@@ -75,7 +74,7 @@ pub fn TagInput(
                         draft.set(evt.value());
                     },
                     onkeydown: {
-                        let handler = on_change.clone();
+                        let handler = on_change;
                         let owned_tags = tags.clone();
                         move |evt: KeyboardEvent| {
                             if disabled {
@@ -90,7 +89,7 @@ pub fn TagInput(
                                     {
                                         let mut next = owned_tags.clone();
                                         next.push(candidate);
-                                        if let Some(h) = handler.clone() {
+                                        if let Some(h) = handler {
                                             h.call(next);
                                         }
                                         draft.set(String::new());
@@ -99,7 +98,7 @@ pub fn TagInput(
                                 Code::Backspace if draft.read().is_empty() && !owned_tags.is_empty() => {
                                     let mut next = owned_tags.clone();
                                     next.pop();
-                                    if let Some(h) = handler.clone() {
+                                    if let Some(h) = handler {
                                         h.call(next);
                                     }
                                 }

@@ -122,7 +122,7 @@ pub fn PricingTable(plans: Vec<PricingPlan>, on_select: Option<EventHandler<Stri
                     key: "{plan.name}",
                     plan: plan.clone(),
                     cta_variant: if plan.featured { PlanCtaVariant::Primary } else { PlanCtaVariant::Ghost },
-                    on_select: on_select.clone(),
+                    on_select,
                 }
             }
         }

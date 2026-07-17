@@ -243,8 +243,8 @@ fn showreel_scene(clock: SceneClock) -> Element {
     }
 }
 
-/// The report-to-video scene: a data-driven composition (title + area chart
-/// + metric strip) whose chart draw-in is pinned to the clock so the
+/// The report-to-video scene: a data-driven composition (title, area chart,
+/// and metric strip) whose chart draw-in is pinned to the clock so the
 /// `kinetics render --scene report` pipeline produces a frame-accurate video.
 fn report_scene(clock: SceneClock) -> Element {
     let elapsed = *clock.elapsed_ms.peek();

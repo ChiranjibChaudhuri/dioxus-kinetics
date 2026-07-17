@@ -80,8 +80,13 @@ impl FormErrors {
     }
 }
 
+/// A boxed custom predicate used by [`FieldRules::custom`]. Factored out so
+/// the field type stays readable (clippy::type_complexity).
+pub type CustomRule = Box<dyn Fn(&str) -> bool + Send + Sync>;
+
 /// Declarative validation rules for a single field. Built with the chained
 /// builder; the first failing rule wins (see [`FieldRules::first_error`]).
+#[derive(Default)]
 pub struct FieldRules {
     required: Option<String>,
     min_length: Option<(usize, String)>,
@@ -90,13 +95,7 @@ pub struct FieldRules {
     max_value: Option<(f64, String)>,
     email: Option<String>,
     matches: Option<(String, String)>,
-    custom: Option<(Box<dyn Fn(&str) -> bool + Send + Sync>, String)>,
-}
-
-impl Default for FieldRules {
-    fn default() -> Self {
-        Self::new()
-    }
+    custom: Option<(CustomRule, String)>,
 }
 
 impl FieldRules {
@@ -157,7 +156,6 @@ impl FieldRules {
         self
     }
 
-    /// Custom predicate — returns `true` when the value is valid.
     pub fn custom(
         mut self,
         check: impl Fn(&str) -> bool + Send + Sync + 'static,
@@ -229,14 +227,9 @@ fn is_plausible_email(value: &str) -> bool {
 }
 
 /// A registered set of field rules, built with [`FormSchema::with_field`].
+#[derive(Default)]
 pub struct FormSchema {
     fields: Vec<(String, FieldRules)>,
-}
-
-impl Default for FormSchema {
-    fn default() -> Self {
-        Self { fields: Vec::new() }
-    }
 }
 
 impl FormSchema {

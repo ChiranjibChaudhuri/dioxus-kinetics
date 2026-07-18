@@ -27,10 +27,12 @@ use crate::previews::{
         stepper_preview,
     },
     new_families::{
-        answer_panel_preview, area_chart_preview, form_preview, funnel_chart_preview,
-        gauge_chart_preview, heatmap_preview, liquid_glass_preview, password_strength_preview,
-        pricing_table_preview, sign_in_card_preview, tag_input_preview, treemap_preview,
-        usage_meter_preview,
+        answer_panel_preview, area_chart_preview, attachment_preview, dropzone_preview,
+        file_input_preview, form_preview, funnel_chart_preview, gauge_chart_preview,
+        heatmap_preview, invoice_list_preview, liquid_glass_preview, mfa_code_preview,
+        oauth_button_preview, password_strength_preview, pricing_table_preview,
+        sign_in_card_preview, tag_input_preview, treemap_preview, usage_meter_preview,
+        virtualized_table_preview,
     },
     shared::{shared_element_preview, shared_layout_preview},
     surfaces::{glass_surface_preview, metric_card_preview, surface_preview},
@@ -187,7 +189,7 @@ pub fn component_docs() -> &'static [ComponentDoc] {
 
 const BASIC_ACCESSIBILITY: &str = "Renders native semantic elements and stable focusable controls.";
 
-const COMPONENT_DOCS: [ComponentDoc; 106] = [
+const COMPONENT_DOCS: [ComponentDoc; 113] = [
     ComponentDoc {
         name: "Button",
         category: ComponentCategory::Actions,
@@ -1142,6 +1144,69 @@ const COMPONENT_DOCS: [ComponentDoc; 106] = [
         snippet: "UsageMeter { label:\"Seats\".into(), used: 9.0, limit: 10.0 }",
         accessibility: "role=\"progressbar\" with aria-valuenow; readout is aria-live=\"polite\".",
         render: Some(usage_meter_preview),
+    },
+    ComponentDoc {
+        name: "FileInput",
+        category: ComponentCategory::Inputs,
+        status: ComponentStatus::Ready,
+        summary: "Native file input with label, help text, and accept/multiple pass-through. Hands AttachedFile selections to on_change.",
+        snippet: "FileInput { id:\"avatar\".into(), label:\"Photo\".into(), accept:\"image/*\".into() }",
+        accessibility: "Labelled native input; help text wired via aria-describedby.",
+        render: Some(file_input_preview),
+    },
+    ComponentDoc {
+        name: "DropZone",
+        category: ComponentCategory::Inputs,
+        status: ComponentStatus::Ready,
+        summary: "Click-or-drop upload region. A visually-hidden native input is the acquisition path; drag over/leave toggles a --dragover affordance.",
+        snippet: "DropZone { id:\"drop\".into(), label:\"Drop files\".into(), hint:\"or click\".into() }",
+        accessibility: "Label-wrapped hidden input keeps the region keyboard-activatable.",
+        render: Some(dropzone_preview),
+    },
+    ComponentDoc {
+        name: "Attachment",
+        category: ComponentCategory::Inputs,
+        status: ComponentStatus::Ready,
+        summary: "Presentational chip for a selected file — name, formatted size, and an optional remove control. Pair with FileInput/DropZone selections.",
+        snippet: "Attachment { name:\"report.pdf\".into(), size_bytes: 2048, on_remove: |_| {} }",
+        accessibility: "Remove control exposes aria-label naming the file.",
+        render: Some(attachment_preview),
+    },
+    ComponentDoc {
+        name: "VirtualizedDataTable",
+        category: ComponentCategory::DataWorkflows,
+        status: ComponentStatus::Ready,
+        summary: "Windowed DataTable — renders only the rows in the scroll window plus overscan, with top/bottom spacers so the scrollbar reflects the true count. Controlled via scroll_top + pure visible_window.",
+        snippet: "VirtualizedDataTable { columns, rows, row_height: 40.0, viewport_height: 320.0, scroll_top: scroll }",
+        accessibility: "Native table semantics with a sticky header; sort headers carry aria-sort.",
+        render: Some(virtualized_table_preview),
+    },
+    ComponentDoc {
+        name: "OAuthButton",
+        category: ComponentCategory::Auth,
+        status: ComponentStatus::Ready,
+        summary: "Provider-styled social-auth button (Google / GitHub / Apple / Microsoft / Generic) with an accessible continue-with label.",
+        snippet: "OAuthButton { provider: OAuthProvider::Github, onclick: |_| {} }",
+        accessibility: "aria-label names the provider and the continue-with action.",
+        render: Some(oauth_button_preview),
+    },
+    ComponentDoc {
+        name: "MfaCodeInput",
+        category: ComponentCategory::Auth,
+        status: ComponentStatus::Ready,
+        summary: "N-digit one-time-code input (default 6). Each digit is its own single-character input; the full code round-trips through on_change.",
+        snippet: "MfaCodeInput { value: \"123456\".into(), on_change: |_| {} }",
+        accessibility: "Fieldset legend + per-digit aria-label (\"Digit N\"); numeric inputmode.",
+        render: Some(mfa_code_preview),
+    },
+    ComponentDoc {
+        name: "InvoiceList",
+        category: ComponentCategory::Billing,
+        status: ComponentStatus::Ready,
+        summary: "A compact list of invoices with a tone-graded status badge per row (Paid / Due / Overdue / Draft).",
+        snippet: "InvoiceList { invoices }",
+        accessibility: "Semantic list; the status text is the accessible name (no colour-only encoding).",
+        render: Some(invoice_list_preview),
     },
 ];
 

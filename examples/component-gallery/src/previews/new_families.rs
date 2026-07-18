@@ -247,3 +247,128 @@ pub fn usage_meter_preview() -> Element {
         }
     }
 }
+
+// ---------------------------------------------------------------------------
+// File upload
+// ---------------------------------------------------------------------------
+
+pub fn file_input_preview() -> Element {
+    rsx! {
+        div { class: "gallery-variant-tile",
+            span { class: "gallery-variant-label", "FileInput" }
+            FileInput {
+                id: "avatar".to_string(),
+                label: "Profile photo".to_string(),
+                accept: "image/*".to_string(),
+                help_text: "PNG or JPG".to_string(),
+            }
+        }
+    }
+}
+
+pub fn dropzone_preview() -> Element {
+    rsx! {
+        div { class: "gallery-variant-tile",
+            span { class: "gallery-variant-label", "DropZone / UploadZone" }
+            DropZone {
+                id: "drop".to_string(),
+                label: "Drop files here".to_string(),
+                hint: "or click to browse".to_string(),
+                accept: ".csv".to_string(),
+                multiple: true,
+            }
+        }
+    }
+}
+
+pub fn attachment_preview() -> Element {
+    rsx! {
+        div { class: "gallery-variant-tile",
+            span { class: "gallery-variant-label", "Attachment / FileChip" }
+            div { style: "display:flex; flex-wrap:wrap; gap:8px;",
+                Attachment { name: "report.pdf".to_string(), size_bytes: 2048, on_remove: |_| {} }
+                Attachment { name: "slides.pptx".to_string(), size_bytes: 1_500_000 }
+                Attachment { name: "data.csv".to_string(), size_bytes: 440 }
+            }
+        }
+    }
+}
+
+// ---------------------------------------------------------------------------
+// Data workflows
+// ---------------------------------------------------------------------------
+
+pub fn virtualized_table_preview() -> Element {
+    let rows: Vec<DataTableRow> = (0..40)
+        .map(|i| {
+            DataTableRow::new(
+                i.to_string(),
+                vec![format!("Row {i}"), format!("${}k", i * 3)],
+            )
+        })
+        .collect();
+    rsx! {
+        div { class: "gallery-variant-tile",
+            span { class: "gallery-variant-label", "VirtualizedDataTable \u{2014} windowed rows" }
+            VirtualizedDataTable {
+                columns: vec![
+                    DataTableColumn::new("id", "ID"),
+                    DataTableColumn::new("rev", "Revenue").sortable(),
+                ],
+                rows,
+                row_height: 36.0,
+                viewport_height: 220.0,
+                scroll_top: 0.0,
+            }
+        }
+    }
+}
+
+// ---------------------------------------------------------------------------
+// Auth (continued)
+// ---------------------------------------------------------------------------
+
+pub fn oauth_button_preview() -> Element {
+    rsx! {
+        div { class: "gallery-variant-grid gallery-variant-grid--stack",
+            div { class: "gallery-variant-tile",
+                span { class: "gallery-variant-label", "OAuth buttons" }
+                div { style: "display:flex; flex-direction:column; gap:10px; align-items:flex-start;",
+                    OAuthButton { provider: OAuthProvider::Google }
+                    OAuthButton { provider: OAuthProvider::Github }
+                    OAuthButton { provider: OAuthProvider::Apple }
+                    OAuthButton { provider: OAuthProvider::Microsoft }
+                }
+            }
+        }
+    }
+}
+
+pub fn mfa_code_preview() -> Element {
+    rsx! {
+        div { class: "gallery-variant-tile",
+            span { class: "gallery-variant-label", "MfaCodeInput / CodeInput" }
+            MfaCodeInput { value: "123456".to_string() }
+        }
+    }
+}
+
+// ---------------------------------------------------------------------------
+// Billing (continued)
+// ---------------------------------------------------------------------------
+
+pub fn invoice_list_preview() -> Element {
+    rsx! {
+        div { class: "gallery-variant-tile",
+            span { class: "gallery-variant-label", "InvoiceList / BillingHistory" }
+            InvoiceList {
+                invoices: vec![
+                    Invoice::new("INV-1042", "2026-03-01", "$29.00", InvoiceStatus::Paid),
+                    Invoice::new("INV-1041", "2026-02-01", "$29.00", InvoiceStatus::Paid),
+                    Invoice::new("INV-1040", "2026-01-01", "$29.00", InvoiceStatus::Overdue),
+                    Invoice::new("INV-1039", "2025-12-01", "$29.00", InvoiceStatus::Due),
+                ],
+            }
+        }
+    }
+}

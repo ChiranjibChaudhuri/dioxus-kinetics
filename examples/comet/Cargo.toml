@@ -1,0 +1,25 @@
+[package]
+name = "comet"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[dependencies]
+dioxus.workspace = true
+kinetics.workspace = true
+ui-styles.workspace = true
+ui-glass.workspace = true
+
+[features]
+web = ["dioxus/web"]
+
+[target.'cfg(target_arch = "wasm32")'.dependencies]
+web-sys = { version = "0.3", features = ["Window"] }
+
+[lib]
+path = "src/lib.rs"
+
+[[bin]]
+name = "comet"
+path = "src/main.rs"

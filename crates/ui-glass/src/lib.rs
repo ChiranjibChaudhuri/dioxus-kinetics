@@ -559,6 +559,38 @@ impl LiquidMaterial {
             .radius(10.0)
             .thickness(1.0)
     }
+
+    /// Apple "Liquid Glass" (2025) aesthetic — a thick, edge-lit lens:
+    /// strong refraction at the rim, a bright overhead specular, a soft
+    /// inner shadow for depth, and adaptive background tint so the surface
+    /// picks up the content behind it. Pair with the `LiquidGlass`
+    /// component's CSS fallback for a tier-consistent look.
+    pub fn apple_liquid() -> Self {
+        Self::new()
+            .blur(28.0)
+            .saturation(1.7)
+            .tint(Color::rgba(255, 255, 255, 1.0), 0.42)
+            .refract(0.42)
+            .disperse(1.5)
+            .specular(-core::f32::consts::FRAC_PI_2, 0.85)
+            .inner_shadow(5.0, 0.16)
+            .edge_falloff(3.0)
+            .surface_curvature(0.6)
+            .adapt_to_background(0.5)
+            .radius(22.0)
+            .thickness(2.0)
+    }
+
+    /// Lighter inline variant of [`Self::apple_liquid`] for pills, chips,
+    /// and tab-bar segments — less blur, gentler lens, tighter radius.
+    pub fn apple_lens() -> Self {
+        Self::apple_liquid()
+            .blur(18.0)
+            .refract(0.28)
+            .inner_shadow(3.0, 0.12)
+            .radius(999.0)
+            .thickness(1.5)
+    }
 }
 
 impl Default for LiquidMaterial {
@@ -647,5 +679,41 @@ impl From<MaterialRequest> for LiquidMaterial {
         }
 
         m
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn apple_liquid_engages_lens_features() {
+        let m = LiquidMaterial::apple_liquid();
+        assert!(m.features.contains(GlassFeatures::REFRACT));
+        assert!(m.features.contains(GlassFeatures::SPECULAR));
+        assert!(m.features.contains(GlassFeatures::INNER_SHADOW));
+        assert!(m.features.contains(GlassFeatures::TINT_ADAPT));
+        assert!(m.refraction_strength > 0.0);
+        assert!(m.light_intensity > 0.0);
+        // Overhead light: angle is -pi/2.
+        assert!((m.light_angle_rad - (-core::f32::consts::FRAC_PI_2)).abs() < 1e-6);
+    }
+
+    #[test]
+    fn apple_lens_is_a_pill_variant_of_apple_liquid() {
+        let lens = LiquidMaterial::apple_lens();
+        // Tighter than the base liquid preset.
+        assert!(lens.blur_radius_px < LiquidMaterial::apple_liquid().blur_radius_px);
+        assert!((lens.radius_px - 999.0).abs() < 1e-6);
+        // Still a lens.
+        assert!(lens.features.contains(GlassFeatures::REFRACT));
+    }
+
+    #[test]
+    fn preset_builder_round_trip() {
+        // Presets should keep their tint opaque-white by default.
+        let m = LiquidMaterial::apple_liquid();
+        assert!(m.tint_alpha > 0.0);
+        assert!(m.blur_radius_px > 0.0);
     }
 }

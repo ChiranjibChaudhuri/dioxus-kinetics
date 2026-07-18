@@ -26,18 +26,24 @@ stable — see `docs/component-naming.md`. The newest addition is a dedicated
 prompt composers, and agent surfaces for AI-native products.
 
 - **Foundations & actions** — `Button`, `IconButton`, `CommandMenu`, `Toolbar`, `DropdownMenu`, `Heading`, `Text`
-- **Inputs** — `TextField`, `Checkbox`, `Switch`, `Select`, `Combobox`, `DatePicker`, `RadioGroup`, `Slider`, `SegmentedControl`
+- **Inputs** — `TextField`, `Checkbox`, `Switch`, `Select`, `Combobox`, `DatePicker`, `RadioGroup`, `Slider`, `SegmentedControl`, `TagInput` / `ChipInput`
+- **Forms** — `Form` / `EntryForm` with an accessible error summary, plus a renderer-neutral `FormSchema` / `FieldRules` / `validate` engine (required, length, numeric, email, cross-field `matches`, custom) and a `use_form_error` context hook
+- **File upload** — `FileInput` / `FilePicker`, click-or-drop `DropZone` / `UploadZone`, `Attachment` / `FileChip`, `format_bytes`
 - **Navigation** — `Breadcrumb`, `Stepper`
-- **Layout & surfaces** — `Stack`, `Tabs`, `Sidebar`, `Accordion`, `Surface`, `GlassSurface`, `MetricCard`, `Badge`, `Avatar`
-- **AI-native surfaces** — `StreamingText`, `AiStatus`, `CitationChip`, `SourceCard`, `SourceRail`, `PromptInput`, `AssistantPanel`, `AgentTimeline`, `Waveform`, `VoiceInput`
+- **Layout & surfaces** — `Stack`, `Tabs`, `Sidebar`, `Accordion`, `Surface`, `GlassSurface`, `MetricCard`, `Badge`, `Avatar`, `LiquidGlass` (Apple "Liquid Glass" CSS recipe + the `apple_liquid` / `apple_lens` WGSL presets)
+- **AI-native surfaces** — `StreamingText`, `AiStatus`, `CitationChip`, `SourceCard`, `SourceRail`, `PromptInput`, `AssistantPanel`, `AgentTimeline`, `Waveform`, `VoiceInput`, `AnswerPanel` (+ `AnswerSource`, `RelatedQuestions`) — a Perplexity-style answer surface
 - **Feedback & overlays** — `Dialog`, `Sheet`, `Popover`, `Tooltip`, `Toast`, `Toaster`, `Alert`, `Progress`, `Skeleton`, `Spinner`, `EmptyState`
 - **Guidance** — `Tour` (+ `TourStep`), `Spotlight`
-- **Data workflows** — `DataTable`, `Pagination`
-- **Charts** — `Sparkline`, `LineChart`, `BarChart`, `DonutGauge` (shared `ChartSeries` / `ChartTone` vocabulary; SR data-table mirrors; deterministic `progress` override for capture)
+- **Data workflows** — `DataTable`, `Pagination`, `VirtualizedDataTable` / `WindowedDataTable` (+ pure `visible_window`)
+- **Charts** — `Sparkline`, `LineChart`, `BarChart`, `DonutGauge`, `AreaChart`, `FunnelChart` (+ `FunnelStage`), `GaugeChart` (semicircle), `Heatmap` (+ `HeatmapRow`), `Treemap` (+ `TreemapItem`) (shared `ChartSeries` / `ChartTone` vocabulary; SR data-table mirrors; deterministic `progress` override for capture)
+- **Auth** — `SignInCard` / `AuthCard`, `OAuthButton` (+ `OAuthProvider`), `PasswordStrengthMeter` (+ pure `password_strength`), `MfaCodeInput` / `CodeInput`
+- **Billing & plans** — `PricingTable` / `PlanPicker`, `PlanCard` / `PlanTile` (+ `PricingPlan`), `UsageMeter` / `QuotaBar` (+ pure `usage_fraction` / `usage_tone`), `InvoiceList` / `BillingHistory` (+ `Invoice` / `InvoiceStatus`)
 - **Sortable surfaces** — `SortableList`, `KanbanBoard` (+ `apply_kanban_move`; full keyboard grab-move-drop with live-region announcements)
 - **Motion** — `Presence`, `PresenceGate`, `Sequence`, `TimelineScope`, `KineticBox`, `KineticText`, `SharedLayout`, `SharedElement`, `SplitText`, `MotionPath`
 - **Scene & composition** — `Scene`, `Clip` (current); `FrameStage` / `FrameClip` / `FrameLayer` (legacy deprecation shims)
 - **Capture** — `CaptureStage`
+- **Token studio** — `export_tokens_css(Theme)` + the `kinetics tokens --mode light|dark` CLI (re-skin every surface by injecting one stylesheet)
+- **Render-to-video** — `kinetics render --scene <hello|product-intro|report|showreel> --capture-png --encode-mp4` (self-contained HTML frames → PNG via Playwright → H.264 via FFmpeg)
 - **Cinematic blocks** (`ui-blocks`, behind the default `blocks` feature) — `LowerThird`, `Caption`, `WipeTransition`, `MetricCounter`, `SocialOverlay`
 - **Learning** (`ui-learn`, behind the default `learn` feature) — `CourseOutline`, `CourseProgressCard`, `ResumeLearning`, `QuestionCard` (5 question shapes + pure `grade_answer`), `QuizResults`, `QuizTimer`, `FlipCard` / `FlashcardDeck` (+ SM-2-lite `next_review` scheduler), `XpBar`, `StreakBadge`, `AchievementUnlock`, `Leaderboard`, `CertificateCard` (export-ready via kinetics-render)
 
@@ -83,6 +89,10 @@ examples/
   flagship/         self-referential marketing page (full-bleed,
                     composed entirely from existing scenes and
                     components — no documentation chrome)
+  showreel/         5-second cinematic showreel (live app + renderable
+                    `showreel` scene → MP4 via kinetics-render)
+  comet/            Perplexity-Comet-style "agentic browser" landing
+                    (dark, teal, LiquidGlass browser mockup)
 docs/
   component-naming.md
   glass-materials.md

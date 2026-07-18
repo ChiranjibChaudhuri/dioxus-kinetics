@@ -18,6 +18,7 @@ mod form;
 mod forms;
 mod kinetics;
 mod layout;
+mod liquid_glass;
 mod motion_path;
 mod navigation;
 mod overlays;
@@ -61,6 +62,7 @@ pub use ai::{
     AssistantSide, CitationChip, PromptInput, SourceCard, SourceRail, StreamingText, VoiceInput,
     VoiceInputState, Waveform,
 };
+pub use ai::{AnswerPanel, AnswerSource, RelatedQuestions};
 pub use auth::{
     password_strength, MfaCodeInput, OAuthButton, OAuthProvider, PasswordStrength,
     PasswordStrengthMeter, SignInCard,
@@ -119,6 +121,7 @@ pub use kinetics::{
     TimelineScope,
 };
 pub use layout::{SharedElement, SharedLayout};
+pub use liquid_glass::LiquidGlass;
 pub use motion_path::MotionPath;
 pub use navigation::{
     Breadcrumb, BreadcrumbItem, Pagination, SegmentItem, SegmentedControl, Sidebar, SidebarItem,

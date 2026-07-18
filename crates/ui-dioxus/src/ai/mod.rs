@@ -8,6 +8,7 @@
 //! `prefers-reduced-motion`.
 
 mod agent_timeline;
+mod answer_panel;
 mod assistant_panel;
 mod citation;
 mod prompt_input;
@@ -17,6 +18,7 @@ mod streaming_text;
 mod voice;
 
 pub use agent_timeline::*;
+pub use answer_panel::*;
 pub use assistant_panel::*;
 pub use citation::*;
 pub use prompt_input::*;

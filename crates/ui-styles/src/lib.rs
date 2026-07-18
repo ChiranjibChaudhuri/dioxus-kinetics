@@ -924,6 +924,136 @@ pub const COMPONENT_CSS: &str = r#"
 .ui-invoice-status--overdue { background: color-mix(in srgb, var(--ui-danger) 16%, transparent); color: var(--ui-danger); }
 .ui-invoice-status--draft { background: var(--ui-surface-muted); color: var(--ui-muted-fg); }
 
+/* Liquid Glass (Apple-style) -------------------------------------------- */
+/* A CSS twin of ui_glass::LiquidMaterial::apple_liquid. Layered backdrop
+   blur + saturation, a bright overhead specular, a soft inner shadow, and
+   a luminous rim — so the look holds on the SVG/solid tiers and in
+   frame-by-frame video capture where the WebGPU engine cannot run. */
+
+.ui-liquid-glass {
+    position: relative;
+    isolation: isolate;
+    border-radius: 22px;
+    background:
+        linear-gradient(135deg, rgba(255, 255, 255, 0.55) 0%, rgba(255, 255, 255, 0.28) 100%);
+    border: 1px solid rgba(255, 255, 255, 0.6);
+    backdrop-filter: blur(28px) saturate(1.8);
+    -webkit-backdrop-filter: blur(28px) saturate(1.8);
+    box-shadow:
+        inset 0 1px 1px rgba(255, 255, 255, 0.9),
+        inset 0 -10px 16px rgba(0, 0, 0, 0.06),
+        inset 0 0 0 1px rgba(255, 255, 255, 0.18),
+        0 22px 48px rgba(13, 20, 32, 0.18);
+    overflow: hidden;
+}
+
+/* Overhead specular highlight + lens refraction at the rim. */
+.ui-liquid-glass::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background:
+        radial-gradient(130% 90% at 30% -25%, rgba(255, 255, 255, 0.7), transparent 60%),
+        radial-gradient(100% 60% at 50% 120%, rgba(255, 255, 255, 0.18), transparent 70%);
+    pointer-events: none;
+}
+
+.ui-liquid-glass--primary { border-color: rgba(0, 122, 255, 0.4); }
+.ui-liquid-glass--success { border-color: rgba(26, 107, 46, 0.4); }
+.ui-liquid-glass--warning { border-color: rgba(154, 88, 0, 0.4); }
+.ui-liquid-glass--danger  { border-color: rgba(196, 43, 43, 0.4); }
+.ui-liquid-glass--info    { border-color: rgba(15, 99, 163, 0.4); }
+
+[data-ui-theme="dark"] .ui-liquid-glass {
+    background: linear-gradient(135deg, rgba(40, 48, 62, 0.55), rgba(25, 32, 43, 0.4));
+    border-color: rgba(255, 255, 255, 0.18);
+}
+
+/* Forced solid fallback when the host opts out of translucency. */
+[data-ui-glass-policy="solid"] .ui-liquid-glass {
+    background: var(--ui-glass-solid);
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+}
+[data-ui-glass-policy="solid"] .ui-liquid-glass::before { display: none; }
+
+/* Perplexity-style answer panel ----------------------------------------- */
+
+.ui-answer-panel {
+    display: flex;
+    flex-direction: column;
+    gap: var(--ui-space-5);
+}
+
+.ui-answer-query {
+    margin: 0;
+    font-size: var(--ui-text-title1);
+    line-height: var(--ui-leading-title1);
+    font-weight: var(--ui-weight-bold);
+    letter-spacing: var(--ui-tracking-title1);
+}
+
+.ui-answer-section-label {
+    margin: 0 0 var(--ui-space-3);
+    font-size: var(--ui-text-caption);
+    font-weight: var(--ui-weight-semibold);
+    color: var(--ui-muted-fg);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+}
+
+.ui-answer-body {
+    font-size: var(--ui-text-body);
+    line-height: var(--ui-leading-body);
+}
+
+.ui-answer-citations {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--ui-space-1);
+    margin-top: var(--ui-space-3);
+}
+
+.ui-related-questions {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: var(--ui-space-2);
+}
+
+.ui-related-question {
+    display: flex;
+    align-items: center;
+    gap: var(--ui-space-3);
+    width: 100%;
+    padding: var(--ui-space-3) var(--ui-space-4);
+    border: 1px solid var(--ui-border);
+    border-radius: var(--ui-radius-md);
+    background: var(--ui-surface);
+    color: var(--ui-fg);
+    font-size: var(--ui-text-subhead);
+    text-align: left;
+    cursor: pointer;
+}
+
+.ui-related-question:hover {
+    background: var(--ui-surface-muted);
+}
+
+.ui-related-question-plus {
+    display: inline-grid;
+    place-items: center;
+    width: 22px;
+    height: 22px;
+    border-radius: var(--ui-radius-full);
+    background: var(--ui-surface-muted);
+    color: var(--ui-muted-fg);
+    font-weight: var(--ui-weight-bold);
+}
+
 .ui-text-field,
 .ui-checkbox,
 .ui-switch,

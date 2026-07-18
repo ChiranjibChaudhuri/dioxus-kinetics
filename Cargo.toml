@@ -23,6 +23,7 @@ members = [
     "examples/component-gallery",
     "examples/flagship",
     "examples/showreel",
+    "examples/comet",
     "crates/ui-glass-engine",
     "crates/ui-glass-dioxus",
 ]

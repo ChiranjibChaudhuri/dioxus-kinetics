@@ -26,6 +26,12 @@ use crate::previews::{
         breadcrumb_preview, pagination_preview, segmented_control_preview, sidebar_preview,
         stepper_preview,
     },
+    new_families::{
+        answer_panel_preview, area_chart_preview, form_preview, funnel_chart_preview,
+        gauge_chart_preview, heatmap_preview, liquid_glass_preview, password_strength_preview,
+        pricing_table_preview, sign_in_card_preview, tag_input_preview, treemap_preview,
+        usage_meter_preview,
+    },
     shared::{shared_element_preview, shared_layout_preview},
     surfaces::{glass_surface_preview, metric_card_preview, surface_preview},
 };
@@ -35,17 +41,20 @@ pub enum ComponentCategory {
     Foundations,
     Actions,
     Inputs,
+    Forms,
     Navigation,
     Layout,
     Surfaces,
+    AiNative,
     Feedback,
     DataWorkflows,
+    Auth,
+    Billing,
     Learning,
     Motion,
     Composition,
     Capture,
     Scene,
-    AiNative,
 }
 
 impl ComponentCategory {
@@ -54,17 +63,20 @@ impl ComponentCategory {
             Self::Foundations => "Foundations",
             Self::Actions => "Actions",
             Self::Inputs => "Inputs",
+            Self::Forms => "Forms",
             Self::Navigation => "Navigation",
             Self::Layout => "Layout",
             Self::Surfaces => "Surfaces",
+            Self::AiNative => "AI",
             Self::Feedback => "Feedback",
             Self::DataWorkflows => "Data workflows",
+            Self::Auth => "Auth",
+            Self::Billing => "Billing & plans",
             Self::Learning => "Learning",
             Self::Motion => "Motion",
             Self::Composition => "Composition",
             Self::Capture => "Capture",
             Self::Scene => "Scene",
-            Self::AiNative => "AI",
         }
     }
 
@@ -73,11 +85,17 @@ impl ComponentCategory {
             Self::Foundations => "Material and surface primitives that anchor the visual system.",
             Self::Actions => "Command controls that trigger a product action.",
             Self::Inputs => "Controls that collect user-entered data.",
+            Self::Forms => "Form orchestration: schema-driven validation, error summaries, and field binding.",
             Self::Navigation => "Wayfinding controls that move between product regions.",
             Self::Layout => "Structure primitives for arranging interface regions.",
             Self::Surfaces => "Containers that define visual layers and material treatment.",
+            Self::AiNative => {
+                "Streaming answers, citations, source rails, prompt composers, and agent surfaces for AI-native products."
+            }
             Self::Feedback => "Overlays and messages that respond to user or system state.",
             Self::DataWorkflows => "Readouts and surfaces that summarize product data.",
+            Self::Auth => "Sign-in, social auth, MFA, and password-strength surfaces.",
+            Self::Billing => "Pricing, plans, usage meters, and invoice surfaces.",
             Self::Learning => {
                 "Course structure, assessment, practice, and recognition surfaces for learning products."
             }
@@ -89,9 +107,6 @@ impl ComponentCategory {
             Self::Scene => {
                 "Seekable cinematic compositions: one paused clock drives every animation runtime."
             }
-            Self::AiNative => {
-                "Streaming answers, citations, source rails, prompt composers, and agent surfaces for AI-native products."
-            }
         }
     }
 
@@ -100,17 +115,20 @@ impl ComponentCategory {
             Self::Foundations => "foundations",
             Self::Actions => "actions",
             Self::Inputs => "inputs",
+            Self::Forms => "forms",
             Self::Navigation => "navigation",
             Self::Layout => "layout",
             Self::Surfaces => "surfaces",
+            Self::AiNative => "ai",
             Self::Feedback => "feedback",
             Self::DataWorkflows => "data-workflows",
+            Self::Auth => "auth",
+            Self::Billing => "billing",
             Self::Learning => "learning",
             Self::Motion => "motion",
             Self::Composition => "composition",
             Self::Capture => "capture",
             Self::Scene => "scene",
-            Self::AiNative => "ai",
         }
     }
 }
@@ -146,12 +164,15 @@ pub fn categories() -> &'static [ComponentCategory] {
         ComponentCategory::Foundations,
         ComponentCategory::Actions,
         ComponentCategory::Inputs,
+        ComponentCategory::Forms,
         ComponentCategory::Navigation,
         ComponentCategory::Layout,
         ComponentCategory::Surfaces,
         ComponentCategory::AiNative,
         ComponentCategory::Feedback,
         ComponentCategory::DataWorkflows,
+        ComponentCategory::Auth,
+        ComponentCategory::Billing,
         ComponentCategory::Learning,
         ComponentCategory::Motion,
         ComponentCategory::Composition,
@@ -166,7 +187,7 @@ pub fn component_docs() -> &'static [ComponentDoc] {
 
 const BASIC_ACCESSIBILITY: &str = "Renders native semantic elements and stable focusable controls.";
 
-const COMPONENT_DOCS: [ComponentDoc; 93] = [
+const COMPONENT_DOCS: [ComponentDoc; 106] = [
     ComponentDoc {
         name: "Button",
         category: ComponentCategory::Actions,
@@ -1004,6 +1025,123 @@ const COMPONENT_DOCS: [ComponentDoc; 93] = [
         snippet: CERTIFICATE_CARD_SNIPPET,
         accessibility: "Exposed as a single labelled role=\"img\" naming recipient, course, date, and issuer, since the certificate is one semantic artifact.",
         render: Some(crate::previews::learning::certificate_card_preview),
+    },
+    ComponentDoc {
+        name: "LiquidGlass",
+        category: ComponentCategory::Surfaces,
+        status: ComponentStatus::Ready,
+        summary: "Apple \"Liquid Glass\" surface — a thick, edge-lit lens via layered backdrop blur, overhead specular, rim light, and inner shadow. The CSS twin of the apple_liquid WGSL recipe.",
+        snippet: "LiquidGlass { tone: GlassTone::Neutral, \"Content\" }",
+        accessibility: "A plain semantic container; inner content carries its own semantics.",
+        render: Some(liquid_glass_preview),
+    },
+    ComponentDoc {
+        name: "Form",
+        category: ComponentCategory::Forms,
+        status: ComponentStatus::Ready,
+        summary: "A <form> wrapper that prevents default submit, surfaces an accessible role=\"alert\" error summary, and publishes field errors through context (use_form_error).",
+        snippet: "Form { errors: Some(errors), on_submit: |_| {}, TextField{id:\"email\".into(), label:\"Email\".into()} }",
+        accessibility: "Error summary is role=\"alert\" with per-field data attributes; fields bind errors via use_form_error.",
+        render: Some(form_preview),
+    },
+    ComponentDoc {
+        name: "TagInput",
+        category: ComponentCategory::Inputs,
+        status: ComponentStatus::Ready,
+        summary: "Chip multi-value editor: Enter adds, Backspace on empty removes the trailing tag, dedupe + optional max cap. Controlled via on_change.",
+        snippet: "TagInput { id:\"skills\".into(), label:\"Skills\".into(), tags: vec![\"Rust\".into()], on_change: |_| {} }",
+        accessibility: "Native text input with labelled fieldset; remove controls expose aria-label per tag.",
+        render: Some(tag_input_preview),
+    },
+    ComponentDoc {
+        name: "AnswerPanel",
+        category: ComponentCategory::AiNative,
+        status: ComponentStatus::Ready,
+        summary: "Perplexity-style answer surface: query heading, numbered sources rail, streaming answer body with citation chips, and a Related follow-up list.",
+        snippet: "AnswerPanel { query:\"What is X?\".into(), answer:\"...\".into(), sources, related }",
+        accessibility: "Answer body is a live region; sources and citations are labelled; related questions are real buttons.",
+        render: Some(answer_panel_preview),
+    },
+    ComponentDoc {
+        name: "AreaChart",
+        category: ComponentCategory::DataWorkflows,
+        status: ComponentStatus::Ready,
+        summary: "Multi-series area chart — always fills the region under each series and draws the line on top. Shared nice-number grid, SR data table, and progress override.",
+        snippet: "AreaChart { label:\"Revenue\".into(), series, x_labels, progress: Some(0.5) }",
+        accessibility: "Named role=\"img\" SVG plus a visually-hidden data table; draw-in is stilled under reduced motion.",
+        render: Some(area_chart_preview),
+    },
+    ComponentDoc {
+        name: "FunnelChart",
+        category: ComponentCategory::DataWorkflows,
+        status: ComponentStatus::Ready,
+        summary: "Conversion funnel of centered, narrowing stages with per-stage label + value. progress (0..1) scales every stage's width for deterministic capture.",
+        snippet: "FunnelChart { label:\"Signup\".into(), stages, progress: Some(1.0) }",
+        accessibility: "Named role=\"img\" SVG plus a visually-hidden stage/value table.",
+        render: Some(funnel_chart_preview),
+    },
+    ComponentDoc {
+        name: "GaugeChart",
+        category: ComponentCategory::DataWorkflows,
+        status: ComponentStatus::Ready,
+        summary: "Semicircle (180°) gauge sweeping 9-to-3 over the top — a speedometer-style meter distinct from the full-ring DonutGauge.",
+        snippet: "GaugeChart { label:\"CPU\".into(), value: 0.62, tone: ChartTone::Success }",
+        accessibility: "role=\"meter\" with aria-valuenow/valuemax/valuetext naming the percentage.",
+        render: Some(gauge_chart_preview),
+    },
+    ComponentDoc {
+        name: "Heatmap",
+        category: ComponentCategory::DataWorkflows,
+        status: ComponentStatus::Ready,
+        summary: "Grid of cells coloured by value intensity against the data range; row/column labels and an SR matrix mirror.",
+        snippet: "Heatmap { label:\"Engagement\".into(), rows, column_labels }",
+        accessibility: "Named role=\"img\" SVG plus a visually-hidden matrix table.",
+        render: Some(heatmap_preview),
+    },
+    ComponentDoc {
+        name: "Treemap",
+        category: ComponentCategory::DataWorkflows,
+        status: ComponentStatus::Ready,
+        summary: "Proportional tiles sized by value (horizontal slice-and-dice) with per-tile label + share; progress scales tile heights for capture.",
+        snippet: "Treemap { label:\"Budget\".into(), items, progress: Some(1.0) }",
+        accessibility: "Named role=\"img\" SVG plus a visually-hidden item/value table.",
+        render: Some(treemap_preview),
+    },
+    ComponentDoc {
+        name: "SignInCard",
+        category: ComponentCategory::Auth,
+        status: ComponentStatus::Ready,
+        summary: "Layout card for a sign-in / sign-up form: titled surface with a body slot for fields and OAuth buttons.",
+        snippet: "SignInCard { title:\"Welcome back\".into(), TextField{id:\"email\".into(), label:\"Email\".into()} }",
+        accessibility: "Semantic section + heading; inner fields carry their own labels and semantics.",
+        render: Some(sign_in_card_preview),
+    },
+    ComponentDoc {
+        name: "PasswordStrengthMeter",
+        category: ComponentCategory::Auth,
+        status: ComponentStatus::Ready,
+        summary: "Four-bar strength meter driven by the pure password_strength scorer (length, mixed case, digits, symbols). Live region announces the level.",
+        snippet: "PasswordStrengthMeter { password: pw.to_string(), show_label: true }",
+        accessibility: "Level text is aria-live=\"polite\"; bars are aria-hidden decoration.",
+        render: Some(password_strength_preview),
+    },
+    ComponentDoc {
+        name: "PricingTable",
+        category: ComponentCategory::Billing,
+        status: ComponentStatus::Ready,
+        summary: "A row of plan cards built from PricingPlan (price, period, features, featured, CTA). Emits the selected plan name via on_select.",
+        snippet: "PricingTable { plans, on_select: |_| {} }",
+        accessibility: "Each plan CTA is a labelled button; featured plan is marked for emphasis.",
+        render: Some(pricing_table_preview),
+    },
+    ComponentDoc {
+        name: "UsageMeter",
+        category: ComponentCategory::Billing,
+        status: ComponentStatus::Ready,
+        summary: "A labelled usage bar (used of limit) whose tone escalates Normal → Warning → Critical near the cap. Pure usage_fraction / usage_tone helpers.",
+        snippet: "UsageMeter { label:\"Seats\".into(), used: 9.0, limit: 10.0 }",
+        accessibility: "role=\"progressbar\" with aria-valuenow; readout is aria-live=\"polite\".",
+        render: Some(usage_meter_preview),
     },
 ];
 

@@ -12,6 +12,7 @@ pub mod learning;
 pub mod liquid_glass;
 pub mod motion;
 pub mod navigation;
+pub mod new_families;
 pub mod scene;
 pub mod scenes;
 pub mod shared;

@@ -12,7 +12,7 @@ pub fn run() -> Result<(), String> {
     report_tool("ffmpeg", &["-version"]);
     println!();
     println!("(missing optional tools are not errors; install them to unlock");
-    println!("`kinetics render --capture-png` and `--encode-mp4`.)");
+    println!("`kinetics render --capture-png`, `--encode-mp4`, and `--capture-pdf`.)");
     Ok(())
 }
 

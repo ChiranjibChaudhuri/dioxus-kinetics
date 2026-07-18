@@ -54,6 +54,10 @@ enum Commands {
         /// Also encode an MP4 via FFmpeg (requires --capture-png).
         #[arg(long)]
         encode_mp4: bool,
+        /// Export the settled frame to a multi-page-ready PDF via Playwright
+        /// (graceful-skip if absent).
+        #[arg(long)]
+        capture_pdf: bool,
     },
     /// Run fmt + clippy across the workspace.
     Lint,
@@ -81,7 +85,8 @@ fn main() -> ExitCode {
             fps,
             capture_png,
             encode_mp4,
-        } => cmd_render::run(&scene, &out, frames, fps, capture_png, encode_mp4),
+            capture_pdf,
+        } => cmd_render::run(&scene, &out, frames, fps, capture_png, encode_mp4, capture_pdf),
         Commands::Lint => cmd_lint::run(),
         Commands::Doctor => cmd_doctor::run(),
         Commands::Tokens { mode } => cmd_tokens::run(&mode),

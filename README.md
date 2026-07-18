@@ -43,7 +43,7 @@ prompt composers, and agent surfaces for AI-native products.
 - **Scene & composition** — `Scene`, `Clip` (current); `FrameStage` / `FrameClip` / `FrameLayer` (legacy deprecation shims)
 - **Capture** — `CaptureStage`
 - **Token studio** — `export_tokens_css(Theme)` + the `kinetics tokens --mode light|dark` CLI (re-skin every surface by injecting one stylesheet)
-- **Render-to-video** — `kinetics render --scene <hello|product-intro|report|showreel> --capture-png --encode-mp4` (self-contained HTML frames → PNG via Playwright → H.264 via FFmpeg)
+- **Render-to-video** — `kinetics render --scene <hello|product-intro|report|showreel> --capture-png --encode-mp4` (self-contained HTML frames → PNG via Playwright → H.264 via FFmpeg); add `--capture-pdf` for a multi-page-ready PDF of the settled frame via Playwright Chromium
 - **Cinematic blocks** (`ui-blocks`, behind the default `blocks` feature) — `LowerThird`, `Caption`, `WipeTransition`, `MetricCounter`, `SocialOverlay`
 - **Learning** (`ui-learn`, behind the default `learn` feature) — `CourseOutline`, `CourseProgressCard`, `ResumeLearning`, `QuestionCard` (5 question shapes + pure `grade_answer`), `QuizResults`, `QuizTimer`, `FlipCard` / `FlashcardDeck` (+ SM-2-lite `next_review` scheduler), `XpBar`, `StreakBadge`, `AchievementUnlock`, `Leaderboard`, `CertificateCard` (export-ready via kinetics-render)
 

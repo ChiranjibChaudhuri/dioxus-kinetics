@@ -4,6 +4,7 @@
 
 mod capture;
 mod encode;
+mod pdf;
 mod template;
 
 use std::io;
@@ -19,6 +20,7 @@ pub struct RenderConfig {
     pub output_dir: PathBuf,
     pub capture_png: bool,
     pub encode_mp4: bool,
+    pub capture_pdf: bool,
 }
 
 impl RenderConfig {
@@ -72,6 +74,7 @@ pub struct RenderReport {
     pub html_dir: PathBuf,
     pub png_dir: Option<PathBuf>,
     pub mp4_path: Option<PathBuf>,
+    pub pdf_path: Option<PathBuf>,
     pub warnings: Vec<String>,
 }
 
@@ -199,11 +202,23 @@ impl Renderer {
             report_warnings.extend(outcome.warnings);
         }
 
+        let mut pdf_path: Option<PathBuf> = None;
+        if self.config.capture_pdf {
+            let outcome = pdf::run_pdf(
+                &self.config.output_dir,
+                self.config.width,
+                self.config.height,
+            );
+            pdf_path = outcome.pdf_path;
+            report_warnings.extend(outcome.warnings);
+        }
+
         Ok(RenderReport {
             frames_written: self.config.frames,
             html_dir,
             png_dir,
             mp4_path,
+            pdf_path,
             warnings: report_warnings,
         })
     }

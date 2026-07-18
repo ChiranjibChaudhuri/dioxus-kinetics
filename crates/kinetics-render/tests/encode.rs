@@ -36,6 +36,7 @@ fn encode_mp4_with_missing_ffmpeg_returns_warning() {
         output_dir: out.clone(),
         capture_png: true, // requires capture_png to also be true
         encode_mp4: true,
+        capture_pdf: false,
     };
     let renderer = Renderer::new(cfg);
     let report = renderer

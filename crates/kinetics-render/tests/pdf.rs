@@ -11,26 +11,22 @@ fn tmp_output() -> PathBuf {
 }
 
 #[test]
-fn capture_png_with_missing_npx_returns_warning_not_error() {
-    // Simulate npx being unavailable by setting PATH to an empty value.
+fn capture_pdf_with_missing_node_returns_warning_not_error() {
+    // Drive the `node` lookup to fail by clearing PATH (and PATHEXT on
+    // Windows) so Command::spawn returns a "program not found" error.
     let original_path = std::env::var_os("PATH");
-    let isolated_path = if cfg!(windows) {
-        // Windows needs SYSTEM32 to spawn processes at all; clear PATH
-        // and rely on a deliberately-empty PATHEXT to fail the lookup.
+    if cfg!(windows) {
         std::env::set_var("PATH", "");
-        Some("")
     } else {
         std::env::set_var("PATH", "/nonexistent-12345");
-        Some("/nonexistent-12345")
-    };
-    let _path_guard = scopeguard::guard((), |_| {
+    }
+    let _guard = scopeguard::guard((), |_| {
         if let Some(p) = &original_path {
             std::env::set_var("PATH", p);
         } else {
             std::env::remove_var("PATH");
         }
     });
-    let _ = isolated_path;
 
     let out = tmp_output();
     let cfg = RenderConfig {
@@ -38,28 +34,35 @@ fn capture_png_with_missing_npx_returns_warning_not_error() {
         fps: 10,
         width: 100,
         height: 100,
-        composition_id: "capture-skip".into(),
+        composition_id: "pdf-skip".into(),
         output_dir: out.clone(),
-        capture_png: true,
+        capture_png: false,
         encode_mp4: false,
-        capture_pdf: false,
+        capture_pdf: true,
     };
     let renderer = Renderer::new(cfg);
     let report = renderer
         .render(|_clock| rsx! { div { "x" } })
-        .expect("render ok even when capture is skipped");
+        .expect("render ok even when pdf capture is skipped");
 
     assert_eq!(report.frames_written, 2);
     assert!(
-        report.png_dir.is_none(),
-        "expected png_dir to be None when capture is skipped",
+        report.pdf_path.is_none(),
+        "expected pdf_path to be None when node is unavailable",
     );
     assert!(
         report
             .warnings
             .iter()
-            .any(|w| w.to_lowercase().contains("playwright") || w.to_lowercase().contains("npx")),
-        "expected a warning about missing playwright/npx; got {:?}",
+            .any(|w| w.to_lowercase().contains("node") || w.to_lowercase().contains("pdf")),
+        "expected a warning mentioning node/pdf; got {:?}",
         report.warnings,
     );
+
+    // The HTML frames remain the source of truth even when PDF export
+    // is skipped — the orchestrator must not block frame emission.
+    for frame in 0..2 {
+        let path = out.join("frames").join(format!("{frame}.html"));
+        assert!(path.exists(), "frame {frame} should still be written");
+    }
 }

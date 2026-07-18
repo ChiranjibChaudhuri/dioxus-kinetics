@@ -9,6 +9,7 @@ pub fn run(
     fps: u32,
     capture_png: bool,
     encode_mp4: bool,
+    capture_pdf: bool,
 ) -> Result<(), String> {
     let spec = scene_registry::lookup(scene).ok_or_else(|| {
         format!(
@@ -20,5 +21,5 @@ pub fn run(
                 .join(", ")
         )
     })?;
-    scene_registry::run_render(spec, out, frames, fps, capture_png, encode_mp4)
+    scene_registry::run_render(spec, out, frames, fps, capture_png, encode_mp4, capture_pdf)
 }

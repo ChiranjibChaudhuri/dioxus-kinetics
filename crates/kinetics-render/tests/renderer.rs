@@ -11,6 +11,7 @@ fn base_config() -> RenderConfig {
         output_dir: PathBuf::from("/tmp/kinetics-render-test"),
         capture_png: false,
         encode_mp4: false,
+        capture_pdf: false,
     }
 }
 
@@ -76,6 +77,7 @@ fn renders_n_html_files_with_distinct_elapsed_ms() {
         output_dir: out.clone(),
         capture_png: false,
         encode_mp4: false,
+        capture_pdf: false,
     };
     let renderer = Renderer::new(cfg);
     let report = renderer
@@ -112,6 +114,7 @@ fn writes_export_manifest_alongside_frames() {
         output_dir: out.clone(),
         capture_png: false,
         encode_mp4: false,
+        capture_pdf: false,
     };
     let renderer = Renderer::new(cfg);
     renderer

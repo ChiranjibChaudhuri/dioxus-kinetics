@@ -59,6 +59,7 @@ pub fn run_render(
     fps: u32,
     capture_png: bool,
     encode_mp4: bool,
+    capture_pdf: bool,
 ) -> Result<(), String> {
     let config = RenderConfig {
         frames,
@@ -69,6 +70,7 @@ pub fn run_render(
         output_dir: PathBuf::from(out),
         capture_png,
         encode_mp4,
+        capture_pdf,
     };
     let renderer = Renderer::new(config);
     let report = renderer
@@ -86,6 +88,9 @@ pub fn run_render(
     }
     if let Some(p) = report.mp4_path {
         println!("MP4: {}", p.display());
+    }
+    if let Some(p) = report.pdf_path {
+        println!("PDF: {}", p.display());
     }
     Ok(())
 }
